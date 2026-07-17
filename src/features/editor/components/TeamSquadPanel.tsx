@@ -5,6 +5,7 @@ import { listTeams, listPlayers, type Player, type Team } from '../../../lib/sup
 import { listFormations, type Formation } from '../../../lib/supabase/formations'
 import { PRESET_FORMATIONS } from '../../formations/presets'
 import { Button } from '../../../components/ui/Button'
+import { KitDesignerModal } from '../../squad/components/KitDesignerModal'
 
 const selectClass =
   'rounded-md border border-pitch-600 bg-pitch-800 px-2 py-1.5 text-xs text-white outline-none focus:border-violet-accent'
@@ -13,6 +14,7 @@ export function TeamSquadPanel() {
   const organization = useAuthStore((s) => s.organization)
   const teamId = useEditorStore((s) => s.teamId)
   const setTeamId = useEditorStore((s) => s.setTeamId)
+  const setTeamKit = useEditorStore((s) => s.setTeamKit)
   const pendingPlayer = useEditorStore((s) => s.pendingPlayer)
   const setPendingPlayer = useEditorStore((s) => s.setPendingPlayer)
   const setTool = useEditorStore((s) => s.setTool)
@@ -23,6 +25,9 @@ export function TeamSquadPanel() {
   const [players, setPlayers] = useState<Player[]>([])
   const [customFormations, setCustomFormations] = useState<Formation[]>([])
   const [selectedFormationKey, setSelectedFormationKey] = useState<string>('')
+  const [showKitDesigner, setShowKitDesigner] = useState(false)
+
+  const activeTeam = teams.find((t) => t.id === teamId) ?? null
 
   useEffect(() => {
     if (!organization) return
@@ -43,6 +48,26 @@ export function TeamSquadPanel() {
       .then(setPlayers)
       .catch(() => setPlayers([]))
   }, [teamId])
+
+  useEffect(() => {
+    if (!activeTeam) {
+      setTeamKit(null)
+      return
+    }
+    setTeamKit({
+      home: {
+        pattern: activeTeam.home_kit_pattern as 'solid' | 'stripes' | 'hoops',
+        color1: activeTeam.home_kit_color1,
+        color2: activeTeam.home_kit_color2,
+      },
+      away: {
+        pattern: activeTeam.away_kit_pattern as 'solid' | 'stripes' | 'hoops',
+        color1: activeTeam.away_kit_color1,
+        color2: activeTeam.away_kit_color2,
+      },
+      chipScale: activeTeam.chip_scale,
+    })
+  }, [activeTeam, setTeamKit])
 
   function handlePickPlayer(player: Player) {
     setPendingPlayer({
@@ -88,6 +113,20 @@ export function TeamSquadPanel() {
           ))}
         </select>
       </label>
+
+      {activeTeam && (
+        <Button variant="secondary" className="w-full" onClick={() => setShowKitDesigner(true)}>
+          Kit-Design bearbeiten
+        </Button>
+      )}
+
+      {showKitDesigner && activeTeam && (
+        <KitDesignerModal
+          team={activeTeam}
+          onClose={() => setShowKitDesigner(false)}
+          onSaved={(updated) => setTeams((ts) => ts.map((t) => (t.id === updated.id ? updated : t)))}
+        />
+      )}
 
       {teamId && (
         <>

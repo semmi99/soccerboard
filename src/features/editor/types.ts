@@ -16,6 +16,20 @@ export interface PlayerChipData {
   playerId?: string
 }
 
+export type KitPattern = 'solid' | 'stripes' | 'hoops'
+
+export interface KitConfig {
+  pattern: KitPattern
+  color1: string
+  color2: string
+}
+
+export interface TeamKit {
+  home: KitConfig
+  away: KitConfig
+  chipScale: number
+}
+
 export interface ArrowData {
   shape: ArrowShape
   points: number[] // flat [x1,y1,x2,y2,...] relative to the object's x/y anchor

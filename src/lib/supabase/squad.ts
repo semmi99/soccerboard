@@ -31,6 +31,36 @@ export async function createTeam(input: {
   return data
 }
 
+export interface TeamKitPatch {
+  homeKitPattern: 'solid' | 'stripes' | 'hoops'
+  homeKitColor1: string
+  homeKitColor2: string
+  awayKitPattern: 'solid' | 'stripes' | 'hoops'
+  awayKitColor1: string
+  awayKitColor2: string
+  chipScale: number
+}
+
+export async function updateTeamKit(teamId: string, patch: TeamKitPatch): Promise<Team> {
+  const update: TablesUpdate<'teams'> = {
+    home_kit_pattern: patch.homeKitPattern,
+    home_kit_color1: patch.homeKitColor1,
+    home_kit_color2: patch.homeKitColor2,
+    away_kit_pattern: patch.awayKitPattern,
+    away_kit_color1: patch.awayKitColor1,
+    away_kit_color2: patch.awayKitColor2,
+    chip_scale: patch.chipScale,
+  }
+  const { data, error } = await supabase
+    .from('teams')
+    .update(update)
+    .eq('id', teamId)
+    .select('*')
+    .single()
+  if (error) throw error
+  return data
+}
+
 export async function listPlayers(teamId: string): Promise<Player[]> {
   const { data, error } = await supabase
     .from('players')

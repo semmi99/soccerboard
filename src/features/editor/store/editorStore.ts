@@ -4,6 +4,7 @@ import type {
   FrameObject,
   PitchDesign,
   PitchOrientation,
+  TeamKit,
   ToolId,
 } from '../types'
 import { createObjectForTool, type PendingRealPlayer } from '../objects/factory'
@@ -42,6 +43,7 @@ interface EditorState {
   pitchDesign: PitchDesign
   orientation: PitchOrientation
   teamId: string | null
+  teamKit: TeamKit | null
   frames: EditorFrame[]
   activeFrameIndex: number
   selection: string[]
@@ -68,6 +70,7 @@ interface EditorState {
   setOrientation: (o: PitchOrientation) => void
   setProjectTitle: (title: string) => void
   setTeamId: (id: string | null) => void
+  setTeamKit: (kit: TeamKit | null) => void
   setTool: (tool: ToolId) => void
   setSelection: (ids: string[]) => void
   setPendingPlayer: (player: PendingRealPlayer | null) => void
@@ -103,6 +106,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
   pitchDesign: 'classic_green',
   orientation: 'vertical',
   teamId: null,
+  teamKit: null,
   frames: [emptyFrame()],
   activeFrameIndex: 0,
   selection: [],
@@ -120,6 +124,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
       pitchDesign,
       orientation,
       teamId,
+      teamKit: null,
       frames: frames.length ? frames : [emptyFrame()],
       activeFrameIndex: 0,
       selection: [],
@@ -136,6 +141,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
       projectId: null,
       projectTitle: 'Neues Projekt',
       teamId: null,
+      teamKit: null,
       frames: [emptyFrame()],
       activeFrameIndex: 0,
       selection: [],
@@ -151,6 +157,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
   setOrientation: (o) => set({ orientation: o, isDirty: true }),
   setProjectTitle: (title) => set({ projectTitle: title, isDirty: true }),
   setTeamId: (id) => set({ teamId: id, isDirty: true }),
+  setTeamKit: (kit) => set({ teamKit: kit }),
   setTool: (tool) => set({ tool, selection: [] }),
   setSelection: (ids) => set({ selection: ids }),
   setPendingPlayer: (player) => set({ pendingPlayer: player }),
@@ -161,7 +168,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
   },
 
   addObjectAt: (x, y) => {
-    const { tool, frames, activeFrameIndex, pendingPlayer } = get()
+    const { tool, frames, activeFrameIndex, pendingPlayer, teamKit } = get()
     if (tool === 'select') return
     const created = createObjectForTool(tool, x, y, pendingPlayer)
     if (!created) return
@@ -169,7 +176,9 @@ export const useEditorStore = create<EditorState>((set, get) => ({
     pushHistory(get, set)
     const frame = frames[activeFrameIndex]!
     const maxZ = frame.objects.reduce((m, o) => Math.max(m, o.zIndex), -1)
-    const newObject: FrameObject = { ...created, zIndex: maxZ + 1 }
+    const scale =
+      created.objectType === 'player_chip' && teamKit ? teamKit.chipScale : created.scale
+    const newObject: FrameObject = { ...created, scale, zIndex: maxZ + 1 }
     const nextFrames = frames.map((f, i) =>
       i === activeFrameIndex ? { ...f, objects: [...f.objects, newObject] } : f,
     )
@@ -184,8 +193,9 @@ export const useEditorStore = create<EditorState>((set, get) => ({
 
   applyFormationToFrame: (positions, players) => {
     pushHistory(get, set)
-    const { frames, activeFrameIndex, orientation } = get()
+    const { frames, activeFrameIndex, orientation, teamKit } = get()
     const stage = PITCH_STAGE_SIZE[orientation]
+    const chipScale = teamKit?.chipScale ?? 1
     const frame = frames[activeFrameIndex]!
     const keptObjects = frame.objects.filter(
       (o) => !(o.objectType === 'player_chip' && o.data.team === 'home'),
@@ -204,7 +214,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
         x: px,
         y: py,
         rotation: 0,
-        scale: 1,
+        scale: chipScale,
         zIndex: maxZ + 1 + i,
         objectType: 'player_chip',
         data: player

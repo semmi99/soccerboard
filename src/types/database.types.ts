@@ -348,7 +348,14 @@ export type Database = {
       teams: {
         Row: {
           age_group: string | null
+          away_kit_color1: string
+          away_kit_color2: string
+          away_kit_pattern: string
+          chip_scale: number
           created_at: string
+          home_kit_color1: string
+          home_kit_color2: string
+          home_kit_pattern: string
           id: string
           name: string
           org_id: string
@@ -356,7 +363,14 @@ export type Database = {
         }
         Insert: {
           age_group?: string | null
+          away_kit_color1?: string
+          away_kit_color2?: string
+          away_kit_pattern?: string
+          chip_scale?: number
           created_at?: string
+          home_kit_color1?: string
+          home_kit_color2?: string
+          home_kit_pattern?: string
           id?: string
           name: string
           org_id: string
@@ -364,7 +378,14 @@ export type Database = {
         }
         Update: {
           age_group?: string | null
+          away_kit_color1?: string
+          away_kit_color2?: string
+          away_kit_pattern?: string
+          chip_scale?: number
           created_at?: string
+          home_kit_color1?: string
+          home_kit_color2?: string
+          home_kit_pattern?: string
           id?: string
           name?: string
           org_id?: string
