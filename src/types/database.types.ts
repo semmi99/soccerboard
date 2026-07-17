@@ -161,6 +161,8 @@ export type Database = {
           created_by: string | null
           id: string
           org_id: string
+          orientation: string
+          pitch_design: string
           team_id: string | null
           thumbnail_url: string | null
           title: string
@@ -172,6 +174,8 @@ export type Database = {
           created_by?: string | null
           id?: string
           org_id: string
+          orientation?: string
+          pitch_design?: string
           team_id?: string | null
           thumbnail_url?: string | null
           title?: string
@@ -183,6 +187,8 @@ export type Database = {
           created_by?: string | null
           id?: string
           org_id?: string
+          orientation?: string
+          pitch_design?: string
           team_id?: string | null
           thumbnail_url?: string | null
           title?: string

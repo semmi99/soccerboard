@@ -45,10 +45,13 @@ interface EditorState {
   loadProject: (opts: {
     projectId: string
     projectTitle: string
+    pitchDesign: PitchDesign
+    orientation: PitchOrientation
     frames: EditorFrame[]
   }) => void
   resetToBlankProject: () => void
   markSaved: () => void
+  setProjectId: (id: string) => void
 
   setPitchDesign: (d: PitchDesign) => void
   setOrientation: (o: PitchOrientation) => void
@@ -94,10 +97,12 @@ export const useEditorStore = create<EditorState>((set, get) => ({
   past: [],
   future: [],
 
-  loadProject: ({ projectId, projectTitle, frames }) => {
+  loadProject: ({ projectId, projectTitle, pitchDesign, orientation, frames }) => {
     set({
       projectId,
       projectTitle,
+      pitchDesign,
+      orientation,
       frames: frames.length ? frames : [emptyFrame()],
       activeFrameIndex: 0,
       selection: [],
@@ -106,6 +111,8 @@ export const useEditorStore = create<EditorState>((set, get) => ({
       isDirty: false,
     })
   },
+
+  setProjectId: (id) => set({ projectId: id }),
 
   resetToBlankProject: () => {
     set({
