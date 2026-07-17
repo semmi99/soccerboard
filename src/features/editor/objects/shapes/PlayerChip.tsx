@@ -1,8 +1,6 @@
-import { Circle, Group, Image as KonvaImage, Rect, Text } from 'react-konva'
-import useImage from 'use-image'
+import { Circle, Group, Rect, Text } from 'react-konva'
 import { TEAM_COLORS } from '../../constants'
 import type { KitConfig, PlayerChipData } from '../../types'
-import { useAuthStore } from '../../../auth/store/authStore'
 import { useEditorStore } from '../../store/editorStore'
 
 const CHIP_R = 18
@@ -52,17 +50,11 @@ function KitFill({ kit }: { kit: KitConfig }) {
 
 export function PlayerChipShape({ data }: { data: PlayerChipData }) {
   const teamKit = useEditorStore((s) => s.teamKit)
-  const playerPhotos = useEditorStore((s) => s.playerPhotos)
   const kit: KitConfig = data.isGoalkeeper
     ? (teamKit?.gk ?? GK_FALLBACK)
     : teamKit
       ? teamKit[data.team]
       : { pattern: 'solid', color1: TEAM_COLORS[data.team], color2: TEAM_COLORS[data.team] }
-
-  const playerPhotoUrl = data.playerId ? playerPhotos[data.playerId] : undefined
-  const orgLogoUrl = useAuthStore((s) => s.organization?.logo_url)
-  const badgeUrl = playerPhotoUrl ?? (data.team === 'home' ? orgLogoUrl : undefined)
-  const [image] = useImage(badgeUrl ?? '', 'anonymous')
 
   return (
     <Group>
@@ -83,14 +75,6 @@ export function PlayerChipShape({ data }: { data: PlayerChipData }) {
         shadowBlur={3}
         shadowOpacity={0.6}
       />
-      {badgeUrl && image && (
-        <>
-          <Circle x={-13} y={-13} radius={9} fill="#ffffff" stroke={kit.color1} strokeWidth={1.5} />
-          <Group clipFunc={(ctx) => ctx.arc(-13, -13, 7.5, 0, Math.PI * 2, false)}>
-            <KonvaImage image={image} x={-20.5} y={-20.5} width={15} height={15} />
-          </Group>
-        </>
-      )}
       {data.label && (
         <Text
           text={data.label}
