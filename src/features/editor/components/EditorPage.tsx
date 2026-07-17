@@ -3,6 +3,8 @@ import { useNavigate, useParams } from 'react-router-dom'
 import type Konva from 'konva'
 import { useEditorStore } from '../store/editorStore'
 import { loadProject } from '../../../lib/supabase/projects'
+import { useProjectSave } from '../hooks/useProjectSave'
+import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts'
 import { TopBar } from './TopBar'
 import { Toolbar } from './Toolbar'
 import { PropertiesSidebar } from './PropertiesSidebar'
@@ -17,6 +19,9 @@ export function EditorPage() {
   const loadProjectIntoStore = useEditorStore((s) => s.loadProject)
   const [loadError, setLoadError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
+  const save = useProjectSave()
+
+  useKeyboardShortcuts({ onSave: save.handleSave })
 
   useEffect(() => {
     if (!projectId) return
@@ -79,7 +84,7 @@ export function EditorPage() {
 
   return (
     <div className="flex h-full flex-col bg-pitch-950">
-      <TopBar stageRef={stageRef} />
+      <TopBar stageRef={stageRef} save={save} />
       <div className="flex min-h-0 flex-1">
         <Toolbar />
         <main className="min-w-0 flex-1 bg-pitch-950 p-4">

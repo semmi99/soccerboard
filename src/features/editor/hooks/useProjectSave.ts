@@ -1,0 +1,64 @@
+import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { useEditorStore } from '../store/editorStore'
+import { useAuthStore } from '../../auth/store/authStore'
+import { limitsForTier } from '../../../lib/limits'
+import { countProjects, saveProject } from '../../../lib/supabase/projects'
+
+export function useProjectSave() {
+  const navigate = useNavigate()
+  const projectId = useEditorStore((s) => s.projectId)
+  const projectTitle = useEditorStore((s) => s.projectTitle)
+  const pitchDesign = useEditorStore((s) => s.pitchDesign)
+  const orientation = useEditorStore((s) => s.orientation)
+  const frames = useEditorStore((s) => s.frames)
+  const isDirty = useEditorStore((s) => s.isDirty)
+  const markSaved = useEditorStore((s) => s.markSaved)
+  const setProjectIdInStore = useEditorStore((s) => s.setProjectId)
+
+  const organization = useAuthStore((s) => s.organization)
+  const profile = useAuthStore((s) => s.profile)
+
+  const [isSaving, setIsSaving] = useState(false)
+  const [saveError, setSaveError] = useState<string | null>(null)
+
+  async function handleSave() {
+    if (!organization || !profile) return
+    if (isSaving) return
+    setIsSaving(true)
+    setSaveError(null)
+
+    try {
+      if (!projectId) {
+        const maxProjects = limitsForTier(organization.subscription_tier).maxProjects
+        const existing = await countProjects(organization.id)
+        if (existing >= maxProjects) {
+          setSaveError(`Free-Limit erreicht: maximal ${maxProjects} Projekte. Upgrade für mehr.`)
+          return
+        }
+      }
+
+      const savedId = await saveProject({
+        projectId,
+        orgId: organization.id,
+        createdBy: profile.id,
+        title: projectTitle,
+        pitchDesign,
+        orientation,
+        frames,
+      })
+
+      if (!projectId) {
+        setProjectIdInStore(savedId)
+        navigate(`/editor/${savedId}`, { replace: true })
+      }
+      markSaved()
+    } catch (err) {
+      setSaveError(err instanceof Error ? err.message : 'Speichern fehlgeschlagen.')
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  return { handleSave, isSaving, saveError, isDirty, projectId }
+}
