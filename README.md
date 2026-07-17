@@ -107,6 +107,12 @@ in den Folge-Phasen als eigene Migrationen dazu.
 4. In Supabase unter **Authentication → URL Configuration** die Vercel-Domain als
    Redirect-URL eintragen.
 
+## Vor Produktivbetrieb
+
+- Supabase Security Advisor meldet **„Leaked Password Protection Disabled“** – unter
+  **Authentication → Policies** aktivieren (prüft Passwörter gegen HaveIBeenPwned).
+  Ein einfacher Dashboard-Toggle, nicht Teil der Migrationen.
+
 ## Bekannte Einschränkungen
 
 - **Google OAuth:** Code-seitig vorbereitet, aber deaktiviert. Für Aktivierung
