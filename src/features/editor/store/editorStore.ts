@@ -272,7 +272,10 @@ export const useEditorStore = create<EditorState>((set, get) => ({
     const copy: EditorFrame = {
       id: crypto.randomUUID(),
       durationMs: source.durationMs,
-      objects: source.objects.map((o) => ({ ...cloneObject(o), id: crypto.randomUUID() }) as FrameObject),
+      // Object ids are intentionally kept identical to the source frame so that
+      // moving them in the new frame produces a smooth tween during playback
+      // instead of an instant swap (matching is done by id, see EditorCanvas).
+      objects: source.objects.map(cloneObject),
     }
     const nextFrames = [...frames]
     nextFrames.splice(index + 1, 0, copy)

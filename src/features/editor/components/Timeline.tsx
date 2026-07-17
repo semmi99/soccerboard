@@ -13,13 +13,34 @@ export function Timeline() {
   const setFrameDuration = useEditorStore((s) => s.setFrameDuration)
   const beginHistoryCheckpoint = useEditorStore((s) => s.beginHistoryCheckpoint)
   const isPlaying = useEditorStore((s) => s.isPlaying)
+  const setIsPlaying = useEditorStore((s) => s.setIsPlaying)
 
   const tier = useAuthStore((s) => s.organization?.subscription_tier ?? 'free')
   const maxFrames = limitsForTier(tier).maxFrames
   const activeFrame = frames[activeFrameIndex]
+  const canPlay = frames.length > 1
+
+  function handlePlayToggle() {
+    if (isPlaying) {
+      setIsPlaying(false)
+      return
+    }
+    setActiveFrameIndex(0)
+    setIsPlaying(true)
+  }
 
   return (
     <footer className="flex h-24 shrink-0 items-center gap-3 border-t border-pitch-700 bg-pitch-900 px-4">
+      <Button
+        variant={isPlaying ? 'danger' : 'primary'}
+        disabled={!canPlay}
+        onClick={handlePlayToggle}
+        title={canPlay ? 'Sequenz abspielen' : 'Mindestens 2 Frames für Wiedergabe nötig'}
+        className="shrink-0"
+      >
+        {isPlaying ? 'Stop' : 'Abspielen'}
+      </Button>
+
       <div className="flex flex-1 items-center gap-2 overflow-x-auto py-2">
         {frames.map((frame, index) => (
           <div
@@ -28,7 +49,7 @@ export function Timeline() {
               index === activeFrameIndex
                 ? 'border-violet-accent bg-violet-accent/20 text-white'
                 : 'border-pitch-600 bg-pitch-800 text-white/60 hover:border-pitch-500'
-            }`}
+            } ${isPlaying ? 'pointer-events-none opacity-60' : ''}`}
             onClick={() => setActiveFrameIndex(index)}
           >
             <span className="font-semibold">Frame {index + 1}</span>
@@ -67,7 +88,8 @@ export function Timeline() {
               type="number"
               min={100}
               step={100}
-              className="w-20 rounded-md border border-pitch-600 bg-pitch-800 px-2 py-1 text-xs text-white outline-none focus:border-violet-accent"
+              disabled={isPlaying}
+              className="w-20 rounded-md border border-pitch-600 bg-pitch-800 px-2 py-1 text-xs text-white outline-none focus:border-violet-accent disabled:opacity-50"
               value={activeFrame.durationMs}
               onFocus={beginHistoryCheckpoint}
               onChange={(e) =>
@@ -78,7 +100,7 @@ export function Timeline() {
           </label>
           <Button
             variant="secondary"
-            disabled={frames.length >= maxFrames}
+            disabled={frames.length >= maxFrames || isPlaying}
             onClick={() => duplicateFrame(activeFrameIndex, maxFrames)}
           >
             Frame duplizieren

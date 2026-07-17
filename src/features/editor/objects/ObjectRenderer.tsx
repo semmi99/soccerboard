@@ -30,6 +30,7 @@ function renderContent(object: FrameObject) {
 interface Props {
   object: FrameObject
   isSelected: boolean
+  interactive: boolean
   onSelect: (id: string, additive: boolean) => void
   onDragStart: () => void
   onDragMove: (id: string, x: number, y: number) => void
@@ -41,6 +42,7 @@ interface Props {
 
 export function ObjectRenderer({
   object,
+  interactive,
   onSelect,
   onDragStart,
   onDragMove,
@@ -76,12 +78,14 @@ export function ObjectRenderer({
       rotation={object.rotation}
       scaleX={object.scale}
       scaleY={object.scale}
-      draggable
+      draggable={interactive}
       onClick={(e: KonvaEventObject<MouseEvent>) => {
+        if (!interactive) return
         e.cancelBubble = true
         onSelect(object.id, e.evt.shiftKey)
       }}
       onTap={(e: KonvaEventObject<TouchEvent>) => {
+        if (!interactive) return
         e.cancelBubble = true
         onSelect(object.id, false)
       }}

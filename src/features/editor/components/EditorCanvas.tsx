@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef } from 'react'
 import { Layer, Stage, Transformer } from 'react-konva'
-import type Konva from 'konva'
+import Konva from 'konva'
 import type { KonvaEventObject } from 'konva/lib/Node'
 import { useEditorStore } from '../store/editorStore'
 import { PITCH_STAGE_SIZE } from '../constants'
@@ -8,6 +8,50 @@ import { useElementSize } from '../hooks/useElementSize'
 import { Pitch } from './Pitch'
 import { ObjectRenderer } from '../objects/ObjectRenderer'
 import type { FrameObject } from '../types'
+
+function tweenObjectTo(node: Konva.Group, target: FrameObject, durationSec: number) {
+  return new Promise<void>((resolve) => {
+    let settled = false
+
+    const tween = new Konva.Tween({
+      node,
+      duration: durationSec,
+      x: target.x,
+      y: target.y,
+      rotation: target.rotation,
+      scaleX: target.scale,
+      scaleY: target.scale,
+      easing: Konva.Easings.EaseInOut,
+      onFinish: () => {
+        if (settled) return
+        settled = true
+        clearTimeout(fallbackId)
+        resolve()
+      },
+    })
+    tween.play()
+
+    // Safety net: if the tab is backgrounded (rAF throttled/paused) or the
+    // tween otherwise never fires onFinish, snap to the final values instead
+    // of leaving playback stuck on this frame forever.
+    const fallbackId = setTimeout(
+      () => {
+        if (settled) return
+        settled = true
+        tween.destroy()
+        node.setAttrs({
+          x: target.x,
+          y: target.y,
+          rotation: target.rotation,
+          scaleX: target.scale,
+          scaleY: target.scale,
+        })
+        resolve()
+      },
+      durationSec * 1000 + 500,
+    )
+  })
+}
 
 export function EditorCanvas() {
   const { ref: containerRef, size } = useElementSize<HTMLDivElement>()
@@ -21,6 +65,7 @@ export function EditorCanvas() {
   const addObjectAt = useEditorStore((s) => s.addObjectAt)
   const beginHistoryCheckpoint = useEditorStore((s) => s.beginHistoryCheckpoint)
   const updateObjectLive = useEditorStore((s) => s.updateObjectLive)
+  const isPlaying = useEditorStore((s) => s.isPlaying)
 
   const frame = frames[activeFrameIndex] ?? frames[0]!
   const sortedObjects = [...frame.objects].sort((a, b) => a.zIndex - b.zIndex)
@@ -50,6 +95,46 @@ export function EditorCanvas() {
     tr.getLayer()?.batchDraw()
   }, [selection, frame.objects])
 
+  useEffect(() => {
+    if (!isPlaying) return
+    let cancelled = false
+
+    async function run() {
+      while (!cancelled) {
+        const state = useEditorStore.getState()
+        const currentIndex = state.activeFrameIndex
+        const currentFrames = state.frames
+        if (currentIndex >= currentFrames.length - 1) break
+
+        const fromFrame = currentFrames[currentIndex]!
+        const toFrame = currentFrames[currentIndex + 1]!
+        const durationSec = Math.max(fromFrame.durationMs, 50) / 1000
+
+        const tweens = toFrame.objects
+          .map((toObj) => {
+            const node = nodeRefs.current[toObj.id]
+            const fromObj = fromFrame.objects.find((o) => o.id === toObj.id)
+            if (!node || !fromObj) return null
+            return tweenObjectTo(node, toObj, durationSec)
+          })
+          .filter((p): p is Promise<void> => Boolean(p))
+
+        await Promise.all(tweens)
+        if (cancelled) return
+
+        useEditorStore.getState().setActiveFrameIndex(currentIndex + 1)
+        await new Promise((resolve) => setTimeout(resolve, 0))
+      }
+      useEditorStore.getState().setIsPlaying(false)
+    }
+
+    run()
+    return () => {
+      cancelled = true
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isPlaying])
+
   function handleSelect(id: string, additive: boolean) {
     if (additive) {
       setSelection(
@@ -61,6 +146,7 @@ export function EditorCanvas() {
   }
 
   function handleStageMouseDown(e: KonvaEventObject<MouseEvent | TouchEvent>) {
+    if (isPlaying) return
     const clickedOnEmpty = e.target === e.target.getStage()
     if (!clickedOnEmpty) return
 
@@ -109,6 +195,7 @@ export function EditorCanvas() {
               key={object.id}
               object={object}
               isSelected={selection.includes(object.id)}
+              interactive={!isPlaying}
               onSelect={handleSelect}
               onDragStart={handleDragStart}
               onDragMove={handleDragMove}
