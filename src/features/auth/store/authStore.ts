@@ -67,10 +67,24 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       }
     }, 8000)
 
-    supabase.auth.onAuthStateChange((_event, session) => {
+    supabase.auth.onAuthStateChange((event, session) => {
       if (!session) {
         clearTimeout(stuckTimeout)
         set({ status: 'signed_out', session: null, profile: null, organization: null })
+        return
+      }
+
+      // Supabase re-fires SIGNED_IN (not just TOKEN_REFRESHED/USER_UPDATED)
+      // on tab focus/visibility changes, not only on an actual new sign-in.
+      // Treating every event as a fresh sign-in bounced the whole app
+      // through a loading spinner — remounting every route — on each one.
+      // If we already have this exact user loaded, just refresh the session
+      // reference instead of redoing the full profile/org fetch.
+      const current = get()
+      const sameUserAlreadyLoaded =
+        current.status === 'signed_in' && current.session?.user.id === session.user.id
+      if (event === 'TOKEN_REFRESHED' || event === 'USER_UPDATED' || sameUserAlreadyLoaded) {
+        set({ session })
         return
       }
 

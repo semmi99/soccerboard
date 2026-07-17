@@ -3,6 +3,7 @@ import { LoginPage } from '../features/auth/components/LoginPage'
 import { SignupPage } from '../features/auth/components/SignupPage'
 import { EditorPage } from '../features/editor/components/EditorPage'
 import { DashboardPage } from '../features/projects/components/DashboardPage'
+import { SquadPage } from '../features/squad/components/SquadPage'
 import { AuthGuard, GuestGuard } from './AuthGuard'
 
 export function AppRoutes() {
@@ -30,6 +31,14 @@ export function AppRoutes() {
         element={
           <AuthGuard>
             <DashboardPage />
+          </AuthGuard>
+        }
+      />
+      <Route
+        path="/squad"
+        element={
+          <AuthGuard>
+            <SquadPage />
           </AuthGuard>
         }
       />
