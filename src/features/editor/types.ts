@@ -14,6 +14,7 @@ export interface PlayerChipData {
   number: number
   label: string
   playerId?: string
+  isGoalkeeper?: boolean
 }
 
 export type KitPattern = 'solid' | 'stripes' | 'hoops'
@@ -27,6 +28,7 @@ export interface KitConfig {
 export interface TeamKit {
   home: KitConfig
   away: KitConfig
+  gk: KitConfig
   chipScale: number
 }
 
@@ -59,6 +61,7 @@ export interface TextData {
 
 export interface EquipmentData {
   kind: EquipmentKind
+  color?: string
 }
 
 export type BallData = Record<string, never>
@@ -101,6 +104,8 @@ export type ToolId =
   | 'select'
   | 'player_home'
   | 'player_away'
+  | 'player_home_gk'
+  | 'player_away_gk'
   | 'arrow_straight'
   | 'arrow_curved'
   | 'shape_circle'

@@ -15,6 +15,7 @@ export interface FormationPlayer {
   id: string
   jerseyNumber: number | null
   label: string
+  isGoalkeeper?: boolean
 }
 
 interface FramesSnapshot {
@@ -44,6 +45,7 @@ interface EditorState {
   orientation: PitchOrientation
   teamId: string | null
   teamKit: TeamKit | null
+  playerPhotos: Record<string, string>
   frames: EditorFrame[]
   activeFrameIndex: number
   selection: string[]
@@ -71,6 +73,7 @@ interface EditorState {
   setProjectTitle: (title: string) => void
   setTeamId: (id: string | null) => void
   setTeamKit: (kit: TeamKit | null) => void
+  setPlayerPhotos: (photos: Record<string, string>) => void
   setTool: (tool: ToolId) => void
   setSelection: (ids: string[]) => void
   setPendingPlayer: (player: PendingRealPlayer | null) => void
@@ -107,6 +110,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
   orientation: 'vertical',
   teamId: null,
   teamKit: null,
+  playerPhotos: {},
   frames: [emptyFrame()],
   activeFrameIndex: 0,
   selection: [],
@@ -125,6 +129,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
       orientation,
       teamId,
       teamKit: null,
+      playerPhotos: {},
       frames: frames.length ? frames : [emptyFrame()],
       activeFrameIndex: 0,
       selection: [],
@@ -142,6 +147,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
       projectTitle: 'Neues Projekt',
       teamId: null,
       teamKit: null,
+      playerPhotos: {},
       frames: [emptyFrame()],
       activeFrameIndex: 0,
       selection: [],
@@ -158,6 +164,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
   setProjectTitle: (title) => set({ projectTitle: title, isDirty: true }),
   setTeamId: (id) => set({ teamId: id, isDirty: true }),
   setTeamKit: (kit) => set({ teamKit: kit }),
+  setPlayerPhotos: (photos) => set({ playerPhotos: photos }),
   setTool: (tool) => set({ tool, selection: [] }),
   setSelection: (ids) => set({ selection: ids }),
   setPendingPlayer: (player) => set({ pendingPlayer: player }),
@@ -218,8 +225,14 @@ export const useEditorStore = create<EditorState>((set, get) => ({
         zIndex: maxZ + 1 + i,
         objectType: 'player_chip',
         data: player
-          ? { team: 'home', number: player.jerseyNumber ?? i + 1, label: player.label, playerId: player.id }
-          : { team: 'home', number: i + 1, label: pos.role },
+          ? {
+              team: 'home',
+              number: player.jerseyNumber ?? i + 1,
+              label: player.label,
+              playerId: player.id,
+              isGoalkeeper: player.isGoalkeeper ?? pos.role === 'TW',
+            }
+          : { team: 'home', number: i + 1, label: pos.role, isGoalkeeper: pos.role === 'TW' },
       } as FrameObject
     })
 

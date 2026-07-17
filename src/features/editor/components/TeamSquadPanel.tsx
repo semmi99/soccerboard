@@ -15,6 +15,7 @@ export function TeamSquadPanel() {
   const teamId = useEditorStore((s) => s.teamId)
   const setTeamId = useEditorStore((s) => s.setTeamId)
   const setTeamKit = useEditorStore((s) => s.setTeamKit)
+  const setPlayerPhotos = useEditorStore((s) => s.setPlayerPhotos)
   const pendingPlayer = useEditorStore((s) => s.pendingPlayer)
   const setPendingPlayer = useEditorStore((s) => s.setPendingPlayer)
   const setTool = useEditorStore((s) => s.setTool)
@@ -42,12 +43,20 @@ export function TeamSquadPanel() {
   useEffect(() => {
     if (!teamId) {
       setPlayers([])
+      setPlayerPhotos({})
       return
     }
     listPlayers(teamId)
-      .then(setPlayers)
+      .then((data) => {
+        setPlayers(data)
+        const photos: Record<string, string> = {}
+        for (const p of data) {
+          if (p.photo_url) photos[p.id] = p.photo_url
+        }
+        setPlayerPhotos(photos)
+      })
       .catch(() => setPlayers([]))
-  }, [teamId])
+  }, [teamId, setPlayerPhotos])
 
   useEffect(() => {
     if (!activeTeam) {
@@ -65,6 +74,11 @@ export function TeamSquadPanel() {
         color1: activeTeam.away_kit_color1,
         color2: activeTeam.away_kit_color2,
       },
+      gk: {
+        pattern: activeTeam.gk_kit_pattern as 'solid' | 'stripes' | 'hoops',
+        color1: activeTeam.gk_kit_color1,
+        color2: activeTeam.gk_kit_color2,
+      },
       chipScale: activeTeam.chip_scale,
     })
   }, [activeTeam, setTeamKit])
@@ -74,6 +88,7 @@ export function TeamSquadPanel() {
       id: player.id,
       jerseyNumber: player.jersey_number,
       label: `${player.first_name} ${player.last_name}`,
+      isGoalkeeper: player.position === 'Torwart',
     })
     setTool('player_home')
   }
@@ -92,6 +107,7 @@ export function TeamSquadPanel() {
         id: p.id,
         jerseyNumber: p.jersey_number,
         label: `${p.first_name} ${p.last_name}`,
+        isGoalkeeper: p.position === 'Torwart',
       })),
     )
   }

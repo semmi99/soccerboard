@@ -22,6 +22,8 @@ interface ToolDef {
   label: string
   icon?: ReactNode
   swatch?: string
+  swatchLabel?: string
+  swatchRing?: string
 }
 
 const EQUIPMENT_ICONS: Record<EquipmentKind, ReactNode> = {
@@ -45,6 +47,20 @@ const SECTIONS: ToolDef[][] = [
   [
     { id: 'player_home', label: 'Spieler Heim', swatch: '#3b82f6' },
     { id: 'player_away', label: 'Spieler Auswärts', swatch: '#ef4444' },
+    {
+      id: 'player_home_gk',
+      label: 'Torwart Heim',
+      swatch: '#eab308',
+      swatchLabel: 'TW',
+      swatchRing: '#3b82f6',
+    },
+    {
+      id: 'player_away_gk',
+      label: 'Torwart Auswärts',
+      swatch: '#eab308',
+      swatchLabel: 'TW',
+      swatchRing: '#ef4444',
+    },
   ],
   [
     { id: 'arrow_straight', label: 'Pfeil gerade', icon: <StraightArrowIcon /> },
@@ -90,9 +106,14 @@ export function Toolbar() {
             >
               {t.swatch ? (
                 <span
-                  className="h-5 w-5 shrink-0 rounded-full border border-white/30"
-                  style={{ backgroundColor: t.swatch }}
-                />
+                  className="relative flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-white/30 text-[7px] font-bold text-black/70"
+                  style={{
+                    backgroundColor: t.swatch,
+                    boxShadow: t.swatchRing ? `0 0 0 2px ${t.swatchRing}` : undefined,
+                  }}
+                >
+                  {t.swatchLabel}
+                </span>
               ) : (
                 t.icon
               )}

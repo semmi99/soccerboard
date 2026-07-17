@@ -353,6 +353,9 @@ export type Database = {
           away_kit_pattern: string
           chip_scale: number
           created_at: string
+          gk_kit_color1: string
+          gk_kit_color2: string
+          gk_kit_pattern: string
           home_kit_color1: string
           home_kit_color2: string
           home_kit_pattern: string
@@ -368,6 +371,9 @@ export type Database = {
           away_kit_pattern?: string
           chip_scale?: number
           created_at?: string
+          gk_kit_color1?: string
+          gk_kit_color2?: string
+          gk_kit_pattern?: string
           home_kit_color1?: string
           home_kit_color2?: string
           home_kit_pattern?: string
@@ -383,6 +389,9 @@ export type Database = {
           away_kit_pattern?: string
           chip_scale?: number
           created_at?: string
+          gk_kit_color1?: string
+          gk_kit_color2?: string
+          gk_kit_pattern?: string
           home_kit_color1?: string
           home_kit_color2?: string
           home_kit_pattern?: string

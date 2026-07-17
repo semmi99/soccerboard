@@ -15,7 +15,7 @@ function renderContent(object: FrameObject) {
     case 'player_chip':
       return <PlayerChipShape data={object.data} />
     case 'arrow':
-      return <ArrowShape data={object.data} />
+      return <ArrowShape data={object.data} scale={object.scale} />
     case 'shape':
       return <ShapeItem data={object.data} />
     case 'text':

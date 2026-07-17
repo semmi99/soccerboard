@@ -3,7 +3,7 @@ import { Button } from '../../../components/ui/Button'
 import { updateTeamKit, type Team, type TeamKitPatch } from '../../../lib/supabase/squad'
 
 type KitPattern = 'solid' | 'stripes' | 'hoops'
-type Side = 'home' | 'away'
+type Side = 'home' | 'away' | 'gk'
 
 const KIT_COLORS: { label: string; value: string }[] = [
   { label: 'Schwarz', value: '#111827' },
@@ -140,6 +140,9 @@ export function KitDesignerModal({
   const [awayPattern, setAwayPattern] = useState(team.away_kit_pattern as KitPattern)
   const [awayColor1, setAwayColor1] = useState(team.away_kit_color1)
   const [awayColor2, setAwayColor2] = useState(team.away_kit_color2)
+  const [gkPattern, setGkPattern] = useState(team.gk_kit_pattern as KitPattern)
+  const [gkColor1, setGkColor1] = useState(team.gk_kit_color1)
+  const [gkColor2, setGkColor2] = useState(team.gk_kit_color2)
   const [chipScale, setChipScale] = useState(team.chip_scale)
   const [isSaving, setIsSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -155,6 +158,9 @@ export function KitDesignerModal({
         awayKitPattern: awayPattern,
         awayKitColor1: awayColor1,
         awayKitColor2: awayColor2,
+        gkKitPattern: gkPattern,
+        gkKitColor1: gkColor1,
+        gkKitColor2: gkColor2,
         chipScale,
       }
       const updated = await updateTeamKit(team.id, patch)
@@ -170,6 +176,7 @@ export function KitDesignerModal({
   const side: Record<Side, { pattern: KitPattern; color1: string; color2: string }> = {
     home: { pattern: homePattern, color1: homeColor1, color2: homeColor2 },
     away: { pattern: awayPattern, color1: awayColor1, color2: awayColor2 },
+    gk: { pattern: gkPattern, color1: gkColor1, color2: gkColor2 },
   }
 
   return (
@@ -177,7 +184,7 @@ export function KitDesignerModal({
       <div className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-xl border border-pitch-700 bg-pitch-900 p-6 shadow-2xl">
         <h2 className="mb-1 text-sm font-semibold text-white">Kit-Design: {team.name}</h2>
         <p className="mb-4 text-xs text-white/50">
-          Farbe &amp; Muster für Heim- und Auswärts-Spieler-Chips dieses Teams.
+          Farbe &amp; Muster für Heim-, Auswärts- und Torwart-Spieler-Chips dieses Teams.
         </p>
 
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -198,6 +205,15 @@ export function KitDesignerModal({
             onPattern={setAwayPattern}
             onColor1={setAwayColor1}
             onColor2={setAwayColor2}
+          />
+          <SideEditor
+            title="Torwart"
+            pattern={side.gk.pattern}
+            color1={side.gk.color1}
+            color2={side.gk.color2}
+            onPattern={setGkPattern}
+            onColor1={setGkColor1}
+            onColor2={setGkColor2}
           />
         </div>
 

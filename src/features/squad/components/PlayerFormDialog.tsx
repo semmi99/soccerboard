@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Button } from '../../../components/ui/Button'
 import { Input } from '../../../components/ui/Input'
 import { POSITIONS, STRONG_FOOT_OPTIONS } from '../constants'
@@ -33,11 +33,17 @@ export function PlayerFormDialog({
   teamId: string
   player?: Player
   onCancel: () => void
-  onSubmit: (values: PlayerFormValues) => Promise<void>
+  onSubmit: (values: PlayerFormValues, photoFile: File | null) => Promise<void>
 }) {
   const [values, setValues] = useState<PlayerFormValues>(toFormValues(teamId, player))
+  const [photoFile, setPhotoFile] = useState<File | null>(null)
   const [isSaving, setIsSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
+  const photoPreviewUrl = useMemo(
+    () => (photoFile ? URL.createObjectURL(photoFile) : (player?.photo_url ?? null)),
+    [photoFile, player?.photo_url],
+  )
 
   function set<K extends keyof PlayerFormValues>(key: K, value: PlayerFormValues[K]) {
     setValues((v) => ({ ...v, [key]: value }))
@@ -48,7 +54,7 @@ export function PlayerFormDialog({
     setIsSaving(true)
     setError(null)
     try {
-      await onSubmit(values)
+      await onSubmit(values, photoFile)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Speichern fehlgeschlagen.')
     } finally {
@@ -65,6 +71,31 @@ export function PlayerFormDialog({
         <h2 className="mb-4 text-sm font-semibold text-white">
           {player ? 'Spieler bearbeiten' : 'Spieler hinzufügen'}
         </h2>
+
+        <div className="mb-4 flex items-center gap-3">
+          {photoPreviewUrl ? (
+            <img
+              src={photoPreviewUrl}
+              alt=""
+              className="h-14 w-14 rounded-full border border-pitch-600 object-cover"
+            />
+          ) : (
+            <div className="flex h-14 w-14 items-center justify-center rounded-full border border-pitch-600 bg-pitch-800 text-xs text-white/40">
+              Foto
+            </div>
+          )}
+          <label className="text-sm">
+            <span className="cursor-pointer rounded-lg border border-pitch-600 bg-pitch-800 px-3 py-2 text-white/70 hover:text-white">
+              Foto/Wappen wählen
+            </span>
+            <input
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={(e) => setPhotoFile(e.target.files?.[0] ?? null)}
+            />
+          </label>
+        </div>
 
         <div className="grid grid-cols-2 gap-3">
           <Input

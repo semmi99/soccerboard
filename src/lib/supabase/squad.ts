@@ -38,6 +38,9 @@ export interface TeamKitPatch {
   awayKitPattern: 'solid' | 'stripes' | 'hoops'
   awayKitColor1: string
   awayKitColor2: string
+  gkKitPattern: 'solid' | 'stripes' | 'hoops'
+  gkKitColor1: string
+  gkKitColor2: string
   chipScale: number
 }
 
@@ -49,6 +52,9 @@ export async function updateTeamKit(teamId: string, patch: TeamKitPatch): Promis
     away_kit_pattern: patch.awayKitPattern,
     away_kit_color1: patch.awayKitColor1,
     away_kit_color2: patch.awayKitColor2,
+    gk_kit_pattern: patch.gkKitPattern,
+    gk_kit_color1: patch.gkKitColor1,
+    gk_kit_color2: patch.gkKitColor2,
     chip_scale: patch.chipScale,
   }
   const { data, error } = await supabase
@@ -128,4 +134,25 @@ export async function updatePlayer(id: string, values: PlayerFormValues): Promis
 export async function deletePlayer(id: string): Promise<void> {
   const { error } = await supabase.from('players').delete().eq('id', id)
   if (error) throw error
+}
+
+export async function uploadPlayerPhoto(orgId: string, playerId: string, file: File): Promise<string> {
+  const ext = file.name.split('.').pop() || 'png'
+  const path = `${orgId}/${playerId}.${ext}`
+
+  const { error: uploadError } = await supabase.storage
+    .from('player-photos')
+    .upload(path, file, { upsert: true, cacheControl: '3600' })
+  if (uploadError) throw uploadError
+
+  const { data } = supabase.storage.from('player-photos').getPublicUrl(path)
+  const photoUrl = `${data.publicUrl}?v=${Date.now()}`
+
+  const { error: updateError } = await supabase
+    .from('players')
+    .update({ photo_url: photoUrl })
+    .eq('id', playerId)
+  if (updateError) throw updateError
+
+  return photoUrl
 }

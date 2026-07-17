@@ -2,6 +2,8 @@ import type { ChangeEvent, ReactNode } from 'react'
 import { useEditorStore } from '../store/editorStore'
 import type {
   ArrowData,
+  EquipmentData,
+  EquipmentKind,
   FrameObject,
   LineStyle,
   PitchDesign,
@@ -12,6 +14,7 @@ import type {
 } from '../types'
 import { Button } from '../../../components/ui/Button'
 import { TeamSquadPanel } from './TeamSquadPanel'
+import { EQUIPMENT_DEFAULT_COLORS } from '../objects/shapes/Equipment'
 
 const LINE_STYLES: { value: LineStyle; label: string }[] = [
   { value: 'solid', label: 'Durchgezogen' },
@@ -147,6 +150,14 @@ export function PropertiesSidebar() {
               data={selectedObject.data}
               onCheckpoint={beginHistoryCheckpoint}
               onChange={(patch) => updateData<Extract<FrameObject, { objectType: 'text' }>>(patch)}
+            />
+          )}
+
+          {selectedObject.objectType === 'training_equipment' && (
+            <EquipmentFields
+              data={selectedObject.data}
+              onCheckpoint={beginHistoryCheckpoint}
+              onChange={(patch) => updateData<Extract<FrameObject, { objectType: 'training_equipment' }>>(patch)}
             />
           )}
 
@@ -420,6 +431,30 @@ function TextFields({
           <option value="bold">Fett</option>
           <option value="italic">Kursiv</option>
         </select>
+      </Field>
+    </div>
+  )
+}
+
+function EquipmentFields({
+  data,
+  onCheckpoint,
+  onChange,
+}: {
+  data: EquipmentData
+  onCheckpoint: () => void
+  onChange: (patch: Partial<EquipmentData>) => void
+}) {
+  return (
+    <div className="flex flex-col gap-2">
+      <Field label="Farbe">
+        <input
+          type="color"
+          className="h-8 w-full rounded-md border border-pitch-600 bg-pitch-800"
+          value={data.color ?? EQUIPMENT_DEFAULT_COLORS[data.kind as EquipmentKind]}
+          onFocus={onCheckpoint}
+          onChange={(e) => onChange({ color: e.target.value })}
+        />
       </Field>
     </div>
   )

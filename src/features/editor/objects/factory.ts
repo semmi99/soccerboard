@@ -12,6 +12,7 @@ export interface PendingRealPlayer {
   id: string
   jerseyNumber: number | null
   label: string
+  isGoalkeeper?: boolean
 }
 
 export function createObjectForTool(
@@ -22,8 +23,14 @@ export function createObjectForTool(
 ): FrameObject | null {
   const base = { id: crypto.randomUUID(), x, y, rotation: 0, scale: 1, zIndex: 0 }
 
-  if (tool === 'player_home' || tool === 'player_away') {
-    const team = tool === 'player_home' ? 'home' : 'away'
+  if (
+    tool === 'player_home' ||
+    tool === 'player_away' ||
+    tool === 'player_home_gk' ||
+    tool === 'player_away_gk'
+  ) {
+    const team = tool === 'player_home' || tool === 'player_home_gk' ? 'home' : 'away'
+    const isGoalkeeper = tool === 'player_home_gk' || tool === 'player_away_gk'
     if (pendingPlayer) {
       return {
         ...base,
@@ -33,6 +40,7 @@ export function createObjectForTool(
           number: pendingPlayer.jerseyNumber ?? 0,
           label: pendingPlayer.label,
           playerId: pendingPlayer.id,
+          isGoalkeeper: isGoalkeeper || pendingPlayer.isGoalkeeper,
         },
       }
     }
@@ -40,7 +48,7 @@ export function createObjectForTool(
     return {
       ...base,
       objectType: 'player_chip',
-      data: { team, number, label: '' },
+      data: { team, number, label: '', isGoalkeeper },
     }
   }
 

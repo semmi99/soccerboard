@@ -9,11 +9,13 @@ import {
   listPlayers,
   listTeams,
   updatePlayer,
+  uploadPlayerPhoto,
   type Player,
   type PlayerFormValues,
   type Team,
 } from '../../../lib/supabase/squad'
 import { PlayerFormDialog } from './PlayerFormDialog'
+import { BulkAddPlayersDialog } from './BulkAddPlayersDialog'
 
 function DeleteConfirmDialog({
   name,
@@ -126,6 +128,7 @@ export function SquadPage() {
   const [pendingDelete, setPendingDelete] = useState<Player | null>(null)
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const [showNewTeam, setShowNewTeam] = useState(false)
+  const [showBulkAdd, setShowBulkAdd] = useState(false)
 
   useEffect(() => {
     if (!organization) return
@@ -177,17 +180,51 @@ export function SquadPage() {
     setShowNewTeam(false)
   }
 
-  async function handleSavePlayer(values: PlayerFormValues) {
-    if (editingPlayer && editingPlayer !== 'new') {
-      const updated = await updatePlayer(editingPlayer.id, values)
-      setPlayers((prev) => prev.map((p) => (p.id === updated.id ? updated : p)))
-    } else {
-      const created = await createPlayer(values)
-      setPlayers((prev) =>
-        [...prev, created].sort((a, b) => (a.jersey_number ?? 999) - (b.jersey_number ?? 999)),
-      )
+  async function handleSavePlayer(values: PlayerFormValues, photoFile: File | null) {
+    let saved =
+      editingPlayer && editingPlayer !== 'new'
+        ? await updatePlayer(editingPlayer.id, values)
+        : await createPlayer(values)
+
+    if (photoFile && organization) {
+      const photoUrl = await uploadPlayerPhoto(organization.id, saved.id, photoFile)
+      saved = { ...saved, photo_url: photoUrl }
     }
+
+    setPlayers((prev) => {
+      const exists = prev.some((p) => p.id === saved.id)
+      const next = exists ? prev.map((p) => (p.id === saved.id ? saved : p)) : [...prev, saved]
+      return next.sort((a, b) => (a.jersey_number ?? 999) - (b.jersey_number ?? 999))
+    })
     setEditingPlayer(null)
+  }
+
+  async function handleBulkAdd(
+    entries: { firstName: string; lastName: string; jerseyNumber: number | null }[],
+  ) {
+    if (!activeTeamId) return
+    const created: Player[] = []
+    for (const entry of entries) {
+      const player = await createPlayer({
+        teamId: activeTeamId,
+        firstName: entry.firstName,
+        lastName: entry.lastName,
+        jerseyNumber: entry.jerseyNumber,
+        position: '',
+        secondaryPosition: '',
+        strongFoot: '',
+        birthDate: '',
+        nationality: '',
+        phone: '',
+        email: '',
+        notes: '',
+      })
+      created.push(player)
+    }
+    setPlayers((prev) =>
+      [...prev, ...created].sort((a, b) => (a.jersey_number ?? 999) - (b.jersey_number ?? 999)),
+    )
+    setShowBulkAdd(false)
   }
 
   async function confirmDeletePlayer() {
@@ -235,7 +272,12 @@ export function SquadPage() {
           </button>
         </div>
         {activeTeam && (
-          <Button onClick={() => setEditingPlayer('new')}>Spieler hinzufügen</Button>
+          <div className="flex gap-2">
+            <Button variant="secondary" onClick={() => setShowBulkAdd(true)}>
+              Mehrere Spieler auf einmal
+            </Button>
+            <Button onClick={() => setEditingPlayer('new')}>Spieler hinzufügen</Button>
+          </div>
         )}
       </div>
 
@@ -341,6 +383,10 @@ export function SquadPage() {
 
       {showNewTeam && (
         <NewTeamDialog onCancel={() => setShowNewTeam(false)} onCreate={handleCreateTeam} />
+      )}
+
+      {showBulkAdd && (
+        <BulkAddPlayersDialog onCancel={() => setShowBulkAdd(false)} onSubmit={handleBulkAdd} />
       )}
     </div>
   )
