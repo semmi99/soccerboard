@@ -107,7 +107,7 @@ export interface EditorFrame {
   objects: FrameObject[]
 }
 
-export type PitchDesign = 'classic_green' | 'night_navy' | 'stadium_bowl'
+export type PitchDesign = 'classic_green' | 'night_navy'
 export type PitchOrientation = 'vertical' | 'horizontal'
 
 export type ToolId =

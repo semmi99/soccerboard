@@ -38,6 +38,7 @@ interface Props {
   onTransformEnd: (id: string, patch: Partial<FrameObject>) => void
   onDoubleClick?: (id: string) => void
   registerRef: (id: string, node: Konva.Group | null) => void
+  initialOpacity?: number
 }
 
 export function ObjectRenderer({
@@ -50,6 +51,7 @@ export function ObjectRenderer({
   onTransformEnd,
   onDoubleClick,
   registerRef,
+  initialOpacity,
 }: Props) {
   const groupRef = useRef<Konva.Group>(null)
 
@@ -78,6 +80,7 @@ export function ObjectRenderer({
       rotation={object.rotation}
       scaleX={object.scale}
       scaleY={object.scale}
+      opacity={initialOpacity ?? 1}
       draggable={interactive}
       onClick={(e: KonvaEventObject<MouseEvent>) => {
         if (!interactive) return

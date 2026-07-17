@@ -16,6 +16,7 @@ import type {
 import { Button } from '../../../components/ui/Button'
 import { TeamSquadPanel } from './TeamSquadPanel'
 import { EQUIPMENT_DEFAULT_COLORS } from '../objects/shapes/Equipment'
+import { ColorSwatchPicker } from '../../../components/ui/ColorSwatchPicker'
 
 const LINE_STYLES: { value: LineStyle; label: string }[] = [
   { value: 'solid', label: 'Durchgezogen' },
@@ -77,7 +78,6 @@ export function PropertiesSidebar() {
             >
               <option value="classic_green">Klassisch Grün</option>
               <option value="night_navy">Stadion bei Nacht</option>
-              <option value="stadium_bowl">Stadion-Kulisse</option>
             </select>
           </Field>
           <Field label="Ausrichtung">
@@ -312,21 +312,21 @@ function ShapeFields({
   return (
     <div className="flex flex-col gap-2">
       <Field label="Füllfarbe">
-        <input
-          type="color"
-          className="h-8 w-full rounded-md border border-pitch-600 bg-pitch-800"
+        <ColorSwatchPicker
           value={rgbaToHex(data.fill)}
-          onFocus={onCheckpoint}
-          onChange={(e) => onChange({ fill: hexToRgba(e.target.value, 0.25) })}
+          onChange={(color) => {
+            onCheckpoint()
+            onChange({ fill: hexToRgba(color, 0.4) })
+          }}
         />
       </Field>
       <Field label="Rahmenfarbe">
-        <input
-          type="color"
-          className="h-8 w-full rounded-md border border-pitch-600 bg-pitch-800"
+        <ColorSwatchPicker
           value={data.stroke}
-          onFocus={onCheckpoint}
-          onChange={(e) => onChange({ stroke: e.target.value })}
+          onChange={(color) => {
+            onCheckpoint()
+            onChange({ stroke: color })
+          }}
         />
       </Field>
       <Field label="Rahmenstil">

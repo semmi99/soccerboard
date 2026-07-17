@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, type RefObject } from 'react'
+import { useCallback, useEffect, useRef, useState, type RefObject } from 'react'
 import { Layer, Stage, Transformer } from 'react-konva'
 import Konva from 'konva'
 import type { KonvaEventObject } from 'konva/lib/Node'
@@ -54,6 +54,45 @@ function tweenObjectTo(node: Konva.Group, target: FrameObject, durationSec: numb
   })
 }
 
+function fadeNodeTo(node: Konva.Group | undefined, targetOpacity: number, durationSec: number) {
+  if (!node) return null
+  return new Promise<void>((resolve) => {
+    let settled = false
+
+    const tween = new Konva.Tween({
+      node,
+      duration: durationSec,
+      opacity: targetOpacity,
+      easing: Konva.Easings.EaseInOut,
+      onFinish: () => {
+        if (settled) return
+        settled = true
+        clearTimeout(fallbackId)
+        resolve()
+      },
+    })
+    tween.play()
+
+    const fallbackId = setTimeout(
+      () => {
+        if (settled) return
+        settled = true
+        tween.destroy()
+        node.opacity(targetOpacity)
+        resolve()
+      },
+      durationSec * 1000 + 500,
+    )
+  })
+}
+
+interface PlaybackOverlay {
+  entering: FrameObject[]
+  exiting: FrameObject[]
+}
+
+const EMPTY_OVERLAY: PlaybackOverlay = { entering: [], exiting: [] }
+
 export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | null> }) {
   const { ref: containerRef, size } = useElementSize<HTMLDivElement>()
   const pitchDesign = useEditorStore((s) => s.pitchDesign)
@@ -72,10 +111,28 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
   const addConnector = useEditorStore((s) => s.addConnector)
 
   const frame = frames[activeFrameIndex] ?? frames[0]!
-  const sortedObjects = [...frame.objects].sort((a, b) => a.zIndex - b.zIndex)
+  const [playbackOverlay, setPlaybackOverlay] = useState<PlaybackOverlay>(EMPTY_OVERLAY)
+
+  // While a frame transition is in flight, objects that only exist in the
+  // target frame (entering) or only in the source frame (exiting) are kept
+  // mounted alongside the current frame's own objects so they can fade in/
+  // out instead of popping in or vanishing exactly at the frame boundary.
+  const overlayIds = new Set([
+    ...playbackOverlay.entering.map((o) => o.id),
+    ...playbackOverlay.exiting.map((o) => o.id),
+  ])
+  const visibleObjects = [
+    ...frame.objects.filter((o) => !overlayIds.has(o.id)),
+    ...playbackOverlay.entering,
+    ...playbackOverlay.exiting,
+  ]
+  const sortedObjects = [...visibleObjects].sort((a, b) => a.zIndex - b.zIndex)
+  const enteringIds = new Set(playbackOverlay.entering.map((o) => o.id))
 
   const trRef = useRef<Konva.Transformer>(null)
+  const objectsLayerRef = useRef<Konva.Layer>(null)
   const nodeRefs = useRef<Record<string, Konva.Group>>({})
+  const connectorRefs = useRef<Record<string, Konva.Line>>({})
 
   const logical = PITCH_STAGE_SIZE[orientation]
   const scale =
@@ -86,6 +143,11 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
   const registerRef = useCallback((id: string, node: Konva.Group | null) => {
     if (node) nodeRefs.current[id] = node
     else delete nodeRefs.current[id]
+  }, [])
+
+  const registerConnectorRef = useCallback((id: string, node: Konva.Line | null) => {
+    if (node) connectorRefs.current[id] = node
+    else delete connectorRefs.current[id]
   }, [])
 
   useEffect(() => {
@@ -113,7 +175,19 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
         const toFrame = currentFrames[currentIndex + 1]!
         const durationSec = Math.max(fromFrame.durationMs, 50) / 1000
 
-        const tweens = toFrame.objects
+        const fromIds = new Set(fromFrame.objects.map((o) => o.id))
+        const toIds = new Set(toFrame.objects.map((o) => o.id))
+        const entering = toFrame.objects.filter((o) => !fromIds.has(o.id))
+        const exiting = fromFrame.objects.filter((o) => !toIds.has(o.id))
+
+        // Mount entering objects (at opacity 0, see initialOpacity below) and
+        // keep exiting ones mounted past the frame boundary so both can be
+        // tweened instead of popping in/out abruptly.
+        setPlaybackOverlay({ entering, exiting })
+        await new Promise((resolve) => setTimeout(resolve, 0))
+        if (cancelled) return
+
+        const positionTweens = toFrame.objects
           .map((toObj) => {
             const node = nodeRefs.current[toObj.id]
             const fromObj = fromFrame.objects.find((o) => o.id === toObj.id)
@@ -122,18 +196,48 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
           })
           .filter((p): p is Promise<void> => Boolean(p))
 
-        await Promise.all(tweens)
+        const fadeTweens = [
+          ...entering.map((o) => fadeNodeTo(nodeRefs.current[o.id], 1, durationSec)),
+          ...exiting.map((o) => fadeNodeTo(nodeRefs.current[o.id], 0, durationSec)),
+        ].filter((p): p is Promise<void> => Boolean(p))
+
+        // Connectors that persist across both frames need their line glued
+        // to their endpoints' live (tweened) node positions on every
+        // animation frame — otherwise they only "catch up" once the frame
+        // boundary flips and React re-renders from the new frame data.
+        const connectorsToSync = toFrame.objects.filter(
+          (o): o is Extract<FrameObject, { objectType: 'connector' }> =>
+            o.objectType === 'connector' && fromIds.has(o.id),
+        )
+        const anim = connectorsToSync.length
+          ? new Konva.Animation(() => {
+              for (const connector of connectorsToSync) {
+                const line = connectorRefs.current[connector.id]
+                const fromNode = nodeRefs.current[connector.data.fromId]
+                const toNode = nodeRefs.current[connector.data.toId]
+                if (!line || !fromNode || !toNode) continue
+                line.points([fromNode.x(), fromNode.y(), toNode.x(), toNode.y()])
+              }
+            }, objectsLayerRef.current)
+          : null
+        anim?.start()
+
+        await Promise.all([...positionTweens, ...fadeTweens])
+        anim?.stop()
         if (cancelled) return
 
         useEditorStore.getState().setActiveFrameIndex(currentIndex + 1)
+        setPlaybackOverlay(EMPTY_OVERLAY)
         await new Promise((resolve) => setTimeout(resolve, 0))
       }
       useEditorStore.getState().setIsPlaying(false)
+      setPlaybackOverlay(EMPTY_OVERLAY)
     }
 
     run()
     return () => {
       cancelled = true
+      setPlaybackOverlay(EMPTY_OVERLAY)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isPlaying])
@@ -213,11 +317,11 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
         <Layer>
           <Pitch design={pitchDesign} orientation={orientation} />
         </Layer>
-        <Layer>
+        <Layer ref={objectsLayerRef}>
           {sortedObjects.map((object) => {
             if (object.objectType === 'connector') {
-              const from = frame.objects.find((o) => o.id === object.data.fromId)
-              const to = frame.objects.find((o) => o.id === object.data.toId)
+              const from = visibleObjects.find((o) => o.id === object.data.fromId)
+              const to = visibleObjects.find((o) => o.id === object.data.toId)
               if (!from || !to) return null
               return (
                 <ConnectorShape
@@ -227,6 +331,7 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
                   to={{ x: to.x, y: to.y }}
                   isSelected={selection.includes(object.id)}
                   onSelect={(additive) => handleSelect(object.id, additive)}
+                  lineRef={(node) => registerConnectorRef(object.id, node)}
                 />
               )
             }
@@ -242,6 +347,7 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
                 onDragEnd={handleDragMove}
                 onTransformEnd={handleTransformEnd}
                 registerRef={registerRef}
+                initialOpacity={enteringIds.has(object.id) ? 0 : 1}
               />
             )
           })}

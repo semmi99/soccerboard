@@ -215,7 +215,6 @@ export const useEditorStore = create<EditorState>((set, get) => ({
     set({
       frames: nextFrames,
       selection: [newObject.id],
-      tool: 'select',
       pendingPlayer: null,
       isDirty: true,
     })
@@ -258,7 +257,6 @@ export const useEditorStore = create<EditorState>((set, get) => ({
     set({
       frames: nextFrames,
       selection: newObjects.map((o) => o.id),
-      tool: 'select',
       pendingPlayers: [],
       isDirty: true,
     })
@@ -275,7 +273,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
           (o.data.fromId === toId && o.data.toId === fromId)),
     )
     if (exists) {
-      set({ connectorDraftFromId: null, tool: 'select' })
+      set({ connectorDraftFromId: null })
       return
     }
     pushHistory(get, set)
@@ -296,7 +294,6 @@ export const useEditorStore = create<EditorState>((set, get) => ({
     set({
       frames: nextFrames,
       selection: [newObject.id],
-      tool: 'select',
       connectorDraftFromId: null,
       isDirty: true,
     })

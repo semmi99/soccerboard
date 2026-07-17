@@ -51,6 +51,7 @@ export function useKeyboardShortcuts({ onSave }: { onSave: () => void }) {
       if (e.key === 'Escape') {
         store.setSelection([])
         store.setConnectorDraftFromId(null)
+        store.setTool('select')
         return
       }
 

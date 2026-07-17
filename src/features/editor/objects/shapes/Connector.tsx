@@ -1,4 +1,5 @@
 import { Line } from 'react-konva'
+import type Konva from 'konva'
 import type { KonvaEventObject } from 'konva/lib/Node'
 import type { ConnectorData } from '../../types'
 import { dashForLineStyle } from './dash'
@@ -9,15 +10,18 @@ export function ConnectorShape({
   to,
   isSelected,
   onSelect,
+  lineRef,
 }: {
   data: ConnectorData
   from: { x: number; y: number }
   to: { x: number; y: number }
   isSelected: boolean
   onSelect: (additive: boolean) => void
+  lineRef?: (node: Konva.Line | null) => void
 }) {
   return (
     <Line
+      ref={lineRef}
       points={[from.x, from.y, to.x, to.y]}
       stroke={isSelected ? '#a855f7' : data.color}
       strokeWidth={isSelected ? data.strokeWidth + 1.5 : data.strokeWidth}

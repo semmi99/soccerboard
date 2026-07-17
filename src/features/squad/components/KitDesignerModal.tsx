@@ -1,23 +1,10 @@
 import { useState } from 'react'
 import { Button } from '../../../components/ui/Button'
+import { ColorSwatchPicker } from '../../../components/ui/ColorSwatchPicker'
 import { updateTeamKit, type Team, type TeamKitPatch } from '../../../lib/supabase/squad'
 
 type KitPattern = 'solid' | 'stripes' | 'hoops'
 type Side = 'home' | 'away' | 'gk'
-
-const KIT_COLORS: { label: string; value: string }[] = [
-  { label: 'Schwarz', value: '#111827' },
-  { label: 'Blau', value: '#2563eb' },
-  { label: 'Dunkelgrün', value: '#14532d' },
-  { label: 'Fuchsia', value: '#d946ef' },
-  { label: 'Hellblau', value: '#38bdf8' },
-  { label: 'Hellgrün', value: '#22c55e' },
-  { label: 'Orange', value: '#f97316' },
-  { label: 'Pink', value: '#ec4899' },
-  { label: 'Rot', value: '#ef4444' },
-  { label: 'Weiß', value: '#f8fafc' },
-  { label: 'Gelb', value: '#eab308' },
-]
 
 const PATTERNS: { id: KitPattern; label: string }[] = [
   { id: 'solid', label: 'Einfarbig' },
@@ -35,33 +22,6 @@ function kitPreviewStyle(pattern: KitPattern, color1: string, color2: string): R
   return {
     background: `repeating-linear-gradient(0deg, ${color1} 0 8px, ${color2} 8px 16px)`,
   }
-}
-
-function ColorSwatchPicker({
-  value,
-  onChange,
-}: {
-  value: string
-  onChange: (color: string) => void
-}) {
-  return (
-    <div className="flex flex-wrap gap-1.5">
-      {KIT_COLORS.map((c) => (
-        <button
-          key={c.value}
-          type="button"
-          title={c.label}
-          onClick={() => onChange(c.value)}
-          className={`h-7 w-7 shrink-0 rounded-full border-2 transition-transform ${
-            value.toLowerCase() === c.value.toLowerCase()
-              ? 'scale-110 border-violet-accent-bright'
-              : 'border-white/20 hover:border-white/50'
-          }`}
-          style={{ backgroundColor: c.value }}
-        />
-      ))}
-    </div>
-  )
 }
 
 function SideEditor({
