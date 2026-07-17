@@ -1,0 +1,132 @@
+import type { SVGProps } from 'react'
+
+function Base(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      width={20}
+      height={20}
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.8}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      {...props}
+    />
+  )
+}
+
+export function CursorIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <Base {...props}>
+      <path d="M5 3l14 8-6 1.5L11 19z" />
+    </Base>
+  )
+}
+
+export function StraightArrowIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <Base {...props}>
+      <path d="M4 12h15" />
+      <path d="M14 6l6 6-6 6" />
+    </Base>
+  )
+}
+
+export function CurvedArrowIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <Base {...props}>
+      <path d="M4 18C4 9 10 5 19 7" />
+      <path d="M14 4l5 3-3 5" />
+    </Base>
+  )
+}
+
+export function CircleShapeIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <Base {...props}>
+      <circle cx="12" cy="12" r="8" />
+    </Base>
+  )
+}
+
+export function RectShapeIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <Base {...props}>
+      <rect x="4" y="6" width="16" height="12" rx="1.5" />
+    </Base>
+  )
+}
+
+export function PolygonShapeIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <Base {...props}>
+      <path d="M12 4l8 6-3 9H7l-3-9z" />
+    </Base>
+  )
+}
+
+export function TextToolIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <Base {...props}>
+      <path d="M5 5h14" />
+      <path d="M12 5v14" />
+    </Base>
+  )
+}
+
+export function BallIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <Base {...props}>
+      <circle cx="12" cy="12" r="8" />
+      <path d="M12 8l3 2-1 4h-4l-1-4z" />
+    </Base>
+  )
+}
+
+export function ConeIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <Base {...props}>
+      <path d="M12 4l5 14H7z" />
+      <path d="M6 18h12" />
+    </Base>
+  )
+}
+
+export function MiniGoalIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <Base {...props}>
+      <rect x="4" y="7" width="16" height="10" rx="1" />
+      <path d="M4 7l16 10" />
+      <path d="M20 7L4 17" />
+    </Base>
+  )
+}
+
+export function MannequinIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <Base {...props}>
+      <circle cx="12" cy="6" r="2.5" />
+      <path d="M8 20l1.5-9h5L16 20" />
+    </Base>
+  )
+}
+
+export function SlalomPoleIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <Base {...props}>
+      <path d="M12 4v13" />
+      <circle cx="12" cy="19" r="2" />
+    </Base>
+  )
+}
+
+export function LadderIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <Base {...props}>
+      <rect x="4" y="8" width="16" height="8" rx="1" />
+      <path d="M9 8v8" />
+      <path d="M15 8v8" />
+    </Base>
+  )
+}
