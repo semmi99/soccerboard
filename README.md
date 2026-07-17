@@ -1,34 +1,49 @@
 # TacticBoard Pro
 
 Professionelle Taktik- und Trainings-Board-Plattform für Fußballtrainer. Dieses
-Repository enthält **Phase 1 (Editor-MVP)**: einen vollwertigen Canvas-Taktik-Editor
-mit Login, Projektverwaltung und Bild-Export gegen ein echtes Supabase-Backend.
+Repository enthält **Phase 1 (Editor-MVP)** und **Phase B2 (Kaderverwaltung &
+Formationen)**: einen vollwertigen Canvas-Taktik-Editor mit Login, echter
+Kaderverwaltung, Formations-System und Bild-Export gegen ein echtes
+Supabase-Backend.
 
 ## Stack
 
 - **Frontend:** React 19 + TypeScript (strict) + Vite + Tailwind CSS v4
 - **Canvas:** Konva.js / react-konva
 - **State:** Zustand
-- **Backend:** Supabase (Postgres, Auth, Row Level Security)
+- **Backend:** Supabase (Postgres, Auth, Row Level Security, Storage)
 - **Routing:** react-router-dom
 
-## Features (Phase 1)
+## Features
 
+**Phase 1 (Editor-MVP):**
 - Email/Passwort-Login & Signup mit automatischem Org+Profil-Bootstrap
-- Taktik-Editor: 2 Feld-Designs, 2 Ausrichtungen, Spieler-Chips (Heim/Auswärts),
-  Pfeile (gerade/kurvig), Formen (Kreis/Rechteck/Polygon), Text, Trainingsequipment
-  (Hütchen, Minitor, Dummy, Slalomstange, Leiter), Ball
+- Taktik-Editor: 3 Feld-Designs (inkl. Stadion-Kulisse mit Tribünen), 2
+  Ausrichtungen, Spieler-Chips (Heim/Auswärts), Pfeile (gerade/kurvig), Formen
+  (Kreis/Rechteck/Polygon), Text, Trainingsequipment (Hütchen, Minitor, Dummy,
+  Slalomstange, Leiter), Ball – icon-basierte Werkzeugleiste
 - Frame-System mit Undo/Redo, Duplizieren, Reorder, und Wiedergabe mit
   Tween-Interpolation zwischen Frames
 - Speichern/Laden von Projekten gegen Supabase, projektbezogene RLS
-- Dashboard mit Free-Tier-Limit (3 Projekte, 7 Frames/Projekt)
+- Dashboard mit Free-Tier-Limit (3 Projekte, 7 Frames/Projekt), Vereinslogo-Upload
 - PNG/JPG-Export (Auflösung je nach Tier begrenzt)
 - Tastenkürzel: `Strg+S` Speichern, `Strg+Z` / `Strg+Shift+Z` Undo/Redo,
   `Strg+D` Duplizieren, `Entf` Löschen, `Esc` Auswahl aufheben, `Leertaste` Play
 
-**Nicht Teil von Phase 1** (siehe Roadmap unten): Kaderverwaltung, Formationsvorlagen,
-Übungsdatenbank, PDF-Export, Video-Export, Stripe-Billing, öffentliche Landingpage,
-Kollaboration, Vereins-Branding, Google-OAuth.
+**Phase B2 (Kaderverwaltung & Formationen):**
+- `/squad` – Kaderverwaltung pro Team (Spieler anlegen/bearbeiten/löschen:
+  Rückennummer, Position, Nebenposition, starker Fuß, Kontaktdaten, Notizen)
+- `/formations` – 4 Formationsvorlagen (4-4-2, 4-3-3, 4-2-3-1, 3-5-2) plus eigene,
+  gespeicherte Formationen
+- Im Editor: echte Kaderspieler per Klick als Spieler-Chip platzieren (Name +
+  Rückennummer statt generischer Nummer), Formation auf den aktiven Frame anwenden
+  (positioniert alle Heim-Chips automatisch und verknüpft sie mit echten Spielern
+  in Rückennummer-Reihenfolge)
+- Vereinslogo erscheint auf Heim-Spieler-Chips, sobald hochgeladen
+
+**Nicht Teil dieses Repos** (siehe Roadmap unten): Übungsdatenbank, PDF-Export,
+Video-Export, Stripe-Billing, öffentliche Landingpage, Kollaboration,
+Team-Vereins-Rollen, Google-OAuth.
 
 ## Setup
 
@@ -68,6 +83,9 @@ VITE_SUPABASE_ANON_KEY=<anon/publishable key>
 4. Email-Bestätigung: Standardmäßig verlangt Supabase Auth eine Email-Bestätigung
    vor dem ersten Login. Für schnelles lokales Testen kann das unter
    **Authentication → Providers → Email → Confirm email** deaktiviert werden.
+5. Für den U18-Kader-Import: `supabase/seed/import_u18_squad.sql` ist an eine
+   konkrete Org/Team-ID aus dem bestehenden Projekt gebunden und muss für ein
+   neues Projekt angepasst werden (siehe Kommentar in der Datei).
 
 ### 3. Dev-Server starten
 
@@ -94,9 +112,15 @@ Die Migrationen in `supabase/migrations/` bauen das Schema inkrementell auf:
   REST-API exponiertes `private`-Schema (behebt Supabase-Security-Advisor-Warnungen).
 - `003_project_canvas_settings.sql` – ergänzt `pitch_design`/`orientation` auf
   `projects`, damit die Canvas-Einstellungen mitgespeichert werden.
+- `004_stadium_pitch_design.sql` – erweitert die `pitch_design`-Check-Constraint um
+  `stadium_bowl`.
+- `005_org_logo_storage.sql` – Storage-Bucket `org-logos` (public read, org-scoped
+  write) für Vereinslogos.
+- `006_players_formations.sql` – `players`- und `formations`-Tabellen,
+  `frames.formation_id`, `frame_objects.player_id`.
 
-Weitere Tabellen (`players`, `formations`, `exercises`, `subscriptions`, …) kommen
-in den Folge-Phasen als eigene Migrationen dazu.
+Weitere Tabellen (`exercises`, `subscriptions`, …) kommen in späteren Phasen als
+eigene Migrationen dazu.
 
 ## Deploy (Vercel)
 
@@ -121,6 +145,9 @@ in den Folge-Phasen als eigene Migrationen dazu.
 - **Thumbnails im Dashboard:** aktuell ein generisches Platzhalter-Icon; echte
   Screenshot-Thumbnails sind ein guter Fast-Follow, sobald der PNG-Export-Pfad
   (bereits vorhanden) an einen Storage-Upload beim Speichern angebunden wird.
+- **Spieler auf die Canvas ziehen:** aktuell Klick-zum-Auswählen +
+  Klick-zum-Platzieren statt echtem Drag&Drop aus der Kaderliste (funktional
+  gleichwertig, aber ohne Drag-Geste).
 - **„Several Konva instances detected“**-Warnung in der Browser-Konsole: bekannte,
   harmlose Warnung, die entsteht, weil sowohl `konva` als auch `react-konva`
   Vite/esbuild-seitig ihre eigene Kopie der Bibliothek pre-bundlen. Wirkt sich in
@@ -128,9 +155,6 @@ in den Folge-Phasen als eigene Migrationen dazu.
 
 ## Roadmap
 
-- **B2:** Echte Kaderverwaltung (inkl. Import des bestehenden U18-Kaders von
-  Rapid Kapfenberg aus `data/spielakte-backup_2026-07-11.json`), Formations-System
-  mit Vorlagen (4-4-2, 4-3-3, …) und Positions-Rollen
 - **B3:** Übungsdatenbank & Trainingsplan-Baukasten, PDF-Export (mehrere Templates),
   Video-Export, Stripe-Billing (Free/Pro/Club), Marketing-Landingpage,
   Team-Kollaboration & Vereins-Branding
