@@ -23,6 +23,7 @@ interface AuthState {
     orgName: string,
   ) => Promise<{ error: string | null; needsEmailConfirmation: boolean }>
   signOut: () => Promise<void>
+  setOrganization: (organization: Organization) => void
 }
 
 async function loadProfileAndOrg(userId: string) {
@@ -112,4 +113,6 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   signOut: async () => {
     await supabase.auth.signOut()
   },
+
+  setOrganization: (organization) => set({ organization }),
 }))

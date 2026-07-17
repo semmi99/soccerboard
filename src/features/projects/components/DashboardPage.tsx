@@ -4,6 +4,7 @@ import { useAuthStore } from '../../auth/store/authStore'
 import { limitsForTier } from '../../../lib/limits'
 import { deleteProject, listProjects, type ProjectSummary } from '../../../lib/supabase/projects'
 import { Button } from '../../../components/ui/Button'
+import { OrgLogoUploader } from './OrgLogoUploader'
 
 function PitchThumbnail() {
   return (
@@ -118,12 +119,15 @@ export function DashboardPage() {
   return (
     <div className="h-full overflow-y-auto bg-pitch-950">
       <header className="flex items-center justify-between border-b border-pitch-700 px-8 py-5">
-        <div>
-          <h1 className="text-lg font-semibold text-white">{organization.name}</h1>
-          <p className="text-sm text-white/40">
-            {projects.length} / {Number.isFinite(maxProjects) ? maxProjects : '∞'} Projekte ·{' '}
-            {organization.subscription_tier === 'free' ? 'Free-Tier' : organization.subscription_tier}
-          </p>
+        <div className="flex items-center gap-4">
+          <OrgLogoUploader />
+          <div>
+            <h1 className="text-lg font-semibold text-white">{organization.name}</h1>
+            <p className="text-sm text-white/40">
+              {projects.length} / {Number.isFinite(maxProjects) ? maxProjects : '∞'} Projekte ·{' '}
+              {organization.subscription_tier === 'free' ? 'Free-Tier' : organization.subscription_tier}
+            </p>
+          </div>
         </div>
         <div className="flex items-center gap-3">
           <Button
