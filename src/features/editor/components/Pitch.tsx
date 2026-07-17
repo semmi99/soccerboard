@@ -1,5 +1,4 @@
 import { Arc, Circle, Group, Line, Rect, Shape, Text } from 'react-konva'
-import type Konva from 'konva'
 import { PITCH_LOGICAL, PITCH_STAGE_SIZE } from '../constants'
 import type { PitchDesign, PitchOrientation } from '../types'
 
@@ -12,46 +11,6 @@ const THEMES: Record<PitchDesign, { grassA: string; grassB: string; line: string
   classic_green: { grassA: '#1e7d32', grassB: '#1a6b2b', line: 'rgba(255,255,255,0.85)' },
   night_navy: { grassA: '#0f1a2e', grassB: '#0b1424', line: 'rgba(212,175,55,0.8)' },
   stadium_bowl: { grassA: '#1e8a3e', grassB: '#1a7a36', line: 'rgba(255,255,255,0.92)' },
-}
-
-/** Traces a "cushion"-distorted rounded rect: edges bow outward, corners cut diagonally. */
-function tracePitchBoundary(
-  ctx: Konva.Context,
-  w: number,
-  h: number,
-  cut: number,
-  bulgeV: number,
-  bulgeH: number,
-) {
-  ctx.beginPath()
-  ctx.moveTo(cut, 0)
-  ctx.quadraticCurveTo(w / 2, -bulgeV, w - cut, 0)
-  ctx.quadraticCurveTo(w, 0, w, cut)
-  ctx.quadraticCurveTo(w + bulgeH, h / 2, w, h - cut)
-  ctx.quadraticCurveTo(w, h, w - cut, h)
-  ctx.quadraticCurveTo(w / 2, h + bulgeV, cut, h)
-  ctx.quadraticCurveTo(0, h, 0, h - cut)
-  ctx.quadraticCurveTo(-bulgeH, h / 2, 0, cut)
-  ctx.quadraticCurveTo(0, 0, cut, 0)
-  ctx.closePath()
-}
-
-const BOUNDARY_CUT = 55
-const BOUNDARY_BULGE_V = 34
-const BOUNDARY_BULGE_H = 22
-
-function PitchBoundaryShape({ stroke }: { stroke: string }) {
-  return (
-    <Shape
-      listening={false}
-      stroke={stroke}
-      strokeWidth={3}
-      sceneFunc={(ctx, shape) => {
-        tracePitchBoundary(ctx, L, B, BOUNDARY_CUT, BOUNDARY_BULGE_V, BOUNDARY_BULGE_H)
-        ctx.fillStrokeShape(shape)
-      }}
-    />
-  )
 }
 
 function Stripes({ theme }: { theme: { grassA: string; grassB: string } }) {
@@ -214,17 +173,17 @@ function forEachRoundRectPerimeter(
   }
 }
 
-const SEAT_OUTER_PAD = 6
-const SEAT_WALKWAY_WIDTH = 16
-const SEAT_ROWS = 6
-const SEAT_SPACING = 12
-const SEAT_A = '#0f3d20'
-const SEAT_B = '#1a5c33'
-const SEAT_ACCENT = '#2f8f52'
+// Bold, high-contrast seat blocks. At the small on-screen sizes this canvas
+// actually renders at, fine per-seat detail aliases into noise — so this
+// intentionally uses few, large, strongly-contrasting blocks per row rather
+// than a realistic seat count.
+const SEAT_WALKWAY_WIDTH = 20
+const SEAT_ROWS = 2
+const SEAT_SPACING = 40
 const BOWL_CORNER_R = 74
 
 function SeatBowl() {
-  const seatBandWidth = STADIUM_MARGIN - SEAT_WALKWAY_WIDTH - SEAT_OUTER_PAD
+  const seatBandWidth = STADIUM_MARGIN - SEAT_WALKWAY_WIDTH
   const ringThickness = seatBandWidth / SEAT_ROWS
 
   return (
@@ -232,16 +191,15 @@ function SeatBowl() {
       listening={false}
       sceneFunc={(ctx) => {
         for (let row = 0; row < SEAT_ROWS; row++) {
-          const inset = SEAT_OUTER_PAD + row * ringThickness + ringThickness / 2
+          const inset = row * ringThickness + ringThickness / 2
           const rw = L - 2 * inset
           const rh = B - 2 * inset
-          const r = Math.max(BOWL_CORNER_R - inset * 0.6, 16)
-          const seatW = SEAT_SPACING * 0.82
-          const seatH = ringThickness * 0.82
+          const r = Math.max(BOWL_CORNER_R - inset * 0.6, 20)
+          const seatW = SEAT_SPACING * 0.8
+          const seatH = ringThickness * 0.86
           let i = 0
           forEachRoundRectPerimeter(rw, rh, r, SEAT_SPACING, (px, py, angleDeg) => {
-            const isAccent = i % 23 === 0
-            const color = isAccent ? SEAT_ACCENT : (i + row) % 2 === 0 ? SEAT_A : SEAT_B
+            const color = i % 2 === 0 ? '#1f8a44' : '#082414'
             ctx.save()
             ctx.translate(inset + px, inset + py)
             ctx.rotate((angleDeg * Math.PI) / 180)
@@ -270,32 +228,32 @@ function Walkway() {
         width={w}
         height={h}
         cornerRadius={r}
-        stroke="#9aa3ab"
+        stroke="#aab2ba"
         strokeWidth={SEAT_WALKWAY_WIDTH}
         listening={false}
       />
       <Text
         text="TACTICBOARD PRO"
         x={0}
-        y={inset - 6}
+        y={inset - 7}
         width={L}
         align="center"
         fontStyle="bold"
-        fontSize={13}
+        fontSize={14}
         letterSpacing={3}
-        fill="#3a4048"
+        fill="#333a41"
         listening={false}
       />
       <Text
         text="TACTICBOARD PRO"
         x={0}
-        y={B - inset - 7}
+        y={B - inset - 8}
         width={L}
         align="center"
         fontStyle="bold"
-        fontSize={13}
+        fontSize={14}
         letterSpacing={3}
-        fill="#3a4048"
+        fill="#333a41"
         listening={false}
       />
     </>
@@ -305,7 +263,7 @@ function Walkway() {
 function StadiumBackdrop() {
   return (
     <>
-      <Rect x={0} y={0} width={L} height={B} cornerRadius={BOWL_CORNER_R} fill="#08120c" listening={false} />
+      <Rect x={0} y={0} width={L} height={B} cornerRadius={BOWL_CORNER_R} fill="#04140b" listening={false} />
       <SeatBowl />
       <Walkway />
     </>
@@ -341,20 +299,10 @@ export function Pitch({
         y={isStadium ? STADIUM_MARGIN : 0}
         scaleX={grassScaleX}
         scaleY={grassScaleY}
-        clipFunc={
-          isStadium
-            ? (ctx) => tracePitchBoundary(ctx, L, B, BOUNDARY_CUT, BOUNDARY_BULGE_V, BOUNDARY_BULGE_H)
-            : undefined
-        }
       >
         <Stripes theme={theme} />
-        <Markings stroke={theme.line} boundary={!isStadium} />
+        <Markings stroke={theme.line} />
       </Group>
-      {isStadium && (
-        <Group x={STADIUM_MARGIN} y={STADIUM_MARGIN} scaleX={grassScaleX} scaleY={grassScaleY}>
-          <PitchBoundaryShape stroke={theme.line} />
-        </Group>
-      )}
     </Group>
   )
 }
