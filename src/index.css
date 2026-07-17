@@ -1,0 +1,52 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+
+  --color-pitch-950: #0a0a12;
+  --color-pitch-900: #0f0f1a;
+  --color-pitch-800: #16162a;
+  --color-pitch-700: #1f1f3a;
+  --color-pitch-600: #2a2a4a;
+
+  --color-violet-accent: #7c3aed;
+  --color-violet-accent-bright: #a855f7;
+  --color-gold-accent: #d4af37;
+  --color-gold-accent-bright: #f0d878;
+
+  --color-home-team: #3b82f6;
+  --color-away-team: #ef4444;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background-color: var(--color-pitch-950);
+  color: #e8e8f0;
+  font-family: var(--font-sans);
+  font-synthesis: none;
+  -webkit-font-smoothing: antialiased;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-pitch-900);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-pitch-600);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-violet-accent);
+}
