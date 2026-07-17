@@ -1,4 +1,4 @@
-import { Arc, Circle, Group, Line, Rect, Shape, Text } from 'react-konva'
+import { Arc, Circle, Group, Line, Rect, Text } from 'react-konva'
 import { PITCH_LOGICAL, PITCH_STAGE_SIZE } from '../constants'
 import type { PitchDesign, PitchOrientation } from '../types'
 
@@ -113,104 +113,98 @@ function Markings({ stroke, boundary = true }: { stroke: string; boundary?: bool
   )
 }
 
-/** Walks the perimeter of a rounded rect (w x h, corner radius r), calling
- * `cb(x, y, tangentAngleDeg)` at roughly `spacing`-px intervals, clockwise
- * from the top edge. Used to scatter stadium-seat units around the bowl. */
-function forEachRoundRectPerimeter(
-  w: number,
-  h: number,
-  r: number,
-  spacing: number,
-  cb: (x: number, y: number, angleDeg: number) => void,
-) {
-  const rr = Math.max(0, Math.min(r, w / 2, h / 2))
-  const arcLen = (Math.PI * rr) / 2
-  const segs: { len: number; point: (t: number) => { x: number; y: number; angleDeg: number } }[] = [
-    { len: w - 2 * rr, point: (t) => ({ x: rr + t * (w - 2 * rr), y: 0, angleDeg: 0 }) },
-    {
-      len: arcLen,
-      point: (t) => {
-        const a = -90 + t * 90
-        const rad = (a * Math.PI) / 180
-        return { x: w - rr + rr * Math.cos(rad), y: rr + rr * Math.sin(rad), angleDeg: a + 90 }
-      },
-    },
-    { len: h - 2 * rr, point: (t) => ({ x: w, y: rr + t * (h - 2 * rr), angleDeg: 90 }) },
-    {
-      len: arcLen,
-      point: (t) => {
-        const a = t * 90
-        const rad = (a * Math.PI) / 180
-        return { x: w - rr + rr * Math.cos(rad), y: h - rr + rr * Math.sin(rad), angleDeg: a + 90 }
-      },
-    },
-    { len: w - 2 * rr, point: (t) => ({ x: w - rr - t * (w - 2 * rr), y: h, angleDeg: 180 }) },
-    {
-      len: arcLen,
-      point: (t) => {
-        const a = 90 + t * 90
-        const rad = (a * Math.PI) / 180
-        return { x: rr + rr * Math.cos(rad), y: h - rr + rr * Math.sin(rad), angleDeg: a + 90 }
-      },
-    },
-    { len: h - 2 * rr, point: (t) => ({ x: 0, y: h - rr - t * (h - 2 * rr), angleDeg: 270 }) },
-    {
-      len: arcLen,
-      point: (t) => {
-        const a = 180 + t * 90
-        const rad = (a * Math.PI) / 180
-        return { x: rr + rr * Math.cos(rad), y: rr + rr * Math.sin(rad), angleDeg: a + 90 }
-      },
-    },
-  ]
-  for (const seg of segs) {
-    if (seg.len <= 0) continue
-    const steps = Math.max(1, Math.round(seg.len / spacing))
-    for (let i = 0; i < steps; i++) {
-      const { x, y, angleDeg } = seg.point(i / steps)
-      cb(x, y, angleDeg)
-    }
+const SEAT_WALKWAY_WIDTH = 20
+const BOWL_CORNER_R = 74
+
+/** Deterministic pseudo-random generator (mulberry32) so the crowd speckle
+ * is stable across re-renders instead of jittering every time Pitch renders. */
+function mulberry32(seed: number) {
+  let s = seed
+  return () => {
+    s = (s + 0x6d2b79f5) | 0
+    let t = Math.imul(s ^ (s >>> 15), 1 | s)
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296
   }
 }
 
-// Bold, high-contrast seat blocks. At the small on-screen sizes this canvas
-// actually renders at, fine per-seat detail aliases into noise — so this
-// intentionally uses few, large, strongly-contrasting blocks per row rather
-// than a realistic seat count.
-const SEAT_WALKWAY_WIDTH = 20
-const SEAT_ROWS = 2
-const SEAT_SPACING = 40
-const BOWL_CORNER_R = 74
+const CROWD_COLORS = ['#f5f5f0', '#f0d878', '#d9534f', '#5b8fd1', '#e8e8e2']
+const CROWD_DOTS = (() => {
+  const rand = mulberry32(42)
+  return Array.from({ length: 240 }, () => ({
+    x: rand() * L,
+    y: rand() * B,
+    r: 1 + rand() * 1.3,
+    color: CROWD_COLORS[Math.floor(rand() * CROWD_COLORS.length)]!,
+    opacity: 0.35 + rand() * 0.4,
+  }))
+})()
 
+const FLOODLIGHT_POS: [number, number][] = [
+  [50, 50],
+  [L - 50, 50],
+  [50, B - 50],
+  [L - 50, B - 50],
+]
+
+/** Smooth gradient-shaded bowl (lighter near the pitch, dark toward the
+ * outer rim) with a couple of subtle tier lines and sparse crowd speckle —
+ * reads as photographic depth at any size instead of a repeating pattern
+ * that aliases into noise once shrunk to the editor's actual canvas size. */
 function SeatBowl() {
-  const seatBandWidth = STADIUM_MARGIN - SEAT_WALKWAY_WIDTH
-  const ringThickness = seatBandWidth / SEAT_ROWS
-
   return (
-    <Shape
-      listening={false}
-      sceneFunc={(ctx) => {
-        for (let row = 0; row < SEAT_ROWS; row++) {
-          const inset = row * ringThickness + ringThickness / 2
-          const rw = L - 2 * inset
-          const rh = B - 2 * inset
-          const r = Math.max(BOWL_CORNER_R - inset * 0.6, 20)
-          const seatW = SEAT_SPACING * 0.8
-          const seatH = ringThickness * 0.86
-          let i = 0
-          forEachRoundRectPerimeter(rw, rh, r, SEAT_SPACING, (px, py, angleDeg) => {
-            const color = i % 2 === 0 ? '#1f8a44' : '#082414'
-            ctx.save()
-            ctx.translate(inset + px, inset + py)
-            ctx.rotate((angleDeg * Math.PI) / 180)
-            ctx.fillStyle = color
-            ctx.fillRect(-seatW / 2, -seatH / 2, seatW, seatH)
-            ctx.restore()
-            i++
-          })
-        }
-      }}
-    />
+    <>
+      <Rect
+        x={0}
+        y={0}
+        width={L}
+        height={B}
+        cornerRadius={BOWL_CORNER_R}
+        fillRadialGradientStartPoint={{ x: CX, y: CY }}
+        fillRadialGradientStartRadius={0}
+        fillRadialGradientEndPoint={{ x: CX, y: CY }}
+        fillRadialGradientEndRadius={Math.max(L, B) * 0.62}
+        fillRadialGradientColorStops={[0, '#3d4b61', 0.5, '#232c3a', 0.82, '#141a24', 1, '#080b10']}
+        listening={false}
+      />
+      <Rect
+        x={18}
+        y={18}
+        width={L - 36}
+        height={B - 36}
+        cornerRadius={Math.max(BOWL_CORNER_R - 14, 20)}
+        stroke="rgba(0,0,0,0.32)"
+        strokeWidth={2}
+        listening={false}
+      />
+      <Rect
+        x={42}
+        y={42}
+        width={L - 84}
+        height={B - 84}
+        cornerRadius={Math.max(BOWL_CORNER_R - 32, 16)}
+        stroke="rgba(0,0,0,0.26)"
+        strokeWidth={2}
+        listening={false}
+      />
+      {CROWD_DOTS.map((d, i) => (
+        <Circle key={i} x={d.x} y={d.y} radius={d.r} fill={d.color} opacity={d.opacity} listening={false} />
+      ))}
+      {FLOODLIGHT_POS.map(([x, y], i) => (
+        <Circle
+          key={i}
+          x={x}
+          y={y}
+          radius={34}
+          fillRadialGradientStartPoint={{ x: 0, y: 0 }}
+          fillRadialGradientStartRadius={0}
+          fillRadialGradientEndPoint={{ x: 0, y: 0 }}
+          fillRadialGradientEndRadius={34}
+          fillRadialGradientColorStops={[0, 'rgba(255,252,235,0.5)', 1, 'rgba(255,252,235,0)']}
+          listening={false}
+        />
+      ))}
+    </>
   )
 }
 
