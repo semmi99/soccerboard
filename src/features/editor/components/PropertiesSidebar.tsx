@@ -72,6 +72,7 @@ export function PropertiesSidebar() {
             >
               <option value="classic_green">Klassisch Grün</option>
               <option value="night_navy">Stadion bei Nacht</option>
+              <option value="stadium_bowl">Stadion-Kulisse</option>
             </select>
           </Field>
           <Field label="Ausrichtung">

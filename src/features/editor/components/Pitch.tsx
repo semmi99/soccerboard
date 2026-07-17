@@ -5,10 +5,12 @@ import type { PitchDesign, PitchOrientation } from '../types'
 const { width: L, height: B } = PITCH_LOGICAL // length (x), breadth (y)
 const CX = L / 2
 const CY = B / 2
+const STADIUM_MARGIN = 90
 
 const THEMES: Record<PitchDesign, { grassA: string; grassB: string; line: string }> = {
   classic_green: { grassA: '#1e7d32', grassB: '#1a6b2b', line: 'rgba(255,255,255,0.85)' },
   night_navy: { grassA: '#0f1a2e', grassB: '#0b1424', line: 'rgba(212,175,55,0.8)' },
+  stadium_bowl: { grassA: '#2d8a3e', grassB: '#279938', line: 'rgba(255,255,255,0.9)' },
 }
 
 function Stripes({ theme }: { theme: { grassA: string; grassB: string } }) {
@@ -109,6 +111,46 @@ function Markings({ stroke }: { stroke: string }) {
   )
 }
 
+function StadiumBowl() {
+  const ringCount = 6
+  const ringThickness = STADIUM_MARGIN / ringCount
+  const seatA = '#0f3d1f'
+  const seatB = '#164d28'
+
+  return (
+    <>
+      <Rect x={0} y={0} width={L} height={B} cornerRadius={70} fill="#0a1f12" listening={false} />
+      {Array.from({ length: ringCount }, (_, i) => {
+        const inset = i * ringThickness + ringThickness / 2
+        return (
+          <Rect
+            key={i}
+            x={inset}
+            y={inset}
+            width={L - inset * 2}
+            height={B - inset * 2}
+            cornerRadius={Math.max(60 - inset * 0.55, 16)}
+            stroke={i % 2 === 0 ? seatA : seatB}
+            strokeWidth={ringThickness}
+            listening={false}
+          />
+        )
+      })}
+      {/* running track */}
+      <Rect
+        x={STADIUM_MARGIN - 10}
+        y={STADIUM_MARGIN - 10}
+        width={L - (STADIUM_MARGIN - 10) * 2}
+        height={B - (STADIUM_MARGIN - 10) * 2}
+        cornerRadius={14}
+        stroke="#8a5a3a"
+        strokeWidth={10}
+        listening={false}
+      />
+    </>
+  )
+}
+
 export function Pitch({
   design,
   orientation,
@@ -119,6 +161,10 @@ export function Pitch({
   const theme = THEMES[design]
   const stage = PITCH_STAGE_SIZE[orientation]
   const rotation = orientation === 'vertical' ? 90 : 0
+  const isStadium = design === 'stadium_bowl'
+
+  const grassScaleX = isStadium ? (L - STADIUM_MARGIN * 2) / L : 1
+  const grassScaleY = isStadium ? (B - STADIUM_MARGIN * 2) / B : 1
 
   return (
     <Group
@@ -128,8 +174,16 @@ export function Pitch({
       offsetY={CY}
       rotation={rotation}
     >
-      <Stripes theme={theme} />
-      <Markings stroke={theme.line} />
+      {isStadium && <StadiumBowl />}
+      <Group
+        x={isStadium ? STADIUM_MARGIN : 0}
+        y={isStadium ? STADIUM_MARGIN : 0}
+        scaleX={grassScaleX}
+        scaleY={grassScaleY}
+      >
+        <Stripes theme={theme} />
+        <Markings stroke={theme.line} />
+      </Group>
     </Group>
   )
 }
