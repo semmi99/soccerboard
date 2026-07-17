@@ -45,7 +45,7 @@ async function loadProfileAndOrg(userId: string) {
 
 let initialized = false
 
-export const useAuthStore = create<AuthState>((set) => ({
+export const useAuthStore = create<AuthState>((set, get) => ({
   status: 'loading',
   session: null,
   profile: null,
@@ -56,16 +56,34 @@ export const useAuthStore = create<AuthState>((set) => ({
     if (initialized) return
     initialized = true
 
+    // Safety net: if we're still stuck on "loading" after a few seconds
+    // (stale/invalid session, network hiccup during profile lookup, ...),
+    // don't leave the app spinning forever — force back to signed-out.
+    const stuckTimeout = setTimeout(() => {
+      if (get().status === 'loading') {
+        void supabase.auth.signOut()
+        set({ status: 'signed_out', session: null, profile: null, organization: null })
+      }
+    }, 8000)
+
     supabase.auth.onAuthStateChange((_event, session) => {
       if (!session) {
+        clearTimeout(stuckTimeout)
         set({ status: 'signed_out', session: null, profile: null, organization: null })
         return
       }
 
       set({ status: 'loading', session })
-      loadProfileAndOrg(session.user.id).then(({ profile, organization }) => {
-        set({ status: 'signed_in', session, profile, organization })
-      })
+      loadProfileAndOrg(session.user.id)
+        .then(({ profile, organization }) => {
+          clearTimeout(stuckTimeout)
+          set({ status: 'signed_in', session, profile, organization })
+        })
+        .catch(() => {
+          clearTimeout(stuckTimeout)
+          void supabase.auth.signOut()
+          set({ status: 'signed_out', session: null, profile: null, organization: null })
+        })
     })
   },
 
