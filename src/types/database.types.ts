@@ -14,6 +14,41 @@ export type Database = {
   }
   public: {
     Tables: {
+      formations: {
+        Row: {
+          created_at: string
+          formation_type: string
+          id: string
+          name: string
+          org_id: string
+          positions: Json
+        }
+        Insert: {
+          created_at?: string
+          formation_type: string
+          id?: string
+          name: string
+          org_id: string
+          positions?: Json
+        }
+        Update: {
+          created_at?: string
+          formation_type?: string
+          id?: string
+          name?: string
+          org_id?: string
+          positions?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "formations_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       frame_objects: {
         Row: {
           created_at: string
@@ -21,6 +56,7 @@ export type Database = {
           frame_id: string
           id: string
           object_type: string
+          player_id: string | null
           rotation: number
           scale: number
           x: number
@@ -33,6 +69,7 @@ export type Database = {
           frame_id: string
           id?: string
           object_type: string
+          player_id?: string | null
           rotation?: number
           scale?: number
           x?: number
@@ -45,6 +82,7 @@ export type Database = {
           frame_id?: string
           id?: string
           object_type?: string
+          player_id?: string | null
           rotation?: number
           scale?: number
           x?: number
@@ -59,12 +97,20 @@ export type Database = {
             referencedRelation: "frames"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "frame_objects_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["id"]
+          },
         ]
       }
       frames: {
         Row: {
           created_at: string
           duration_ms: number
+          formation_id: string | null
           id: string
           order_index: number
           project_id: string
@@ -72,6 +118,7 @@ export type Database = {
         Insert: {
           created_at?: string
           duration_ms?: number
+          formation_id?: string | null
           id?: string
           order_index?: number
           project_id: string
@@ -79,11 +126,19 @@ export type Database = {
         Update: {
           created_at?: string
           duration_ms?: number
+          formation_id?: string | null
           id?: string
           order_index?: number
           project_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "frames_formation_id_fkey"
+            columns: ["formation_id"]
+            isOneToOne: false
+            referencedRelation: "formations"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "frames_project_id_fkey"
             columns: ["project_id"]
@@ -122,6 +177,77 @@ export type Database = {
           subscription_tier?: string
         }
         Relationships: []
+      }
+      players: {
+        Row: {
+          attributes: Json
+          birth_date: string | null
+          created_at: string
+          email: string | null
+          first_name: string
+          height_cm: number | null
+          id: string
+          jersey_number: number | null
+          last_name: string
+          nationality: string | null
+          notes: string | null
+          phone: string | null
+          photo_url: string | null
+          position: string | null
+          secondary_position: string | null
+          strong_foot: string | null
+          team_id: string
+          weight_kg: number | null
+        }
+        Insert: {
+          attributes?: Json
+          birth_date?: string | null
+          created_at?: string
+          email?: string | null
+          first_name: string
+          height_cm?: number | null
+          id?: string
+          jersey_number?: number | null
+          last_name: string
+          nationality?: string | null
+          notes?: string | null
+          phone?: string | null
+          photo_url?: string | null
+          position?: string | null
+          secondary_position?: string | null
+          strong_foot?: string | null
+          team_id: string
+          weight_kg?: number | null
+        }
+        Update: {
+          attributes?: Json
+          birth_date?: string | null
+          created_at?: string
+          email?: string | null
+          first_name?: string
+          height_cm?: number | null
+          id?: string
+          jersey_number?: number | null
+          last_name?: string
+          nationality?: string | null
+          notes?: string | null
+          phone?: string | null
+          photo_url?: string | null
+          position?: string | null
+          secondary_position?: string | null
+          strong_foot?: string | null
+          team_id?: string
+          weight_kg?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "players_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {
