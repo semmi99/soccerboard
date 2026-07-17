@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef } from 'react'
+import { useCallback, useEffect, useRef, type RefObject } from 'react'
 import { Layer, Stage, Transformer } from 'react-konva'
 import Konva from 'konva'
 import type { KonvaEventObject } from 'konva/lib/Node'
@@ -53,7 +53,7 @@ function tweenObjectTo(node: Konva.Group, target: FrameObject, durationSec: numb
   })
 }
 
-export function EditorCanvas() {
+export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | null> }) {
   const { ref: containerRef, size } = useElementSize<HTMLDivElement>()
   const pitchDesign = useEditorStore((s) => s.pitchDesign)
   const orientation = useEditorStore((s) => s.orientation)
@@ -70,7 +70,6 @@ export function EditorCanvas() {
   const frame = frames[activeFrameIndex] ?? frames[0]!
   const sortedObjects = [...frame.objects].sort((a, b) => a.zIndex - b.zIndex)
 
-  const stageRef = useRef<Konva.Stage>(null)
   const trRef = useRef<Konva.Transformer>(null)
   const nodeRefs = useRef<Record<string, Konva.Group>>({})
 

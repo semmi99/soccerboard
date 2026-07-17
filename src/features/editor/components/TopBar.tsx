@@ -1,12 +1,14 @@
-import { useState } from 'react'
+import { useState, type RefObject } from 'react'
 import { useNavigate } from 'react-router-dom'
+import type Konva from 'konva'
 import { useEditorStore } from '../store/editorStore'
 import { useAuthStore } from '../../auth/store/authStore'
 import { limitsForTier } from '../../../lib/limits'
 import { countProjects, saveProject } from '../../../lib/supabase/projects'
 import { Button } from '../../../components/ui/Button'
+import { ExportMenu } from './ExportMenu'
 
-export function TopBar() {
+export function TopBar({ stageRef }: { stageRef: RefObject<Konva.Stage | null> }) {
   const navigate = useNavigate()
   const projectId = useEditorStore((s) => s.projectId)
   const projectTitle = useEditorStore((s) => s.projectTitle)
@@ -93,6 +95,8 @@ export function TopBar() {
       </div>
 
       {saveError && <p className="max-w-xs truncate text-xs text-red-400">{saveError}</p>}
+
+      <ExportMenu stageRef={stageRef} />
 
       <Button onClick={handleSave} loading={isSaving} disabled={!isDirty && Boolean(projectId)}>
         {projectId ? 'Speichern' : 'Projekt erstellen'}

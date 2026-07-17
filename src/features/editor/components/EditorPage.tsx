@@ -1,5 +1,6 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
+import type Konva from 'konva'
 import { useEditorStore } from '../store/editorStore'
 import { loadProject } from '../../../lib/supabase/projects'
 import { TopBar } from './TopBar'
@@ -11,6 +12,7 @@ import { Timeline } from './Timeline'
 export function EditorPage() {
   const { projectId } = useParams<{ projectId: string }>()
   const navigate = useNavigate()
+  const stageRef = useRef<Konva.Stage>(null)
   const resetToBlankProject = useEditorStore((s) => s.resetToBlankProject)
   const loadProjectIntoStore = useEditorStore((s) => s.loadProject)
   const [loadError, setLoadError] = useState<string | null>(null)
@@ -77,11 +79,11 @@ export function EditorPage() {
 
   return (
     <div className="flex h-full flex-col bg-pitch-950">
-      <TopBar />
+      <TopBar stageRef={stageRef} />
       <div className="flex min-h-0 flex-1">
         <Toolbar />
         <main className="min-w-0 flex-1 bg-pitch-950 p-4">
-          <EditorCanvas />
+          <EditorCanvas stageRef={stageRef} />
         </main>
         <PropertiesSidebar />
       </div>
