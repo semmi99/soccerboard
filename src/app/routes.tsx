@@ -1,4 +1,7 @@
 import { Navigate, Route, Routes } from 'react-router-dom'
+import { LoginPage } from '../features/auth/components/LoginPage'
+import { SignupPage } from '../features/auth/components/SignupPage'
+import { AuthGuard, GuestGuard } from './AuthGuard'
 
 function Placeholder({ label }: { label: string }) {
   return (
@@ -11,15 +14,40 @@ function Placeholder({ label }: { label: string }) {
 export function AppRoutes() {
   return (
     <Routes>
-      <Route path="/" element={<Navigate to="/login" replace />} />
-      <Route path="/login" element={<Placeholder label="Login" />} />
-      <Route path="/signup" element={<Placeholder label="Signup" />} />
-      <Route path="/dashboard" element={<Placeholder label="Dashboard" />} />
+      <Route path="/" element={<Navigate to="/dashboard" replace />} />
+      <Route
+        path="/login"
+        element={
+          <GuestGuard>
+            <LoginPage />
+          </GuestGuard>
+        }
+      />
+      <Route
+        path="/signup"
+        element={
+          <GuestGuard>
+            <SignupPage />
+          </GuestGuard>
+        }
+      />
+      <Route
+        path="/dashboard"
+        element={
+          <AuthGuard>
+            <Placeholder label="Dashboard" />
+          </AuthGuard>
+        }
+      />
       <Route
         path="/editor/:projectId"
-        element={<Placeholder label="Editor" />}
+        element={
+          <AuthGuard>
+            <Placeholder label="Editor" />
+          </AuthGuard>
+        }
       />
-      <Route path="*" element={<Navigate to="/login" replace />} />
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   )
 }
