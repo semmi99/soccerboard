@@ -54,55 +54,35 @@ export function PlayerChipShape({ data }: { data: PlayerChipData }) {
   const kit: KitConfig = teamKit
     ? teamKit[data.team]
     : { pattern: 'solid', color1: TEAM_COLORS[data.team], color2: TEAM_COLORS[data.team] }
-  const badgeColor = kit.color1
   const logoUrl = useAuthStore((s) => s.organization?.logo_url)
   const showLogo = data.team === 'home' && Boolean(logoUrl)
   const [image] = useImage(showLogo ? (logoUrl as string) : '', 'anonymous')
 
   return (
     <Group>
-      {showLogo && image ? (
+      <KitFill kit={kit} />
+      <Text
+        text={String(data.number)}
+        fontSize={15}
+        fontStyle="bold"
+        fill="#ffffff"
+        width={36}
+        height={36}
+        offsetX={18}
+        offsetY={18}
+        align="center"
+        verticalAlign="middle"
+        listening={false}
+        shadowColor="#000000"
+        shadowBlur={3}
+        shadowOpacity={0.6}
+      />
+      {showLogo && image && (
         <>
-          <Circle radius={CHIP_R} fill="#ffffff" stroke="#ffffff" strokeWidth={2} shadowBlur={4} shadowOpacity={0.4} />
-          <Group clipFunc={(ctx) => ctx.arc(0, 0, 16, 0, Math.PI * 2, false)}>
-            <KonvaImage image={image} x={-16} y={-16} width={32} height={32} />
+          <Circle x={-13} y={-13} radius={9} fill="#ffffff" stroke={kit.color1} strokeWidth={1.5} />
+          <Group clipFunc={(ctx) => ctx.arc(-13, -13, 7.5, 0, Math.PI * 2, false)}>
+            <KonvaImage image={image} x={-20.5} y={-20.5} width={15} height={15} />
           </Group>
-          <Circle x={13} y={13} radius={8} fill={badgeColor} stroke="#ffffff" strokeWidth={1.5} />
-          <Text
-            text={String(data.number)}
-            fontSize={9}
-            fontStyle="bold"
-            fill="#ffffff"
-            width={16}
-            height={16}
-            offsetX={8}
-            offsetY={8}
-            x={13}
-            y={13}
-            align="center"
-            verticalAlign="middle"
-            listening={false}
-          />
-        </>
-      ) : (
-        <>
-          <KitFill kit={kit} />
-          <Text
-            text={String(data.number)}
-            fontSize={15}
-            fontStyle="bold"
-            fill="#ffffff"
-            width={36}
-            height={36}
-            offsetX={18}
-            offsetY={18}
-            align="center"
-            verticalAlign="middle"
-            listening={false}
-            shadowColor="#000000"
-            shadowBlur={3}
-            shadowOpacity={0.6}
-          />
         </>
       )}
       {data.label && (
