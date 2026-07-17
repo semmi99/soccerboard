@@ -1,0 +1,96 @@
+export type Team = 'home' | 'away'
+export type LineStyle = 'solid' | 'dashed' | 'dotted'
+export type ArrowShape = 'straight' | 'curved' | 'polyline'
+export type ShapeKind = 'circle' | 'rect' | 'polygon'
+export type EquipmentKind =
+  | 'cone'
+  | 'mini_goal'
+  | 'mannequin'
+  | 'slalom_pole'
+  | 'ladder'
+
+export interface PlayerChipData {
+  team: Team
+  number: number
+  label: string
+}
+
+export interface ArrowData {
+  shape: ArrowShape
+  points: number[] // flat [x1,y1,x2,y2,...] relative to the object's x/y anchor
+  lineStyle: LineStyle
+  color: string
+  strokeWidth: number
+}
+
+export interface ShapeData {
+  kind: ShapeKind
+  width: number
+  height: number
+  points?: number[] // polygon only, relative to x/y anchor
+  fill: string
+  stroke: string
+  strokeWidth: number
+  lineStyle: LineStyle
+  opacity: number
+}
+
+export interface TextData {
+  text: string
+  fontSize: number
+  color: string
+  fontStyle: 'normal' | 'bold' | 'italic'
+}
+
+export interface EquipmentData {
+  kind: EquipmentKind
+}
+
+export type BallData = Record<string, never>
+
+export type ObjectType =
+  | 'player_chip'
+  | 'arrow'
+  | 'shape'
+  | 'text'
+  | 'training_equipment'
+  | 'ball'
+
+export interface FrameObjectBase {
+  id: string
+  x: number
+  y: number
+  rotation: number
+  scale: number
+  zIndex: number
+}
+
+export type FrameObject =
+  | (FrameObjectBase & { objectType: 'player_chip'; data: PlayerChipData })
+  | (FrameObjectBase & { objectType: 'arrow'; data: ArrowData })
+  | (FrameObjectBase & { objectType: 'shape'; data: ShapeData })
+  | (FrameObjectBase & { objectType: 'text'; data: TextData })
+  | (FrameObjectBase & { objectType: 'training_equipment'; data: EquipmentData })
+  | (FrameObjectBase & { objectType: 'ball'; data: BallData })
+
+export interface EditorFrame {
+  id: string
+  durationMs: number
+  objects: FrameObject[]
+}
+
+export type PitchDesign = 'classic_green' | 'night_navy'
+export type PitchOrientation = 'vertical' | 'horizontal'
+
+export type ToolId =
+  | 'select'
+  | 'player_home'
+  | 'player_away'
+  | 'arrow_straight'
+  | 'arrow_curved'
+  | 'shape_circle'
+  | 'shape_rect'
+  | 'shape_polygon'
+  | 'text'
+  | 'ball'
+  | `equipment_${EquipmentKind}`

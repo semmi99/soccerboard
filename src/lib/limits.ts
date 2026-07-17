@@ -1,0 +1,21 @@
+export interface TierLimits {
+  maxProjects: number
+  maxFrames: number
+  maxExportPixelRatio: number
+}
+
+export const FREE_TIER_LIMITS: TierLimits = {
+  maxProjects: 3,
+  maxFrames: 7,
+  maxExportPixelRatio: 2, // ~1080p on a standard pitch canvas size
+}
+
+export const PRO_TIER_LIMITS: TierLimits = {
+  maxProjects: Infinity,
+  maxFrames: Infinity,
+  maxExportPixelRatio: 4, // ~4K
+}
+
+export function limitsForTier(tier: string): TierLimits {
+  return tier === 'free' ? FREE_TIER_LIMITS : PRO_TIER_LIMITS
+}
