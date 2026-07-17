@@ -11,6 +11,7 @@ import type {
   TextData,
 } from '../types'
 import { Button } from '../../../components/ui/Button'
+import { TeamSquadPanel } from './TeamSquadPanel'
 
 const LINE_STYLES: { value: LineStyle; label: string }[] = [
   { value: 'solid', label: 'Durchgezogen' },
@@ -86,6 +87,13 @@ export function PropertiesSidebar() {
             </select>
           </Field>
         </div>
+      </div>
+
+      <div>
+        <h3 className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-white/40">
+          Team &amp; Kader
+        </h3>
+        <TeamSquadPanel />
       </div>
 
       {selection.length > 1 && (
@@ -179,6 +187,11 @@ function PlayerChipFields({
 }) {
   return (
     <div className="flex flex-col gap-2">
+      {data.playerId && (
+        <p className="rounded-md bg-violet-accent/10 px-2 py-1.5 text-xs text-violet-accent-bright">
+          Verknüpft mit Kaderspieler
+        </p>
+      )}
       <Field label="Team">
         <select
           className={selectClass}

@@ -13,6 +13,7 @@ export interface PlayerChipData {
   team: Team
   number: number
   label: string
+  playerId?: string
 }
 
 export interface ArrowData {

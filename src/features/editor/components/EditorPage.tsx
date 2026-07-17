@@ -43,6 +43,7 @@ export function EditorPage() {
           projectTitle: project.title,
           pitchDesign: project.pitchDesign,
           orientation: project.orientation,
+          teamId: project.teamId,
           frames: project.frames,
         })
       })

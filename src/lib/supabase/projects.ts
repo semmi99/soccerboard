@@ -62,13 +62,14 @@ export interface LoadedProject {
   title: string
   pitchDesign: PitchDesign
   orientation: PitchOrientation
+  teamId: string | null
   frames: EditorFrame[]
 }
 
 export async function loadProject(id: string): Promise<LoadedProject> {
   const { data: project, error: projectError } = await supabase
     .from('projects')
-    .select('id, title, pitch_design, orientation')
+    .select('id, title, pitch_design, orientation, team_id')
     .eq('id', id)
     .single()
   if (projectError) throw projectError
@@ -98,6 +99,7 @@ export async function loadProject(id: string): Promise<LoadedProject> {
     title: project.title,
     pitchDesign: project.pitch_design as PitchDesign,
     orientation: project.orientation as PitchOrientation,
+    teamId: project.team_id,
     frames,
   }
 }
@@ -109,6 +111,7 @@ export interface SaveProjectInput {
   title: string
   pitchDesign: PitchDesign
   orientation: PitchOrientation
+  teamId: string | null
   frames: EditorFrame[]
 }
 
@@ -122,6 +125,7 @@ export async function saveProject(input: SaveProjectInput): Promise<string> {
         title: input.title,
         pitch_design: input.pitchDesign,
         orientation: input.orientation,
+        team_id: input.teamId,
       })
       .eq('id', projectId)
     if (error) throw error
@@ -149,6 +153,7 @@ async function insertProjectRow(
     type: 'tactic',
     pitch_design: input.pitchDesign,
     orientation: input.orientation,
+    team_id: input.teamId,
   }
   const { data, error } = await supabase
     .from('projects')
@@ -177,6 +182,7 @@ async function insertFramesAndObjects(projectId: string, frames: EditorFrame[]) 
       frame_id: f.id,
       object_type: o.objectType,
       data: o.data as unknown as Json,
+      player_id: o.objectType === 'player_chip' ? (o.data.playerId ?? null) : null,
       x: o.x,
       y: o.y,
       rotation: o.rotation,

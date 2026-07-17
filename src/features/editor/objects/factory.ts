@@ -8,15 +8,34 @@ export function resetPlayerCounters() {
   awayPlayerCount = 0
 }
 
+export interface PendingRealPlayer {
+  id: string
+  jerseyNumber: number | null
+  label: string
+}
+
 export function createObjectForTool(
   tool: ToolId,
   x: number,
   y: number,
+  pendingPlayer?: PendingRealPlayer | null,
 ): FrameObject | null {
   const base = { id: crypto.randomUUID(), x, y, rotation: 0, scale: 1, zIndex: 0 }
 
   if (tool === 'player_home' || tool === 'player_away') {
     const team = tool === 'player_home' ? 'home' : 'away'
+    if (pendingPlayer) {
+      return {
+        ...base,
+        objectType: 'player_chip',
+        data: {
+          team,
+          number: pendingPlayer.jerseyNumber ?? 0,
+          label: pendingPlayer.label,
+          playerId: pendingPlayer.id,
+        },
+      }
+    }
     const number = team === 'home' ? ++homePlayerCount : ++awayPlayerCount
     return {
       ...base,

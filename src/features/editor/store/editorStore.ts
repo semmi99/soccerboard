@@ -6,7 +6,15 @@ import type {
   PitchOrientation,
   ToolId,
 } from '../types'
-import { createObjectForTool } from '../objects/factory'
+import { createObjectForTool, type PendingRealPlayer } from '../objects/factory'
+import { PITCH_STAGE_SIZE } from '../constants'
+import type { FormationPosition } from '../../formations/presets'
+
+export interface FormationPlayer {
+  id: string
+  jerseyNumber: number | null
+  label: string
+}
 
 interface FramesSnapshot {
   frames: EditorFrame[]
@@ -33,10 +41,12 @@ interface EditorState {
   projectTitle: string
   pitchDesign: PitchDesign
   orientation: PitchOrientation
+  teamId: string | null
   frames: EditorFrame[]
   activeFrameIndex: number
   selection: string[]
   tool: ToolId
+  pendingPlayer: PendingRealPlayer | null
   isPlaying: boolean
   isDirty: boolean
   past: FramesSnapshot[]
@@ -47,6 +57,7 @@ interface EditorState {
     projectTitle: string
     pitchDesign: PitchDesign
     orientation: PitchOrientation
+    teamId: string | null
     frames: EditorFrame[]
   }) => void
   resetToBlankProject: () => void
@@ -56,12 +67,15 @@ interface EditorState {
   setPitchDesign: (d: PitchDesign) => void
   setOrientation: (o: PitchOrientation) => void
   setProjectTitle: (title: string) => void
+  setTeamId: (id: string | null) => void
   setTool: (tool: ToolId) => void
   setSelection: (ids: string[]) => void
+  setPendingPlayer: (player: PendingRealPlayer | null) => void
 
   activeFrame: () => EditorFrame
 
   addObjectAt: (x: number, y: number) => void
+  applyFormationToFrame: (positions: FormationPosition[], players: FormationPlayer[]) => void
   beginHistoryCheckpoint: () => void
   updateObjectLive: (objectId: string, patch: Partial<FrameObject>) => void
   removeSelected: () => void
@@ -88,21 +102,24 @@ export const useEditorStore = create<EditorState>((set, get) => ({
   projectTitle: 'Neues Projekt',
   pitchDesign: 'classic_green',
   orientation: 'vertical',
+  teamId: null,
   frames: [emptyFrame()],
   activeFrameIndex: 0,
   selection: [],
   tool: 'select',
+  pendingPlayer: null,
   isPlaying: false,
   isDirty: false,
   past: [],
   future: [],
 
-  loadProject: ({ projectId, projectTitle, pitchDesign, orientation, frames }) => {
+  loadProject: ({ projectId, projectTitle, pitchDesign, orientation, teamId, frames }) => {
     set({
       projectId,
       projectTitle,
       pitchDesign,
       orientation,
+      teamId,
       frames: frames.length ? frames : [emptyFrame()],
       activeFrameIndex: 0,
       selection: [],
@@ -118,6 +135,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
     set({
       projectId: null,
       projectTitle: 'Neues Projekt',
+      teamId: null,
       frames: [emptyFrame()],
       activeFrameIndex: 0,
       selection: [],
@@ -132,8 +150,10 @@ export const useEditorStore = create<EditorState>((set, get) => ({
   setPitchDesign: (d) => set({ pitchDesign: d, isDirty: true }),
   setOrientation: (o) => set({ orientation: o, isDirty: true }),
   setProjectTitle: (title) => set({ projectTitle: title, isDirty: true }),
+  setTeamId: (id) => set({ teamId: id, isDirty: true }),
   setTool: (tool) => set({ tool, selection: [] }),
   setSelection: (ids) => set({ selection: ids }),
+  setPendingPlayer: (player) => set({ pendingPlayer: player }),
 
   activeFrame: () => {
     const { frames, activeFrameIndex } = get()
@@ -141,9 +161,9 @@ export const useEditorStore = create<EditorState>((set, get) => ({
   },
 
   addObjectAt: (x, y) => {
-    const { tool, frames, activeFrameIndex } = get()
+    const { tool, frames, activeFrameIndex, pendingPlayer } = get()
     if (tool === 'select') return
-    const created = createObjectForTool(tool, x, y)
+    const created = createObjectForTool(tool, x, y, pendingPlayer)
     if (!created) return
 
     pushHistory(get, set)
@@ -153,7 +173,50 @@ export const useEditorStore = create<EditorState>((set, get) => ({
     const nextFrames = frames.map((f, i) =>
       i === activeFrameIndex ? { ...f, objects: [...f.objects, newObject] } : f,
     )
-    set({ frames: nextFrames, selection: [newObject.id], tool: 'select', isDirty: true })
+    set({
+      frames: nextFrames,
+      selection: [newObject.id],
+      tool: 'select',
+      pendingPlayer: null,
+      isDirty: true,
+    })
+  },
+
+  applyFormationToFrame: (positions, players) => {
+    pushHistory(get, set)
+    const { frames, activeFrameIndex, orientation } = get()
+    const stage = PITCH_STAGE_SIZE[orientation]
+    const frame = frames[activeFrameIndex]!
+    const keptObjects = frame.objects.filter(
+      (o) => !(o.objectType === 'player_chip' && o.data.team === 'home'),
+    )
+    const maxZ = frame.objects.reduce((m, o) => Math.max(m, o.zIndex), -1)
+    const sortedPlayers = [...players].sort(
+      (a, b) => (a.jerseyNumber ?? 999) - (b.jerseyNumber ?? 999),
+    )
+
+    const newChips: FrameObject[] = positions.map((pos, i) => {
+      const player = sortedPlayers[i]
+      const px = orientation === 'vertical' ? pos.x * stage.width : pos.y * stage.width
+      const py = orientation === 'vertical' ? (1 - pos.y) * stage.height : pos.x * stage.height
+      return {
+        id: crypto.randomUUID(),
+        x: px,
+        y: py,
+        rotation: 0,
+        scale: 1,
+        zIndex: maxZ + 1 + i,
+        objectType: 'player_chip',
+        data: player
+          ? { team: 'home', number: player.jerseyNumber ?? i + 1, label: player.label, playerId: player.id }
+          : { team: 'home', number: i + 1, label: pos.role },
+      } as FrameObject
+    })
+
+    const nextFrames = frames.map((f, i) =>
+      i === activeFrameIndex ? { ...f, objects: [...keptObjects, ...newChips] } : f,
+    )
+    set({ frames: nextFrames, selection: [], isDirty: true })
   },
 
   beginHistoryCheckpoint: () => pushHistory(get, set),
