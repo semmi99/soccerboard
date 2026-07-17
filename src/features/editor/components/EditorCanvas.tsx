@@ -7,6 +7,7 @@ import { PITCH_STAGE_SIZE } from '../constants'
 import { useElementSize } from '../hooks/useElementSize'
 import { Pitch } from './Pitch'
 import { ObjectRenderer } from '../objects/ObjectRenderer'
+import { ConnectorShape } from '../objects/shapes/Connector'
 import type { FrameObject } from '../types'
 
 function tweenObjectTo(node: Konva.Group, target: FrameObject, durationSec: number) {
@@ -66,6 +67,9 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
   const beginHistoryCheckpoint = useEditorStore((s) => s.beginHistoryCheckpoint)
   const updateObjectLive = useEditorStore((s) => s.updateObjectLive)
   const isPlaying = useEditorStore((s) => s.isPlaying)
+  const connectorDraftFromId = useEditorStore((s) => s.connectorDraftFromId)
+  const setConnectorDraftFromId = useEditorStore((s) => s.setConnectorDraftFromId)
+  const addConnector = useEditorStore((s) => s.addConnector)
 
   const frame = frames[activeFrameIndex] ?? frames[0]!
   const sortedObjects = [...frame.objects].sort((a, b) => a.zIndex - b.zIndex)
@@ -144,12 +148,33 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
     }
   }
 
+  function handleObjectClick(id: string, additive: boolean) {
+    if (tool === 'connector') {
+      if (!connectorDraftFromId) {
+        setConnectorDraftFromId(id)
+        setSelection([id])
+      } else if (connectorDraftFromId === id) {
+        setConnectorDraftFromId(null)
+        setSelection([])
+      } else {
+        addConnector(connectorDraftFromId, id)
+      }
+      return
+    }
+    handleSelect(id, additive)
+  }
+
   function handleStageMouseDown(e: KonvaEventObject<MouseEvent | TouchEvent>) {
     if (isPlaying) return
     const clickedOnEmpty = e.target === e.target.getStage()
     if (!clickedOnEmpty) return
 
     if (tool === 'select') {
+      setSelection([])
+      return
+    }
+    if (tool === 'connector') {
+      setConnectorDraftFromId(null)
       setSelection([])
       return
     }
@@ -189,20 +214,37 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
           <Pitch design={pitchDesign} orientation={orientation} />
         </Layer>
         <Layer>
-          {sortedObjects.map((object) => (
-            <ObjectRenderer
-              key={object.id}
-              object={object}
-              isSelected={selection.includes(object.id)}
-              interactive={!isPlaying}
-              onSelect={handleSelect}
-              onDragStart={handleDragStart}
-              onDragMove={handleDragMove}
-              onDragEnd={handleDragMove}
-              onTransformEnd={handleTransformEnd}
-              registerRef={registerRef}
-            />
-          ))}
+          {sortedObjects.map((object) => {
+            if (object.objectType === 'connector') {
+              const from = frame.objects.find((o) => o.id === object.data.fromId)
+              const to = frame.objects.find((o) => o.id === object.data.toId)
+              if (!from || !to) return null
+              return (
+                <ConnectorShape
+                  key={object.id}
+                  data={object.data}
+                  from={{ x: from.x, y: from.y }}
+                  to={{ x: to.x, y: to.y }}
+                  isSelected={selection.includes(object.id)}
+                  onSelect={(additive) => handleSelect(object.id, additive)}
+                />
+              )
+            }
+            return (
+              <ObjectRenderer
+                key={object.id}
+                object={object}
+                isSelected={selection.includes(object.id)}
+                interactive={!isPlaying}
+                onSelect={handleObjectClick}
+                onDragStart={handleDragStart}
+                onDragMove={handleDragMove}
+                onDragEnd={handleDragMove}
+                onTransformEnd={handleTransformEnd}
+                registerRef={registerRef}
+              />
+            )
+          })}
           <Transformer
             ref={trRef}
             onTransformStart={handleTransformStart}

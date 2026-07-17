@@ -2,6 +2,7 @@ import type { ChangeEvent, ReactNode } from 'react'
 import { useEditorStore } from '../store/editorStore'
 import type {
   ArrowData,
+  ConnectorData,
   EquipmentData,
   EquipmentKind,
   FrameObject,
@@ -158,6 +159,14 @@ export function PropertiesSidebar() {
               data={selectedObject.data}
               onCheckpoint={beginHistoryCheckpoint}
               onChange={(patch) => updateData<Extract<FrameObject, { objectType: 'training_equipment' }>>(patch)}
+            />
+          )}
+
+          {selectedObject.objectType === 'connector' && (
+            <ConnectorFields
+              data={selectedObject.data}
+              onCheckpoint={beginHistoryCheckpoint}
+              onChange={(patch) => updateData<Extract<FrameObject, { objectType: 'connector' }>>(patch)}
             />
           )}
 
@@ -431,6 +440,58 @@ function TextFields({
           <option value="bold">Fett</option>
           <option value="italic">Kursiv</option>
         </select>
+      </Field>
+    </div>
+  )
+}
+
+function ConnectorFields({
+  data,
+  onCheckpoint,
+  onChange,
+}: {
+  data: ConnectorData
+  onCheckpoint: () => void
+  onChange: (patch: Partial<ConnectorData>) => void
+}) {
+  return (
+    <div className="flex flex-col gap-2">
+      <Field label="Farbe">
+        <input
+          type="color"
+          className="h-8 w-full rounded-md border border-pitch-600 bg-pitch-800"
+          value={data.color}
+          onFocus={onCheckpoint}
+          onChange={(e) => onChange({ color: e.target.value })}
+        />
+      </Field>
+      <Field label="Linienstil">
+        <select
+          className={selectClass}
+          value={data.lineStyle}
+          onChange={(e) => {
+            onCheckpoint()
+            onChange({ lineStyle: e.target.value as LineStyle })
+          }}
+        >
+          {LINE_STYLES.map((s) => (
+            <option key={s.value} value={s.value}>
+              {s.label}
+            </option>
+          ))}
+        </select>
+      </Field>
+      <Field label={`Strichstärke (${data.strokeWidth}px)`}>
+        <input
+          type="range"
+          min={1}
+          max={6}
+          step={0.5}
+          className="w-full"
+          value={data.strokeWidth}
+          onFocus={onCheckpoint}
+          onChange={(e) => onChange({ strokeWidth: Number(e.target.value) })}
+        />
       </Field>
     </div>
   )

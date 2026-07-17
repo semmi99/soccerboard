@@ -84,6 +84,16 @@ export function BallIcon(props: SVGProps<SVGSVGElement>) {
   )
 }
 
+export function ConnectorIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <Base {...props}>
+      <circle cx="5.5" cy="6" r="2.2" />
+      <circle cx="18.5" cy="18" r="2.2" />
+      <path d="M7.2 7.7l9.6 8.6" strokeDasharray="2.5 2.5" />
+    </Base>
+  )
+}
+
 export function ConeIcon(props: SVGProps<SVGSVGElement>) {
   return (
     <Base {...props}>

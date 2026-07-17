@@ -66,6 +66,14 @@ export interface EquipmentData {
 
 export type BallData = Record<string, never>
 
+export interface ConnectorData {
+  fromId: string
+  toId: string
+  color: string
+  strokeWidth: number
+  lineStyle: LineStyle
+}
+
 export type ObjectType =
   | 'player_chip'
   | 'arrow'
@@ -73,6 +81,7 @@ export type ObjectType =
   | 'text'
   | 'training_equipment'
   | 'ball'
+  | 'connector'
 
 export interface FrameObjectBase {
   id: string
@@ -90,6 +99,7 @@ export type FrameObject =
   | (FrameObjectBase & { objectType: 'text'; data: TextData })
   | (FrameObjectBase & { objectType: 'training_equipment'; data: EquipmentData })
   | (FrameObjectBase & { objectType: 'ball'; data: BallData })
+  | (FrameObjectBase & { objectType: 'connector'; data: ConnectorData })
 
 export interface EditorFrame {
   id: string
@@ -113,4 +123,5 @@ export type ToolId =
   | 'shape_polygon'
   | 'text'
   | 'ball'
+  | 'connector'
   | `equipment_${EquipmentKind}`

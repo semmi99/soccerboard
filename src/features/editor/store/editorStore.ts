@@ -51,6 +51,8 @@ interface EditorState {
   selection: string[]
   tool: ToolId
   pendingPlayer: PendingRealPlayer | null
+  pendingPlayers: PendingRealPlayer[]
+  connectorDraftFromId: string | null
   isPlaying: boolean
   isDirty: boolean
   past: FramesSnapshot[]
@@ -77,10 +79,14 @@ interface EditorState {
   setTool: (tool: ToolId) => void
   setSelection: (ids: string[]) => void
   setPendingPlayer: (player: PendingRealPlayer | null) => void
+  setPendingPlayers: (players: PendingRealPlayer[]) => void
+  setConnectorDraftFromId: (id: string | null) => void
 
   activeFrame: () => EditorFrame
 
   addObjectAt: (x: number, y: number) => void
+  placeGroupAt: (x: number, y: number) => void
+  addConnector: (fromId: string, toId: string) => void
   applyFormationToFrame: (positions: FormationPosition[], players: FormationPlayer[]) => void
   beginHistoryCheckpoint: () => void
   updateObjectLive: (objectId: string, patch: Partial<FrameObject>) => void
@@ -116,6 +122,8 @@ export const useEditorStore = create<EditorState>((set, get) => ({
   selection: [],
   tool: 'select',
   pendingPlayer: null,
+  pendingPlayers: [],
+  connectorDraftFromId: null,
   isPlaying: false,
   isDirty: false,
   past: [],
@@ -133,6 +141,9 @@ export const useEditorStore = create<EditorState>((set, get) => ({
       frames: frames.length ? frames : [emptyFrame()],
       activeFrameIndex: 0,
       selection: [],
+      pendingPlayer: null,
+      pendingPlayers: [],
+      connectorDraftFromId: null,
       past: [],
       future: [],
       isDirty: false,
@@ -151,6 +162,9 @@ export const useEditorStore = create<EditorState>((set, get) => ({
       frames: [emptyFrame()],
       activeFrameIndex: 0,
       selection: [],
+      pendingPlayer: null,
+      pendingPlayers: [],
+      connectorDraftFromId: null,
       past: [],
       future: [],
       isDirty: false,
@@ -168,6 +182,8 @@ export const useEditorStore = create<EditorState>((set, get) => ({
   setTool: (tool) => set({ tool, selection: [] }),
   setSelection: (ids) => set({ selection: ids }),
   setPendingPlayer: (player) => set({ pendingPlayer: player }),
+  setPendingPlayers: (players) => set({ pendingPlayers: players }),
+  setConnectorDraftFromId: (id) => set({ connectorDraftFromId: id }),
 
   activeFrame: () => {
     const { frames, activeFrameIndex } = get()
@@ -175,8 +191,15 @@ export const useEditorStore = create<EditorState>((set, get) => ({
   },
 
   addObjectAt: (x, y) => {
-    const { tool, frames, activeFrameIndex, pendingPlayer, teamKit } = get()
+    const { tool, frames, activeFrameIndex, pendingPlayer, pendingPlayers, teamKit } = get()
     if (tool === 'select') return
+    if (
+      pendingPlayers.length > 0 &&
+      (tool === 'player_home' || tool === 'player_away' || tool === 'player_home_gk' || tool === 'player_away_gk')
+    ) {
+      get().placeGroupAt(x, y)
+      return
+    }
     const created = createObjectForTool(tool, x, y, pendingPlayer)
     if (!created) return
 
@@ -194,6 +217,87 @@ export const useEditorStore = create<EditorState>((set, get) => ({
       selection: [newObject.id],
       tool: 'select',
       pendingPlayer: null,
+      isDirty: true,
+    })
+  },
+
+  placeGroupAt: (x, y) => {
+    const { tool, pendingPlayers, frames, activeFrameIndex, teamKit } = get()
+    if (!pendingPlayers.length) return
+    const team = tool === 'player_away' || tool === 'player_away_gk' ? 'away' : 'home'
+    const isGkTool = tool === 'player_home_gk' || tool === 'player_away_gk'
+
+    pushHistory(get, set)
+    const frame = frames[activeFrameIndex]!
+    const maxZ = frame.objects.reduce((m, o) => Math.max(m, o.zIndex), -1)
+    const scale = teamKit?.chipScale ?? 1
+    const spacing = 46
+    const n = pendingPlayers.length
+    const startX = x - ((n - 1) * spacing) / 2
+
+    const newObjects: FrameObject[] = pendingPlayers.map((p, i) => ({
+      id: crypto.randomUUID(),
+      x: startX + i * spacing,
+      y,
+      rotation: 0,
+      scale,
+      zIndex: maxZ + 1 + i,
+      objectType: 'player_chip',
+      data: {
+        team,
+        number: p.jerseyNumber ?? i + 1,
+        label: p.label,
+        playerId: p.id,
+        isGoalkeeper: isGkTool || p.isGoalkeeper,
+      },
+    }))
+
+    const nextFrames = frames.map((f, i) =>
+      i === activeFrameIndex ? { ...f, objects: [...f.objects, ...newObjects] } : f,
+    )
+    set({
+      frames: nextFrames,
+      selection: newObjects.map((o) => o.id),
+      tool: 'select',
+      pendingPlayers: [],
+      isDirty: true,
+    })
+  },
+
+  addConnector: (fromId, toId) => {
+    if (fromId === toId) return
+    const { frames, activeFrameIndex } = get()
+    const frame = frames[activeFrameIndex]!
+    const exists = frame.objects.some(
+      (o) =>
+        o.objectType === 'connector' &&
+        ((o.data.fromId === fromId && o.data.toId === toId) ||
+          (o.data.fromId === toId && o.data.toId === fromId)),
+    )
+    if (exists) {
+      set({ connectorDraftFromId: null, tool: 'select' })
+      return
+    }
+    pushHistory(get, set)
+    const maxZ = frame.objects.reduce((m, o) => Math.max(m, o.zIndex), -1)
+    const newObject: FrameObject = {
+      id: crypto.randomUUID(),
+      x: 0,
+      y: 0,
+      rotation: 0,
+      scale: 1,
+      zIndex: maxZ + 1,
+      objectType: 'connector',
+      data: { fromId, toId, color: '#f0d878', strokeWidth: 2.5, lineStyle: 'dashed' },
+    }
+    const nextFrames = frames.map((f, i) =>
+      i === activeFrameIndex ? { ...f, objects: [...f.objects, newObject] } : f,
+    )
+    set({
+      frames: nextFrames,
+      selection: [newObject.id],
+      tool: 'select',
+      connectorDraftFromId: null,
       isDirty: true,
     })
   },
@@ -263,9 +367,19 @@ export const useEditorStore = create<EditorState>((set, get) => ({
     const { selection, frames, activeFrameIndex } = get()
     if (!selection.length) return
     pushHistory(get, set)
+    const removedIds = new Set(selection)
     const nextFrames = frames.map((f, i) =>
       i === activeFrameIndex
-        ? { ...f, objects: f.objects.filter((o) => !selection.includes(o.id)) }
+        ? {
+            ...f,
+            objects: f.objects.filter((o) => {
+              if (removedIds.has(o.id)) return false
+              if (o.objectType === 'connector') {
+                return !removedIds.has(o.data.fromId) && !removedIds.has(o.data.toId)
+              }
+              return true
+            }),
+          }
         : f,
     )
     set({ frames: nextFrames, selection: [], isDirty: true })

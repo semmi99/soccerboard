@@ -4,6 +4,7 @@ import type { EquipmentKind, ToolId } from '../types'
 import {
   BallIcon,
   ConeIcon,
+  ConnectorIcon,
   CurvedArrowIcon,
   CircleShapeIcon,
   CursorIcon,
@@ -65,6 +66,7 @@ const SECTIONS: ToolDef[][] = [
   [
     { id: 'arrow_straight', label: 'Pfeil gerade', icon: <StraightArrowIcon /> },
     { id: 'arrow_curved', label: 'Pfeil kurvig', icon: <CurvedArrowIcon /> },
+    { id: 'connector', label: 'Spieler verbinden', icon: <ConnectorIcon /> },
   ],
   [
     { id: 'shape_circle', label: 'Kreis', icon: <CircleShapeIcon /> },

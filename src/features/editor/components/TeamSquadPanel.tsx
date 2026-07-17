@@ -18,6 +18,8 @@ export function TeamSquadPanel() {
   const setPlayerPhotos = useEditorStore((s) => s.setPlayerPhotos)
   const pendingPlayer = useEditorStore((s) => s.pendingPlayer)
   const setPendingPlayer = useEditorStore((s) => s.setPendingPlayer)
+  const pendingPlayers = useEditorStore((s) => s.pendingPlayers)
+  const setPendingPlayers = useEditorStore((s) => s.setPendingPlayers)
   const setTool = useEditorStore((s) => s.setTool)
   const applyFormationToFrame = useEditorStore((s) => s.applyFormationToFrame)
   const beginHistoryCheckpoint = useEditorStore((s) => s.beginHistoryCheckpoint)
@@ -27,6 +29,7 @@ export function TeamSquadPanel() {
   const [customFormations, setCustomFormations] = useState<Formation[]>([])
   const [selectedFormationKey, setSelectedFormationKey] = useState<string>('')
   const [showKitDesigner, setShowKitDesigner] = useState(false)
+  const [groupSelectIds, setGroupSelectIds] = useState<Set<string>>(new Set())
 
   const activeTeam = teams.find((t) => t.id === teamId) ?? null
 
@@ -91,6 +94,32 @@ export function TeamSquadPanel() {
       isGoalkeeper: player.position === 'Torwart',
     })
     setTool('player_home')
+  }
+
+  function toggleGroupSelect(id: string) {
+    setGroupSelectIds((prev) => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
+  }
+
+  function handlePlaceGroup(team: 'home' | 'away') {
+    const chosen = players
+      .filter((p) => groupSelectIds.has(p.id))
+      .sort((a, b) => (a.jersey_number ?? 99) - (b.jersey_number ?? 99))
+    if (!chosen.length) return
+    setPendingPlayers(
+      chosen.map((p) => ({
+        id: p.id,
+        jerseyNumber: p.jersey_number,
+        label: `${p.first_name} ${p.last_name}`,
+        isGoalkeeper: p.position === 'Torwart',
+      })),
+    )
+    setTool(team === 'home' ? 'player_home' : 'player_away')
+    setGroupSelectIds(new Set())
   }
 
   function handleApplyFormation() {
@@ -184,7 +213,12 @@ export function TeamSquadPanel() {
 
           <div>
             <span className="mb-1 block text-xs font-medium text-white/60">
-              Kader {pendingPlayer && '(Spieler ausgewählt – aufs Feld klicken)'}
+              Kader{' '}
+              {pendingPlayer
+                ? '(Spieler ausgewählt – aufs Feld klicken)'
+                : pendingPlayers.length > 0
+                  ? `(${pendingPlayers.length} Spieler ausgewählt – einmal aufs Feld klicken)`
+                  : '– Checkbox für mehrere, Klick auf Zeile für einen'}
             </span>
             <div className="flex max-h-48 flex-col gap-1 overflow-y-auto">
               {players.length === 0 ? (
@@ -194,26 +228,47 @@ export function TeamSquadPanel() {
                   .slice()
                   .sort((a, b) => (a.jersey_number ?? 99) - (b.jersey_number ?? 99))
                   .map((p) => (
-                    <button
+                    <div
                       key={p.id}
-                      type="button"
-                      onClick={() => handlePickPlayer(p)}
                       className={`flex items-center gap-2 rounded-md px-2 py-1.5 text-left text-xs transition-colors ${
                         pendingPlayer?.id === p.id
                           ? 'bg-violet-accent text-white'
                           : 'bg-pitch-800 text-white/70 hover:bg-pitch-700 hover:text-white'
                       }`}
                     >
-                      <span className="w-5 shrink-0 text-center font-semibold">
-                        {p.jersey_number ?? '–'}
-                      </span>
-                      <span className="truncate">
-                        {p.first_name} {p.last_name}
-                      </span>
-                    </button>
+                      <input
+                        type="checkbox"
+                        className="shrink-0 accent-violet-accent"
+                        checked={groupSelectIds.has(p.id)}
+                        onChange={() => toggleGroupSelect(p.id)}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => handlePickPlayer(p)}
+                        className="flex flex-1 items-center gap-2 overflow-hidden text-left"
+                      >
+                        <span className="w-5 shrink-0 text-center font-semibold">
+                          {p.jersey_number ?? '–'}
+                        </span>
+                        <span className="truncate">
+                          {p.first_name} {p.last_name}
+                        </span>
+                      </button>
+                    </div>
                   ))
               )}
             </div>
+            {groupSelectIds.size > 0 && (
+              <div className="mt-2 flex items-center gap-1.5">
+                <span className="text-xs text-white/50">{groupSelectIds.size} ausgewählt:</span>
+                <Button variant="secondary" onClick={() => handlePlaceGroup('home')}>
+                  Heim platzieren
+                </Button>
+                <Button variant="secondary" onClick={() => handlePlaceGroup('away')}>
+                  Auswärts
+                </Button>
+              </div>
+            )}
           </div>
         </>
       )}
