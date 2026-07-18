@@ -47,6 +47,20 @@ export async function createFormation(input: {
   return fromRow(data)
 }
 
+export async function updateFormation(
+  id: string,
+  input: { name: string; positions: FormationPosition[] },
+): Promise<Formation> {
+  const { data, error } = await supabase
+    .from('formations')
+    .update({ name: input.name, positions: input.positions as unknown as Json })
+    .eq('id', id)
+    .select('*')
+    .single()
+  if (error) throw error
+  return fromRow(data)
+}
+
 export async function deleteFormation(id: string): Promise<void> {
   const { error } = await supabase.from('formations').delete().eq('id', id)
   if (error) throw error
