@@ -6,6 +6,7 @@ import { listFormations, type Formation } from '../../../lib/supabase/formations
 import { PRESET_FORMATIONS } from '../../formations/presets'
 import { Button } from '../../../components/ui/Button'
 import { KitDesignerModal } from '../../squad/components/KitDesignerModal'
+import type { KitPattern } from '../types'
 
 const selectClass =
   'rounded-md border border-pitch-600 bg-pitch-800 px-2 py-1.5 text-xs text-white outline-none focus:border-violet-accent'
@@ -68,17 +69,17 @@ export function TeamSquadPanel() {
     }
     setTeamKit({
       home: {
-        pattern: activeTeam.home_kit_pattern as 'solid' | 'stripes' | 'hoops',
+        pattern: activeTeam.home_kit_pattern as KitPattern,
         color1: activeTeam.home_kit_color1,
         color2: activeTeam.home_kit_color2,
       },
       away: {
-        pattern: activeTeam.away_kit_pattern as 'solid' | 'stripes' | 'hoops',
+        pattern: activeTeam.away_kit_pattern as KitPattern,
         color1: activeTeam.away_kit_color1,
         color2: activeTeam.away_kit_color2,
       },
       gk: {
-        pattern: activeTeam.gk_kit_pattern as 'solid' | 'stripes' | 'hoops',
+        pattern: activeTeam.gk_kit_pattern as KitPattern,
         color1: activeTeam.gk_kit_color1,
         color2: activeTeam.gk_kit_color2,
       },

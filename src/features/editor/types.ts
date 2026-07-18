@@ -17,7 +17,7 @@ export interface PlayerChipData {
   isGoalkeeper?: boolean
 }
 
-export type KitPattern = 'solid' | 'stripes' | 'hoops'
+export type KitPattern = 'solid' | 'stripes' | 'hoops' | 'sash' | 'split' | 'collar'
 
 export interface KitConfig {
   pattern: KitPattern

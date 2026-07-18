@@ -1,5 +1,6 @@
 import { supabase } from './client'
 import type { Tables, TablesInsert, TablesUpdate } from '../../types/database.types'
+import type { KitPattern } from '../../features/editor/types'
 
 export type Team = Tables<'teams'>
 export type Player = Tables<'players'>
@@ -32,13 +33,13 @@ export async function createTeam(input: {
 }
 
 export interface TeamKitPatch {
-  homeKitPattern: 'solid' | 'stripes' | 'hoops'
+  homeKitPattern: KitPattern
   homeKitColor1: string
   homeKitColor2: string
-  awayKitPattern: 'solid' | 'stripes' | 'hoops'
+  awayKitPattern: KitPattern
   awayKitColor1: string
   awayKitColor2: string
-  gkKitPattern: 'solid' | 'stripes' | 'hoops'
+  gkKitPattern: KitPattern
   gkKitColor1: string
   gkKitColor2: string
   chipScale: number

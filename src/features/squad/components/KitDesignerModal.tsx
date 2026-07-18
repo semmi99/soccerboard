@@ -2,25 +2,37 @@ import { useState } from 'react'
 import { Button } from '../../../components/ui/Button'
 import { ColorSwatchPicker } from '../../../components/ui/ColorSwatchPicker'
 import { updateTeamKit, type Team, type TeamKitPatch } from '../../../lib/supabase/squad'
+import type { KitPattern } from '../../editor/types'
 
-type KitPattern = 'solid' | 'stripes' | 'hoops'
 type Side = 'home' | 'away' | 'gk'
 
 const PATTERNS: { id: KitPattern; label: string }[] = [
   { id: 'solid', label: 'Einfarbig' },
   { id: 'stripes', label: 'Streifen' },
   { id: 'hoops', label: 'Ringel' },
+  { id: 'sash', label: 'Schrägband' },
+  { id: 'split', label: 'Geteilt' },
+  { id: 'collar', label: 'Kragen' },
 ]
 
 function kitPreviewStyle(pattern: KitPattern, color1: string, color2: string): React.CSSProperties {
-  if (pattern === 'solid') return { background: color1 }
-  if (pattern === 'stripes') {
-    return {
-      background: `repeating-linear-gradient(90deg, ${color1} 0 8px, ${color2} 8px 16px)`,
-    }
-  }
-  return {
-    background: `repeating-linear-gradient(0deg, ${color1} 0 8px, ${color2} 8px 16px)`,
+  switch (pattern) {
+    case 'solid':
+      return { background: color1 }
+    case 'stripes':
+      return { background: `repeating-linear-gradient(90deg, ${color1} 0 8px, ${color2} 8px 16px)` }
+    case 'hoops':
+      return { background: `repeating-linear-gradient(0deg, ${color1} 0 8px, ${color2} 8px 16px)` }
+    case 'sash':
+      return {
+        background: `linear-gradient(135deg, ${color1} 0%, ${color1} 38%, ${color2} 38%, ${color2} 62%, ${color1} 62%, ${color1} 100%)`,
+      }
+    case 'split':
+      return { background: `linear-gradient(90deg, ${color1} 50%, ${color2} 50%)` }
+    case 'collar':
+      return {
+        background: `linear-gradient(180deg, ${color2} 0%, ${color2} 28%, ${color1} 28%, ${color1} 100%)`,
+      }
   }
 }
 
@@ -51,13 +63,13 @@ function SideEditor({
         <span className="text-sm font-semibold text-white">{title}</span>
       </div>
 
-      <div className="flex gap-1.5">
+      <div className="flex flex-wrap gap-1.5">
         {PATTERNS.map((p) => (
           <button
             key={p.id}
             type="button"
             onClick={() => onPattern(p.id)}
-            className={`flex-1 rounded-md border px-2 py-1.5 text-xs transition-colors ${
+            className={`flex-1 basis-[calc(33.333%-0.25rem)] rounded-md border px-2 py-1.5 text-xs transition-colors ${
               pattern === p.id
                 ? 'border-violet-accent bg-violet-accent/20 text-white'
                 : 'border-pitch-600 text-white/60 hover:text-white'
