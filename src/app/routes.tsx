@@ -5,12 +5,20 @@ import { EditorPage } from '../features/editor/components/EditorPage'
 import { DashboardPage } from '../features/projects/components/DashboardPage'
 import { SquadPage } from '../features/squad/components/SquadPage'
 import { FormationsPage } from '../features/formations/components/FormationsPage'
+import { LandingPage } from '../features/marketing/components/LandingPage'
 import { AuthGuard, GuestGuard } from './AuthGuard'
 
 export function AppRoutes() {
   return (
     <Routes>
-      <Route path="/" element={<Navigate to="/dashboard" replace />} />
+      <Route
+        path="/"
+        element={
+          <GuestGuard>
+            <LandingPage />
+          </GuestGuard>
+        }
+      />
       <Route
         path="/login"
         element={

@@ -16,6 +16,14 @@
 
   --color-home-team: #3b82f6;
   --color-away-team: #ef4444;
+
+  /* 9011 Soccer brand palette, used on the public marketing/landing page */
+  --color-brand-blue: #1c8dc9;
+  --color-brand-blue-dark: #145f89;
+  --color-brand-yellow: #ffe100;
+  --color-brand-gold: #f2a73b;
+  --color-brand-maroon: #9c3a2a;
+  --color-brand-ink: #161616;
 }
 
 html,
