@@ -86,7 +86,15 @@ function KitFill({ kit }: { kit: KitConfig }) {
       <Group clipFunc={(ctx) => ctx.arc(0, 0, CHIP_R, 0, Math.PI * 2, false)}>
         <KitPatternContent kit={kit} />
       </Group>
-      <Circle radius={CHIP_R} stroke="#ffffff" strokeWidth={2} shadowBlur={4} shadowOpacity={0.4} />
+      <Circle
+        radius={CHIP_R}
+        stroke="#ffffff"
+        strokeWidth={2}
+        shadowColor="#000000"
+        shadowBlur={6}
+        shadowOffsetY={3}
+        shadowOpacity={0.45}
+      />
     </>
   )
 }

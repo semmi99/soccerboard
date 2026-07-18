@@ -131,31 +131,45 @@ function ZoneLines({ stroke }: { stroke: string }) {
   )
 }
 
-/** The "positional play" grid: full-width bands at the very top/bottom, and
- * 5 vertical lanes (narrow wide-channels, wider half-spaces/center) across
- * the middle, where only the 3 central lanes are additionally split in half
- * lengthwise — the two wide outer lanes stay as single tall cells. */
+/** The "positional play" grid: the pitch split into 3 lengthwise bands
+ * (thin end bands + a big middle band) and 3 widthwise lanes (thin outer
+ * lanes + a wide center lane), full length/width. Within the middle band,
+ * the center lane is further split into 3 sub-lanes; within the two outer
+ * lanes, the middle band is further split into 3 sub-bands — giving the
+ * offset "brick" look of the reference diagram rather than a uniform grid. */
 function GuardiolaGrid({ stroke }: { stroke: string }) {
-  const laneFracs = [0.16, 0.21, 0.26, 0.21, 0.16]
-  const laneYs: number[] = []
-  let acc = 0
-  for (const f of laneFracs.slice(0, -1)) {
-    acc += f * B
-    laneYs.push(acc)
-  }
-  const x1 = L / 6
-  const x2 = L / 2
-  const x3 = (5 * L) / 6
-  const common = { stroke, strokeWidth: 1.5, dash: [7, 7], opacity: 0.6, listening: false }
+  const topBandEnd = 0.154 * L
+  const bottomBandStart = 0.846 * L
+  const laneLeftEnd = 0.191 * B
+  const laneRightStart = 0.804 * B
+
+  const centerWidth = laneRightStart - laneLeftEnd
+  const centerSub1 = laneLeftEnd + 0.287 * centerWidth
+  const centerSub2 = laneLeftEnd + 0.713 * centerWidth
+
+  const midLen = bottomBandStart - topBandEnd
+  const lenSub1 = topBandEnd + 0.238 * midLen
+  const lenSub2 = bottomBandStart - 0.238 * midLen
+
+  const common = { stroke, strokeWidth: 1.5, opacity: 0.8, listening: false }
 
   return (
     <>
-      <Line points={[x1, 0, x1, B]} {...common} />
-      <Line points={[x3, 0, x3, B]} {...common} />
-      {laneYs.map((y, i) => (
-        <Line key={`lane-${i}`} points={[x1, y, x3, y]} {...common} />
-      ))}
-      <Line points={[x2, laneYs[0]!, x2, laneYs[3]!]} {...common} />
+      {/* lane boundaries (left/center/right), full length */}
+      <Line points={[0, laneLeftEnd, L, laneLeftEnd]} {...common} />
+      <Line points={[0, laneRightStart, L, laneRightStart]} {...common} />
+      {/* band boundaries (top/middle/bottom), full width */}
+      <Line points={[topBandEnd, 0, topBandEnd, B]} {...common} />
+      <Line points={[bottomBandStart, 0, bottomBandStart, B]} {...common} />
+      {/* center lane split into 3, only within the middle band */}
+      <Line points={[topBandEnd, centerSub1, bottomBandStart, centerSub1]} {...common} />
+      <Line points={[topBandEnd, centerSub2, bottomBandStart, centerSub2]} {...common} />
+      {/* outer lanes split into 3, only within their own width */}
+      <Line points={[lenSub1, 0, lenSub1, laneLeftEnd]} {...common} />
+      <Line points={[lenSub2, 0, lenSub2, laneLeftEnd]} {...common} />
+      <Line points={[lenSub1, laneRightStart, lenSub1, B]} {...common} />
+      <Line points={[lenSub2, laneRightStart, lenSub2, B]} {...common} />
+      <Circle x={CX} y={CY} radius={70} stroke={stroke} strokeWidth={1} opacity={0.3} listening={false} />
     </>
   )
 }
@@ -186,7 +200,7 @@ export function Pitch({
       <Stripes theme={theme} />
       {showPitchMarkings && <Markings stroke={theme.line} />}
       {zoneGridStyle === 'thirds_channels' && <ZoneLines stroke={theme.line} />}
-      {zoneGridStyle === 'guardiola' && <GuardiolaGrid stroke={theme.line} />}
+      {zoneGridStyle === 'guardiola' && <GuardiolaGrid stroke="rgba(20, 20, 20, 0.85)" />}
     </Group>
   )
 }

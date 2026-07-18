@@ -11,11 +11,12 @@ import { ConnectorShape } from '../objects/shapes/Connector'
 import { PlayerZoneShape } from '../objects/shapes/PlayerZone'
 import type { FrameObject } from '../types'
 
-// Quadratic ease-in-out, matching Konva.Easings.EaseInOut's shape closely
-// enough for our purposes while being trivial to evaluate for an arbitrary
-// t in [0, 1] (Konva.Easings functions instead take (t, from, delta, duration)).
+// Cubic ease-in-out: a touch smoother/slower off the start and into the end
+// than a quadratic curve, closer to what motion-design tools use by default.
+// Trivial to evaluate for an arbitrary t in [0, 1] (Konva.Easings functions
+// instead take (t, from, delta, duration)).
 function easeInOut(t: number) {
-  return t < 0.5 ? 2 * t * t : 1 - ((-2 * t + 2) ** 2) / 2
+  return t < 0.5 ? 4 * t * t * t : 1 - ((-2 * t + 2) ** 3) / 2
 }
 
 interface MoveSpec {
@@ -34,6 +35,8 @@ interface FadeSpec {
   node: Konva.Group
   from: number
   to: number
+  fromScale: number
+  toScale: number
 }
 
 interface ConnectorSyncSpec {
@@ -88,6 +91,9 @@ function runTransition(
       }
       for (const f of fades) {
         f.node.opacity(f.from + (f.to - f.from) * eased)
+        const s = f.fromScale + (f.toScale - f.fromScale) * eased
+        f.node.scaleX(s)
+        f.node.scaleY(s)
       }
       for (const c of connectors) {
         const fromNode = nodeRefs[c.fromId]
@@ -114,7 +120,11 @@ function runTransition(
       for (const m of moves) {
         m.node.setAttrs({ x: m.toX, y: m.toY, rotation: m.toRotation, scaleX: m.toScale, scaleY: m.toScale })
       }
-      for (const f of fades) f.node.opacity(f.to)
+      for (const f of fades) {
+        f.node.opacity(f.to)
+        f.node.scaleX(f.toScale)
+        f.node.scaleY(f.toScale)
+      }
       for (const c of connectors) {
         const fromNode = nodeRefs[c.fromId]
         const toNode = nodeRefs[c.toId]
@@ -262,15 +272,19 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
           })
           .filter((m): m is MoveSpec => Boolean(m))
 
+        // Entering/exiting objects get a subtle scale-pop alongside the fade
+        // (growing in from ~70% size, shrinking out to ~70%) instead of a
+        // flat opacity crossfade — reads as a much livelier transition.
+        const POP_SCALE = 0.7
         const fades: FadeSpec[] = [
           ...entering
-            .map((o) => nodeRefs.current[o.id])
-            .filter((n): n is Konva.Group => Boolean(n))
-            .map((node) => ({ node, from: 0, to: 1 })),
+            .map((o) => (nodeRefs.current[o.id] ? { node: nodeRefs.current[o.id]!, scale: o.scale } : null))
+            .filter((f): f is { node: Konva.Group; scale: number } => Boolean(f))
+            .map(({ node, scale }) => ({ node, from: 0, to: 1, fromScale: scale * POP_SCALE, toScale: scale })),
           ...exiting
-            .map((o) => nodeRefs.current[o.id])
-            .filter((n): n is Konva.Group => Boolean(n))
-            .map((node) => ({ node, from: 1, to: 0 })),
+            .map((o) => (nodeRefs.current[o.id] ? { node: nodeRefs.current[o.id]!, scale: o.scale } : null))
+            .filter((f): f is { node: Konva.Group; scale: number } => Boolean(f))
+            .map(({ node, scale }) => ({ node, from: 1, to: 0, fromScale: scale, toScale: scale * POP_SCALE })),
         ]
 
         // Connectors that persist across both frames need their line glued
@@ -476,6 +490,7 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
                 onTransformEnd={handleTransformEnd}
                 registerRef={registerRef}
                 initialOpacity={enteringIds.has(object.id) ? 0 : 1}
+                initialScaleFactor={enteringIds.has(object.id) ? 0.7 : 1}
               />
             )
           })}
