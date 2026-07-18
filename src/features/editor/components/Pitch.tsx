@@ -136,10 +136,13 @@ function ZoneLines({ stroke }: { stroke: string }) {
  * lanes + a wide center lane), full length/width. Within the middle band,
  * the center lane is further split into 3 sub-lanes; within the two outer
  * lanes, the middle band is further split into 3 sub-bands — giving the
- * offset "brick" look of the reference diagram rather than a uniform grid. */
+ * offset "brick" look of the reference diagram rather than a uniform grid.
+ * The end bands are snapped to the penalty-box depth so this grid's own
+ * lines land flush on the box edge instead of drawing a redundant second
+ * line right next to it when markings are shown alongside the grid. */
 function GuardiolaGrid({ stroke }: { stroke: string }) {
-  const topBandEnd = 0.154 * L
-  const bottomBandStart = 0.846 * L
+  const topBandEnd = 157 // matches Markings' penaltyDepth
+  const bottomBandStart = L - 157
   const laneLeftEnd = 0.191 * B
   const laneRightStart = 0.804 * B
 
@@ -151,7 +154,7 @@ function GuardiolaGrid({ stroke }: { stroke: string }) {
   const lenSub1 = topBandEnd + 0.238 * midLen
   const lenSub2 = bottomBandStart - 0.238 * midLen
 
-  const common = { stroke, strokeWidth: 1.5, opacity: 0.8, listening: false }
+  const common = { stroke, strokeWidth: 1.5, opacity: 0.75, listening: false }
 
   return (
     <>
@@ -169,7 +172,6 @@ function GuardiolaGrid({ stroke }: { stroke: string }) {
       <Line points={[lenSub2, 0, lenSub2, laneLeftEnd]} {...common} />
       <Line points={[lenSub1, laneRightStart, lenSub1, B]} {...common} />
       <Line points={[lenSub2, laneRightStart, lenSub2, B]} {...common} />
-      <Circle x={CX} y={CY} radius={70} stroke={stroke} strokeWidth={1} opacity={0.3} listening={false} />
     </>
   )
 }
@@ -200,7 +202,7 @@ export function Pitch({
       <Stripes theme={theme} />
       {showPitchMarkings && <Markings stroke={theme.line} />}
       {zoneGridStyle === 'thirds_channels' && <ZoneLines stroke={theme.line} />}
-      {zoneGridStyle === 'guardiola' && <GuardiolaGrid stroke="rgba(20, 20, 20, 0.85)" />}
+      {zoneGridStyle === 'guardiola' && <GuardiolaGrid stroke={theme.line} />}
     </Group>
   )
 }
