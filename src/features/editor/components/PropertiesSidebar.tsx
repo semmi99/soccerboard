@@ -20,6 +20,7 @@ import { Button } from '../../../components/ui/Button'
 import { TeamSquadPanel } from './TeamSquadPanel'
 import { EQUIPMENT_DEFAULT_COLORS } from '../objects/shapes/Equipment'
 import { ColorSwatchPicker } from '../../../components/ui/ColorSwatchPicker'
+import { getCurveOffset } from '../objects/shapes/arrowCurve'
 
 const LINE_STYLES: { value: LineStyle; label: string }[] = [
   { value: 'solid', label: 'Durchgezogen' },
@@ -352,6 +353,20 @@ function ArrowFields({
           onChange={(e) => onChange({ strokeWidth: Number(e.target.value) })}
         />
       </Field>
+      {data.shape === 'curved' && (
+        <Field label={`Kurvenradius (${getCurveOffset(data)}px)`}>
+          <input
+            type="range"
+            min={-150}
+            max={150}
+            step={5}
+            className="w-full"
+            value={getCurveOffset(data)}
+            onFocus={onCheckpoint}
+            onChange={(e) => onChange({ curveOffset: Number(e.target.value) })}
+          />
+        </Field>
+      )}
       <label className="flex items-center gap-2 text-xs text-white/70">
         <input
           type="checkbox"

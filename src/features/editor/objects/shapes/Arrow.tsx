@@ -1,6 +1,7 @@
 import { Arrow } from 'react-konva'
 import type { ArrowData } from '../../types'
 import { dashForLineStyle } from './dash'
+import { computeCurvedPoints } from './arrowCurve'
 
 const BASE_POINTER_SIZE = 12
 
@@ -11,10 +12,11 @@ export function ArrowShape({ data, scale = 1 }: { data: ArrowData; scale?: numbe
   // so the arrowhead stays close to its intended size regardless of scale.
   const showArrowhead = data.showArrowhead ?? true
   const pointerSize = showArrowhead ? BASE_POINTER_SIZE / Math.max(scale, 0.2) : 0
+  const points = data.shape === 'curved' ? computeCurvedPoints(data) : data.points
 
   return (
     <Arrow
-      points={data.points}
+      points={points}
       stroke={data.color}
       fill={data.color}
       strokeWidth={data.strokeWidth}

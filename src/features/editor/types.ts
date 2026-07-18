@@ -39,6 +39,7 @@ export interface ArrowData {
   color: string
   strokeWidth: number
   showArrowhead?: boolean // false renders as a plain line (e.g. freehand zone dividers)
+  curveOffset?: number // curved arrows only: perpendicular bend depth, user-adjustable
 }
 
 export interface ShapeData {
