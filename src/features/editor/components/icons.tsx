@@ -94,6 +94,25 @@ export function ConnectorIcon(props: SVGProps<SVGSVGElement>) {
   )
 }
 
+export function PlainLineIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <Base {...props}>
+      <path d="M4 18L20 6" strokeDasharray="3 3" />
+    </Base>
+  )
+}
+
+export function PlayerZoneIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <Base {...props}>
+      <path d="M12 4l7 5-2.7 9H7.7L5 9z" fill="currentColor" fillOpacity="0.25" />
+      <circle cx="12" cy="4" r="1.6" fill="currentColor" stroke="none" />
+      <circle cx="19" cy="9" r="1.6" fill="currentColor" stroke="none" />
+      <circle cx="5" cy="9" r="1.6" fill="currentColor" stroke="none" />
+    </Base>
+  )
+}
+
 export function ConeIcon(props: SVGProps<SVGSVGElement>) {
   return (
     <Base {...props}>

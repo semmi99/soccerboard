@@ -289,12 +289,13 @@ export type Database = {
           org_id: string
           orientation: string
           pitch_design: string
-          show_zone_lines: boolean
+          show_pitch_markings: boolean
           team_id: string | null
           thumbnail_url: string | null
           title: string
           type: string
           updated_at: string
+          zone_grid_style: string
         }
         Insert: {
           created_at?: string
@@ -303,12 +304,13 @@ export type Database = {
           org_id: string
           orientation?: string
           pitch_design?: string
-          show_zone_lines?: boolean
+          show_pitch_markings?: boolean
           team_id?: string | null
           thumbnail_url?: string | null
           title?: string
           type?: string
           updated_at?: string
+          zone_grid_style?: string
         }
         Update: {
           created_at?: string
@@ -317,12 +319,13 @@ export type Database = {
           org_id?: string
           orientation?: string
           pitch_design?: string
-          show_zone_lines?: boolean
+          show_pitch_markings?: boolean
           team_id?: string | null
           thumbnail_url?: string | null
           title?: string
           type?: string
           updated_at?: string
+          zone_grid_style?: string
         }
         Relationships: [
           {

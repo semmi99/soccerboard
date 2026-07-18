@@ -1,11 +1,13 @@
 import { create } from 'zustand'
 import type {
   EditorFrame,
+  EquipmentKind,
   FrameObject,
   PitchDesign,
   PitchOrientation,
   TeamKit,
   ToolId,
+  ZoneGridStyle,
 } from '../types'
 import { createObjectForTool, type PendingRealPlayer } from '../objects/factory'
 import { PITCH_STAGE_SIZE } from '../constants'
@@ -43,7 +45,8 @@ interface EditorState {
   projectTitle: string
   pitchDesign: PitchDesign
   orientation: PitchOrientation
-  showZoneLines: boolean
+  zoneGridStyle: ZoneGridStyle
+  showPitchMarkings: boolean
   teamId: string | null
   teamKit: TeamKit | null
   playerPhotos: Record<string, string>
@@ -54,6 +57,7 @@ interface EditorState {
   pendingPlayer: PendingRealPlayer | null
   pendingPlayers: PendingRealPlayer[]
   connectorDraftFromId: string | null
+  polygonDraftIds: string[]
   isPlaying: boolean
   isDirty: boolean
   past: FramesSnapshot[]
@@ -65,7 +69,8 @@ interface EditorState {
     pitchDesign: PitchDesign
     orientation: PitchOrientation
     teamId: string | null
-    showZoneLines: boolean
+    zoneGridStyle: ZoneGridStyle
+    showPitchMarkings: boolean
     frames: EditorFrame[]
   }) => void
   resetToBlankProject: () => void
@@ -74,7 +79,8 @@ interface EditorState {
 
   setPitchDesign: (d: PitchDesign) => void
   setOrientation: (o: PitchOrientation) => void
-  setShowZoneLines: (show: boolean) => void
+  setZoneGridStyle: (style: ZoneGridStyle) => void
+  setShowPitchMarkings: (show: boolean) => void
   setProjectTitle: (title: string) => void
   setTeamId: (id: string | null) => void
   setTeamKit: (kit: TeamKit | null) => void
@@ -84,15 +90,21 @@ interface EditorState {
   setPendingPlayer: (player: PendingRealPlayer | null) => void
   setPendingPlayers: (players: PendingRealPlayer[]) => void
   setConnectorDraftFromId: (id: string | null) => void
+  setPolygonDraftIds: (ids: string[]) => void
 
   activeFrame: () => EditorFrame
 
   addObjectAt: (x: number, y: number) => void
   placeGroupAt: (x: number, y: number) => void
   addConnector: (fromId: string, toId: string) => void
+  addPlayerZone: (playerIds: string[]) => void
   applyFormationToFrame: (positions: FormationPosition[], players: FormationPlayer[]) => void
   beginHistoryCheckpoint: () => void
   updateObjectLive: (objectId: string, patch: Partial<FrameObject>) => void
+  applyEquipmentStyleToAll: (
+    kind: EquipmentKind,
+    patch: { color?: string; scale?: number; rotation?: number },
+  ) => void
   removeSelected: () => void
   duplicateSelected: () => void
   bringToFront: (objectId: string) => void
@@ -117,7 +129,8 @@ export const useEditorStore = create<EditorState>((set, get) => ({
   projectTitle: 'Neues Projekt',
   pitchDesign: 'classic_green',
   orientation: 'vertical',
-  showZoneLines: false,
+  zoneGridStyle: 'none',
+  showPitchMarkings: true,
   teamId: null,
   teamKit: null,
   playerPhotos: {},
@@ -128,18 +141,29 @@ export const useEditorStore = create<EditorState>((set, get) => ({
   pendingPlayer: null,
   pendingPlayers: [],
   connectorDraftFromId: null,
+  polygonDraftIds: [],
   isPlaying: false,
   isDirty: false,
   past: [],
   future: [],
 
-  loadProject: ({ projectId, projectTitle, pitchDesign, orientation, teamId, showZoneLines, frames }) => {
+  loadProject: ({
+    projectId,
+    projectTitle,
+    pitchDesign,
+    orientation,
+    teamId,
+    zoneGridStyle,
+    showPitchMarkings,
+    frames,
+  }) => {
     set({
       projectId,
       projectTitle,
       pitchDesign,
       orientation,
-      showZoneLines,
+      zoneGridStyle,
+      showPitchMarkings,
       teamId,
       teamKit: null,
       playerPhotos: {},
@@ -149,6 +173,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
       pendingPlayer: null,
       pendingPlayers: [],
       connectorDraftFromId: null,
+      polygonDraftIds: [],
       past: [],
       future: [],
       isDirty: false,
@@ -161,7 +186,8 @@ export const useEditorStore = create<EditorState>((set, get) => ({
     set({
       projectId: null,
       projectTitle: 'Neues Projekt',
-      showZoneLines: false,
+      zoneGridStyle: 'none',
+      showPitchMarkings: true,
       teamId: null,
       teamKit: null,
       playerPhotos: {},
@@ -171,6 +197,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
       pendingPlayer: null,
       pendingPlayers: [],
       connectorDraftFromId: null,
+      polygonDraftIds: [],
       past: [],
       future: [],
       isDirty: false,
@@ -181,16 +208,18 @@ export const useEditorStore = create<EditorState>((set, get) => ({
 
   setPitchDesign: (d) => set({ pitchDesign: d, isDirty: true }),
   setOrientation: (o) => set({ orientation: o, isDirty: true }),
-  setShowZoneLines: (show) => set({ showZoneLines: show, isDirty: true }),
+  setZoneGridStyle: (style) => set({ zoneGridStyle: style, isDirty: true }),
+  setShowPitchMarkings: (show) => set({ showPitchMarkings: show, isDirty: true }),
   setProjectTitle: (title) => set({ projectTitle: title, isDirty: true }),
   setTeamId: (id) => set({ teamId: id, isDirty: true }),
   setTeamKit: (kit) => set({ teamKit: kit }),
   setPlayerPhotos: (photos) => set({ playerPhotos: photos }),
-  setTool: (tool) => set({ tool, selection: [] }),
+  setTool: (tool) => set({ tool, selection: [], polygonDraftIds: [] }),
   setSelection: (ids) => set({ selection: ids }),
   setPendingPlayer: (player) => set({ pendingPlayer: player }),
   setPendingPlayers: (players) => set({ pendingPlayers: players }),
   setConnectorDraftFromId: (id) => set({ connectorDraftFromId: id }),
+  setPolygonDraftIds: (ids) => set({ polygonDraftIds: ids }),
 
   activeFrame: () => {
     const { frames, activeFrameIndex } = get()
@@ -306,6 +335,33 @@ export const useEditorStore = create<EditorState>((set, get) => ({
     })
   },
 
+  addPlayerZone: (playerIds) => {
+    if (playerIds.length < 3) return
+    const { frames, activeFrameIndex } = get()
+    pushHistory(get, set)
+    const frame = frames[activeFrameIndex]!
+    const maxZ = frame.objects.reduce((m, o) => Math.max(m, o.zIndex), -1)
+    const newObject: FrameObject = {
+      id: crypto.randomUUID(),
+      x: 0,
+      y: 0,
+      rotation: 0,
+      scale: 1,
+      zIndex: maxZ + 1,
+      objectType: 'player_zone',
+      data: { playerIds, fill: 'rgba(15, 15, 15, 0.45)', stroke: '#f0d878', opacity: 1 },
+    }
+    const nextFrames = frames.map((f, i) =>
+      i === activeFrameIndex ? { ...f, objects: [...f.objects, newObject] } : f,
+    )
+    set({
+      frames: nextFrames,
+      selection: [newObject.id],
+      polygonDraftIds: [],
+      isDirty: true,
+    })
+  },
+
   applyFormationToFrame: (positions, players) => {
     pushHistory(get, set)
     const { frames, activeFrameIndex, orientation, teamKit } = get()
@@ -367,6 +423,29 @@ export const useEditorStore = create<EditorState>((set, get) => ({
     set({ frames: nextFrames, isDirty: true })
   },
 
+  applyEquipmentStyleToAll: (kind, patch) => {
+    const { frames, activeFrameIndex } = get()
+    pushHistory(get, set)
+    const nextFrames = frames.map((f, i) =>
+      i === activeFrameIndex
+        ? {
+            ...f,
+            objects: f.objects.map((o) =>
+              o.objectType === 'training_equipment' && o.data.kind === kind
+                ? {
+                    ...o,
+                    scale: patch.scale ?? o.scale,
+                    rotation: patch.rotation ?? o.rotation,
+                    data: { ...o.data, color: patch.color ?? o.data.color },
+                  }
+                : o,
+            ),
+          }
+        : f,
+    )
+    set({ frames: nextFrames, isDirty: true })
+  },
+
   removeSelected: () => {
     const { selection, frames, activeFrameIndex } = get()
     if (!selection.length) return
@@ -380,6 +459,9 @@ export const useEditorStore = create<EditorState>((set, get) => ({
               if (removedIds.has(o.id)) return false
               if (o.objectType === 'connector') {
                 return !removedIds.has(o.data.fromId) && !removedIds.has(o.data.toId)
+              }
+              if (o.objectType === 'player_zone') {
+                return !o.data.playerIds.some((id) => removedIds.has(id))
               }
               return true
             }),

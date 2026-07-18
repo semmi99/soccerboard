@@ -38,6 +38,7 @@ export interface ArrowData {
   lineStyle: LineStyle
   color: string
   strokeWidth: number
+  showArrowhead?: boolean // false renders as a plain line (e.g. freehand zone dividers)
 }
 
 export interface ShapeData {
@@ -64,7 +65,9 @@ export interface EquipmentData {
   color?: string
 }
 
-export type BallData = Record<string, never>
+export interface BallData {
+  color?: string
+}
 
 export interface ConnectorData {
   fromId: string
@@ -72,6 +75,13 @@ export interface ConnectorData {
   color: string
   strokeWidth: number
   lineStyle: LineStyle
+}
+
+export interface PlayerZoneData {
+  playerIds: string[] // ordered polygon vertices, resolved live from player_chip positions
+  fill: string
+  stroke: string
+  opacity: number
 }
 
 export type ObjectType =
@@ -82,6 +92,7 @@ export type ObjectType =
   | 'training_equipment'
   | 'ball'
   | 'connector'
+  | 'player_zone'
 
 export interface FrameObjectBase {
   id: string
@@ -100,6 +111,7 @@ export type FrameObject =
   | (FrameObjectBase & { objectType: 'training_equipment'; data: EquipmentData })
   | (FrameObjectBase & { objectType: 'ball'; data: BallData })
   | (FrameObjectBase & { objectType: 'connector'; data: ConnectorData })
+  | (FrameObjectBase & { objectType: 'player_zone'; data: PlayerZoneData })
 
 export interface EditorFrame {
   id: string
@@ -109,6 +121,7 @@ export interface EditorFrame {
 
 export type PitchDesign = 'classic_green' | 'night_navy' | 'dark_orange'
 export type PitchOrientation = 'vertical' | 'horizontal'
+export type ZoneGridStyle = 'none' | 'thirds_channels' | 'guardiola'
 
 export type ToolId =
   | 'select'
@@ -118,10 +131,12 @@ export type ToolId =
   | 'player_away_gk'
   | 'arrow_straight'
   | 'arrow_curved'
+  | 'line_straight'
   | 'shape_circle'
   | 'shape_rect'
   | 'shape_polygon'
   | 'text'
   | 'ball'
   | 'connector'
+  | 'player_zone'
   | `equipment_${EquipmentKind}`

@@ -8,6 +8,7 @@ import { useElementSize } from '../hooks/useElementSize'
 import { Pitch } from './Pitch'
 import { ObjectRenderer } from '../objects/ObjectRenderer'
 import { ConnectorShape } from '../objects/shapes/Connector'
+import { PlayerZoneShape } from '../objects/shapes/PlayerZone'
 import type { FrameObject } from '../types'
 
 // Quadratic ease-in-out, matching Konva.Easings.EaseInOut's shape closely
@@ -41,6 +42,11 @@ interface ConnectorSyncSpec {
   toId: string
 }
 
+interface PolygonSyncSpec {
+  line: Konva.Line
+  ids: string[]
+}
+
 /** Drives every animated property of a single frame transition (object
  * positions, enter/exit fades, connector lines) from one shared elapsed-time
  * value each animation frame, instead of many independent Konva.Tween
@@ -52,6 +58,7 @@ function runTransition(
   moves: MoveSpec[],
   fades: FadeSpec[],
   connectors: ConnectorSyncSpec[],
+  zones: PolygonSyncSpec[],
   nodeRefs: Record<string, Konva.Group>,
 ) {
   return new Promise<void>((resolve) => {
@@ -87,6 +94,12 @@ function runTransition(
         const toNode = nodeRefs[c.toId]
         if (fromNode && toNode) c.line.points([fromNode.x(), fromNode.y(), toNode.x(), toNode.y()])
       }
+      for (const z of zones) {
+        const nodes = z.ids.map((id) => nodeRefs[id]).filter((n): n is Konva.Group => Boolean(n))
+        if (nodes.length === z.ids.length) {
+          z.line.points(nodes.flatMap((n) => [n.x(), n.y()]))
+        }
+      }
 
       if (raw >= 1) settle()
     }, layer)
@@ -107,6 +120,12 @@ function runTransition(
         const toNode = nodeRefs[c.toId]
         if (fromNode && toNode) c.line.points([fromNode.x(), fromNode.y(), toNode.x(), toNode.y()])
       }
+      for (const z of zones) {
+        const nodes = z.ids.map((id) => nodeRefs[id]).filter((n): n is Konva.Group => Boolean(n))
+        if (nodes.length === z.ids.length) {
+          z.line.points(nodes.flatMap((n) => [n.x(), n.y()]))
+        }
+      }
       settle()
     }, durationMs + 500)
   })
@@ -123,7 +142,8 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
   const { ref: containerRef, size } = useElementSize<HTMLDivElement>()
   const pitchDesign = useEditorStore((s) => s.pitchDesign)
   const orientation = useEditorStore((s) => s.orientation)
-  const showZoneLines = useEditorStore((s) => s.showZoneLines)
+  const zoneGridStyle = useEditorStore((s) => s.zoneGridStyle)
+  const showPitchMarkings = useEditorStore((s) => s.showPitchMarkings)
   const frames = useEditorStore((s) => s.frames)
   const activeFrameIndex = useEditorStore((s) => s.activeFrameIndex)
   const tool = useEditorStore((s) => s.tool)
@@ -136,6 +156,9 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
   const connectorDraftFromId = useEditorStore((s) => s.connectorDraftFromId)
   const setConnectorDraftFromId = useEditorStore((s) => s.setConnectorDraftFromId)
   const addConnector = useEditorStore((s) => s.addConnector)
+  const polygonDraftIds = useEditorStore((s) => s.polygonDraftIds)
+  const setPolygonDraftIds = useEditorStore((s) => s.setPolygonDraftIds)
+  const addPlayerZone = useEditorStore((s) => s.addPlayerZone)
 
   const frame = frames[activeFrameIndex] ?? frames[0]!
   const [playbackOverlay, setPlaybackOverlay] = useState<PlaybackOverlay>(EMPTY_OVERLAY)
@@ -160,6 +183,7 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
   const objectsLayerRef = useRef<Konva.Layer>(null)
   const nodeRefs = useRef<Record<string, Konva.Group>>({})
   const connectorRefs = useRef<Record<string, Konva.Line>>({})
+  const zoneRefs = useRef<Record<string, Konva.Line>>({})
 
   const logical = PITCH_STAGE_SIZE[orientation]
   const scale =
@@ -175,6 +199,11 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
   const registerConnectorRef = useCallback((id: string, node: Konva.Line | null) => {
     if (node) connectorRefs.current[id] = node
     else delete connectorRefs.current[id]
+  }, [])
+
+  const registerZoneRef = useCallback((id: string, node: Konva.Line | null) => {
+    if (node) zoneRefs.current[id] = node
+    else delete zoneRefs.current[id]
   }, [])
 
   useEffect(() => {
@@ -259,7 +288,21 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
           })
           .filter((c): c is ConnectorSyncSpec => Boolean(c))
 
-        await runTransition(objectsLayerRef.current, durationSec, moves, fades, connectors, nodeRefs.current)
+        // Same idea as connectors: a player-zone polygon that persists across
+        // both frames needs its points glued to the live (tweened) positions
+        // of the player chips it references while the transition is in flight.
+        const zones: PolygonSyncSpec[] = toFrame.objects
+          .filter(
+            (o): o is Extract<FrameObject, { objectType: 'player_zone' }> =>
+              o.objectType === 'player_zone' && fromIds.has(o.id),
+          )
+          .map((o) => {
+            const line = zoneRefs.current[o.id]
+            return line ? { line, ids: o.data.playerIds } : null
+          })
+          .filter((z): z is PolygonSyncSpec => Boolean(z))
+
+        await runTransition(objectsLayerRef.current, durationSec, moves, fades, connectors, zones, nodeRefs.current)
         if (cancelled) return
 
         useEditorStore.getState().setActiveFrameIndex(currentIndex + 1)
@@ -301,6 +344,19 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
       }
       return
     }
+    if (tool === 'player_zone') {
+      const clicked = frame.objects.find((o) => o.id === id)
+      if (!clicked || clicked.objectType !== 'player_chip') return
+      if (polygonDraftIds.length >= 3 && polygonDraftIds[0] === id) {
+        addPlayerZone(polygonDraftIds)
+        return
+      }
+      if (polygonDraftIds.includes(id)) return
+      const next = [...polygonDraftIds, id]
+      setPolygonDraftIds(next)
+      setSelection(next)
+      return
+    }
     handleSelect(id, additive)
   }
 
@@ -315,6 +371,11 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
     }
     if (tool === 'connector') {
       setConnectorDraftFromId(null)
+      setSelection([])
+      return
+    }
+    if (tool === 'player_zone') {
+      setPolygonDraftIds([])
       setSelection([])
       return
     }
@@ -338,6 +399,16 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
     updateObjectLive(id, patch)
   }
 
+  // Shapes (zones/circles/rects/polygons) get free non-uniform corner
+  // resizing since their width/height are independently meaningful; other
+  // object kinds (chips, equipment, text, ball) keep proportional scaling
+  // since they don't have separate width/height to resize into.
+  const selectedObjects = selection
+    .map((id) => frame.objects.find((o) => o.id === id))
+    .filter((o): o is FrameObject => Boolean(o))
+  const allShapesSelected =
+    selectedObjects.length > 0 && selectedObjects.every((o) => o.objectType === 'shape')
+
   return (
     <div ref={containerRef} className="flex h-full w-full items-center justify-center overflow-hidden">
       <Stage
@@ -351,10 +422,31 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
         className="rounded-lg shadow-2xl shadow-black/60"
       >
         <Layer>
-          <Pitch design={pitchDesign} orientation={orientation} showZoneLines={showZoneLines} />
+          <Pitch
+            design={pitchDesign}
+            orientation={orientation}
+            zoneGridStyle={zoneGridStyle}
+            showPitchMarkings={showPitchMarkings}
+          />
         </Layer>
         <Layer ref={objectsLayerRef}>
           {sortedObjects.map((object) => {
+            if (object.objectType === 'player_zone') {
+              const points = object.data.playerIds
+                .map((id) => visibleObjects.find((o) => o.id === id))
+                .filter((o): o is FrameObject => Boolean(o))
+              if (points.length !== object.data.playerIds.length) return null
+              return (
+                <PlayerZoneShape
+                  key={object.id}
+                  data={object.data}
+                  points={points.flatMap((p) => [p.x, p.y])}
+                  isSelected={selection.includes(object.id)}
+                  onSelect={(additive) => handleSelect(object.id, additive)}
+                  lineRef={(node) => registerZoneRef(object.id, node)}
+                />
+              )
+            }
             if (object.objectType === 'connector') {
               const from = visibleObjects.find((o) => o.id === object.data.fromId)
               const to = visibleObjects.find((o) => o.id === object.data.toId)
@@ -391,7 +483,7 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
             ref={trRef}
             onTransformStart={handleTransformStart}
             rotateEnabled
-            keepRatio
+            keepRatio={!allShapesSelected}
             boundBoxFunc={(oldBox, newBox) =>
               newBox.width < 8 || newBox.height < 8 ? oldBox : newBox
             }

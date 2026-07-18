@@ -9,7 +9,8 @@ export function ArrowShape({ data, scale = 1 }: { data: ArrowData; scale?: numbe
   // rendered size, so the pointer/arrowhead would otherwise balloon far
   // more than the line as the arrow is stretched. Divide it back out here
   // so the arrowhead stays close to its intended size regardless of scale.
-  const pointerSize = BASE_POINTER_SIZE / Math.max(scale, 0.2)
+  const showArrowhead = data.showArrowhead ?? true
+  const pointerSize = showArrowhead ? BASE_POINTER_SIZE / Math.max(scale, 0.2) : 0
 
   return (
     <Arrow

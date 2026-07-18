@@ -1,6 +1,13 @@
 import { supabase } from './client'
 import type { Json, Tables, TablesInsert } from '../../types/database.types'
-import type { EditorFrame, FrameObject, ObjectType, PitchDesign, PitchOrientation } from '../../features/editor/types'
+import type {
+  EditorFrame,
+  FrameObject,
+  ObjectType,
+  PitchDesign,
+  PitchOrientation,
+  ZoneGridStyle,
+} from '../../features/editor/types'
 
 export interface ProjectSummary {
   id: string
@@ -63,14 +70,15 @@ export interface LoadedProject {
   pitchDesign: PitchDesign
   orientation: PitchOrientation
   teamId: string | null
-  showZoneLines: boolean
+  zoneGridStyle: ZoneGridStyle
+  showPitchMarkings: boolean
   frames: EditorFrame[]
 }
 
 export async function loadProject(id: string): Promise<LoadedProject> {
   const { data: project, error: projectError } = await supabase
     .from('projects')
-    .select('id, title, pitch_design, orientation, team_id, show_zone_lines')
+    .select('id, title, pitch_design, orientation, team_id, zone_grid_style, show_pitch_markings')
     .eq('id', id)
     .single()
   if (projectError) throw projectError
@@ -101,7 +109,8 @@ export async function loadProject(id: string): Promise<LoadedProject> {
     pitchDesign: project.pitch_design as PitchDesign,
     orientation: project.orientation as PitchOrientation,
     teamId: project.team_id,
-    showZoneLines: project.show_zone_lines,
+    zoneGridStyle: project.zone_grid_style as ZoneGridStyle,
+    showPitchMarkings: project.show_pitch_markings,
     frames,
   }
 }
@@ -114,7 +123,8 @@ export interface SaveProjectInput {
   pitchDesign: PitchDesign
   orientation: PitchOrientation
   teamId: string | null
-  showZoneLines: boolean
+  zoneGridStyle: ZoneGridStyle
+  showPitchMarkings: boolean
   frames: EditorFrame[]
 }
 
@@ -129,7 +139,8 @@ export async function saveProject(input: SaveProjectInput): Promise<string> {
         pitch_design: input.pitchDesign,
         orientation: input.orientation,
         team_id: input.teamId,
-        show_zone_lines: input.showZoneLines,
+        zone_grid_style: input.zoneGridStyle,
+        show_pitch_markings: input.showPitchMarkings,
       })
       .eq('id', projectId)
     if (error) throw error
@@ -158,7 +169,8 @@ async function insertProjectRow(
     pitch_design: input.pitchDesign,
     orientation: input.orientation,
     team_id: input.teamId,
-    show_zone_lines: input.showZoneLines,
+    zone_grid_style: input.zoneGridStyle,
+    show_pitch_markings: input.showPitchMarkings,
   }
   const { data, error } = await supabase
     .from('projects')

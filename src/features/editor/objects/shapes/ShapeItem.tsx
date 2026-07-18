@@ -1,4 +1,4 @@
-import { Circle, Line, Rect } from 'react-konva'
+import { Ellipse, Line, Rect } from 'react-konva'
 import type { ShapeData } from '../../types'
 import { dashForLineStyle } from './dash'
 
@@ -12,7 +12,7 @@ export function ShapeItem({ data }: { data: ShapeData }) {
   }
 
   if (data.kind === 'circle') {
-    return <Circle radius={data.width / 2} {...common} />
+    return <Ellipse radiusX={data.width / 2} radiusY={data.height / 2} {...common} />
   }
 
   if (data.kind === 'rect') {

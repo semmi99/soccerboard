@@ -1,6 +1,6 @@
 import { Arc, Circle, Group, Line, Rect } from 'react-konva'
 import { PITCH_LOGICAL, PITCH_STAGE_SIZE } from '../constants'
-import type { PitchDesign, PitchOrientation } from '../types'
+import type { PitchDesign, PitchOrientation, ZoneGridStyle } from '../types'
 
 const { width: L, height: B } = PITCH_LOGICAL // length (x), breadth (y)
 const CX = L / 2
@@ -131,14 +131,45 @@ function ZoneLines({ stroke }: { stroke: string }) {
   )
 }
 
+/** The "positional play" grid: full-width bands at the very top/bottom, and
+ * 5 vertical lanes (narrow wide-channels, wider half-spaces/center) across
+ * the middle, where only the 3 central lanes are additionally split in half
+ * lengthwise — the two wide outer lanes stay as single tall cells. */
+function GuardiolaGrid({ stroke }: { stroke: string }) {
+  const laneFracs = [0.16, 0.21, 0.26, 0.21, 0.16]
+  const laneYs: number[] = []
+  let acc = 0
+  for (const f of laneFracs.slice(0, -1)) {
+    acc += f * B
+    laneYs.push(acc)
+  }
+  const x1 = L / 6
+  const x2 = L / 2
+  const x3 = (5 * L) / 6
+  const common = { stroke, strokeWidth: 1.5, dash: [7, 7], opacity: 0.6, listening: false }
+
+  return (
+    <>
+      <Line points={[x1, 0, x1, B]} {...common} />
+      <Line points={[x3, 0, x3, B]} {...common} />
+      {laneYs.map((y, i) => (
+        <Line key={`lane-${i}`} points={[x1, y, x3, y]} {...common} />
+      ))}
+      <Line points={[x2, laneYs[0]!, x2, laneYs[3]!]} {...common} />
+    </>
+  )
+}
+
 export function Pitch({
   design,
   orientation,
-  showZoneLines = false,
+  zoneGridStyle = 'none',
+  showPitchMarkings = true,
 }: {
   design: PitchDesign
   orientation: PitchOrientation
-  showZoneLines?: boolean
+  zoneGridStyle?: ZoneGridStyle
+  showPitchMarkings?: boolean
 }) {
   const theme = THEMES[design]
   const stage = PITCH_STAGE_SIZE[orientation]
@@ -153,8 +184,9 @@ export function Pitch({
       rotation={rotation}
     >
       <Stripes theme={theme} />
-      <Markings stroke={theme.line} />
-      {showZoneLines && <ZoneLines stroke={theme.line} />}
+      {showPitchMarkings && <Markings stroke={theme.line} />}
+      {zoneGridStyle === 'thirds_channels' && <ZoneLines stroke={theme.line} />}
+      {zoneGridStyle === 'guardiola' && <GuardiolaGrid stroke={theme.line} />}
     </Group>
   )
 }

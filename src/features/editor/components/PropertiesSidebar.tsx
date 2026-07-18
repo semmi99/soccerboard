@@ -2,6 +2,7 @@ import type { ChangeEvent, ReactNode } from 'react'
 import { useEditorStore } from '../store/editorStore'
 import type {
   ArrowData,
+  BallData,
   ConnectorData,
   EquipmentData,
   EquipmentKind,
@@ -10,8 +11,10 @@ import type {
   PitchDesign,
   PitchOrientation,
   PlayerChipData,
+  PlayerZoneData,
   ShapeData,
   TextData,
+  ZoneGridStyle,
 } from '../types'
 import { Button } from '../../../components/ui/Button'
 import { TeamSquadPanel } from './TeamSquadPanel'
@@ -22,6 +25,13 @@ const LINE_STYLES: { value: LineStyle; label: string }[] = [
   { value: 'solid', label: 'Durchgezogen' },
   { value: 'dashed', label: 'Gestrichelt' },
   { value: 'dotted', label: 'Gepunktet' },
+]
+
+const FONT_SIZE_PRESETS = [
+  { label: 'Klein', size: 14 },
+  { label: 'Mittel', size: 22 },
+  { label: 'Groß', size: 34 },
+  { label: 'Riesig', size: 52 },
 ]
 
 function Field({ label, children }: { label: string; children: ReactNode }) {
@@ -41,15 +51,18 @@ const inputClass =
 export function PropertiesSidebar() {
   const pitchDesign = useEditorStore((s) => s.pitchDesign)
   const orientation = useEditorStore((s) => s.orientation)
-  const showZoneLines = useEditorStore((s) => s.showZoneLines)
+  const zoneGridStyle = useEditorStore((s) => s.zoneGridStyle)
+  const showPitchMarkings = useEditorStore((s) => s.showPitchMarkings)
   const setPitchDesign = useEditorStore((s) => s.setPitchDesign)
   const setOrientation = useEditorStore((s) => s.setOrientation)
-  const setShowZoneLines = useEditorStore((s) => s.setShowZoneLines)
+  const setZoneGridStyle = useEditorStore((s) => s.setZoneGridStyle)
+  const setShowPitchMarkings = useEditorStore((s) => s.setShowPitchMarkings)
   const selection = useEditorStore((s) => s.selection)
   const activeFrameIndex = useEditorStore((s) => s.activeFrameIndex)
   const frames = useEditorStore((s) => s.frames)
   const beginHistoryCheckpoint = useEditorStore((s) => s.beginHistoryCheckpoint)
   const updateObjectLive = useEditorStore((s) => s.updateObjectLive)
+  const applyEquipmentStyleToAll = useEditorStore((s) => s.applyEquipmentStyleToAll)
   const removeSelected = useEditorStore((s) => s.removeSelected)
   const duplicateSelected = useEditorStore((s) => s.duplicateSelected)
   const bringToFront = useEditorStore((s) => s.bringToFront)
@@ -93,14 +106,25 @@ export function PropertiesSidebar() {
               <option value="horizontal">Querformat</option>
             </select>
           </Field>
+          <Field label="Zonenraster">
+            <select
+              className={selectClass}
+              value={zoneGridStyle}
+              onChange={(e) => setZoneGridStyle(e.target.value as ZoneGridStyle)}
+            >
+              <option value="none">Kein Raster</option>
+              <option value="thirds_channels">Drittel &amp; Kanäle</option>
+              <option value="guardiola">Guardiola (Positionsspiel)</option>
+            </select>
+          </Field>
           <label className="flex items-center gap-2 text-xs text-white/70">
             <input
               type="checkbox"
               className="accent-violet-accent"
-              checked={showZoneLines}
-              onChange={(e) => setShowZoneLines(e.target.checked)}
+              checked={showPitchMarkings}
+              onChange={(e) => setShowPitchMarkings(e.target.checked)}
             />
-            Zonenlinien (Drittel &amp; Kanäle)
+            Spielfeldmarkierungen anzeigen
           </label>
         </div>
       </div>
@@ -169,8 +193,12 @@ export function PropertiesSidebar() {
           {selectedObject.objectType === 'training_equipment' && (
             <EquipmentFields
               data={selectedObject.data}
+              scale={selectedObject.scale}
+              rotation={selectedObject.rotation}
               onCheckpoint={beginHistoryCheckpoint}
               onChange={(patch) => updateData<Extract<FrameObject, { objectType: 'training_equipment' }>>(patch)}
+              onChangeTop={(patch) => updateObjectLive(selectedObject.id, patch as Partial<FrameObject>)}
+              onApplyToAll={(patch) => applyEquipmentStyleToAll(selectedObject.data.kind, patch)}
             />
           )}
 
@@ -179,6 +207,22 @@ export function PropertiesSidebar() {
               data={selectedObject.data}
               onCheckpoint={beginHistoryCheckpoint}
               onChange={(patch) => updateData<Extract<FrameObject, { objectType: 'connector' }>>(patch)}
+            />
+          )}
+
+          {selectedObject.objectType === 'ball' && (
+            <BallFields
+              data={selectedObject.data}
+              onCheckpoint={beginHistoryCheckpoint}
+              onChange={(patch) => updateData<Extract<FrameObject, { objectType: 'ball' }>>(patch)}
+            />
+          )}
+
+          {selectedObject.objectType === 'player_zone' && (
+            <PlayerZoneFields
+              data={selectedObject.data}
+              onCheckpoint={beginHistoryCheckpoint}
+              onChange={(patch) => updateData<Extract<FrameObject, { objectType: 'player_zone' }>>(patch)}
             />
           )}
 
@@ -308,6 +352,18 @@ function ArrowFields({
           onChange={(e) => onChange({ strokeWidth: Number(e.target.value) })}
         />
       </Field>
+      <label className="flex items-center gap-2 text-xs text-white/70">
+        <input
+          type="checkbox"
+          className="accent-violet-accent"
+          checked={data.showArrowhead ?? true}
+          onChange={(e) => {
+            onCheckpoint()
+            onChange({ showArrowhead: e.target.checked })
+          }}
+        />
+        Pfeilspitze anzeigen
+      </label>
     </div>
   )
 }
@@ -423,13 +479,32 @@ function TextFields({
         <input
           type="range"
           min={10}
-          max={48}
+          max={64}
           className="w-full"
           value={data.fontSize}
           onFocus={onCheckpoint}
           onChange={(e) => onChange({ fontSize: Number(e.target.value) })}
         />
       </Field>
+      <div className="flex gap-1.5">
+        {FONT_SIZE_PRESETS.map((preset) => (
+          <button
+            key={preset.label}
+            type="button"
+            onClick={() => {
+              onCheckpoint()
+              onChange({ fontSize: preset.size })
+            }}
+            className={`flex-1 rounded-md border px-1.5 py-1 text-[11px] transition-colors ${
+              data.fontSize === preset.size
+                ? 'border-violet-accent bg-violet-accent/20 text-white'
+                : 'border-pitch-600 bg-pitch-800 text-white/60 hover:border-violet-accent/50'
+            }`}
+          >
+            {preset.label}
+          </button>
+        ))}
+      </div>
       <Field label="Farbe">
         <input
           type="color"
@@ -509,24 +584,138 @@ function ConnectorFields({
   )
 }
 
+const EQUIPMENT_COLOR_CHOICES = ['#ef4444', '#facc15', '#22c55e', '#3b82f6', '#111827', '#f5f5f5']
+
 function EquipmentFields({
+  data,
+  scale,
+  rotation,
+  onCheckpoint,
+  onChange,
+  onChangeTop,
+  onApplyToAll,
+}: {
+  data: EquipmentData
+  scale: number
+  rotation: number
+  onCheckpoint: () => void
+  onChange: (patch: Partial<EquipmentData>) => void
+  onChangeTop: (patch: { scale?: number; rotation?: number }) => void
+  onApplyToAll: (patch: { color?: string; scale?: number; rotation?: number }) => void
+}) {
+  const color = data.color ?? EQUIPMENT_DEFAULT_COLORS[data.kind as EquipmentKind]
+  return (
+    <div className="flex flex-col gap-2">
+      <Field label="Farbe">
+        <ColorSwatchPicker
+          value={color}
+          colors={EQUIPMENT_COLOR_CHOICES}
+          onChange={(c) => {
+            onCheckpoint()
+            onChange({ color: c })
+          }}
+        />
+      </Field>
+      <Field label={`Größe (${Math.round(scale * 100)}%)`}>
+        <input
+          type="range"
+          min={0.4}
+          max={2.5}
+          step={0.05}
+          className="w-full"
+          value={scale}
+          onFocus={onCheckpoint}
+          onChange={(e) => onChangeTop({ scale: Number(e.target.value) })}
+        />
+      </Field>
+      <Field label={`Winkel (${Math.round(rotation)}°)`}>
+        <input
+          type="range"
+          min={0}
+          max={359}
+          className="w-full"
+          value={rotation}
+          onFocus={onCheckpoint}
+          onChange={(e) => onChangeTop({ rotation: Number(e.target.value) })}
+        />
+      </Field>
+      <Button
+        variant="secondary"
+        onClick={() => {
+          onCheckpoint()
+          onApplyToAll({ color, scale, rotation })
+        }}
+      >
+        Auf alle dieser Art anwenden
+      </Button>
+    </div>
+  )
+}
+
+function BallFields({
   data,
   onCheckpoint,
   onChange,
 }: {
-  data: EquipmentData
+  data: BallData
   onCheckpoint: () => void
-  onChange: (patch: Partial<EquipmentData>) => void
+  onChange: (patch: Partial<BallData>) => void
 }) {
   return (
     <div className="flex flex-col gap-2">
       <Field label="Farbe">
+        <ColorSwatchPicker
+          value={data.color ?? '#f5f5f0'}
+          colors={['#f5f5f0', '#ef4444', '#facc15', '#22c55e', '#3b82f6', '#111827']}
+          onChange={(c) => {
+            onCheckpoint()
+            onChange({ color: c })
+          }}
+        />
+      </Field>
+    </div>
+  )
+}
+
+function PlayerZoneFields({
+  data,
+  onCheckpoint,
+  onChange,
+}: {
+  data: PlayerZoneData
+  onCheckpoint: () => void
+  onChange: (patch: Partial<PlayerZoneData>) => void
+}) {
+  return (
+    <div className="flex flex-col gap-2">
+      <Field label="Füllfarbe">
+        <ColorSwatchPicker
+          value={rgbaToHex(data.fill)}
+          onChange={(c) => {
+            onCheckpoint()
+            onChange({ fill: hexToRgba(c, 0.45) })
+          }}
+        />
+      </Field>
+      <Field label="Rahmenfarbe">
+        <ColorSwatchPicker
+          value={data.stroke}
+          onChange={(c) => {
+            onCheckpoint()
+            onChange({ stroke: c })
+          }}
+        />
+      </Field>
+      <Field label={`Deckkraft (${Math.round(data.opacity * 100)}%)`}>
         <input
-          type="color"
-          className="h-8 w-full rounded-md border border-pitch-600 bg-pitch-800"
-          value={data.color ?? EQUIPMENT_DEFAULT_COLORS[data.kind as EquipmentKind]}
+          type="range"
+          min={0.1}
+          max={1}
+          step={0.05}
+          className="w-full"
+          value={data.opacity}
           onFocus={onCheckpoint}
-          onChange={(e) => onChange({ color: e.target.value })}
+          onChange={(e) => onChange({ opacity: Number(e.target.value) })}
         />
       </Field>
     </div>

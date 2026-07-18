@@ -67,6 +67,21 @@ export function createObjectForTool(
     }
   }
 
+  if (tool === 'line_straight') {
+    return {
+      ...base,
+      objectType: 'arrow',
+      data: {
+        shape: 'straight',
+        points: [-70, 0, 70, 0],
+        lineStyle: 'dashed',
+        color: '#38bdf8',
+        strokeWidth: 2.5,
+        showArrowhead: false,
+      },
+    }
+  }
+
   if (tool === 'shape_circle') {
     return {
       ...base,

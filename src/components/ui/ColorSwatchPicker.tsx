@@ -16,15 +16,20 @@ export function ColorSwatchPicker({
   value,
   onChange,
   size = 'md',
+  colors,
 }: {
   value: string
   onChange: (color: string) => void
   size?: 'sm' | 'md'
+  colors?: string[]
 }) {
   const dimension = size === 'sm' ? 'h-5 w-5' : 'h-7 w-7'
+  const options = colors
+    ? colors.map((value) => ({ label: value, value }))
+    : SWATCH_COLORS
   return (
     <div className="flex flex-wrap gap-1.5">
-      {SWATCH_COLORS.map((c) => (
+      {options.map((c) => (
         <button
           key={c.value}
           type="button"
