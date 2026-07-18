@@ -64,6 +64,7 @@ const SECTIONS: ToolDef[][] = [
       swatchLabel: 'TW',
       swatchRing: '#ef4444',
     },
+    { id: 'ball', label: 'Ball', icon: <BallIcon /> },
   ],
   [
     { id: 'arrow_straight', label: 'Pfeil gerade', icon: <StraightArrowIcon /> },
@@ -77,10 +78,7 @@ const SECTIONS: ToolDef[][] = [
     { id: 'shape_rect', label: 'Rechteck', icon: <RectShapeIcon /> },
     { id: 'shape_polygon', label: 'Polygon (Zone)', icon: <PolygonShapeIcon /> },
   ],
-  [
-    { id: 'text', label: 'Text', icon: <TextToolIcon /> },
-    { id: 'ball', label: 'Ball', icon: <BallIcon /> },
-  ],
+  [{ id: 'text', label: 'Text', icon: <TextToolIcon /> }],
   (Object.keys(EQUIPMENT_ICONS) as EquipmentKind[]).map((kind) => ({
     id: `equipment_${kind}` as ToolId,
     label: EQUIPMENT_LABELS[kind],
