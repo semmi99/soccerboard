@@ -41,8 +41,10 @@ const inputClass =
 export function PropertiesSidebar() {
   const pitchDesign = useEditorStore((s) => s.pitchDesign)
   const orientation = useEditorStore((s) => s.orientation)
+  const showZoneLines = useEditorStore((s) => s.showZoneLines)
   const setPitchDesign = useEditorStore((s) => s.setPitchDesign)
   const setOrientation = useEditorStore((s) => s.setOrientation)
+  const setShowZoneLines = useEditorStore((s) => s.setShowZoneLines)
   const selection = useEditorStore((s) => s.selection)
   const activeFrameIndex = useEditorStore((s) => s.activeFrameIndex)
   const frames = useEditorStore((s) => s.frames)
@@ -78,6 +80,7 @@ export function PropertiesSidebar() {
             >
               <option value="classic_green">Klassisch Grün</option>
               <option value="night_navy">Stadion bei Nacht</option>
+              <option value="dark_orange">Dunkel (Orange)</option>
             </select>
           </Field>
           <Field label="Ausrichtung">
@@ -90,6 +93,15 @@ export function PropertiesSidebar() {
               <option value="horizontal">Querformat</option>
             </select>
           </Field>
+          <label className="flex items-center gap-2 text-xs text-white/70">
+            <input
+              type="checkbox"
+              className="accent-violet-accent"
+              checked={showZoneLines}
+              onChange={(e) => setShowZoneLines(e.target.checked)}
+            />
+            Zonenlinien (Drittel &amp; Kanäle)
+          </label>
         </div>
       </div>
 

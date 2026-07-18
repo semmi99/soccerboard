@@ -9,6 +9,7 @@ const CY = B / 2
 const THEMES: Record<PitchDesign, { grassA: string; grassB: string; line: string }> = {
   classic_green: { grassA: '#1e7d32', grassB: '#1a6b2b', line: 'rgba(255,255,255,0.85)' },
   night_navy: { grassA: '#0f1a2e', grassB: '#0b1424', line: 'rgba(212,175,55,0.8)' },
+  dark_orange: { grassA: '#0c0c0c', grassB: '#090909', line: 'rgba(255,140,26,0.9)' },
 }
 
 function Stripes({ theme }: { theme: { grassA: string; grassB: string } }) {
@@ -109,12 +110,35 @@ function Markings({ stroke }: { stroke: string }) {
   )
 }
 
+/** Dashed tactical grid: 2 lines splitting the pitch into attacking/middle/
+ * defensive thirds, and 4 lines splitting it into 5 vertical channels
+ * (wide/half-space/central lanes). */
+function ZoneLines({ stroke }: { stroke: string }) {
+  const thirds = [L / 3, (2 * L) / 3]
+  const channelCount = 5
+  const channels = Array.from({ length: channelCount - 1 }, (_, i) => (B / channelCount) * (i + 1))
+  const common = { stroke, strokeWidth: 1.5, dash: [7, 7], opacity: 0.6, listening: false }
+
+  return (
+    <>
+      {thirds.map((x, i) => (
+        <Line key={`third-${i}`} points={[x, 0, x, B]} {...common} />
+      ))}
+      {channels.map((y, i) => (
+        <Line key={`channel-${i}`} points={[0, y, L, y]} {...common} />
+      ))}
+    </>
+  )
+}
+
 export function Pitch({
   design,
   orientation,
+  showZoneLines = false,
 }: {
   design: PitchDesign
   orientation: PitchOrientation
+  showZoneLines?: boolean
 }) {
   const theme = THEMES[design]
   const stage = PITCH_STAGE_SIZE[orientation]
@@ -130,6 +154,7 @@ export function Pitch({
     >
       <Stripes theme={theme} />
       <Markings stroke={theme.line} />
+      {showZoneLines && <ZoneLines stroke={theme.line} />}
     </Group>
   )
 }

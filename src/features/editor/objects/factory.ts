@@ -109,7 +109,7 @@ export function createObjectForTool(
         kind: 'polygon',
         width: 100,
         height: 100,
-        points: [0, -50, 50, 40, -50, 40],
+        points: [-50, -35, 50, -35, 50, 35, -50, 35],
         fill: 'rgba(124, 58, 237, 0.25)',
         stroke: '#a855f7',
         strokeWidth: 2,

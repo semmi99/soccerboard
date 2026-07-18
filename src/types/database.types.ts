@@ -289,6 +289,7 @@ export type Database = {
           org_id: string
           orientation: string
           pitch_design: string
+          show_zone_lines: boolean
           team_id: string | null
           thumbnail_url: string | null
           title: string
@@ -302,6 +303,7 @@ export type Database = {
           org_id: string
           orientation?: string
           pitch_design?: string
+          show_zone_lines?: boolean
           team_id?: string | null
           thumbnail_url?: string | null
           title?: string
@@ -315,6 +317,7 @@ export type Database = {
           org_id?: string
           orientation?: string
           pitch_design?: string
+          show_zone_lines?: boolean
           team_id?: string | null
           thumbnail_url?: string | null
           title?: string

@@ -11,6 +11,7 @@ export function useProjectSave() {
   const projectTitle = useEditorStore((s) => s.projectTitle)
   const pitchDesign = useEditorStore((s) => s.pitchDesign)
   const orientation = useEditorStore((s) => s.orientation)
+  const showZoneLines = useEditorStore((s) => s.showZoneLines)
   const teamId = useEditorStore((s) => s.teamId)
   const frames = useEditorStore((s) => s.frames)
   const isDirty = useEditorStore((s) => s.isDirty)
@@ -47,6 +48,7 @@ export function useProjectSave() {
         pitchDesign,
         orientation,
         teamId,
+        showZoneLines,
         frames,
       })
 

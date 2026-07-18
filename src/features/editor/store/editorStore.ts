@@ -43,6 +43,7 @@ interface EditorState {
   projectTitle: string
   pitchDesign: PitchDesign
   orientation: PitchOrientation
+  showZoneLines: boolean
   teamId: string | null
   teamKit: TeamKit | null
   playerPhotos: Record<string, string>
@@ -64,6 +65,7 @@ interface EditorState {
     pitchDesign: PitchDesign
     orientation: PitchOrientation
     teamId: string | null
+    showZoneLines: boolean
     frames: EditorFrame[]
   }) => void
   resetToBlankProject: () => void
@@ -72,6 +74,7 @@ interface EditorState {
 
   setPitchDesign: (d: PitchDesign) => void
   setOrientation: (o: PitchOrientation) => void
+  setShowZoneLines: (show: boolean) => void
   setProjectTitle: (title: string) => void
   setTeamId: (id: string | null) => void
   setTeamKit: (kit: TeamKit | null) => void
@@ -114,6 +117,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
   projectTitle: 'Neues Projekt',
   pitchDesign: 'classic_green',
   orientation: 'vertical',
+  showZoneLines: false,
   teamId: null,
   teamKit: null,
   playerPhotos: {},
@@ -129,12 +133,13 @@ export const useEditorStore = create<EditorState>((set, get) => ({
   past: [],
   future: [],
 
-  loadProject: ({ projectId, projectTitle, pitchDesign, orientation, teamId, frames }) => {
+  loadProject: ({ projectId, projectTitle, pitchDesign, orientation, teamId, showZoneLines, frames }) => {
     set({
       projectId,
       projectTitle,
       pitchDesign,
       orientation,
+      showZoneLines,
       teamId,
       teamKit: null,
       playerPhotos: {},
@@ -156,6 +161,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
     set({
       projectId: null,
       projectTitle: 'Neues Projekt',
+      showZoneLines: false,
       teamId: null,
       teamKit: null,
       playerPhotos: {},
@@ -175,6 +181,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
 
   setPitchDesign: (d) => set({ pitchDesign: d, isDirty: true }),
   setOrientation: (o) => set({ orientation: o, isDirty: true }),
+  setShowZoneLines: (show) => set({ showZoneLines: show, isDirty: true }),
   setProjectTitle: (title) => set({ projectTitle: title, isDirty: true }),
   setTeamId: (id) => set({ teamId: id, isDirty: true }),
   setTeamKit: (kit) => set({ teamKit: kit }),

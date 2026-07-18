@@ -63,13 +63,14 @@ export interface LoadedProject {
   pitchDesign: PitchDesign
   orientation: PitchOrientation
   teamId: string | null
+  showZoneLines: boolean
   frames: EditorFrame[]
 }
 
 export async function loadProject(id: string): Promise<LoadedProject> {
   const { data: project, error: projectError } = await supabase
     .from('projects')
-    .select('id, title, pitch_design, orientation, team_id')
+    .select('id, title, pitch_design, orientation, team_id, show_zone_lines')
     .eq('id', id)
     .single()
   if (projectError) throw projectError
@@ -100,6 +101,7 @@ export async function loadProject(id: string): Promise<LoadedProject> {
     pitchDesign: project.pitch_design as PitchDesign,
     orientation: project.orientation as PitchOrientation,
     teamId: project.team_id,
+    showZoneLines: project.show_zone_lines,
     frames,
   }
 }
@@ -112,6 +114,7 @@ export interface SaveProjectInput {
   pitchDesign: PitchDesign
   orientation: PitchOrientation
   teamId: string | null
+  showZoneLines: boolean
   frames: EditorFrame[]
 }
 
@@ -126,6 +129,7 @@ export async function saveProject(input: SaveProjectInput): Promise<string> {
         pitch_design: input.pitchDesign,
         orientation: input.orientation,
         team_id: input.teamId,
+        show_zone_lines: input.showZoneLines,
       })
       .eq('id', projectId)
     if (error) throw error
@@ -154,6 +158,7 @@ async function insertProjectRow(
     pitch_design: input.pitchDesign,
     orientation: input.orientation,
     team_id: input.teamId,
+    show_zone_lines: input.showZoneLines,
   }
   const { data, error } = await supabase
     .from('projects')

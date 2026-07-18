@@ -97,6 +97,7 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
   const { ref: containerRef, size } = useElementSize<HTMLDivElement>()
   const pitchDesign = useEditorStore((s) => s.pitchDesign)
   const orientation = useEditorStore((s) => s.orientation)
+  const showZoneLines = useEditorStore((s) => s.showZoneLines)
   const frames = useEditorStore((s) => s.frames)
   const activeFrameIndex = useEditorStore((s) => s.activeFrameIndex)
   const tool = useEditorStore((s) => s.tool)
@@ -315,7 +316,7 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
         className="rounded-lg shadow-2xl shadow-black/60"
       >
         <Layer>
-          <Pitch design={pitchDesign} orientation={orientation} />
+          <Pitch design={pitchDesign} orientation={orientation} showZoneLines={showZoneLines} />
         </Layer>
         <Layer ref={objectsLayerRef}>
           {sortedObjects.map((object) => {

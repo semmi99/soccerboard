@@ -44,6 +44,7 @@ export function EditorPage() {
           pitchDesign: project.pitchDesign,
           orientation: project.orientation,
           teamId: project.teamId,
+          showZoneLines: project.showZoneLines,
           frames: project.frames,
         })
       })
