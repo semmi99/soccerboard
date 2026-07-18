@@ -4,6 +4,7 @@ import { useEditorStore } from '../store/editorStore'
 import { useAuthStore } from '../../auth/store/authStore'
 import { limitsForTier } from '../../../lib/limits'
 import { exportStageAsImage, type ExportFormat } from '../export/exportImage'
+import { downloadVideo, recordFramesAsVideo } from '../export/exportVideo'
 import { Button } from '../../../components/ui/Button'
 
 const RESOLUTION_OPTIONS = [
@@ -13,25 +14,31 @@ const RESOLUTION_OPTIONS = [
   { pixelRatio: 4, label: 'Maximal (4x, ~4K)' },
 ]
 
+type ExportKind = ExportFormat | 'video'
+
 export function ExportMenu({ stageRef }: { stageRef: RefObject<Konva.Stage | null> }) {
   const [isOpen, setIsOpen] = useState(false)
-  const [format, setFormat] = useState<ExportFormat>('png')
+  const [format, setFormat] = useState<ExportKind>('png')
   const [pixelRatio, setPixelRatio] = useState(2)
+  const [isRecording, setIsRecording] = useState(false)
+  const [videoError, setVideoError] = useState<string | null>(null)
   const containerRef = useRef<HTMLDivElement>(null)
 
   const projectTitle = useEditorStore((s) => s.projectTitle)
   const selection = useEditorStore((s) => s.selection)
   const setSelection = useEditorStore((s) => s.setSelection)
+  const frames = useEditorStore((s) => s.frames)
   const organization = useAuthStore((s) => s.organization)
 
   const maxPixelRatio = organization
     ? limitsForTier(organization.subscription_tier).maxExportPixelRatio
     : 2
   const availableResolutions = RESOLUTION_OPTIONS.filter((r) => r.pixelRatio <= maxPixelRatio)
+  const fileName = projectTitle.trim() || 'tacticboard-projekt'
 
   function handleExport() {
     const stage = stageRef.current
-    if (!stage) return
+    if (!stage || format === 'video') return
 
     const hadSelection = selection.length > 0
     if (hadSelection) setSelection([])
@@ -44,10 +51,29 @@ export function ExportMenu({ stageRef }: { stageRef: RefObject<Konva.Stage | nul
       exportStageAsImage(stage, {
         format,
         pixelRatio,
-        fileName: projectTitle.trim() || 'tacticboard-projekt',
+        fileName,
       })
       setIsOpen(false)
     }, 0)
+  }
+
+  async function handleExportVideo() {
+    const stage = stageRef.current
+    if (!stage) return
+    setVideoError(null)
+    if (selection.length > 0) setSelection([])
+    setIsRecording(true)
+    try {
+      // Give the Transformer a tick to detach before recording starts.
+      await new Promise((resolve) => setTimeout(resolve, 0))
+      const result = await recordFramesAsVideo(stage)
+      downloadVideo(result, fileName)
+      setIsOpen(false)
+    } catch (err) {
+      setVideoError(err instanceof Error ? err.message : 'Aufnahme fehlgeschlagen.')
+    } finally {
+      setIsRecording(false)
+    }
   }
 
   return (
@@ -64,37 +90,64 @@ export function ExportMenu({ stageRef }: { stageRef: RefObject<Konva.Stage | nul
               <select
                 className="rounded-md border border-pitch-600 bg-pitch-800 px-2 py-1.5 text-xs text-white outline-none focus:border-violet-accent"
                 value={format}
-                onChange={(e) => setFormat(e.target.value as ExportFormat)}
+                onChange={(e) => {
+                  setFormat(e.target.value as ExportKind)
+                  setVideoError(null)
+                }}
               >
                 <option value="png">PNG (verlustfrei, transparent)</option>
                 <option value="jpg">JPG (kleinere Datei)</option>
+                <option value="video">Video (MP4/WebM, Sequenz)</option>
               </select>
             </label>
 
-            <label className="flex flex-col gap-1 text-xs">
-              <span className="font-medium text-white/60">Auflösung</span>
-              <select
-                className="rounded-md border border-pitch-600 bg-pitch-800 px-2 py-1.5 text-xs text-white outline-none focus:border-violet-accent"
-                value={pixelRatio}
-                onChange={(e) => setPixelRatio(Number(e.target.value))}
-              >
-                {availableResolutions.map((r) => (
-                  <option key={r.pixelRatio} value={r.pixelRatio}>
-                    {r.label}
-                  </option>
-                ))}
-              </select>
-            </label>
+            {format === 'video' ? (
+              <>
+                <p className="text-[11px] text-white/40">
+                  Spielt alle Frames einmal ab und nimmt die Wiedergabe als Video auf. Mindestens 2 Frames
+                  nötig. Je nach Browser wird MP4 oder WebM erzeugt.
+                </p>
+                {frames.length < 2 && (
+                  <p className="text-[11px] text-amber-400">Mindestens 2 Frames für ein Video nötig.</p>
+                )}
+                {videoError && <p className="text-[11px] text-red-400">{videoError}</p>}
+                <Button
+                  onClick={() => void handleExportVideo()}
+                  loading={isRecording}
+                  disabled={frames.length < 2}
+                  className="w-full"
+                >
+                  {isRecording ? 'Aufnahme läuft…' : 'Video aufnehmen & herunterladen'}
+                </Button>
+              </>
+            ) : (
+              <>
+                <label className="flex flex-col gap-1 text-xs">
+                  <span className="font-medium text-white/60">Auflösung</span>
+                  <select
+                    className="rounded-md border border-pitch-600 bg-pitch-800 px-2 py-1.5 text-xs text-white outline-none focus:border-violet-accent"
+                    value={pixelRatio}
+                    onChange={(e) => setPixelRatio(Number(e.target.value))}
+                  >
+                    {availableResolutions.map((r) => (
+                      <option key={r.pixelRatio} value={r.pixelRatio}>
+                        {r.label}
+                      </option>
+                    ))}
+                  </select>
+                </label>
 
-            {maxPixelRatio < 4 && (
-              <p className="text-[11px] text-white/40">
-                Free-Tier: Export bis {maxPixelRatio}x. Für 4K auf Pro upgraden.
-              </p>
+                {maxPixelRatio < 4 && (
+                  <p className="text-[11px] text-white/40">
+                    Free-Tier: Export bis {maxPixelRatio}x. Für 4K auf Pro upgraden.
+                  </p>
+                )}
+
+                <Button onClick={handleExport} className="w-full">
+                  Herunterladen
+                </Button>
+              </>
             )}
-
-            <Button onClick={handleExport} className="w-full">
-              Herunterladen
-            </Button>
           </div>
         </div>
       )}
