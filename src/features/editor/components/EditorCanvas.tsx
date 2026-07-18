@@ -10,79 +10,105 @@ import { ObjectRenderer } from '../objects/ObjectRenderer'
 import { ConnectorShape } from '../objects/shapes/Connector'
 import type { FrameObject } from '../types'
 
-function tweenObjectTo(node: Konva.Group, target: FrameObject, durationSec: number) {
-  return new Promise<void>((resolve) => {
-    let settled = false
-
-    const tween = new Konva.Tween({
-      node,
-      duration: durationSec,
-      x: target.x,
-      y: target.y,
-      rotation: target.rotation,
-      scaleX: target.scale,
-      scaleY: target.scale,
-      easing: Konva.Easings.EaseInOut,
-      onFinish: () => {
-        if (settled) return
-        settled = true
-        clearTimeout(fallbackId)
-        resolve()
-      },
-    })
-    tween.play()
-
-    // Safety net: if the tab is backgrounded (rAF throttled/paused) or the
-    // tween otherwise never fires onFinish, snap to the final values instead
-    // of leaving playback stuck on this frame forever.
-    const fallbackId = setTimeout(
-      () => {
-        if (settled) return
-        settled = true
-        tween.destroy()
-        node.setAttrs({
-          x: target.x,
-          y: target.y,
-          rotation: target.rotation,
-          scaleX: target.scale,
-          scaleY: target.scale,
-        })
-        resolve()
-      },
-      durationSec * 1000 + 500,
-    )
-  })
+// Quadratic ease-in-out, matching Konva.Easings.EaseInOut's shape closely
+// enough for our purposes while being trivial to evaluate for an arbitrary
+// t in [0, 1] (Konva.Easings functions instead take (t, from, delta, duration)).
+function easeInOut(t: number) {
+  return t < 0.5 ? 2 * t * t : 1 - ((-2 * t + 2) ** 2) / 2
 }
 
-function fadeNodeTo(node: Konva.Group | undefined, targetOpacity: number, durationSec: number) {
-  if (!node) return null
+interface MoveSpec {
+  node: Konva.Group
+  fromX: number
+  fromY: number
+  toX: number
+  toY: number
+  fromRotation: number
+  toRotation: number
+  fromScale: number
+  toScale: number
+}
+
+interface FadeSpec {
+  node: Konva.Group
+  from: number
+  to: number
+}
+
+interface ConnectorSyncSpec {
+  line: Konva.Line
+  fromId: string
+  toId: string
+}
+
+/** Drives every animated property of a single frame transition (object
+ * positions, enter/exit fades, connector lines) from one shared elapsed-time
+ * value each animation frame, instead of many independent Konva.Tween
+ * instances. This is what actually guarantees everything stays in lockstep —
+ * separate tweens merely tend to agree, this makes it structural. */
+function runTransition(
+  layer: Konva.Layer | null,
+  durationSec: number,
+  moves: MoveSpec[],
+  fades: FadeSpec[],
+  connectors: ConnectorSyncSpec[],
+  nodeRefs: Record<string, Konva.Group>,
+) {
   return new Promise<void>((resolve) => {
     let settled = false
+    const durationMs = durationSec * 1000
+    const start = performance.now()
 
-    const tween = new Konva.Tween({
-      node,
-      duration: durationSec,
-      opacity: targetOpacity,
-      easing: Konva.Easings.EaseInOut,
-      onFinish: () => {
-        if (settled) return
-        settled = true
-        clearTimeout(fallbackId)
-        resolve()
-      },
-    })
-    tween.play()
+    function settle() {
+      if (settled) return
+      settled = true
+      clearTimeout(fallbackId)
+      anim.stop()
+      resolve()
+    }
 
-    const fallbackId = setTimeout(
-      () => {
-        if (settled) return
-        settled = true
-        tween.destroy()
-        node.opacity(targetOpacity)
-        resolve()
-      },
-      durationSec * 1000 + 500,
-    )
+    const anim = new Konva.Animation(() => {
+      const raw = Math.min(1, (performance.now() - start) / durationMs)
+      const eased = easeInOut(raw)
+
+      for (const m of moves) {
+        m.node.x(m.fromX + (m.toX - m.fromX) * eased)
+        m.node.y(m.fromY + (m.toY - m.fromY) * eased)
+        m.node.rotation(m.fromRotation + (m.toRotation - m.fromRotation) * eased)
+        const s = m.fromScale + (m.toScale - m.fromScale) * eased
+        m.node.scaleX(s)
+        m.node.scaleY(s)
+      }
+      for (const f of fades) {
+        f.node.opacity(f.from + (f.to - f.from) * eased)
+      }
+      for (const c of connectors) {
+        const fromNode = nodeRefs[c.fromId]
+        const toNode = nodeRefs[c.toId]
+        if (fromNode && toNode) c.line.points([fromNode.x(), fromNode.y(), toNode.x(), toNode.y()])
+      }
+
+      if (raw >= 1) settle()
+    }, layer)
+
+    anim.start()
+
+    // Safety net: if the tab is backgrounded (rAF throttled/paused) and the
+    // animation frame callback stalls, force-finish instead of leaving
+    // playback stuck on this frame forever.
+    const fallbackId = setTimeout(() => {
+      if (settled) return
+      for (const m of moves) {
+        m.node.setAttrs({ x: m.toX, y: m.toY, rotation: m.toRotation, scaleX: m.toScale, scaleY: m.toScale })
+      }
+      for (const f of fades) f.node.opacity(f.to)
+      for (const c of connectors) {
+        const fromNode = nodeRefs[c.fromId]
+        const toNode = nodeRefs[c.toId]
+        if (fromNode && toNode) c.line.points([fromNode.x(), fromNode.y(), toNode.x(), toNode.y()])
+      }
+      settle()
+    }, durationMs + 500)
   })
 }
 
@@ -188,43 +214,52 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
         await new Promise((resolve) => setTimeout(resolve, 0))
         if (cancelled) return
 
-        const positionTweens = toFrame.objects
+        const moves: MoveSpec[] = toFrame.objects
           .map((toObj) => {
             const node = nodeRefs.current[toObj.id]
             const fromObj = fromFrame.objects.find((o) => o.id === toObj.id)
             if (!node || !fromObj) return null
-            return tweenObjectTo(node, toObj, durationSec)
+            return {
+              node,
+              fromX: fromObj.x,
+              fromY: fromObj.y,
+              toX: toObj.x,
+              toY: toObj.y,
+              fromRotation: fromObj.rotation,
+              toRotation: toObj.rotation,
+              fromScale: fromObj.scale,
+              toScale: toObj.scale,
+            }
           })
-          .filter((p): p is Promise<void> => Boolean(p))
+          .filter((m): m is MoveSpec => Boolean(m))
 
-        const fadeTweens = [
-          ...entering.map((o) => fadeNodeTo(nodeRefs.current[o.id], 1, durationSec)),
-          ...exiting.map((o) => fadeNodeTo(nodeRefs.current[o.id], 0, durationSec)),
-        ].filter((p): p is Promise<void> => Boolean(p))
+        const fades: FadeSpec[] = [
+          ...entering
+            .map((o) => nodeRefs.current[o.id])
+            .filter((n): n is Konva.Group => Boolean(n))
+            .map((node) => ({ node, from: 0, to: 1 })),
+          ...exiting
+            .map((o) => nodeRefs.current[o.id])
+            .filter((n): n is Konva.Group => Boolean(n))
+            .map((node) => ({ node, from: 1, to: 0 })),
+        ]
 
         // Connectors that persist across both frames need their line glued
         // to their endpoints' live (tweened) node positions on every
         // animation frame — otherwise they only "catch up" once the frame
         // boundary flips and React re-renders from the new frame data.
-        const connectorsToSync = toFrame.objects.filter(
-          (o): o is Extract<FrameObject, { objectType: 'connector' }> =>
-            o.objectType === 'connector' && fromIds.has(o.id),
-        )
-        const anim = connectorsToSync.length
-          ? new Konva.Animation(() => {
-              for (const connector of connectorsToSync) {
-                const line = connectorRefs.current[connector.id]
-                const fromNode = nodeRefs.current[connector.data.fromId]
-                const toNode = nodeRefs.current[connector.data.toId]
-                if (!line || !fromNode || !toNode) continue
-                line.points([fromNode.x(), fromNode.y(), toNode.x(), toNode.y()])
-              }
-            }, objectsLayerRef.current)
-          : null
-        anim?.start()
+        const connectors: ConnectorSyncSpec[] = toFrame.objects
+          .filter(
+            (o): o is Extract<FrameObject, { objectType: 'connector' }> =>
+              o.objectType === 'connector' && fromIds.has(o.id),
+          )
+          .map((o) => {
+            const line = connectorRefs.current[o.id]
+            return line ? { line, fromId: o.data.fromId, toId: o.data.toId } : null
+          })
+          .filter((c): c is ConnectorSyncSpec => Boolean(c))
 
-        await Promise.all([...positionTweens, ...fadeTweens])
-        anim?.stop()
+        await runTransition(objectsLayerRef.current, durationSec, moves, fades, connectors, nodeRefs.current)
         if (cancelled) return
 
         useEditorStore.getState().setActiveFrameIndex(currentIndex + 1)
