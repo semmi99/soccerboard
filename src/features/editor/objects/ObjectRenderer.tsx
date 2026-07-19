@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react'
-import { Group } from 'react-konva'
+import { Circle, Group } from 'react-konva'
 import type Konva from 'konva'
 import type { KonvaEventObject } from 'konva/lib/Node'
 import type { FrameObject } from '../types'
@@ -27,6 +27,61 @@ function renderContent(object: FrameObject) {
   }
 }
 
+/** Small draggable handles at each of a straight/polyline arrow's points —
+ * shown only while selected — so a pass/run can be bent into an arbitrary
+ * path by hand instead of relying on a fixed curve formula. Rendered as
+ * siblings inside the same (already x/y/rotation/scale-transformed) Group
+ * as the arrow itself, so handle positions line up with `data.points`
+ * without any extra coordinate math. */
+function ArrowPointHandles({
+  points,
+  scale,
+  onDragStart,
+  onDragMove,
+}: {
+  points: number[]
+  scale: number
+  onDragStart: () => void
+  onDragMove: (pairIndex: number, x: number, y: number) => void
+}) {
+  const safeScale = Math.max(scale, 0.2)
+  const radius = 6 / safeScale
+  const strokeWidth = 1.5 / safeScale
+
+  const pairs: { x: number; y: number }[] = []
+  for (let i = 0; i < points.length; i += 2) {
+    pairs.push({ x: points[i]!, y: points[i + 1]! })
+  }
+
+  return (
+    <>
+      {pairs.map((p, i) => (
+        <Circle
+          key={i}
+          x={p.x}
+          y={p.y}
+          radius={radius}
+          fill="#ffe100"
+          stroke="#0f3d59"
+          strokeWidth={strokeWidth}
+          draggable
+          onDragStart={(e: KonvaEventObject<DragEvent>) => {
+            e.cancelBubble = true
+            onDragStart()
+          }}
+          onDragMove={(e: KonvaEventObject<DragEvent>) => {
+            e.cancelBubble = true
+            onDragMove(i, e.target.x(), e.target.y())
+          }}
+          onClick={(e: KonvaEventObject<MouseEvent>) => {
+            e.cancelBubble = true
+          }}
+        />
+      ))}
+    </>
+  )
+}
+
 interface Props {
   object: FrameObject
   isSelected: boolean
@@ -37,6 +92,7 @@ interface Props {
   onDragEnd: (id: string, x: number, y: number) => void
   onTransformEnd: (id: string, patch: Partial<FrameObject>) => void
   onDoubleClick?: (id: string) => void
+  onArrowPointsChange?: (id: string, points: number[]) => void
   registerRef: (id: string, node: Konva.Group | null) => void
   initialOpacity?: number
   initialScaleFactor?: number
@@ -44,6 +100,7 @@ interface Props {
 
 export function ObjectRenderer({
   object,
+  isSelected,
   interactive,
   onSelect,
   onDragStart,
@@ -51,6 +108,7 @@ export function ObjectRenderer({
   onDragEnd,
   onTransformEnd,
   onDoubleClick,
+  onArrowPointsChange,
   registerRef,
   initialOpacity,
   initialScaleFactor,
@@ -108,6 +166,17 @@ export function ObjectRenderer({
     })
   }
 
+  const showArrowHandles =
+    object.objectType === 'arrow' && object.data.shape !== 'curved' && isSelected && interactive
+
+  function handleArrowPointDragMove(pairIndex: number, x: number, y: number) {
+    if (object.objectType !== 'arrow' || !onArrowPointsChange) return
+    const points = [...object.data.points]
+    points[pairIndex * 2] = x
+    points[pairIndex * 2 + 1] = y
+    onArrowPointsChange(object.id, points)
+  }
+
   return (
     <Group
       ref={groupRef}
@@ -135,6 +204,14 @@ export function ObjectRenderer({
       onTransformEnd={handleTransformEnd}
     >
       {renderContent(object)}
+      {showArrowHandles && object.objectType === 'arrow' && (
+        <ArrowPointHandles
+          points={object.data.points}
+          scale={object.scale}
+          onDragStart={onDragStart}
+          onDragMove={handleArrowPointDragMove}
+        />
+      )}
     </Group>
   )
 }

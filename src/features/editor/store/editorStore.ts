@@ -50,6 +50,8 @@ interface EditorState {
   zoneGridStyle: ZoneGridStyle
   showPitchMarkings: boolean
   fieldCrop: FieldCrop
+  pitchLengthM: number
+  pitchWidthM: number
   teamId: string | null
   teamKit: TeamKit | null
   playerPhotos: Record<string, string>
@@ -60,6 +62,7 @@ interface EditorState {
   pendingPlayer: PendingRealPlayer | null
   pendingPlayers: PendingRealPlayer[]
   connectorDraftFromId: string | null
+  lastConnectorColor: string
   polygonDraftIds: string[]
   isPlaying: boolean
   isDirty: boolean
@@ -75,6 +78,8 @@ interface EditorState {
     zoneGridStyle: ZoneGridStyle
     showPitchMarkings: boolean
     fieldCrop: FieldCrop
+    pitchLengthM: number
+    pitchWidthM: number
     frames: EditorFrame[]
   }) => void
   resetToBlankProject: () => void
@@ -86,6 +91,8 @@ interface EditorState {
   setZoneGridStyle: (style: ZoneGridStyle) => void
   setShowPitchMarkings: (show: boolean) => void
   setFieldCrop: (crop: FieldCrop) => void
+  setPitchLengthM: (m: number) => void
+  setPitchWidthM: (m: number) => void
   setProjectTitle: (title: string) => void
   setTeamId: (id: string | null) => void
   setTeamKit: (kit: TeamKit | null) => void
@@ -102,6 +109,7 @@ interface EditorState {
   addObjectAt: (x: number, y: number) => void
   placeGroupAt: (x: number, y: number) => void
   addConnector: (fromId: string, toId: string) => void
+  setLastConnectorColor: (color: string) => void
   addPlayerZone: (playerIds: string[]) => void
   applyFormationToFrame: (positions: FormationPosition[], players: FormationPlayer[]) => void
   beginHistoryCheckpoint: () => void
@@ -138,6 +146,8 @@ export const useEditorStore = create<EditorState>((set, get) => ({
   zoneGridStyle: 'none',
   showPitchMarkings: true,
   fieldCrop: 'full',
+  pitchLengthM: 105,
+  pitchWidthM: 68,
   teamId: null,
   teamKit: null,
   playerPhotos: {},
@@ -148,6 +158,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
   pendingPlayer: null,
   pendingPlayers: [],
   connectorDraftFromId: null,
+  lastConnectorColor: '#f0d878',
   polygonDraftIds: [],
   isPlaying: false,
   isDirty: false,
@@ -163,6 +174,8 @@ export const useEditorStore = create<EditorState>((set, get) => ({
     zoneGridStyle,
     showPitchMarkings,
     fieldCrop,
+    pitchLengthM,
+    pitchWidthM,
     frames,
   }) => {
     set({
@@ -173,6 +186,8 @@ export const useEditorStore = create<EditorState>((set, get) => ({
       zoneGridStyle,
       showPitchMarkings,
       fieldCrop,
+      pitchLengthM,
+      pitchWidthM,
       teamId,
       teamKit: null,
       playerPhotos: {},
@@ -182,6 +197,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
       pendingPlayer: null,
       pendingPlayers: [],
       connectorDraftFromId: null,
+      lastConnectorColor: '#f0d878',
       polygonDraftIds: [],
       past: [],
       future: [],
@@ -198,6 +214,8 @@ export const useEditorStore = create<EditorState>((set, get) => ({
       zoneGridStyle: 'none',
       showPitchMarkings: true,
       fieldCrop: 'full',
+      pitchLengthM: 105,
+      pitchWidthM: 68,
       teamId: null,
       teamKit: null,
       playerPhotos: {},
@@ -207,6 +225,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
       pendingPlayer: null,
       pendingPlayers: [],
       connectorDraftFromId: null,
+      lastConnectorColor: '#f0d878',
       polygonDraftIds: [],
       past: [],
       future: [],
@@ -221,6 +240,8 @@ export const useEditorStore = create<EditorState>((set, get) => ({
   setZoneGridStyle: (style) => set({ zoneGridStyle: style, isDirty: true }),
   setShowPitchMarkings: (show) => set({ showPitchMarkings: show, isDirty: true }),
   setFieldCrop: (crop) => set({ fieldCrop: crop, isDirty: true }),
+  setPitchLengthM: (m) => set({ pitchLengthM: m, isDirty: true }),
+  setPitchWidthM: (m) => set({ pitchWidthM: m, isDirty: true }),
   setProjectTitle: (title) => set({ projectTitle: title, isDirty: true }),
   setTeamId: (id) => set({ teamId: id, isDirty: true }),
   setTeamKit: (kit) => set({ teamKit: kit }),
@@ -311,7 +332,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
 
   addConnector: (fromId, toId) => {
     if (fromId === toId) return
-    const { frames, activeFrameIndex } = get()
+    const { frames, activeFrameIndex, lastConnectorColor } = get()
     const frame = frames[activeFrameIndex]!
     const exists = frame.objects.some(
       (o) =>
@@ -333,7 +354,10 @@ export const useEditorStore = create<EditorState>((set, get) => ({
       scale: 1,
       zIndex: maxZ + 1,
       objectType: 'connector',
-      data: { fromId, toId, color: '#f0d878', strokeWidth: 2.5, lineStyle: 'dashed' },
+      // The first connector line drawn sets the color for the rest of the
+      // chain (see setLastConnectorColor) instead of always resetting to a
+      // hardcoded default, so a multi-hop connection reads as one sequence.
+      data: { fromId, toId, color: lastConnectorColor, strokeWidth: 2.5, lineStyle: 'dashed' },
     }
     const nextFrames = frames.map((f, i) =>
       i === activeFrameIndex ? { ...f, objects: [...f.objects, newObject] } : f,
@@ -345,6 +369,8 @@ export const useEditorStore = create<EditorState>((set, get) => ({
       isDirty: true,
     })
   },
+
+  setLastConnectorColor: (color) => set({ lastConnectorColor: color }),
 
   addPlayerZone: (playerIds) => {
     if (playerIds.length < 3) return

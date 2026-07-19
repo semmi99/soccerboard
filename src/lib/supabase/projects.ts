@@ -74,6 +74,8 @@ export interface LoadedProject {
   zoneGridStyle: ZoneGridStyle
   showPitchMarkings: boolean
   fieldCrop: FieldCrop
+  pitchLengthM: number
+  pitchWidthM: number
   frames: EditorFrame[]
 }
 
@@ -81,7 +83,7 @@ export async function loadProject(id: string): Promise<LoadedProject> {
   const { data: project, error: projectError } = await supabase
     .from('projects')
     .select(
-      'id, title, pitch_design, orientation, team_id, zone_grid_style, show_pitch_markings, field_crop',
+      'id, title, pitch_design, orientation, team_id, zone_grid_style, show_pitch_markings, field_crop, pitch_length_m, pitch_width_m',
     )
     .eq('id', id)
     .single()
@@ -127,6 +129,8 @@ export async function loadProject(id: string): Promise<LoadedProject> {
     zoneGridStyle: project.zone_grid_style as ZoneGridStyle,
     showPitchMarkings: project.show_pitch_markings,
     fieldCrop: project.field_crop as FieldCrop,
+    pitchLengthM: project.pitch_length_m,
+    pitchWidthM: project.pitch_width_m,
     frames,
   }
 }
@@ -142,6 +146,8 @@ export interface SaveProjectInput {
   zoneGridStyle: ZoneGridStyle
   showPitchMarkings: boolean
   fieldCrop: FieldCrop
+  pitchLengthM: number
+  pitchWidthM: number
   frames: EditorFrame[]
 }
 
@@ -159,6 +165,8 @@ export async function saveProject(input: SaveProjectInput): Promise<string> {
         zone_grid_style: input.zoneGridStyle,
         show_pitch_markings: input.showPitchMarkings,
         field_crop: input.fieldCrop,
+        pitch_length_m: input.pitchLengthM,
+        pitch_width_m: input.pitchWidthM,
       })
       .eq('id', projectId)
     if (error) throw error
@@ -190,6 +198,8 @@ async function insertProjectRow(
     zone_grid_style: input.zoneGridStyle,
     show_pitch_markings: input.showPitchMarkings,
     field_crop: input.fieldCrop,
+    pitch_length_m: input.pitchLengthM,
+    pitch_width_m: input.pitchWidthM,
   }
   const { data, error } = await supabase
     .from('projects')

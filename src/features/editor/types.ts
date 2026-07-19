@@ -18,6 +18,9 @@ export interface PlayerChipData {
   /** Short tactical role tag rendered above the chip (e.g. "PIVOT", "FREE",
    * "RB") — distinct from `label`, which is the player's name below it. */
   roleLabel?: string
+  /** Pulses a glowing ring around the chip so it draws attention in this
+   * frame — e.g. to call out who a sequence is about. */
+  highlighted?: boolean
 }
 
 export type KitPattern = 'solid' | 'stripes' | 'hoops' | 'sash' | 'split' | 'collar'
@@ -43,6 +46,9 @@ export interface ArrowData {
   strokeWidth: number
   showArrowhead?: boolean // false renders as a plain line (e.g. freehand zone dividers)
   curveOffset?: number // curved arrows only: perpendicular bend depth, user-adjustable
+  /** Shows the real-world pass/run distance (computed from the project's
+   * pitch size) as a small label near the arrow's midpoint. */
+  showDistance?: boolean
 }
 
 export interface ShapeData {
@@ -162,7 +168,6 @@ export type ToolId =
   | 'player_home_gk'
   | 'player_away_gk'
   | 'arrow_straight'
-  | 'arrow_curved'
   | 'line_straight'
   | 'pass_release'
   | 'pass_bounce'

@@ -1,10 +1,45 @@
+import { useEffect, useRef } from 'react'
 import { Circle, Group, Rect, Text } from 'react-konva'
+import Konva from 'konva'
 import { TEAM_COLORS } from '../../constants'
 import type { KitConfig, PlayerChipData } from '../../types'
 import { useEditorStore } from '../../store/editorStore'
 
 const CHIP_R = 18
 const GK_FALLBACK: KitConfig = { pattern: 'solid', color1: '#eab308', color2: '#111827' }
+
+/** Pulsing glow ring behind a highlighted chip — its radius/opacity oscillate
+ * on a Konva.Animation tied to the shape's own layer, so it keeps pulsing
+ * continuously (including while recording video export) without React
+ * re-rendering every frame. */
+function HighlightRing() {
+  const ref = useRef<Konva.Circle>(null)
+
+  useEffect(() => {
+    const node = ref.current
+    if (!node) return
+    const anim = new Konva.Animation((frame) => {
+      if (!frame) return
+      const phase = (Math.sin(frame.time / 350) + 1) / 2 // 0..1
+      node.radius(CHIP_R + 4 + phase * 9)
+      node.opacity(0.85 - phase * 0.6)
+    }, node.getLayer())
+    anim.start()
+    return () => {
+      anim.stop()
+    }
+  }, [])
+
+  return (
+    <Circle
+      ref={ref}
+      radius={CHIP_R + 4}
+      stroke="#ffe100"
+      strokeWidth={3}
+      listening={false}
+    />
+  )
+}
 
 function KitPatternContent({ kit }: { kit: KitConfig }) {
   switch (kit.pattern) {
@@ -109,6 +144,7 @@ export function PlayerChipShape({ data }: { data: PlayerChipData }) {
 
   return (
     <Group>
+      {data.highlighted && <HighlightRing />}
       {data.roleLabel && (
         <Group y={-CHIP_R - 16} listening={false}>
           <Rect

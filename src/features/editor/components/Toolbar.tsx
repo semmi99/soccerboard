@@ -6,7 +6,6 @@ import {
   BouncePassIcon,
   ConeIcon,
   ConnectorIcon,
-  CurvedArrowIcon,
   CircleShapeIcon,
   CursorIcon,
   LadderIcon,
@@ -70,8 +69,7 @@ const SECTIONS: ToolDef[][] = [
     { id: 'ball', label: 'Ball', icon: <BallIcon /> },
   ],
   [
-    { id: 'arrow_straight', label: 'Pfeil gerade', icon: <StraightArrowIcon /> },
-    { id: 'arrow_curved', label: 'Pfeil kurvig', icon: <CurvedArrowIcon /> },
+    { id: 'arrow_straight', label: 'Pfeil (Ziehpunkte zum Biegen)', icon: <StraightArrowIcon /> },
     { id: 'line_straight', label: 'Linie (Zone einzeichnen)', icon: <PlainLineIcon /> },
     { id: 'connector', label: 'Spieler verbinden', icon: <ConnectorIcon /> },
     { id: 'player_zone', label: 'Spielerzone (Fläche füllen)', icon: <PlayerZoneIcon /> },

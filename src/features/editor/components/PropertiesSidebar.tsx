@@ -22,6 +22,7 @@ import { TeamSquadPanel } from './TeamSquadPanel'
 import { EQUIPMENT_DEFAULT_COLORS } from '../objects/shapes/Equipment'
 import { ColorSwatchPicker } from '../../../components/ui/ColorSwatchPicker'
 import { getCurveOffset } from '../objects/shapes/arrowCurve'
+import { addArrowMidpoint } from '../objects/shapes/arrowPoints'
 
 const LINE_STYLES: { value: LineStyle; label: string }[] = [
   { value: 'solid', label: 'Durchgezogen' },
@@ -56,11 +57,16 @@ export function PropertiesSidebar() {
   const zoneGridStyle = useEditorStore((s) => s.zoneGridStyle)
   const showPitchMarkings = useEditorStore((s) => s.showPitchMarkings)
   const fieldCrop = useEditorStore((s) => s.fieldCrop)
+  const pitchLengthM = useEditorStore((s) => s.pitchLengthM)
+  const pitchWidthM = useEditorStore((s) => s.pitchWidthM)
   const setPitchDesign = useEditorStore((s) => s.setPitchDesign)
   const setOrientation = useEditorStore((s) => s.setOrientation)
   const setZoneGridStyle = useEditorStore((s) => s.setZoneGridStyle)
   const setShowPitchMarkings = useEditorStore((s) => s.setShowPitchMarkings)
   const setFieldCrop = useEditorStore((s) => s.setFieldCrop)
+  const setPitchLengthM = useEditorStore((s) => s.setPitchLengthM)
+  const setPitchWidthM = useEditorStore((s) => s.setPitchWidthM)
+  const setLastConnectorColor = useEditorStore((s) => s.setLastConnectorColor)
   const selection = useEditorStore((s) => s.selection)
   const activeFrameIndex = useEditorStore((s) => s.activeFrameIndex)
   const frames = useEditorStore((s) => s.frames)
@@ -146,6 +152,29 @@ export function PropertiesSidebar() {
             />
             Spielfeldmarkierungen anzeigen
           </label>
+          <div className="flex gap-2">
+            <Field label="Länge (m)">
+              <input
+                type="number"
+                min={1}
+                className={inputClass}
+                value={pitchLengthM}
+                onChange={(e) => setPitchLengthM(Number(e.target.value) || 105)}
+              />
+            </Field>
+            <Field label="Breite (m)">
+              <input
+                type="number"
+                min={1}
+                className={inputClass}
+                value={pitchWidthM}
+                onChange={(e) => setPitchWidthM(Number(e.target.value) || 68)}
+              />
+            </Field>
+          </div>
+          <p className="text-[11px] text-white/40">
+            Echte Feldmaße — wird genutzt, um Pass-/Laufdistanzen in Metern anzuzeigen.
+          </p>
         </div>
       </div>
 
@@ -226,7 +255,10 @@ export function PropertiesSidebar() {
             <ConnectorFields
               data={selectedObject.data}
               onCheckpoint={beginHistoryCheckpoint}
-              onChange={(patch) => updateData<Extract<FrameObject, { objectType: 'connector' }>>(patch)}
+              onChange={(patch) => {
+                if (patch.color) setLastConnectorColor(patch.color)
+                updateData<Extract<FrameObject, { objectType: 'connector' }>>(patch)
+              }}
             />
           )}
 
@@ -331,6 +363,18 @@ function PlayerChipFields({
           onChange={(e) => onChange({ roleLabel: e.target.value })}
         />
       </Field>
+      <label className="flex items-center gap-2 text-xs text-white/70">
+        <input
+          type="checkbox"
+          className="accent-violet-accent"
+          checked={data.highlighted ?? false}
+          onChange={(e) => {
+            onCheckpoint()
+            onChange({ highlighted: e.target.checked })
+          }}
+        />
+        Hervorheben (blinkt in diesem Frame)
+      </label>
     </div>
   )
 }
@@ -408,6 +452,29 @@ function ArrowFields({
         />
         Pfeilspitze anzeigen
       </label>
+      <label className="flex items-center gap-2 text-xs text-white/70">
+        <input
+          type="checkbox"
+          className="accent-violet-accent"
+          checked={data.showDistance ?? false}
+          onChange={(e) => {
+            onCheckpoint()
+            onChange({ showDistance: e.target.checked })
+          }}
+        />
+        Distanz anzeigen (m)
+      </label>
+      {data.shape !== 'curved' && (
+        <Button
+          variant="secondary"
+          onClick={() => {
+            onCheckpoint()
+            onChange({ points: addArrowMidpoint(data) })
+          }}
+        >
+          Ziehpunkt hinzufügen
+        </Button>
+      )}
     </div>
   )
 }

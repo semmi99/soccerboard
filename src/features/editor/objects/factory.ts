@@ -1,4 +1,4 @@
-import type { ArrowShape, EquipmentKind, FrameObject, ToolId } from '../types'
+import type { EquipmentKind, FrameObject, ToolId } from '../types'
 
 let homePlayerCount = 0
 let awayPlayerCount = 0
@@ -52,14 +52,13 @@ export function createObjectForTool(
     }
   }
 
-  if (tool === 'arrow_straight' || tool === 'arrow_curved') {
-    const shape: ArrowShape = tool === 'arrow_straight' ? 'straight' : 'curved'
+  if (tool === 'arrow_straight') {
     return {
       ...base,
       objectType: 'arrow',
       data: {
-        shape,
-        points: shape === 'curved' ? [0, 0, 50, -40, 100, 0] : [0, 0, 100, 0],
+        shape: 'straight',
+        points: [0, 0, 100, 0],
         lineStyle: 'solid',
         color: '#f0d878',
         strokeWidth: 3,
@@ -168,8 +167,11 @@ export function createObjectForTool(
       data: {
         kind: 'polygon',
         width: 100,
-        height: 100,
-        points: [-50, -35, 50, -35, 50, 35, -50, 35],
+        height: 70,
+        // A trapezoid by default (not a rectangle!) so this reads as its own
+        // freely-reshapeable zone shape from the moment it's placed, instead
+        // of looking identical to the plain Rechteck tool until dragged.
+        points: [-30, -35, 30, -35, 55, 35, -55, 35],
         fill: 'rgba(124, 58, 237, 0.25)',
         stroke: '#a855f7',
         strokeWidth: 2,

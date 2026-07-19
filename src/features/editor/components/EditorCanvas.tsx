@@ -428,6 +428,12 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
     updateObjectLive(id, patch)
   }
 
+  function handleArrowPointsChange(id: string, points: number[]) {
+    const obj = frame.objects.find((o) => o.id === id)
+    if (!obj || obj.objectType !== 'arrow') return
+    updateObjectLive(id, { data: { ...obj.data, points } } as Partial<FrameObject>)
+  }
+
   // Shapes (zones/circles/rects/polygons) get free non-uniform corner
   // resizing since their width/height are independently meaningful; other
   // object kinds (chips, equipment, text, ball) keep proportional scaling
@@ -508,6 +514,7 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
                 onDragMove={handleDragMove}
                 onDragEnd={handleDragMove}
                 onTransformEnd={handleTransformEnd}
+                onArrowPointsChange={handleArrowPointsChange}
                 registerRef={registerRef}
                 initialOpacity={enteringIds.has(object.id) ? 0 : 1}
                 initialScaleFactor={enteringIds.has(object.id) ? 0.7 : 1}

@@ -329,6 +329,8 @@ export type Database = {
           org_id: string
           orientation: string
           pitch_design: string
+          pitch_length_m: number
+          pitch_width_m: number
           show_pitch_markings: boolean
           team_id: string | null
           thumbnail_url: string | null
@@ -345,6 +347,8 @@ export type Database = {
           org_id: string
           orientation?: string
           pitch_design?: string
+          pitch_length_m?: number
+          pitch_width_m?: number
           show_pitch_markings?: boolean
           team_id?: string | null
           thumbnail_url?: string | null
@@ -361,6 +365,8 @@ export type Database = {
           org_id?: string
           orientation?: string
           pitch_design?: string
+          pitch_length_m?: number
+          pitch_width_m?: number
           show_pitch_markings?: boolean
           team_id?: string | null
           thumbnail_url?: string | null

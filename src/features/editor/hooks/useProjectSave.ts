@@ -14,6 +14,8 @@ export function useProjectSave() {
   const zoneGridStyle = useEditorStore((s) => s.zoneGridStyle)
   const showPitchMarkings = useEditorStore((s) => s.showPitchMarkings)
   const fieldCrop = useEditorStore((s) => s.fieldCrop)
+  const pitchLengthM = useEditorStore((s) => s.pitchLengthM)
+  const pitchWidthM = useEditorStore((s) => s.pitchWidthM)
   const teamId = useEditorStore((s) => s.teamId)
   const frames = useEditorStore((s) => s.frames)
   const isDirty = useEditorStore((s) => s.isDirty)
@@ -53,6 +55,8 @@ export function useProjectSave() {
         zoneGridStyle,
         showPitchMarkings,
         fieldCrop,
+        pitchLengthM,
+        pitchWidthM,
         frames,
       })
 

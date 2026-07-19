@@ -47,6 +47,8 @@ export function EditorPage() {
           zoneGridStyle: project.zoneGridStyle,
           showPitchMarkings: project.showPitchMarkings,
           fieldCrop: project.fieldCrop,
+          pitchLengthM: project.pitchLengthM,
+          pitchWidthM: project.pitchWidthM,
           frames: project.frames,
         })
       })
