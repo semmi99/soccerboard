@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import { FREE_TIER_LIMITS, PRO_TIER_LIMITS } from '../../../lib/limits'
+import { MarketingFooter } from './MarketingFooter'
 
 const FEATURES = [
   {
@@ -205,9 +206,7 @@ export function LandingPage() {
         </div>
       </section>
 
-      <footer className="border-t border-white/10 px-6 py-8 text-center text-xs text-white/40">
-        TacticBoard Pro — ein Produkt von 9011 Soccer
-      </footer>
+      <MarketingFooter />
     </div>
   )
 }

@@ -14,7 +14,7 @@ export function AuthGuard({ children }: { children: ReactNode }) {
   const status = useAuthStore((s) => s.status)
 
   if (status === 'loading') return <FullScreenSpinner />
-  if (status === 'signed_out') return <Navigate to="/login" replace />
+  if (status === 'signed_out') return <Navigate to="/" replace />
   return <>{children}</>
 }
 
