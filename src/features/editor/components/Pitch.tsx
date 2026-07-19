@@ -1,15 +1,19 @@
 import { Arc, Circle, Group, Line, Rect } from 'react-konva'
-import { PITCH_LOGICAL, PITCH_STAGE_SIZE } from '../constants'
-import type { PitchDesign, PitchOrientation, ZoneGridStyle } from '../types'
+import { PITCH_LOGICAL, getCropLength, getCropOriginX, getCroppedStageSize } from '../constants'
+import type { FieldCrop, PitchDesign, PitchOrientation, ZoneGridStyle } from '../types'
 
 const { width: L, height: B } = PITCH_LOGICAL // length (x), breadth (y)
-const CX = L / 2
+const CX = L / 2 // the pitch's true midfield line — a fixed anatomical point, independent of any crop
 const CY = B / 2
 
 const THEMES: Record<PitchDesign, { grassA: string; grassB: string; line: string }> = {
   classic_green: { grassA: '#1e7d32', grassB: '#1a6b2b', line: 'rgba(255,255,255,0.85)' },
   night_navy: { grassA: '#0f1a2e', grassB: '#0b1424', line: 'rgba(212,175,55,0.8)' },
   dark_orange: { grassA: '#0c0c0c', grassB: '#090909', line: 'rgba(255,140,26,0.9)' },
+  turquoise: { grassA: '#0f766e', grassB: '#0d6560', line: 'rgba(255,255,255,0.85)' },
+  royal_blue: { grassA: '#1c4f8c', grassB: '#173f70', line: 'rgba(255,255,255,0.85)' },
+  maroon: { grassA: '#5c1f1f', grassB: '#4a1818', line: 'rgba(240,216,120,0.85)' },
+  light_gray: { grassA: '#e5e7eb', grassB: '#d1d5db', line: 'rgba(20,20,20,0.85)' },
 }
 
 function Stripes({ theme }: { theme: { grassA: string; grassB: string } }) {
@@ -181,21 +185,31 @@ export function Pitch({
   orientation,
   zoneGridStyle = 'none',
   showPitchMarkings = true,
+  fieldCrop = 'full',
 }: {
   design: PitchDesign
   orientation: PitchOrientation
   zoneGridStyle?: ZoneGridStyle
   showPitchMarkings?: boolean
+  fieldCrop?: FieldCrop
 }) {
   const theme = THEMES[design]
-  const stage = PITCH_STAGE_SIZE[orientation]
+  const stage = getCroppedStageSize(orientation, fieldCrop)
   const rotation = orientation === 'vertical' ? 90 : 0
+
+  // A crop is just a smaller "window" into the same full-size pitch: the
+  // window's own center (not the pitch's true center) becomes the rotation
+  // anchor, so only that slice ends up inside the (now smaller) stage —
+  // everything else is naturally clipped by the stage bounds like normal.
+  const cropLength = getCropLength(fieldCrop)
+  const cropOriginX = getCropOriginX(fieldCrop)
+  const anchorX = cropOriginX + cropLength / 2
 
   return (
     <Group
       x={stage.width / 2}
       y={stage.height / 2}
-      offsetX={CX}
+      offsetX={anchorX}
       offsetY={CY}
       rotation={rotation}
     >

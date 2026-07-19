@@ -2,6 +2,7 @@ import { create } from 'zustand'
 import type {
   EditorFrame,
   EquipmentKind,
+  FieldCrop,
   FrameObject,
   PitchDesign,
   PitchOrientation,
@@ -47,6 +48,7 @@ interface EditorState {
   orientation: PitchOrientation
   zoneGridStyle: ZoneGridStyle
   showPitchMarkings: boolean
+  fieldCrop: FieldCrop
   teamId: string | null
   teamKit: TeamKit | null
   playerPhotos: Record<string, string>
@@ -71,6 +73,7 @@ interface EditorState {
     teamId: string | null
     zoneGridStyle: ZoneGridStyle
     showPitchMarkings: boolean
+    fieldCrop: FieldCrop
     frames: EditorFrame[]
   }) => void
   resetToBlankProject: () => void
@@ -81,6 +84,7 @@ interface EditorState {
   setOrientation: (o: PitchOrientation) => void
   setZoneGridStyle: (style: ZoneGridStyle) => void
   setShowPitchMarkings: (show: boolean) => void
+  setFieldCrop: (crop: FieldCrop) => void
   setProjectTitle: (title: string) => void
   setTeamId: (id: string | null) => void
   setTeamKit: (kit: TeamKit | null) => void
@@ -131,6 +135,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
   orientation: 'vertical',
   zoneGridStyle: 'none',
   showPitchMarkings: true,
+  fieldCrop: 'full',
   teamId: null,
   teamKit: null,
   playerPhotos: {},
@@ -155,6 +160,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
     teamId,
     zoneGridStyle,
     showPitchMarkings,
+    fieldCrop,
     frames,
   }) => {
     set({
@@ -164,6 +170,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
       orientation,
       zoneGridStyle,
       showPitchMarkings,
+      fieldCrop,
       teamId,
       teamKit: null,
       playerPhotos: {},
@@ -188,6 +195,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
       projectTitle: 'Neues Projekt',
       zoneGridStyle: 'none',
       showPitchMarkings: true,
+      fieldCrop: 'full',
       teamId: null,
       teamKit: null,
       playerPhotos: {},
@@ -210,6 +218,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
   setOrientation: (o) => set({ orientation: o, isDirty: true }),
   setZoneGridStyle: (style) => set({ zoneGridStyle: style, isDirty: true }),
   setShowPitchMarkings: (show) => set({ showPitchMarkings: show, isDirty: true }),
+  setFieldCrop: (crop) => set({ fieldCrop: crop, isDirty: true }),
   setProjectTitle: (title) => set({ projectTitle: title, isDirty: true }),
   setTeamId: (id) => set({ teamId: id, isDirty: true }),
   setTeamKit: (kit) => set({ teamKit: kit }),

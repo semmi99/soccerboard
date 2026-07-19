@@ -13,6 +13,7 @@ export function useProjectSave() {
   const orientation = useEditorStore((s) => s.orientation)
   const zoneGridStyle = useEditorStore((s) => s.zoneGridStyle)
   const showPitchMarkings = useEditorStore((s) => s.showPitchMarkings)
+  const fieldCrop = useEditorStore((s) => s.fieldCrop)
   const teamId = useEditorStore((s) => s.teamId)
   const frames = useEditorStore((s) => s.frames)
   const isDirty = useEditorStore((s) => s.isDirty)
@@ -51,6 +52,7 @@ export function useProjectSave() {
         teamId,
         zoneGridStyle,
         showPitchMarkings,
+        fieldCrop,
         frames,
       })
 

@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useRef, useState, type RefObject } from 'react'
-import { Layer, Stage, Transformer } from 'react-konva'
+import { Group, Layer, Stage, Transformer } from 'react-konva'
 import Konva from 'konva'
 import type { KonvaEventObject } from 'konva/lib/Node'
 import { useEditorStore } from '../store/editorStore'
-import { PITCH_STAGE_SIZE } from '../constants'
+import { getCropOriginX, getCroppedStageSize } from '../constants'
 import { useElementSize } from '../hooks/useElementSize'
 import { Pitch } from './Pitch'
 import { ObjectRenderer } from '../objects/ObjectRenderer'
@@ -154,6 +154,7 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
   const orientation = useEditorStore((s) => s.orientation)
   const zoneGridStyle = useEditorStore((s) => s.zoneGridStyle)
   const showPitchMarkings = useEditorStore((s) => s.showPitchMarkings)
+  const fieldCrop = useEditorStore((s) => s.fieldCrop)
   const frames = useEditorStore((s) => s.frames)
   const activeFrameIndex = useEditorStore((s) => s.activeFrameIndex)
   const tool = useEditorStore((s) => s.tool)
@@ -195,11 +196,18 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
   const connectorRefs = useRef<Record<string, Konva.Line>>({})
   const zoneRefs = useRef<Record<string, Konva.Line>>({})
 
-  const logical = PITCH_STAGE_SIZE[orientation]
+  const logical = getCroppedStageSize(orientation, fieldCrop)
   const scale =
     size.width > 0 && size.height > 0
       ? Math.min(size.width / logical.width, size.height / logical.height)
       : 1
+
+  // Objects are stored in the full (uncropped) pitch's coordinate system.
+  // When a crop is active, the stage itself only spans the cropped slice,
+  // so the whole objects layer is shifted by the same amount the Pitch's
+  // own rendering is (see Pitch.tsx) to keep them aligned — and the shift
+  // is added back when translating a click into a stored position.
+  const cropShift = getCropOriginX(fieldCrop)
 
   const registerRef = useCallback((id: string, node: Konva.Group | null) => {
     if (node) nodeRefs.current[id] = node
@@ -394,7 +402,12 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
       return
     }
     const pos = stageRef.current?.getRelativePointerPosition()
-    if (pos) addObjectAt(pos.x, pos.y)
+    if (!pos) return
+    // getRelativePointerPosition() is relative to the (possibly cropped)
+    // stage; shift it back into the full-pitch coordinate space objects
+    // are stored in (see the cropShift comment above).
+    if (orientation === 'vertical') addObjectAt(pos.x, pos.y + cropShift)
+    else addObjectAt(pos.x + cropShift, pos.y)
   }
 
   function handleDragStart() {
@@ -441,9 +454,14 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
             orientation={orientation}
             zoneGridStyle={zoneGridStyle}
             showPitchMarkings={showPitchMarkings}
+            fieldCrop={fieldCrop}
           />
         </Layer>
         <Layer ref={objectsLayerRef}>
+        <Group
+          x={orientation === 'horizontal' ? -cropShift : 0}
+          y={orientation === 'vertical' ? -cropShift : 0}
+        >
           {sortedObjects.map((object) => {
             if (object.objectType === 'player_zone') {
               const points = object.data.playerIds
@@ -503,6 +521,7 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
               newBox.width < 8 || newBox.height < 8 ? oldBox : newBox
             }
           />
+        </Group>
         </Layer>
       </Stage>
     </div>

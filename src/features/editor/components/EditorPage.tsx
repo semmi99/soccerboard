@@ -46,6 +46,7 @@ export function EditorPage() {
           teamId: project.teamId,
           zoneGridStyle: project.zoneGridStyle,
           showPitchMarkings: project.showPitchMarkings,
+          fieldCrop: project.fieldCrop,
           frames: project.frames,
         })
       })

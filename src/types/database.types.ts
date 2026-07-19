@@ -285,6 +285,7 @@ export type Database = {
         Row: {
           created_at: string
           created_by: string | null
+          field_crop: string
           id: string
           org_id: string
           orientation: string
@@ -300,6 +301,7 @@ export type Database = {
         Insert: {
           created_at?: string
           created_by?: string | null
+          field_crop?: string
           id?: string
           org_id: string
           orientation?: string
@@ -315,6 +317,7 @@ export type Database = {
         Update: {
           created_at?: string
           created_by?: string | null
+          field_crop?: string
           id?: string
           org_id?: string
           orientation?: string

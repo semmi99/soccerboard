@@ -120,9 +120,20 @@ export interface EditorFrame {
   objects: FrameObject[]
 }
 
-export type PitchDesign = 'classic_green' | 'night_navy' | 'dark_orange'
+export type PitchDesign =
+  | 'classic_green'
+  | 'night_navy'
+  | 'dark_orange'
+  | 'turquoise'
+  | 'royal_blue'
+  | 'maroon'
+  | 'light_gray'
 export type PitchOrientation = 'vertical' | 'horizontal'
 export type ZoneGridStyle = 'none' | 'thirds_channels' | 'guardiola'
+/** How much of the pitch's length is shown/exported: the full pitch, or a
+ * zoomed-in slice of just the attacking end for corner-kick/set-piece
+ * diagrams. */
+export type FieldCrop = 'full' | 'half' | 'three_quarter' | 'third'
 
 export type ToolId =
   | 'select'

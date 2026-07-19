@@ -6,6 +6,7 @@ import type {
   ConnectorData,
   EquipmentData,
   EquipmentKind,
+  FieldCrop,
   FrameObject,
   LineStyle,
   PitchDesign,
@@ -54,10 +55,12 @@ export function PropertiesSidebar() {
   const orientation = useEditorStore((s) => s.orientation)
   const zoneGridStyle = useEditorStore((s) => s.zoneGridStyle)
   const showPitchMarkings = useEditorStore((s) => s.showPitchMarkings)
+  const fieldCrop = useEditorStore((s) => s.fieldCrop)
   const setPitchDesign = useEditorStore((s) => s.setPitchDesign)
   const setOrientation = useEditorStore((s) => s.setOrientation)
   const setZoneGridStyle = useEditorStore((s) => s.setZoneGridStyle)
   const setShowPitchMarkings = useEditorStore((s) => s.setShowPitchMarkings)
+  const setFieldCrop = useEditorStore((s) => s.setFieldCrop)
   const selection = useEditorStore((s) => s.selection)
   const activeFrameIndex = useEditorStore((s) => s.activeFrameIndex)
   const frames = useEditorStore((s) => s.frames)
@@ -95,6 +98,10 @@ export function PropertiesSidebar() {
               <option value="classic_green">Klassisch Grün</option>
               <option value="night_navy">Stadion bei Nacht</option>
               <option value="dark_orange">Dunkel (Orange)</option>
+              <option value="turquoise">Türkis</option>
+              <option value="royal_blue">Königsblau</option>
+              <option value="maroon">Bordeaux</option>
+              <option value="light_gray">Hellgrau (Druck)</option>
             </select>
           </Field>
           <Field label="Ausrichtung">
@@ -105,6 +112,18 @@ export function PropertiesSidebar() {
             >
               <option value="vertical">Hochformat</option>
               <option value="horizontal">Querformat</option>
+            </select>
+          </Field>
+          <Field label="Feldausschnitt">
+            <select
+              className={selectClass}
+              value={fieldCrop}
+              onChange={(e) => setFieldCrop(e.target.value as FieldCrop)}
+            >
+              <option value="full">Ganzes Feld</option>
+              <option value="half">Hälfte</option>
+              <option value="three_quarter">Dreiviertel</option>
+              <option value="third">Letztes Drittel (Eckball)</option>
             </select>
           </Field>
           <Field label="Zonenraster">

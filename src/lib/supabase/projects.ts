@@ -2,6 +2,7 @@ import { supabase } from './client'
 import type { Json, Tables, TablesInsert } from '../../types/database.types'
 import type {
   EditorFrame,
+  FieldCrop,
   FrameObject,
   ObjectType,
   PitchDesign,
@@ -72,13 +73,16 @@ export interface LoadedProject {
   teamId: string | null
   zoneGridStyle: ZoneGridStyle
   showPitchMarkings: boolean
+  fieldCrop: FieldCrop
   frames: EditorFrame[]
 }
 
 export async function loadProject(id: string): Promise<LoadedProject> {
   const { data: project, error: projectError } = await supabase
     .from('projects')
-    .select('id, title, pitch_design, orientation, team_id, zone_grid_style, show_pitch_markings')
+    .select(
+      'id, title, pitch_design, orientation, team_id, zone_grid_style, show_pitch_markings, field_crop',
+    )
     .eq('id', id)
     .single()
   if (projectError) throw projectError
@@ -111,6 +115,7 @@ export async function loadProject(id: string): Promise<LoadedProject> {
     teamId: project.team_id,
     zoneGridStyle: project.zone_grid_style as ZoneGridStyle,
     showPitchMarkings: project.show_pitch_markings,
+    fieldCrop: project.field_crop as FieldCrop,
     frames,
   }
 }
@@ -125,6 +130,7 @@ export interface SaveProjectInput {
   teamId: string | null
   zoneGridStyle: ZoneGridStyle
   showPitchMarkings: boolean
+  fieldCrop: FieldCrop
   frames: EditorFrame[]
 }
 
@@ -141,6 +147,7 @@ export async function saveProject(input: SaveProjectInput): Promise<string> {
         team_id: input.teamId,
         zone_grid_style: input.zoneGridStyle,
         show_pitch_markings: input.showPitchMarkings,
+        field_crop: input.fieldCrop,
       })
       .eq('id', projectId)
     if (error) throw error
@@ -171,6 +178,7 @@ async function insertProjectRow(
     team_id: input.teamId,
     zone_grid_style: input.zoneGridStyle,
     show_pitch_markings: input.showPitchMarkings,
+    field_crop: input.fieldCrop,
   }
   const { data, error } = await supabase
     .from('projects')
