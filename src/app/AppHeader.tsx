@@ -5,6 +5,7 @@ const NAV_ITEMS = [
   { to: '/dashboard', label: 'Projekte' },
   { to: '/squad', label: 'Kader' },
   { to: '/formations', label: 'Formationen' },
+  { to: '/account', label: 'Konto' },
 ]
 
 export function AppHeader() {

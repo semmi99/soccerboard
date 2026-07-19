@@ -6,6 +6,7 @@ import { DashboardPage } from '../features/projects/components/DashboardPage'
 import { SquadPage } from '../features/squad/components/SquadPage'
 import { FormationsPage } from '../features/formations/components/FormationsPage'
 import { LandingPage } from '../features/marketing/components/LandingPage'
+import { AccountPage } from '../features/account/components/AccountPage'
 import { AuthGuard, GuestGuard } from './AuthGuard'
 
 export function AppRoutes() {
@@ -56,6 +57,14 @@ export function AppRoutes() {
         element={
           <AuthGuard>
             <FormationsPage />
+          </AuthGuard>
+        }
+      />
+      <Route
+        path="/account"
+        element={
+          <AuthGuard>
+            <AccountPage />
           </AuthGuard>
         }
       />

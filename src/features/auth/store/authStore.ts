@@ -24,6 +24,8 @@ interface AuthState {
   ) => Promise<{ error: string | null; needsEmailConfirmation: boolean }>
   signOut: () => Promise<void>
   setOrganization: (organization: Organization) => void
+  updatePassword: (newPassword: string) => Promise<{ error: string | null }>
+  updateProfileName: (fullName: string) => Promise<{ error: string | null }>
 }
 
 async function loadProfileAndOrg(userId: string) {
@@ -129,4 +131,23 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
 
   setOrganization: (organization) => set({ organization }),
+
+  updatePassword: async (newPassword) => {
+    const { error } = await supabase.auth.updateUser({ password: newPassword })
+    return { error: error?.message ?? null }
+  },
+
+  updateProfileName: async (fullName) => {
+    const { profile } = get()
+    if (!profile) return { error: 'Kein Profil geladen.' }
+    const { data, error } = await supabase
+      .from('profiles')
+      .update({ full_name: fullName })
+      .eq('id', profile.id)
+      .select('*')
+      .single()
+    if (error) return { error: error.message }
+    set({ profile: data })
+    return { error: null }
+  },
 }))
