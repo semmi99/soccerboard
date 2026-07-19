@@ -42,7 +42,7 @@ export function SignupPage() {
         </p>
         <Link
           to="/login"
-          className="mt-5 inline-block text-sm font-medium text-violet-accent-bright hover:underline"
+          className="mt-5 inline-block text-sm font-medium text-brand-yellow hover:underline"
         >
           Zurück zum Login
         </Link>
@@ -86,13 +86,13 @@ export function SignupPage() {
           onChange={(e) => setPassword(e.target.value)}
         />
         {error && <p className="text-sm text-red-400">{error}</p>}
-        <Button type="submit" loading={loading} className="mt-2 w-full">
+        <Button type="submit" variant="brand" loading={loading} className="mt-2 w-full">
           Konto erstellen
         </Button>
       </form>
-      <p className="mt-5 text-center text-sm text-white/50">
+      <p className="mt-5 text-center text-sm text-white/60">
         Schon registriert?{' '}
-        <Link to="/login" className="font-medium text-violet-accent-bright hover:underline">
+        <Link to="/login" className="font-medium text-brand-yellow hover:underline">
           Anmelden
         </Link>
       </p>
