@@ -33,6 +33,18 @@
   --color-brand-ink: #161616;
 }
 
+/* "Dunkel" theme: same accent colors, neutral near-black backgrounds
+   instead of 9011 blue. Applied via a data-theme attribute on <html> (see
+   src/lib/theme.ts) so every component using bg-pitch-* / border-pitch-*
+   picks it up automatically — no component changes needed. */
+:root[data-theme="dark"] {
+  --color-pitch-950: #0a0a0a;
+  --color-pitch-900: #121212;
+  --color-pitch-800: #1c1c1c;
+  --color-pitch-700: #292929;
+  --color-pitch-600: #3a3a3a;
+}
+
 html,
 body,
 #root {

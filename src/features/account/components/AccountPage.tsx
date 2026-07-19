@@ -3,6 +3,12 @@ import { AppHeader } from '../../../app/AppHeader'
 import { Button } from '../../../components/ui/Button'
 import { Input } from '../../../components/ui/Input'
 import { useAuthStore } from '../../auth/store/authStore'
+import { applyTheme, getStoredTheme, type AppTheme } from '../../../lib/theme'
+
+const THEME_OPTIONS: { value: AppTheme; label: string; swatch: string }[] = [
+  { value: 'brand', label: '9011 Blau', swatch: '#0f3d59' },
+  { value: 'dark', label: 'Dunkel', swatch: '#121212' },
+]
 
 export function AccountPage() {
   const session = useAuthStore((s) => s.session)
@@ -10,6 +16,13 @@ export function AccountPage() {
   const organization = useAuthStore((s) => s.organization)
   const updatePassword = useAuthStore((s) => s.updatePassword)
   const updateProfileName = useAuthStore((s) => s.updateProfileName)
+
+  const [theme, setTheme] = useState<AppTheme>(getStoredTheme)
+
+  function handleThemeChange(next: AppTheme) {
+    setTheme(next)
+    applyTheme(next)
+  }
 
   const [fullName, setFullName] = useState(profile?.full_name ?? '')
   const [nameSaving, setNameSaving] = useState(false)
@@ -92,6 +105,35 @@ export function AccountPage() {
               Namen speichern
             </Button>
           </form>
+        </section>
+
+        <section className="mb-8 rounded-xl border border-pitch-700 bg-pitch-900 p-5">
+          <h2 className="mb-4 text-[11px] font-semibold uppercase tracking-wide text-white/40">
+            Darstellung
+          </h2>
+          <div className="flex gap-3">
+            {THEME_OPTIONS.map((opt) => (
+              <button
+                key={opt.value}
+                type="button"
+                onClick={() => handleThemeChange(opt.value)}
+                className={`flex flex-1 flex-col items-center gap-2 rounded-lg border p-3 text-xs transition-colors ${
+                  theme === opt.value
+                    ? 'border-violet-accent bg-violet-accent/10 text-white'
+                    : 'border-pitch-600 text-white/60 hover:border-pitch-500'
+                }`}
+              >
+                <span
+                  className="h-8 w-full rounded-md border border-white/10"
+                  style={{ backgroundColor: opt.swatch }}
+                />
+                {opt.label}
+              </button>
+            ))}
+          </div>
+          <p className="mt-3 text-[11px] text-white/40">
+            Gilt für diesen Browser, nicht für die öffentliche Startseite.
+          </p>
         </section>
 
         <section className="rounded-xl border border-pitch-700 bg-pitch-900 p-5">
