@@ -3,7 +3,7 @@ import type Konva from 'konva'
 import { useEditorStore } from '../store/editorStore'
 import { useAuthStore } from '../../auth/store/authStore'
 import { limitsForTier } from '../../../lib/limits'
-import { exportStageAsImage, type ExportFormat } from '../export/exportImage'
+import { exportStageAsImage, exportStageAsSocialImage, type ExportFormat } from '../export/exportImage'
 import { downloadVideo, recordFramesAsVideo } from '../export/exportVideo'
 import { Button } from '../../../components/ui/Button'
 
@@ -20,6 +20,7 @@ export function ExportMenu({ stageRef }: { stageRef: RefObject<Konva.Stage | nul
   const [isOpen, setIsOpen] = useState(false)
   const [format, setFormat] = useState<ExportKind>('png')
   const [pixelRatio, setPixelRatio] = useState(2)
+  const [socialFormat, setSocialFormat] = useState(false)
   const [isRecording, setIsRecording] = useState(false)
   const [videoError, setVideoError] = useState<string | null>(null)
   const containerRef = useRef<HTMLDivElement>(null)
@@ -48,6 +49,12 @@ export function ExportMenu({ stageRef }: { stageRef: RefObject<Konva.Stage | nul
     // A macrotask (not requestAnimationFrame) so this fires even if the tab
     // is backgrounded or otherwise not actively compositing frames.
     setTimeout(() => {
+      if (socialFormat) {
+        void exportStageAsSocialImage(stage, { logoUrl: organization?.logo_url, fileName }).then(
+          () => setIsOpen(false),
+        )
+        return
+      }
       exportStageAsImage(stage, {
         format,
         pixelRatio,
@@ -66,7 +73,10 @@ export function ExportMenu({ stageRef }: { stageRef: RefObject<Konva.Stage | nul
     try {
       // Give the Transformer a tick to detach before recording starts.
       await new Promise((resolve) => setTimeout(resolve, 0))
-      const result = await recordFramesAsVideo(stage)
+      const result = await recordFramesAsVideo(stage, {
+        social: socialFormat,
+        logoUrl: organization?.logo_url,
+      })
       downloadVideo(result, fileName)
       setIsOpen(false)
     } catch (err) {
@@ -101,6 +111,16 @@ export function ExportMenu({ stageRef }: { stageRef: RefObject<Konva.Stage | nul
               </select>
             </label>
 
+            <label className="flex items-center gap-2 text-xs text-white/70">
+              <input
+                type="checkbox"
+                className="accent-violet-accent"
+                checked={socialFormat}
+                onChange={(e) => setSocialFormat(e.target.checked)}
+              />
+              Social Story (9:16, Hochformat + Logo)
+            </label>
+
             {format === 'video' ? (
               <>
                 <p className="text-[11px] text-white/40">
@@ -122,25 +142,34 @@ export function ExportMenu({ stageRef }: { stageRef: RefObject<Konva.Stage | nul
               </>
             ) : (
               <>
-                <label className="flex flex-col gap-1 text-xs">
-                  <span className="font-medium text-white/60">Auflösung</span>
-                  <select
-                    className="rounded-md border border-pitch-600 bg-pitch-800 px-2 py-1.5 text-xs text-white outline-none focus:border-violet-accent"
-                    value={pixelRatio}
-                    onChange={(e) => setPixelRatio(Number(e.target.value))}
-                  >
-                    {availableResolutions.map((r) => (
-                      <option key={r.pixelRatio} value={r.pixelRatio}>
-                        {r.label}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-
-                {maxPixelRatio < 4 && (
+                {socialFormat ? (
                   <p className="text-[11px] text-white/40">
-                    Free-Tier: Export bis {maxPixelRatio}x. Für 4K auf Pro upgraden.
+                    Exportiert als 1080×1920 PNG mit 9011-Hintergrund und Vereinslogo, fertig für
+                    Instagram/TikTok.
                   </p>
+                ) : (
+                  <>
+                    <label className="flex flex-col gap-1 text-xs">
+                      <span className="font-medium text-white/60">Auflösung</span>
+                      <select
+                        className="rounded-md border border-pitch-600 bg-pitch-800 px-2 py-1.5 text-xs text-white outline-none focus:border-violet-accent"
+                        value={pixelRatio}
+                        onChange={(e) => setPixelRatio(Number(e.target.value))}
+                      >
+                        {availableResolutions.map((r) => (
+                          <option key={r.pixelRatio} value={r.pixelRatio}>
+                            {r.label}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+
+                    {maxPixelRatio < 4 && (
+                      <p className="text-[11px] text-white/40">
+                        Free-Tier: Export bis {maxPixelRatio}x. Für 4K auf Pro upgraden.
+                      </p>
+                    )}
+                  </>
                 )}
 
                 <Button onClick={handleExport} className="w-full">

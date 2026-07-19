@@ -108,6 +108,9 @@ export type Database = {
       }
       frames: {
         Row: {
+          caption_badge: string | null
+          caption_subtitle: string | null
+          caption_title: string | null
           created_at: string
           duration_ms: number
           formation_id: string | null
@@ -116,6 +119,9 @@ export type Database = {
           project_id: string
         }
         Insert: {
+          caption_badge?: string | null
+          caption_subtitle?: string | null
+          caption_title?: string | null
           created_at?: string
           duration_ms?: number
           formation_id?: string | null
@@ -124,6 +130,9 @@ export type Database = {
           project_id: string
         }
         Update: {
+          caption_badge?: string | null
+          caption_subtitle?: string | null
+          caption_title?: string | null
           created_at?: string
           duration_ms?: number
           formation_id?: string | null

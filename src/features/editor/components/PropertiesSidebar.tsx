@@ -321,6 +321,16 @@ function PlayerChipFields({
           onChange={(e) => onChange({ label: e.target.value })}
         />
       </Field>
+      <Field label="Taktische Rolle (optional)">
+        <input
+          type="text"
+          className={inputClass}
+          placeholder="z.B. PIVOT, FREE, PIN"
+          value={data.roleLabel ?? ''}
+          onFocus={onCheckpoint}
+          onChange={(e) => onChange({ roleLabel: e.target.value })}
+        />
+      </Field>
     </div>
   )
 }
@@ -722,6 +732,16 @@ function PlayerZoneFields({
 }) {
   return (
     <div className="flex flex-col gap-2">
+      <Field label="Beschriftung (optional)">
+        <input
+          type="text"
+          className={inputClass}
+          placeholder="z.B. 4 v 3"
+          value={data.label ?? ''}
+          onFocus={onCheckpoint}
+          onChange={(e) => onChange({ label: e.target.value })}
+        />
+      </Field>
       <Field label="Füllfarbe">
         <ColorSwatchPicker
           value={rgbaToHex(data.fill)}

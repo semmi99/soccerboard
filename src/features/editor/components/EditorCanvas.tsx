@@ -9,6 +9,7 @@ import { Pitch } from './Pitch'
 import { ObjectRenderer } from '../objects/ObjectRenderer'
 import { ConnectorShape } from '../objects/shapes/Connector'
 import { PlayerZoneShape } from '../objects/shapes/PlayerZone'
+import { FrameCaptionOverlay } from './FrameCaptionOverlay'
 import type { FrameObject } from '../types'
 
 // Cubic ease-in-out: a touch smoother/slower off the start and into the end
@@ -523,6 +524,15 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
           />
         </Group>
         </Layer>
+        {frame.caption && (
+          <Layer listening={false}>
+            <FrameCaptionOverlay
+              caption={frame.caption}
+              stageWidth={logical.width}
+              stageHeight={logical.height}
+            />
+          </Layer>
+        )}
       </Stage>
     </div>
   )

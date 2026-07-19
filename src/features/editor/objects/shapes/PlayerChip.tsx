@@ -109,6 +109,29 @@ export function PlayerChipShape({ data }: { data: PlayerChipData }) {
 
   return (
     <Group>
+      {data.roleLabel && (
+        <Group y={-CHIP_R - 16} listening={false}>
+          <Rect
+            width={80}
+            height={15}
+            offsetX={40}
+            offsetY={7.5}
+            cornerRadius={7.5}
+            fill="rgba(10, 10, 10, 0.65)"
+          />
+          <Text
+            text={data.roleLabel.toUpperCase()}
+            fontSize={9.5}
+            fontStyle="bold"
+            fill="#ffe100"
+            width={80}
+            offsetX={40}
+            offsetY={5}
+            align="center"
+            letterSpacing={0.5}
+          />
+        </Group>
+      )}
       <KitFill kit={kit} />
       <Text
         text={String(data.number)}

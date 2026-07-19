@@ -15,6 +15,9 @@ export interface PlayerChipData {
   label: string
   playerId?: string
   isGoalkeeper?: boolean
+  /** Short tactical role tag rendered above the chip (e.g. "PIVOT", "FREE",
+   * "RB") — distinct from `label`, which is the player's name below it. */
+  roleLabel?: string
 }
 
 export type KitPattern = 'solid' | 'stripes' | 'hoops' | 'sash' | 'split' | 'collar'
@@ -83,6 +86,8 @@ export interface PlayerZoneData {
   fill: string
   stroke: string
   opacity: number
+  /** Optional call-out rendered centered in the zone (e.g. "4 v 3"). */
+  label?: string
 }
 
 export type ObjectType =
@@ -114,10 +119,21 @@ export type FrameObject =
   | (FrameObjectBase & { objectType: 'connector'; data: ConnectorData })
   | (FrameObjectBase & { objectType: 'player_zone'; data: PlayerZoneData })
 
+/** Lower-third overlay shown on the pitch for this frame and baked into
+ * PNG/video export — a step badge, headline, and optional subline, matching
+ * the "coaching explainer" caption style used in social-media tactics reels.
+ * Rendered only when `title` is non-empty. */
+export interface FrameCaption {
+  badge?: string
+  title: string
+  subtitle?: string
+}
+
 export interface EditorFrame {
   id: string
   durationMs: number
   objects: FrameObject[]
+  caption?: FrameCaption
 }
 
 export type PitchDesign =
@@ -144,6 +160,9 @@ export type ToolId =
   | 'arrow_straight'
   | 'arrow_curved'
   | 'line_straight'
+  | 'pass_release'
+  | 'pass_bounce'
+  | 'run_arrow'
   | 'shape_circle'
   | 'shape_rect'
   | 'shape_polygon'

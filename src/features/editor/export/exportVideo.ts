@@ -1,10 +1,26 @@
 import type Konva from 'konva'
 import { useEditorStore } from '../store/editorStore'
+import {
+  SOCIAL_HEIGHT,
+  SOCIAL_WIDTH,
+  computeSocialFitRect,
+  drawSocialLogo,
+  loadImageElement,
+  paintSocialBackground,
+} from './socialFrame'
 
 export interface VideoRecordingResult {
   blob: Blob
   mimeType: string
   extension: 'mp4' | 'webm'
+}
+
+export interface RecordVideoOptions {
+  fps?: number
+  /** Composite into a 1080x1920 (9:16) frame with brand background + logo
+   * watermark instead of recording the stage at its native size. */
+  social?: boolean
+  logoUrl?: string | null
 }
 
 const CANDIDATE_MIME_TYPES = [
@@ -26,25 +42,57 @@ function pickMimeType(): string {
  * screen-recording of the same animation the "Abspielen" button drives,
  * not a separately re-rendered export path. True MP4 (H.264) is used
  * when the browser's MediaRecorder supports it; otherwise this falls
- * back to WebM (Chrome/Firefox today only record MP4 in newer versions). */
-export function recordFramesAsVideo(stage: Konva.Stage, fps = 30): Promise<VideoRecordingResult> {
+ * back to WebM (Chrome/Firefox today only record MP4 in newer versions).
+ *
+ * With `social: true`, each tick is instead composited into a 1080x1920
+ * frame (brand background + centered pitch + logo watermark) for a
+ * ready-to-post Instagram/TikTok Story or Reel. */
+export async function recordFramesAsVideo(
+  stage: Konva.Stage,
+  options: RecordVideoOptions = {},
+): Promise<VideoRecordingResult> {
+  const { fps = 30, social = false, logoUrl = null } = options
   const { frames } = useEditorStore.getState()
   if (frames.length < 2) {
-    return Promise.reject(new Error('Mindestens 2 Frames für ein Video nötig.'))
+    throw new Error('Mindestens 2 Frames für ein Video nötig.')
   }
   if (useEditorStore.getState().isPlaying) {
-    return Promise.reject(new Error('Wiedergabe läuft bereits.'))
+    throw new Error('Wiedergabe läuft bereits.')
   }
 
-  const width = stage.width()
-  const height = stage.height()
+  const stageWidth = stage.width()
+  const stageHeight = stage.height()
+  const width = social ? SOCIAL_WIDTH : stageWidth
+  const height = social ? SOCIAL_HEIGHT : stageHeight
+  const fitRect = social ? computeSocialFitRect(stageWidth, stageHeight) : null
+
+  // Loaded once up front so each per-tick composite stays synchronous —
+  // a failed/slow logo fetch just means no watermark, not a broken export.
+  let logoImg: HTMLImageElement | null = null
+  if (social && logoUrl) {
+    try {
+      logoImg = await loadImageElement(logoUrl)
+    } catch {
+      logoImg = null
+    }
+  }
+
   const mergeCanvas = document.createElement('canvas')
   mergeCanvas.width = width
   mergeCanvas.height = height
   const ctx = mergeCanvas.getContext('2d')
-  if (!ctx) return Promise.reject(new Error('Canvas wird nicht unterstützt.'))
+  if (!ctx) throw new Error('Canvas wird nicht unterstützt.')
 
   function compositeOnce() {
+    if (social && fitRect) {
+      paintSocialBackground(ctx!)
+      for (const layer of stage.getLayers()) {
+        const layerCanvas = (layer.getCanvas() as unknown as { _canvas: HTMLCanvasElement })._canvas
+        ctx!.drawImage(layerCanvas, fitRect.x, fitRect.y, fitRect.w, fitRect.h)
+      }
+      if (logoImg) drawSocialLogo(ctx!, logoImg)
+      return
+    }
     ctx!.clearRect(0, 0, width, height)
     for (const layer of stage.getLayers()) {
       // Konva doesn't expose the layer's raw canvas element publicly, but
