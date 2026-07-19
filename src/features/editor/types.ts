@@ -127,6 +127,10 @@ export interface FrameCaption {
   badge?: string
   title: string
   subtitle?: string
+  /** Position of the block's anchor (its bottom-left corner), draggable in
+   * the editor. Defaults to the stage's bottom-left when unset. */
+  x?: number
+  y?: number
 }
 
 export interface EditorFrame {

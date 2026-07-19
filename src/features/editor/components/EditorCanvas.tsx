@@ -171,6 +171,7 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
   const polygonDraftIds = useEditorStore((s) => s.polygonDraftIds)
   const setPolygonDraftIds = useEditorStore((s) => s.setPolygonDraftIds)
   const addPlayerZone = useEditorStore((s) => s.addPlayerZone)
+  const setFrameCaption = useEditorStore((s) => s.setFrameCaption)
 
   const frame = frames[activeFrameIndex] ?? frames[0]!
   const [playbackOverlay, setPlaybackOverlay] = useState<PlaybackOverlay>(EMPTY_OVERLAY)
@@ -525,11 +526,16 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
         </Group>
         </Layer>
         {frame.caption && (
-          <Layer listening={false}>
+          <Layer>
             <FrameCaptionOverlay
               caption={frame.caption}
               stageWidth={logical.width}
               stageHeight={logical.height}
+              draggable={!isPlaying}
+              onDragStart={beginHistoryCheckpoint}
+              onDragEnd={(x, y) =>
+                setFrameCaption(activeFrameIndex, { ...frame.caption!, x, y })
+              }
             />
           </Layer>
         )}

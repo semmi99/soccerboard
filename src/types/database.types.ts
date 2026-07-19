@@ -135,6 +135,8 @@ export type Database = {
           caption_badge: string | null
           caption_subtitle: string | null
           caption_title: string | null
+          caption_x: number | null
+          caption_y: number | null
           created_at: string
           duration_ms: number
           formation_id: string | null
@@ -146,6 +148,8 @@ export type Database = {
           caption_badge?: string | null
           caption_subtitle?: string | null
           caption_title?: string | null
+          caption_x?: number | null
+          caption_y?: number | null
           created_at?: string
           duration_ms?: number
           formation_id?: string | null
@@ -157,6 +161,8 @@ export type Database = {
           caption_badge?: string | null
           caption_subtitle?: string | null
           caption_title?: string | null
+          caption_x?: number | null
+          caption_y?: number | null
           created_at?: string
           duration_ms?: number
           formation_id?: string | null

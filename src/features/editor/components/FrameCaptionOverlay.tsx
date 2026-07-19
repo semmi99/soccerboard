@@ -1,4 +1,6 @@
 import { Group, Rect, Text } from 'react-konva'
+import type Konva from 'konva'
+import type { KonvaEventObject } from 'konva/lib/Node'
 import type { FrameCaption } from '../types'
 
 /** Lower-third caption overlay for the active frame — a step badge, bold
@@ -7,15 +9,25 @@ import type { FrameCaption } from '../types'
  * wrapped in the objects Group's crop shift) so it stays anchored to the
  * visible viewport regardless of field crop or pitch orientation, and is
  * automatically included in PNG/video export since it's part of the same
- * Konva stage. */
+ * Konva stage.
+ *
+ * The whole block (badge + title + subtitle) drags as one unit — its
+ * position is stored per-frame (`caption.x`/`caption.y`) and defaults to the
+ * bottom-left corner when unset. */
 export function FrameCaptionOverlay({
   caption,
   stageWidth,
   stageHeight,
+  draggable = false,
+  onDragStart,
+  onDragEnd,
 }: {
   caption: FrameCaption
   stageWidth: number
   stageHeight: number
+  draggable?: boolean
+  onDragStart?: () => void
+  onDragEnd?: (x: number, y: number) => void
 }) {
   const padding = Math.max(20, stageWidth * 0.045)
   const maxWidth = stageWidth - padding * 2
@@ -37,8 +49,26 @@ export function FrameCaptionOverlay({
   const badgeHeight = badgeFontSize + 10
   const badgeY = cursorBottom - badgeHeight
 
+  function setCursor(stage: Konva.Stage | null, cursor: string) {
+    const container = stage?.container()
+    if (container) container.style.cursor = cursor
+  }
+
   return (
-    <Group x={0} y={stageHeight} listening={false}>
+    <Group
+      x={caption.x ?? 0}
+      y={caption.y ?? stageHeight}
+      draggable={draggable}
+      onDragStart={onDragStart}
+      onDragEnd={(e: KonvaEventObject<DragEvent>) => onDragEnd?.(e.target.x(), e.target.y())}
+      onMouseEnter={(e: KonvaEventObject<MouseEvent>) => {
+        if (draggable) setCursor(e.target.getStage(), 'move')
+      }}
+      onMouseLeave={(e: KonvaEventObject<MouseEvent>) => setCursor(e.target.getStage(), 'default')}
+    >
+      {draggable && (
+        <Rect x={0} y={badgeY - 10} width={stageWidth} height={20 - badgeY} fill="#000000" opacity={0.0001} />
+      )}
       {caption.badge && (
         <Group y={badgeY}>
           <Rect
