@@ -233,7 +233,7 @@ export function TeamSquadPanel() {
                       key={p.id}
                       className={`flex items-center gap-2 rounded-md px-2 py-1.5 text-left text-xs transition-colors ${
                         pendingPlayer?.id === p.id
-                          ? 'bg-violet-accent text-white'
+                          ? 'bg-violet-accent text-brand-blue-dark font-medium'
                           : 'bg-pitch-800 text-white/70 hover:bg-pitch-700 hover:text-white'
                       }`}
                     >

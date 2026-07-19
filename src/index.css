@@ -3,21 +3,23 @@
 @theme {
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
 
-  /* Navy-tinted dark scale (was violet-tinted) so the whole app's chrome
-     reads as part of the same 9011 Soccer palette as the landing page. */
-  --color-pitch-950: #0a0f16;
-  --color-pitch-900: #0e1620;
-  --color-pitch-800: #142030;
-  --color-pitch-700: #1c2c3d;
-  --color-pitch-600: #283c4f;
+  /* Actual 9011 Soccer blue scale (was near-black/violet) so the app's
+     background genuinely reads as the same blue as the landing page,
+     not just a dark theme with a blue accent. */
+  --color-pitch-950: #0a2e45;
+  --color-pitch-900: #0f3d59;
+  --color-pitch-800: #154f70;
+  --color-pitch-700: #1c6288;
+  --color-pitch-600: #2779a3;
 
-  /* Primary interactive accent: was violet, now 9011 Soccer blue/gold. The
-     token names stay the same so every existing component (buttons, focus
+  /* Primary interactive accent: was violet, now the landing page's yellow
+     CTA color (gold-accent stays as the secondary/badge accent). Token
+     names stay the same so every existing component (buttons, focus
      rings, active nav states, ...) picks up the new brand colors for free. */
-  --color-violet-accent: #1c8dc9;
-  --color-violet-accent-bright: #38b6f0;
+  --color-violet-accent: #ffe100;
+  --color-violet-accent-bright: #fff066;
   --color-gold-accent: #f2a73b;
-  --color-gold-accent-bright: #ffe100;
+  --color-gold-accent-bright: #ffcf73;
 
   --color-home-team: #3b82f6;
   --color-away-team: #ef4444;

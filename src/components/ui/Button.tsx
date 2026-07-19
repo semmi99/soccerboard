@@ -4,7 +4,7 @@ type Variant = 'primary' | 'secondary' | 'ghost' | 'danger' | 'brand'
 
 const variantClasses: Record<Variant, string> = {
   primary:
-    'bg-violet-accent hover:bg-violet-accent-bright text-white shadow-lg shadow-violet-accent/20',
+    'bg-violet-accent hover:bg-violet-accent-bright text-brand-blue-dark font-semibold shadow-lg shadow-black/20',
   secondary:
     'bg-pitch-700 hover:bg-pitch-600 text-white border border-pitch-600',
   ghost: 'bg-transparent hover:bg-pitch-800 text-white/80 hover:text-white',
@@ -12,6 +12,8 @@ const variantClasses: Record<Variant, string> = {
   brand:
     'bg-brand-yellow hover:brightness-105 text-brand-blue-dark font-semibold shadow-lg shadow-black/20',
 }
+
+const darkSpinnerVariants: Variant[] = ['primary', 'brand']
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: Variant
@@ -33,7 +35,13 @@ export function Button({
       {...rest}
     >
       {loading && (
-        <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+        <span
+          className={`h-4 w-4 animate-spin rounded-full border-2 ${
+            darkSpinnerVariants.includes(variant)
+              ? 'border-brand-blue-dark/30 border-t-brand-blue-dark'
+              : 'border-white/30 border-t-white'
+          }`}
+        />
       )}
       {children}
     </button>
