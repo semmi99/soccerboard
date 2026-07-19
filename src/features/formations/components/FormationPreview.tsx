@@ -8,7 +8,7 @@ export function FormationPreview({ positions }: { positions: FormationPosition[]
       <circle cx={50} cy={70} r={12} fill="none" stroke="#ffffff40" strokeWidth={1} />
       {positions.map((p, i) => (
         <g key={i}>
-          <circle cx={p.x * 100} cy={(1 - p.y) * 140} r={6} fill="#7c3aed" stroke="#ffffff" strokeWidth={1} />
+          <circle cx={p.x * 100} cy={(1 - p.y) * 140} r={6} fill="#1c8dc9" stroke="#ffffff" strokeWidth={1} />
           <text
             x={p.x * 100}
             y={(1 - p.y) * 140 + 2.5}

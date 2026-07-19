@@ -3,16 +3,21 @@
 @theme {
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
 
-  --color-pitch-950: #0a0a12;
-  --color-pitch-900: #0f0f1a;
-  --color-pitch-800: #16162a;
-  --color-pitch-700: #1f1f3a;
-  --color-pitch-600: #2a2a4a;
+  /* Navy-tinted dark scale (was violet-tinted) so the whole app's chrome
+     reads as part of the same 9011 Soccer palette as the landing page. */
+  --color-pitch-950: #0a0f16;
+  --color-pitch-900: #0e1620;
+  --color-pitch-800: #142030;
+  --color-pitch-700: #1c2c3d;
+  --color-pitch-600: #283c4f;
 
-  --color-violet-accent: #7c3aed;
-  --color-violet-accent-bright: #a855f7;
-  --color-gold-accent: #d4af37;
-  --color-gold-accent-bright: #f0d878;
+  /* Primary interactive accent: was violet, now 9011 Soccer blue/gold. The
+     token names stay the same so every existing component (buttons, focus
+     rings, active nav states, ...) picks up the new brand colors for free. */
+  --color-violet-accent: #1c8dc9;
+  --color-violet-accent-bright: #38b6f0;
+  --color-gold-accent: #f2a73b;
+  --color-gold-accent-bright: #ffe100;
 
   --color-home-team: #3b82f6;
   --color-away-team: #ef4444;

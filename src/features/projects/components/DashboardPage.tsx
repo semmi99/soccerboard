@@ -11,9 +11,9 @@ function PitchThumbnail() {
   return (
     <div className="flex aspect-[4/5] w-full items-center justify-center rounded-md bg-gradient-to-br from-pitch-800 to-pitch-900">
       <svg viewBox="0 0 65 100" className="h-2/3 w-2/3 opacity-40">
-        <rect x="1" y="1" width="63" height="98" fill="none" stroke="#7c3aed" strokeWidth="1.5" />
-        <line x1="1" y1="50" x2="64" y2="50" stroke="#7c3aed" strokeWidth="1.5" />
-        <circle cx="32.5" cy="50" r="9" fill="none" stroke="#7c3aed" strokeWidth="1.5" />
+        <rect x="1" y="1" width="63" height="98" fill="none" stroke="#1c8dc9" strokeWidth="1.5" />
+        <line x1="1" y1="50" x2="64" y2="50" stroke="#1c8dc9" strokeWidth="1.5" />
+        <circle cx="32.5" cy="50" r="9" fill="none" stroke="#1c8dc9" strokeWidth="1.5" />
       </svg>
     </div>
   )

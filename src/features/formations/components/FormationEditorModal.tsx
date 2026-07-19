@@ -152,7 +152,7 @@ export function FormationEditorModal({
                     cx={p.x * VIEW_W}
                     cy={(1 - p.y) * VIEW_H}
                     r={6}
-                    fill={i === selectedIndex ? '#a855f7' : '#7c3aed'}
+                    fill={i === selectedIndex ? '#38b6f0' : '#1c8dc9'}
                     stroke="#ffffff"
                     strokeWidth={i === selectedIndex ? 2 : 1}
                     className="cursor-grab active:cursor-grabbing"
