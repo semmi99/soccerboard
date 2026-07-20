@@ -94,6 +94,7 @@ interface Props {
   interactive: boolean
   onSelect: (id: string, additive: boolean) => void
   onDragStart: () => void
+  onObjectDragStart?: (id: string) => void
   onDragMove: (id: string, x: number, y: number) => void
   onDragEnd: (id: string, x: number, y: number) => void
   onTransformEnd: (id: string, patch: Partial<FrameObject>) => void
@@ -110,6 +111,7 @@ export function ObjectRenderer({
   interactive,
   onSelect,
   onDragStart,
+  onObjectDragStart,
   onDragMove,
   onDragEnd,
   onTransformEnd,
@@ -245,7 +247,10 @@ export function ObjectRenderer({
         onSelect(object.id, false)
       }}
       onDblClick={() => onDoubleClick?.(object.id)}
-      onDragStart={onDragStart}
+      onDragStart={() => {
+        onDragStart()
+        onObjectDragStart?.(object.id)
+      }}
       onDragMove={(e) => onDragMove(object.id, e.target.x(), e.target.y())}
       onDragEnd={(e) => onDragEnd(object.id, e.target.x(), e.target.y())}
       onTransformEnd={handleTransformEnd}

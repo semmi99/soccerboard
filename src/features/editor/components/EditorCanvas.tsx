@@ -635,6 +635,20 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
     beginHistoryCheckpoint()
   }
 
+  // A plain grab-and-drag (no prior click) never fires onSelect — Konva only
+  // treats a gesture as a click if the pointer barely moved — so without
+  // this, moving a player/ball straight from an unselected state would never
+  // reveal its motion guide (below) at all. Only takes over the selection if
+  // the object wasn't already part of it, so dragging one of several
+  // selected chips together doesn't collapse the rest of the selection.
+  function handleObjectDragStart(id: string) {
+    if (selection.includes(id)) return
+    const obj = frame.objects.find((o) => o.id === id)
+    if (obj && (obj.objectType === 'player_chip' || obj.objectType === 'ball')) {
+      setSelection([id])
+    }
+  }
+
   function handleDragMove(id: string, x: number, y: number) {
     updateObjectLive(id, { x, y })
   }
@@ -786,6 +800,7 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
                 interactive={!isPlaying}
                 onSelect={handleObjectClick}
                 onDragStart={handleDragStart}
+                onObjectDragStart={handleObjectDragStart}
                 onDragMove={handleDragMove}
                 onDragEnd={handleDragMove}
                 onTransformEnd={handleTransformEnd}
