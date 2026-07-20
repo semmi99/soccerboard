@@ -50,6 +50,13 @@ interface PolygonSyncSpec {
   ids: string[]
 }
 
+interface ArrowPointsSpec {
+  arrowLine: Konva.Arrow
+  label: Konva.Group | null
+  fromPoints: number[]
+  toPoints: number[]
+}
+
 /** Drives every animated property of a single frame transition (object
  * positions, enter/exit fades, connector lines) from one shared elapsed-time
  * value each animation frame, instead of many independent Konva.Tween
@@ -62,6 +69,7 @@ function runTransition(
   fades: FadeSpec[],
   connectors: ConnectorSyncSpec[],
   zones: PolygonSyncSpec[],
+  arrows: ArrowPointsSpec[],
   nodeRefs: Record<string, Konva.Group>,
 ) {
   return new Promise<void>((resolve) => {
@@ -106,6 +114,16 @@ function runTransition(
           z.line.points(nodes.flatMap((n) => [n.x(), n.y()]))
         }
       }
+      for (const a of arrows) {
+        a.arrowLine.points(
+          a.fromPoints.map((v, i) => v + (a.toPoints[i]! - v) * eased),
+        )
+        // The distance label's own number only makes sense for the settled
+        // start/end shape — while the path itself is actively reshaping mid-
+        // transition, showing a label that doesn't match what's drawn reads
+        // as broken rather than animated, so it dips out and back in instead.
+        if (a.label) a.label.opacity(eased < 0.5 ? 1 - eased * 2 : (eased - 0.5) * 2)
+      }
 
       if (raw >= 1) settle()
     }, layer)
@@ -135,6 +153,10 @@ function runTransition(
         if (nodes.length === z.ids.length) {
           z.line.points(nodes.flatMap((n) => [n.x(), n.y()]))
         }
+      }
+      for (const a of arrows) {
+        a.arrowLine.points(a.toPoints)
+        if (a.label) a.label.opacity(1)
       }
       settle()
     }, durationMs + 500)
@@ -334,7 +356,50 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
           })
           .filter((z): z is PolygonSyncSpec => Boolean(z))
 
-        await runTransition(objectsLayerRef.current, durationSec, moves, fades, connectors, zones, nodeRefs.current)
+        // An arrow's own path (points) isn't covered by `moves` — that only
+        // tweens the object's whole-shape x/y/rotation/scale — so a bent or
+        // reshaped arrow used to snap its line instantly to the next frame's
+        // shape the moment playback crossed the frame boundary. Interpolating
+        // the points directly here keeps the line itself smooth too.
+        const arrows: ArrowPointsSpec[] = toFrame.objects
+          .filter(
+            (o): o is Extract<FrameObject, { objectType: 'arrow' }> =>
+              o.objectType === 'arrow' && fromIds.has(o.id),
+          )
+          .map((o) => {
+            const fromObj = fromFrame.objects.find((f) => f.id === o.id)
+            if (!fromObj || fromObj.objectType !== 'arrow') return null
+            const group = nodeRefs.current[o.id]
+            const arrowLine = group?.findOne<Konva.Arrow>('.arrow-line') ?? null
+            if (!arrowLine) return null
+            const fromPoints = fromObj.data.points
+            const toPoints = o.data.points
+            if (fromPoints.length === toPoints.length && fromPoints.every((v, i) => v === toPoints[i])) {
+              return null
+            }
+            // Reconcile differing point counts (e.g. a bend point added or
+            // removed between frames) by holding the shorter path's last
+            // point steady for the extra segment instead of crashing.
+            const maxLen = Math.max(fromPoints.length, toPoints.length)
+            const padded = (pts: number[]) =>
+              pts.length === maxLen
+                ? pts
+                : [...pts, ...Array(maxLen - pts.length).fill(0).map((_, i) => pts[pts.length - 2 + (i % 2)]!)]
+            const label = group?.findOne<Konva.Group>('.distance-label') ?? null
+            return { arrowLine, label, fromPoints: padded(fromPoints), toPoints: padded(toPoints) }
+          })
+          .filter((a): a is ArrowPointsSpec => Boolean(a))
+
+        await runTransition(
+          objectsLayerRef.current,
+          durationSec,
+          moves,
+          fades,
+          connectors,
+          zones,
+          arrows,
+          nodeRefs.current,
+        )
         if (cancelled) return
 
         useEditorStore.getState().setActiveFrameIndex(currentIndex + 1)

@@ -42,6 +42,7 @@ export function ArrowShape({ data, scale = 1 }: { data: ArrowData; scale?: numbe
   return (
     <Group>
       <Arrow
+        name="arrow-line"
         points={points}
         stroke={data.color}
         fill={data.color}
@@ -55,7 +56,7 @@ export function ArrowShape({ data, scale = 1 }: { data: ArrowData; scale?: numbe
         hitStrokeWidth={16}
       />
       {distanceLabel && mid && (
-        <Group x={mid.x} y={mid.y} listening={false}>
+        <Group name="distance-label" x={mid.x} y={mid.y} listening={false}>
           <Rect
             x={-labelWidth / 2}
             y={-labelFontSize * 1.6}
