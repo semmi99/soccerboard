@@ -91,9 +91,7 @@ export async function loadProject(id: string): Promise<LoadedProject> {
 
   const { data: frameRows, error: framesError } = await supabase
     .from('frames')
-    .select(
-      'id, duration_ms, order_index, caption_badge, caption_title, caption_subtitle, caption_x, caption_y',
-    )
+    .select('id, duration_ms, order_index')
     .eq('project_id', id)
     .order('order_index', { ascending: true })
   if (framesError) throw framesError
@@ -109,15 +107,6 @@ export async function loadProject(id: string): Promise<LoadedProject> {
     id: f.id,
     durationMs: f.duration_ms,
     objects: objectRows.filter((o) => o.frame_id === f.id).map(rowToFrameObject),
-    caption: f.caption_title
-      ? {
-          badge: f.caption_badge ?? undefined,
-          title: f.caption_title,
-          subtitle: f.caption_subtitle ?? undefined,
-          x: f.caption_x ?? undefined,
-          y: f.caption_y ?? undefined,
-        }
-      : undefined,
   }))
 
   return {
@@ -218,11 +207,6 @@ async function insertFramesAndObjects(projectId: string, frames: EditorFrame[]) 
     project_id: projectId,
     order_index: index,
     duration_ms: f.durationMs,
-    caption_badge: f.caption?.badge ?? null,
-    caption_title: f.caption?.title ?? null,
-    caption_subtitle: f.caption?.subtitle ?? null,
-    caption_x: f.caption?.x ?? null,
-    caption_y: f.caption?.y ?? null,
   }))
   const { error: framesError } = await supabase.from('frames').insert(frameInserts)
   if (framesError) throw framesError

@@ -3,7 +3,6 @@ import type {
   EditorFrame,
   EquipmentKind,
   FieldCrop,
-  FrameCaption,
   FrameObject,
   PitchDesign,
   PitchOrientation,
@@ -129,7 +128,6 @@ interface EditorState {
   reorderFrames: (fromIndex: number, toIndex: number) => void
   setActiveFrameIndex: (index: number) => void
   setFrameDuration: (index: number, durationMs: number) => void
-  setFrameCaption: (index: number, caption: FrameCaption | undefined) => void
   setIsPlaying: (playing: boolean) => void
 
   undo: () => void
@@ -635,12 +633,6 @@ export const useEditorStore = create<EditorState>((set, get) => ({
   setFrameDuration: (index, durationMs) => {
     const { frames } = get()
     const nextFrames = frames.map((f, i) => (i === index ? { ...f, durationMs } : f))
-    set({ frames: nextFrames, isDirty: true })
-  },
-
-  setFrameCaption: (index, caption) => {
-    const { frames } = get()
-    const nextFrames = frames.map((f, i) => (i === index ? { ...f, caption } : f))
     set({ frames: nextFrames, isDirty: true })
   },
 

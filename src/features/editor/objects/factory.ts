@@ -189,6 +189,34 @@ export function createObjectForTool(
     }
   }
 
+  // Badge/Titel/Untertitel: pre-styled shortcuts for the same "coaching
+  // explainer" lower-third look tactics reels use, but as ordinary (freely
+  // placeable, individually draggable, repeatable) text objects instead of
+  // a single fixed per-frame caption block.
+  if (tool === 'text_badge') {
+    return {
+      ...base,
+      objectType: 'text',
+      data: { text: 'BADGE', fontSize: 15, color: '#0f3d59', fontStyle: 'bold', background: '#ffe100' },
+    }
+  }
+
+  if (tool === 'text_title') {
+    return {
+      ...base,
+      objectType: 'text',
+      data: { text: 'Titel', fontSize: 28, color: '#ffffff', fontStyle: 'bold', shadow: true },
+    }
+  }
+
+  if (tool === 'text_subtitle') {
+    return {
+      ...base,
+      objectType: 'text',
+      data: { text: 'Untertitel', fontSize: 16, color: 'rgba(255,255,255,0.8)', fontStyle: 'normal', shadow: true },
+    }
+  }
+
   if (tool === 'ball') {
     return { ...base, objectType: 'ball', data: {} }
   }

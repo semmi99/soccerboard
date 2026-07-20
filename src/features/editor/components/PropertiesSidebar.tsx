@@ -639,6 +639,37 @@ function TextFields({
           <option value="italic">Kursiv</option>
         </select>
       </Field>
+      <Field label="Hintergrund (Badge-Stil)">
+        <div className="flex items-center gap-2">
+          <input
+            type="checkbox"
+            checked={!!data.background}
+            onChange={(e) => {
+              onCheckpoint()
+              onChange({ background: e.target.checked ? (data.background ?? '#ffe100') : undefined })
+            }}
+          />
+          {data.background && (
+            <input
+              type="color"
+              className="h-8 flex-1 rounded-md border border-pitch-600 bg-pitch-800"
+              value={data.background}
+              onFocus={onCheckpoint}
+              onChange={(e) => onChange({ background: e.target.value })}
+            />
+          )}
+        </div>
+      </Field>
+      <Field label="Schatten (Lesbarkeit auf dem Feld)">
+        <input
+          type="checkbox"
+          checked={!!data.shadow}
+          onChange={(e) => {
+            onCheckpoint()
+            onChange({ shadow: e.target.checked })
+          }}
+        />
+      </Field>
     </div>
   )
 }

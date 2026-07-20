@@ -3,9 +3,6 @@ import { useAuthStore } from '../../auth/store/authStore'
 import { limitsForTier } from '../../../lib/limits'
 import { Button } from '../../../components/ui/Button'
 
-const captionInputClass =
-  'rounded-md border border-pitch-600 bg-pitch-800 px-2 py-1 text-xs text-white outline-none focus:border-violet-accent'
-
 export function Timeline() {
   const frames = useEditorStore((s) => s.frames)
   const activeFrameIndex = useEditorStore((s) => s.activeFrameIndex)
@@ -14,7 +11,6 @@ export function Timeline() {
   const removeFrame = useEditorStore((s) => s.removeFrame)
   const duplicateFrame = useEditorStore((s) => s.duplicateFrame)
   const setFrameDuration = useEditorStore((s) => s.setFrameDuration)
-  const setFrameCaption = useEditorStore((s) => s.setFrameCaption)
   const beginHistoryCheckpoint = useEditorStore((s) => s.beginHistoryCheckpoint)
   const isPlaying = useEditorStore((s) => s.isPlaying)
   const setIsPlaying = useEditorStore((s) => s.setIsPlaying)
@@ -31,15 +27,6 @@ export function Timeline() {
     }
     setActiveFrameIndex(0)
     setIsPlaying(true)
-  }
-
-  function updateCaption(patch: { badge?: string; title?: string; subtitle?: string }) {
-    if (!activeFrame) return
-    const current = activeFrame.caption ?? { badge: '', title: '', subtitle: '' }
-    const next = { ...current, ...patch }
-    // An overlay with no headline has nothing to show, so drop the caption
-    // entirely rather than persisting an empty-but-present object.
-    setFrameCaption(activeFrameIndex, next.title.trim() ? next : undefined)
   }
 
   return (
@@ -68,12 +55,6 @@ export function Timeline() {
             >
               <span className="font-semibold">Frame {index + 1}</span>
               <span className="text-[10px] text-white/40">{frame.durationMs}ms</span>
-              {frame.caption?.title && (
-                <span
-                  title="Hat eine Beschriftung"
-                  className="absolute -left-1.5 -top-1.5 h-3 w-3 rounded-full bg-brand-yellow"
-                />
-              )}
               {frames.length > 1 && (
                 <button
                   type="button"
@@ -128,38 +109,6 @@ export function Timeline() {
           </div>
         )}
       </div>
-
-      {activeFrame && (
-        <div className="flex items-center gap-2 border-t border-pitch-700 px-4 py-2">
-          <span className="shrink-0 text-[11px] font-medium text-white/40">
-            Beschriftung (optional)
-          </span>
-          <input
-            type="text"
-            placeholder="Badge, z.B. SCHRITT 1"
-            className={`${captionInputClass} w-40`}
-            value={activeFrame.caption?.badge ?? ''}
-            onFocus={beginHistoryCheckpoint}
-            onChange={(e) => updateCaption({ badge: e.target.value })}
-          />
-          <input
-            type="text"
-            placeholder="Titel, z.B. Make a 4 v 3"
-            className={`${captionInputClass} flex-1`}
-            value={activeFrame.caption?.title ?? ''}
-            onFocus={beginHistoryCheckpoint}
-            onChange={(e) => updateCaption({ title: e.target.value })}
-          />
-          <input
-            type="text"
-            placeholder="Untertitel (optional)"
-            className={`${captionInputClass} flex-1`}
-            value={activeFrame.caption?.subtitle ?? ''}
-            onFocus={beginHistoryCheckpoint}
-            onChange={(e) => updateCaption({ subtitle: e.target.value })}
-          />
-        </div>
-      )}
     </footer>
   )
 }

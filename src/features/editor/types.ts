@@ -68,6 +68,12 @@ export interface TextData {
   fontSize: number
   color: string
   fontStyle: 'normal' | 'bold' | 'italic'
+  /** Pill background color — the "Badge" text preset's look, but available
+   * to any text object. */
+  background?: string
+  /** Drop shadow for legibility over busy pitch backgrounds — used by the
+   * "Titel"/"Untertitel" text presets. */
+  shadow?: boolean
 }
 
 export interface EquipmentData {
@@ -125,25 +131,10 @@ export type FrameObject =
   | (FrameObjectBase & { objectType: 'connector'; data: ConnectorData })
   | (FrameObjectBase & { objectType: 'player_zone'; data: PlayerZoneData })
 
-/** Lower-third overlay shown on the pitch for this frame and baked into
- * PNG/video export — a step badge, headline, and optional subline, matching
- * the "coaching explainer" caption style used in social-media tactics reels.
- * Rendered only when `title` is non-empty. */
-export interface FrameCaption {
-  badge?: string
-  title: string
-  subtitle?: string
-  /** Position of the block's anchor (its bottom-left corner), draggable in
-   * the editor. Defaults to the stage's bottom-left when unset. */
-  x?: number
-  y?: number
-}
-
 export interface EditorFrame {
   id: string
   durationMs: number
   objects: FrameObject[]
-  caption?: FrameCaption
 }
 
 export type PitchDesign =
@@ -176,6 +167,9 @@ export type ToolId =
   | 'shape_rect'
   | 'shape_polygon'
   | 'text'
+  | 'text_badge'
+  | 'text_title'
+  | 'text_subtitle'
   | 'ball'
   | 'connector'
   | 'player_zone'

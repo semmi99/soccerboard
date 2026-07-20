@@ -9,7 +9,6 @@ import { Pitch } from './Pitch'
 import { ObjectRenderer } from '../objects/ObjectRenderer'
 import { ConnectorShape } from '../objects/shapes/Connector'
 import { PlayerZoneShape } from '../objects/shapes/PlayerZone'
-import { FrameCaptionOverlay } from './FrameCaptionOverlay'
 import type { FrameObject } from '../types'
 
 // Cubic ease-in-out: a touch smoother/slower off the start and into the end
@@ -171,7 +170,6 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
   const polygonDraftIds = useEditorStore((s) => s.polygonDraftIds)
   const setPolygonDraftIds = useEditorStore((s) => s.setPolygonDraftIds)
   const addPlayerZone = useEditorStore((s) => s.addPlayerZone)
-  const setFrameCaption = useEditorStore((s) => s.setFrameCaption)
 
   const frame = frames[activeFrameIndex] ?? frames[0]!
   const [playbackOverlay, setPlaybackOverlay] = useState<PlaybackOverlay>(EMPTY_OVERLAY)
@@ -542,20 +540,6 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
           />
         </Group>
         </Layer>
-        {frame.caption && (
-          <Layer>
-            <FrameCaptionOverlay
-              caption={frame.caption}
-              stageWidth={logical.width}
-              stageHeight={logical.height}
-              draggable={!isPlaying}
-              onDragStart={beginHistoryCheckpoint}
-              onDragEnd={(x, y) =>
-                setFrameCaption(activeFrameIndex, { ...frame.caption!, x, y })
-              }
-            />
-          </Layer>
-        )}
       </Stage>
     </div>
   )
