@@ -126,15 +126,15 @@ export function LandingPage() {
             </a>
           </div>
 
-          <div className="mt-6 w-full max-w-[280px] overflow-hidden rounded-2xl border border-white/15 bg-black/20 shadow-2xl shadow-black/40">
+          <div className="mt-6 w-full max-w-md overflow-hidden rounded-2xl border border-white/15 bg-black/20 shadow-2xl shadow-black/40">
             <div className="flex items-center gap-1.5 border-b border-white/10 bg-black/30 px-3 py-2">
               <span className="h-2.5 w-2.5 rounded-full bg-red-400/70" />
               <span className="h-2.5 w-2.5 rounded-full bg-yellow-400/70" />
               <span className="h-2.5 w-2.5 rounded-full bg-green-400/70" />
             </div>
             <img
-              src="/marketing/hero-formation.png"
-              alt="Taktikformation im TacticBoard-Pro-Editor"
+              src="/marketing/hero-formation.svg"
+              alt="Taktiktafel im TacticBoard-Pro-Editor: Überzahl-Zone, gebogener Steckpass, Laufweg, Hervorhebung und Beschriftung in einer Szene"
               className="w-full"
             />
           </div>
