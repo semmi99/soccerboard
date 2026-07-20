@@ -519,6 +519,31 @@ function ShapeFields({
           }}
         />
       </Field>
+      <Field label="Farbverlauf (z.B. Heatmap)">
+        <div className="flex flex-col gap-1.5">
+          <label className="flex items-center gap-2 text-xs text-white/70">
+            <input
+              type="checkbox"
+              className="accent-violet-accent"
+              checked={Boolean(data.gradientColor)}
+              onChange={(e) => {
+                onCheckpoint()
+                onChange({ gradientColor: e.target.checked ? rgbaToHex(data.fill) : null })
+              }}
+            />
+            Statt flacher Füllfarbe ein Farbverlauf von der Mitte nach außen
+          </label>
+          {data.gradientColor && (
+            <ColorSwatchPicker
+              value={data.gradientColor}
+              onChange={(color) => {
+                onCheckpoint()
+                onChange({ gradientColor: color })
+              }}
+            />
+          )}
+        </div>
+      </Field>
       <Field label="Rahmenfarbe">
         <ColorSwatchPicker
           value={data.stroke}

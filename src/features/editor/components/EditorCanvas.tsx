@@ -343,7 +343,16 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
     ...playbackOverlay.entering,
     ...playbackOverlay.exiting,
   ]
-  const sortedObjects = [...visibleObjects].sort((a, b) => a.zIndex - b.zIndex)
+  // Rect/circle shapes (heatmap-style zone markers) always render behind
+  // every other object, regardless of their own z-order — so a coach can
+  // always drag a player (or anything else) on top of one instead of
+  // having to remember to send it to back first.
+  const isBackgroundShape = (o: FrameObject) =>
+    o.objectType === 'shape' && (o.data.kind === 'rect' || o.data.kind === 'circle')
+  const sortedObjects = [...visibleObjects].sort((a, b) => {
+    const bucketDiff = Number(isBackgroundShape(a)) - Number(isBackgroundShape(b))
+    return bucketDiff !== 0 ? -bucketDiff : a.zIndex - b.zIndex
+  })
   const enteringIds = new Set(playbackOverlay.entering.map((o) => o.id))
 
   const trRef = useRef<Konva.Transformer>(null)

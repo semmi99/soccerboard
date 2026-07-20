@@ -71,6 +71,10 @@ export interface ShapeData {
   strokeWidth: number
   lineStyle: LineStyle
   opacity: number
+  /** When set, the shape fills with a radial gradient from this color
+   * (solid at the center) fading to transparent at its edge — e.g. for
+   * heatmap-style pitch zones — instead of the flat `fill` color. */
+  gradientColor?: string | null
 }
 
 export interface TextData {
