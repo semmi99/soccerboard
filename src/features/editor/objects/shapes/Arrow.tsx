@@ -48,7 +48,7 @@ export function ArrowShape({ data, scale = 1 }: { data: ArrowData; scale?: numbe
         fill={data.color}
         strokeWidth={data.strokeWidth}
         dash={dashForLineStyle(data.lineStyle)}
-        tension={data.shape === 'curved' ? 0.5 : 0}
+        tension={data.shape === 'curved' ? 0.5 : 0.4}
         pointerLength={pointerSize}
         pointerWidth={pointerSize}
         lineCap="round"

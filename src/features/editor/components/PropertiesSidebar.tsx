@@ -385,13 +385,23 @@ function ArrowFields({
   return (
     <div className="flex flex-col gap-2">
       <Field label="Farbe">
-        <input
-          type="color"
-          className="h-8 w-full rounded-md border border-pitch-600 bg-pitch-800"
-          value={data.color}
-          onFocus={onCheckpoint}
-          onChange={(e) => onChange({ color: e.target.value })}
-        />
+        <div className="flex flex-col gap-1.5">
+          <ColorSwatchPicker
+            size="sm"
+            value={data.color}
+            onChange={(c) => {
+              onCheckpoint()
+              onChange({ color: c })
+            }}
+          />
+          <input
+            type="color"
+            className="h-8 w-full rounded-md border border-pitch-600 bg-pitch-800"
+            value={data.color}
+            onFocus={onCheckpoint}
+            onChange={(e) => onChange({ color: e.target.value })}
+          />
+        </div>
       </Field>
       <Field label="Linienstil">
         <select
@@ -611,13 +621,23 @@ function TextFields({
         ))}
       </div>
       <Field label="Farbe">
-        <input
-          type="color"
-          className="h-8 w-full rounded-md border border-pitch-600 bg-pitch-800"
-          value={data.color}
-          onFocus={onCheckpoint}
-          onChange={(e) => onChange({ color: e.target.value })}
-        />
+        <div className="flex flex-col gap-1.5">
+          <ColorSwatchPicker
+            size="sm"
+            value={data.color}
+            onChange={(c) => {
+              onCheckpoint()
+              onChange({ color: c })
+            }}
+          />
+          <input
+            type="color"
+            className="h-8 w-full rounded-md border border-pitch-600 bg-pitch-800"
+            value={data.color}
+            onFocus={onCheckpoint}
+            onChange={(e) => onChange({ color: e.target.value })}
+          />
+        </div>
       </Field>
       <Field label="Stil">
         <select
@@ -644,13 +664,23 @@ function TextFields({
             }}
           />
           {data.background && (
-            <input
-              type="color"
-              className="h-8 flex-1 rounded-md border border-pitch-600 bg-pitch-800"
-              value={data.background}
-              onFocus={onCheckpoint}
-              onChange={(e) => onChange({ background: e.target.value })}
-            />
+            <div className="flex flex-1 flex-col gap-1.5">
+              <ColorSwatchPicker
+                size="sm"
+                value={data.background}
+                onChange={(c) => {
+                  onCheckpoint()
+                  onChange({ background: c })
+                }}
+              />
+              <input
+                type="color"
+                className="h-8 w-full rounded-md border border-pitch-600 bg-pitch-800"
+                value={data.background}
+                onFocus={onCheckpoint}
+                onChange={(e) => onChange({ background: e.target.value })}
+              />
+            </div>
           )}
         </div>
       </Field>
@@ -680,13 +710,23 @@ function ConnectorFields({
   return (
     <div className="flex flex-col gap-2">
       <Field label="Farbe">
-        <input
-          type="color"
-          className="h-8 w-full rounded-md border border-pitch-600 bg-pitch-800"
-          value={data.color}
-          onFocus={onCheckpoint}
-          onChange={(e) => onChange({ color: e.target.value })}
-        />
+        <div className="flex flex-col gap-1.5">
+          <ColorSwatchPicker
+            size="sm"
+            value={data.color}
+            onChange={(c) => {
+              onCheckpoint()
+              onChange({ color: c })
+            }}
+          />
+          <input
+            type="color"
+            className="h-8 w-full rounded-md border border-pitch-600 bg-pitch-800"
+            value={data.color}
+            onFocus={onCheckpoint}
+            onChange={(e) => onChange({ color: e.target.value })}
+          />
+        </div>
       </Field>
       <Field label="Linienstil">
         <select
