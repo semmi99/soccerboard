@@ -82,6 +82,22 @@ export function LandingPage() {
             <a href="#pricing" className="hover:text-white">
               Preise
             </a>
+            <a
+              href="https://9011soccer.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-white"
+            >
+              9011soccer.com
+            </a>
+            <a
+              href="https://socceranalyticspro.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-white"
+            >
+              SoccerAnalyticsPro
+            </a>
           </nav>
           <div className="flex items-center gap-3">
             <Link to="/login" className="text-sm font-medium text-white/80 hover:text-white">
