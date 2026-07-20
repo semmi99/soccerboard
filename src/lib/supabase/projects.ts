@@ -7,6 +7,7 @@ import type {
   ObjectType,
   PitchDesign,
   PitchOrientation,
+  TeamKit,
   ZoneGridStyle,
 } from '../../features/editor/types'
 
@@ -76,6 +77,7 @@ export interface LoadedProject {
   fieldCrop: FieldCrop
   pitchLengthM: number
   pitchWidthM: number
+  customKit: TeamKit | null
   frames: EditorFrame[]
 }
 
@@ -83,7 +85,7 @@ export async function loadProject(id: string): Promise<LoadedProject> {
   const { data: project, error: projectError } = await supabase
     .from('projects')
     .select(
-      'id, title, pitch_design, orientation, team_id, zone_grid_style, show_pitch_markings, field_crop, pitch_length_m, pitch_width_m',
+      'id, title, pitch_design, orientation, team_id, zone_grid_style, show_pitch_markings, field_crop, pitch_length_m, pitch_width_m, kit_override',
     )
     .eq('id', id)
     .single()
@@ -120,6 +122,7 @@ export async function loadProject(id: string): Promise<LoadedProject> {
     fieldCrop: project.field_crop as FieldCrop,
     pitchLengthM: project.pitch_length_m,
     pitchWidthM: project.pitch_width_m,
+    customKit: (project.kit_override as TeamKit | null) ?? null,
     frames,
   }
 }
@@ -137,6 +140,7 @@ export interface SaveProjectInput {
   fieldCrop: FieldCrop
   pitchLengthM: number
   pitchWidthM: number
+  customKit: TeamKit | null
   frames: EditorFrame[]
 }
 
@@ -156,6 +160,7 @@ export async function saveProject(input: SaveProjectInput): Promise<string> {
         field_crop: input.fieldCrop,
         pitch_length_m: input.pitchLengthM,
         pitch_width_m: input.pitchWidthM,
+        kit_override: input.customKit as unknown as Json,
       })
       .eq('id', projectId)
     if (error) throw error
@@ -189,6 +194,7 @@ async function insertProjectRow(
     field_crop: input.fieldCrop,
     pitch_length_m: input.pitchLengthM,
     pitch_width_m: input.pitchWidthM,
+    kit_override: input.customKit as unknown as Json,
   }
   const { data, error } = await supabase
     .from('projects')

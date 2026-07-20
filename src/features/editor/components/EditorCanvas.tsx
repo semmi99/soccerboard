@@ -249,17 +249,7 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
   useEffect(() => {
     const tr = trRef.current
     if (!tr) return
-    // Bendable straight/polyline arrows get their own point-drag handles
-    // (see ArrowPointHandles in ObjectRenderer) sitting right at the shape's
-    // corners — the Transformer's resize anchors would land almost exactly
-    // on top of them and hijack the drag, silently resizing/collapsing the
-    // arrow instead of moving a point. Curved arrows have no such handles
-    // and still rely on the Transformer normally.
     const nodes = selection
-      .filter((id) => {
-        const obj = frame.objects.find((o) => o.id === id)
-        return !(obj?.objectType === 'arrow' && obj.data.shape !== 'curved')
-      })
       .map((id) => nodeRefs.current[id])
       .filter((n): n is Konva.Group => Boolean(n))
     tr.nodes(nodes)
@@ -518,6 +508,18 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
     selectedObjects.length > 0 &&
     selectedObjects.every((o) => o.objectType === 'shape' || o.objectType === 'training_equipment')
 
+  // Bendable straight/polyline arrows get their own point-drag handles (see
+  // ArrowPointHandles in ObjectRenderer) sitting right at the shape's own
+  // corners — the Transformer's resize anchors would land almost exactly on
+  // top of them and hijack the drag. Rotation doesn't have that conflict
+  // (the rotate handle sits above the shape, not on its corners), so these
+  // arrows stay attached to the Transformer for rotating, just with the
+  // resize anchors hidden. Curved arrows have no point handles and keep the
+  // normal full set.
+  const hasBendableArrowSelected = selectedObjects.some(
+    (o) => o.objectType === 'arrow' && o.data.shape !== 'curved',
+  )
+
   return (
     <div ref={containerRef} className="flex h-full w-full items-center justify-center overflow-hidden">
       <Stage
@@ -599,6 +601,7 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
             ref={trRef}
             onTransformStart={handleTransformStart}
             rotateEnabled
+            enabledAnchors={hasBendableArrowSelected ? [] : undefined}
             keepRatio={!allFreelyResizableSelected}
             boundBoxFunc={(oldBox, newBox) =>
               newBox.width < 8 || newBox.height < 8 ? oldBox : newBox

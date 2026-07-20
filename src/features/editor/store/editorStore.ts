@@ -53,6 +53,9 @@ interface EditorState {
   pitchWidthM: number
   teamId: string | null
   teamKit: TeamKit | null
+  /** Kit colors chosen when no real team is linked to the project — persisted
+   * with the project itself since there's no team row to hang it off of. */
+  customKit: TeamKit | null
   playerPhotos: Record<string, string>
   frames: EditorFrame[]
   activeFrameIndex: number
@@ -79,6 +82,7 @@ interface EditorState {
     fieldCrop: FieldCrop
     pitchLengthM: number
     pitchWidthM: number
+    customKit: TeamKit | null
     frames: EditorFrame[]
   }) => void
   resetToBlankProject: () => void
@@ -95,6 +99,7 @@ interface EditorState {
   setProjectTitle: (title: string) => void
   setTeamId: (id: string | null) => void
   setTeamKit: (kit: TeamKit | null) => void
+  setCustomKit: (kit: TeamKit) => void
   setPlayerPhotos: (photos: Record<string, string>) => void
   setTool: (tool: ToolId) => void
   setSelection: (ids: string[]) => void
@@ -118,6 +123,7 @@ interface EditorState {
     patch: { color?: string; scale?: number; rotation?: number },
   ) => void
   removeSelected: () => void
+  clearActiveFrame: () => void
   duplicateSelected: () => void
   bringToFront: (objectId: string) => void
   sendToBack: (objectId: string) => void
@@ -148,6 +154,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
   pitchWidthM: 68,
   teamId: null,
   teamKit: null,
+  customKit: null,
   playerPhotos: {},
   frames: [emptyFrame()],
   activeFrameIndex: 0,
@@ -174,6 +181,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
     fieldCrop,
     pitchLengthM,
     pitchWidthM,
+    customKit,
     frames,
   }) => {
     set({
@@ -187,7 +195,8 @@ export const useEditorStore = create<EditorState>((set, get) => ({
       pitchLengthM,
       pitchWidthM,
       teamId,
-      teamKit: null,
+      teamKit: teamId ? null : customKit,
+      customKit,
       playerPhotos: {},
       frames: frames.length ? frames : [emptyFrame()],
       activeFrameIndex: 0,
@@ -216,6 +225,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
       pitchWidthM: 68,
       teamId: null,
       teamKit: null,
+      customKit: null,
       playerPhotos: {},
       frames: [emptyFrame()],
       activeFrameIndex: 0,
@@ -243,6 +253,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
   setProjectTitle: (title) => set({ projectTitle: title, isDirty: true }),
   setTeamId: (id) => set({ teamId: id, isDirty: true }),
   setTeamKit: (kit) => set({ teamKit: kit }),
+  setCustomKit: (kit) => set({ customKit: kit, teamKit: kit, isDirty: true }),
   setPlayerPhotos: (photos) => set({ playerPhotos: photos }),
   setTool: (tool) => set({ tool, selection: [], polygonDraftIds: [] }),
   setSelection: (ids) => set({ selection: ids }),
@@ -503,6 +514,14 @@ export const useEditorStore = create<EditorState>((set, get) => ({
           }
         : f,
     )
+    set({ frames: nextFrames, selection: [], isDirty: true })
+  },
+
+  clearActiveFrame: () => {
+    const { frames, activeFrameIndex } = get()
+    if (!frames[activeFrameIndex]!.objects.length) return
+    pushHistory(get, set)
+    const nextFrames = frames.map((f, i) => (i === activeFrameIndex ? { ...f, objects: [] } : f))
     set({ frames: nextFrames, selection: [], isDirty: true })
   },
 

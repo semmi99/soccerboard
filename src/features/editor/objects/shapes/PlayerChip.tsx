@@ -147,7 +147,7 @@ export function PlayerChipShape({ data }: { data: PlayerChipData }) {
       {data.highlighted && <HighlightRing />}
       <KitFill kit={kit} />
       <Text
-        text={String(data.number)}
+        text={data.displayText !== undefined ? data.displayText : String(data.number)}
         fontSize={15}
         fontStyle="bold"
         fill="#ffffff"
@@ -165,13 +165,17 @@ export function PlayerChipShape({ data }: { data: PlayerChipData }) {
       {data.label && (
         <Text
           text={data.label}
-          fontSize={11}
+          fontSize={14}
+          fontStyle="bold"
           fill="#ffffff"
-          width={100}
-          offsetX={50}
+          width={110}
+          offsetX={55}
           y={22}
           align="center"
           listening={false}
+          shadowColor="#000000"
+          shadowBlur={3}
+          shadowOpacity={0.7}
         />
       )}
     </Group>

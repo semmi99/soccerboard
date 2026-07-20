@@ -1,12 +1,20 @@
 import { useEffect, useState } from 'react'
 import { useEditorStore } from '../store/editorStore'
 import { useAuthStore } from '../../auth/store/authStore'
-import { listTeams, listPlayers, type Player, type Team } from '../../../lib/supabase/squad'
+import { listTeams, listPlayers, updateTeamKit, type Player, type Team } from '../../../lib/supabase/squad'
 import { listFormations, type Formation } from '../../../lib/supabase/formations'
 import { PRESET_FORMATIONS } from '../../formations/presets'
 import { Button } from '../../../components/ui/Button'
 import { KitDesignerModal } from '../../squad/components/KitDesignerModal'
-import type { KitPattern } from '../types'
+import { TEAM_COLORS } from '../constants'
+import type { KitPattern, TeamKit } from '../types'
+
+const DEFAULT_CUSTOM_KIT: TeamKit = {
+  home: { pattern: 'solid', color1: TEAM_COLORS.home, color2: TEAM_COLORS.home },
+  away: { pattern: 'solid', color1: TEAM_COLORS.away, color2: TEAM_COLORS.away },
+  gk: { pattern: 'solid', color1: '#eab308', color2: '#111827' },
+  chipScale: 1,
+}
 
 const selectClass =
   'rounded-md border border-pitch-600 bg-pitch-800 px-2 py-1.5 text-xs text-white outline-none focus:border-violet-accent'
@@ -16,6 +24,8 @@ export function TeamSquadPanel() {
   const teamId = useEditorStore((s) => s.teamId)
   const setTeamId = useEditorStore((s) => s.setTeamId)
   const setTeamKit = useEditorStore((s) => s.setTeamKit)
+  const customKit = useEditorStore((s) => s.customKit)
+  const setCustomKit = useEditorStore((s) => s.setCustomKit)
   const setPlayerPhotos = useEditorStore((s) => s.setPlayerPhotos)
   const pendingPlayer = useEditorStore((s) => s.pendingPlayer)
   const setPendingPlayer = useEditorStore((s) => s.setPendingPlayer)
@@ -64,7 +74,9 @@ export function TeamSquadPanel() {
 
   useEffect(() => {
     if (!activeTeam) {
-      setTeamKit(null)
+      // No linked team — fall back to whatever custom kit is saved with this
+      // project (or null, which PlayerChip resolves to plain default colors).
+      setTeamKit(customKit)
       return
     }
     setTeamKit({
@@ -85,6 +97,7 @@ export function TeamSquadPanel() {
       },
       chipScale: activeTeam.chip_scale,
     })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTeam, setTeamKit])
 
   function handlePickPlayer(player: Player) {
@@ -160,17 +173,44 @@ export function TeamSquadPanel() {
         </select>
       </label>
 
-      {activeTeam && (
-        <Button variant="secondary" className="w-full" onClick={() => setShowKitDesigner(true)}>
-          Kit-Design bearbeiten
-        </Button>
-      )}
+      <Button variant="secondary" className="w-full" onClick={() => setShowKitDesigner(true)}>
+        {activeTeam ? 'Kit-Design bearbeiten' : 'Farben anpassen'}
+      </Button>
 
-      {showKitDesigner && activeTeam && (
+      {showKitDesigner && (
         <KitDesignerModal
-          team={activeTeam}
+          title={activeTeam ? `Kit-Design: ${activeTeam.name}` : 'Farben anpassen'}
+          description={
+            activeTeam
+              ? undefined
+              : 'Kein Team verknüpft — diese Farben gelten nur für dieses Projekt.'
+          }
+          initial={{
+            homeKitPattern: (activeTeam?.home_kit_pattern ?? customKit?.home.pattern ?? DEFAULT_CUSTOM_KIT.home.pattern) as KitPattern,
+            homeKitColor1: activeTeam?.home_kit_color1 ?? customKit?.home.color1 ?? DEFAULT_CUSTOM_KIT.home.color1,
+            homeKitColor2: activeTeam?.home_kit_color2 ?? customKit?.home.color2 ?? DEFAULT_CUSTOM_KIT.home.color2,
+            awayKitPattern: (activeTeam?.away_kit_pattern ?? customKit?.away.pattern ?? DEFAULT_CUSTOM_KIT.away.pattern) as KitPattern,
+            awayKitColor1: activeTeam?.away_kit_color1 ?? customKit?.away.color1 ?? DEFAULT_CUSTOM_KIT.away.color1,
+            awayKitColor2: activeTeam?.away_kit_color2 ?? customKit?.away.color2 ?? DEFAULT_CUSTOM_KIT.away.color2,
+            gkKitPattern: (activeTeam?.gk_kit_pattern ?? customKit?.gk.pattern ?? DEFAULT_CUSTOM_KIT.gk.pattern) as KitPattern,
+            gkKitColor1: activeTeam?.gk_kit_color1 ?? customKit?.gk.color1 ?? DEFAULT_CUSTOM_KIT.gk.color1,
+            gkKitColor2: activeTeam?.gk_kit_color2 ?? customKit?.gk.color2 ?? DEFAULT_CUSTOM_KIT.gk.color2,
+            chipScale: activeTeam?.chip_scale ?? customKit?.chipScale ?? DEFAULT_CUSTOM_KIT.chipScale,
+          }}
           onClose={() => setShowKitDesigner(false)}
-          onSaved={(updated) => setTeams((ts) => ts.map((t) => (t.id === updated.id ? updated : t)))}
+          onSave={async (patch) => {
+            if (activeTeam) {
+              const updated = await updateTeamKit(activeTeam.id, patch)
+              setTeams((ts) => ts.map((t) => (t.id === updated.id ? updated : t)))
+            } else {
+              setCustomKit({
+                home: { pattern: patch.homeKitPattern, color1: patch.homeKitColor1, color2: patch.homeKitColor2 },
+                away: { pattern: patch.awayKitPattern, color1: patch.awayKitColor1, color2: patch.awayKitColor2 },
+                gk: { pattern: patch.gkKitPattern, color1: patch.gkKitColor1, color2: patch.gkKitColor2 },
+                chipScale: patch.chipScale,
+              })
+            }
+          }}
         />
       )}
 

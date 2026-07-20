@@ -36,7 +36,9 @@ export function TopBar({
       <input
         value={projectTitle}
         onChange={(e) => setProjectTitle(e.target.value)}
-        className="min-w-0 flex-1 truncate rounded-md bg-transparent px-2 py-1 text-sm font-medium text-white outline-none hover:bg-pitch-800 focus:bg-pitch-800"
+        placeholder="Projektname"
+        title="Projektname (klicken zum Umbenennen)"
+        className="min-w-0 max-w-xs truncate rounded-md border border-pitch-700 bg-pitch-800/60 px-2 py-1 text-sm font-medium text-white outline-none hover:border-pitch-600 focus:border-violet-accent focus:bg-pitch-800"
       />
 
       <div className="flex items-center gap-1">

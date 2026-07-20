@@ -11,8 +11,8 @@ export function DatenschutzPage() {
         <p>
           Verantwortlicher im Sinne der Datenschutz-Grundverordnung (DSGVO) ist:
           <br />
-          <Placeholder>Firmenname / Name</Placeholder>, <Placeholder>Adresse</Placeholder>,{' '}
-          <Placeholder>E-Mail-Adresse</Placeholder>
+          9011 Entertainment Ltd, Great Ancoats Street, M4 6DE Manchester, Vereinigtes
+          Königreich, office@9011soccer.com
         </p>
       </section>
 
@@ -106,7 +106,8 @@ export function DatenschutzPage() {
           Du hast das Recht auf Auskunft, Berichtigung, Löschung, Einschränkung der
           Verarbeitung, Datenübertragbarkeit sowie Widerspruch gegen die Verarbeitung deiner
           Daten. Zudem hast du das Recht, dich bei der zuständigen Datenschutz-Aufsichtsbehörde
-          (in Österreich die Datenschutzbehörde, dsb.gv.at) zu beschweren.
+          (im Vereinigten Königreich das Information Commissioner's Office, ico.org.uk) zu
+          beschweren.
         </p>
       </section>
 
@@ -122,7 +123,10 @@ export function DatenschutzPage() {
       <section>
         <h2 className="mb-2 text-lg font-bold text-white">9. Kontakt</h2>
         <p>
-          Für Fragen zum Datenschutz erreichst du uns unter <Placeholder>Datenschutz-E-Mail</Placeholder>{' '}
+          Für Fragen zum Datenschutz erreichst du uns unter{' '}
+          <a href="mailto:office@9011soccer.com" className="text-brand-gold underline">
+            office@9011soccer.com
+          </a>{' '}
           oder über unser <a href="/kontakt" className="text-brand-gold underline">Kontaktformular</a>.
         </p>
       </section>

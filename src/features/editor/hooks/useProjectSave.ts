@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useCallback, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useEditorStore } from '../store/editorStore'
 import { useAuthStore } from '../../auth/store/authStore'
@@ -17,6 +17,7 @@ export function useProjectSave() {
   const pitchLengthM = useEditorStore((s) => s.pitchLengthM)
   const pitchWidthM = useEditorStore((s) => s.pitchWidthM)
   const teamId = useEditorStore((s) => s.teamId)
+  const customKit = useEditorStore((s) => s.customKit)
   const frames = useEditorStore((s) => s.frames)
   const isDirty = useEditorStore((s) => s.isDirty)
   const markSaved = useEditorStore((s) => s.markSaved)
@@ -27,10 +28,18 @@ export function useProjectSave() {
 
   const [isSaving, setIsSaving] = useState(false)
   const [saveError, setSaveError] = useState<string | null>(null)
+  // React state updates aren't visible synchronously, so two calls to
+  // handleSave arriving close together (a fast double-click, or the
+  // keyboard-shortcut listener re-registering) could both read `isSaving`
+  // as false and race — both inserting the same client-generated frame/
+  // frame_objects ids and one of them hitting a primary-key conflict. A
+  // ref is updated immediately, so the second call sees it right away.
+  const isSavingRef = useRef(false)
 
-  async function handleSave() {
+  const handleSave = useCallback(async () => {
     if (!organization || !profile) return
-    if (isSaving) return
+    if (isSavingRef.current) return
+    isSavingRef.current = true
     setIsSaving(true)
     setSaveError(null)
 
@@ -57,6 +66,7 @@ export function useProjectSave() {
         fieldCrop,
         pitchLengthM,
         pitchWidthM,
+        customKit,
         frames,
       })
 
@@ -68,9 +78,28 @@ export function useProjectSave() {
     } catch (err) {
       setSaveError(err instanceof Error ? err.message : 'Speichern fehlgeschlagen.')
     } finally {
+      isSavingRef.current = false
       setIsSaving(false)
     }
-  }
+  }, [
+    organization,
+    profile,
+    projectId,
+    projectTitle,
+    pitchDesign,
+    orientation,
+    teamId,
+    customKit,
+    zoneGridStyle,
+    showPitchMarkings,
+    fieldCrop,
+    pitchLengthM,
+    pitchWidthM,
+    frames,
+    navigate,
+    setProjectIdInStore,
+    markSaved,
+  ])
 
   return { handleSave, isSaving, saveError, isDirty, projectId }
 }

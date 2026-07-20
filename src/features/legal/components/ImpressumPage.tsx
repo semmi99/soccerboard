@@ -4,33 +4,26 @@ import { Placeholder } from './Placeholder'
 export function ImpressumPage() {
   return (
     <LegalPageLayout title="Impressum">
-      <p>
-        Angaben gemäß § 5 E-Commerce-Gesetz (ECG), § 25 Mediengesetz (MedienG) und § 14
-        Unternehmensgesetzbuch (UGB).
-      </p>
+      <p>Angaben gemäß den anwendbaren gesetzlichen Bestimmungen des Vereinigten Königreichs.</p>
 
       <section>
         <h2 className="mb-2 text-lg font-bold text-white">Diensteanbieter</h2>
         <p>
-          <Placeholder>Firmenname / Vor- und Nachname</Placeholder>
+          9011 Entertainment Ltd
           <br />
-          <Placeholder>Rechtsform (z.B. Einzelunternehmen, GmbH, e.U.)</Placeholder>
+          Limited Company (England &amp; Wales)
           <br />
-          <Placeholder>Straße, Hausnummer</Placeholder>
+          Great Ancoats Street
           <br />
-          <Placeholder>PLZ, Ort</Placeholder>
+          M4 6DE Manchester
           <br />
-          <Placeholder>Österreich</Placeholder>
+          Vereinigtes Königreich
         </p>
       </section>
 
       <section>
         <h2 className="mb-2 text-lg font-bold text-white">Kontakt</h2>
-        <p>
-          E-Mail: <Placeholder>kontakt@9011soccer.com</Placeholder>
-          <br />
-          Telefon: <Placeholder>+43 …</Placeholder>
-        </p>
+        <p>E-Mail: office@9011soccer.com</p>
       </section>
 
       <section>
@@ -42,13 +35,7 @@ export function ImpressumPage() {
 
       <section>
         <h2 className="mb-2 text-lg font-bold text-white">Unternehmensrechtliche Angaben</h2>
-        <p>
-          Firmenbuchnummer: <Placeholder>falls vorhanden, sonst entfernen</Placeholder>
-          <br />
-          UID-Nummer: <Placeholder>falls vorhanden, sonst entfernen</Placeholder>
-          <br />
-          Zuständige Aufsichtsbehörde/Gewerbebehörde: <Placeholder>falls zutreffend</Placeholder>
-        </p>
+        <p>Registernummer (Companies House): 13808099</p>
       </section>
 
       <section>

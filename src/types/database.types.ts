@@ -326,6 +326,7 @@ export type Database = {
           created_by: string | null
           field_crop: string
           id: string
+          kit_override: Json | null
           org_id: string
           orientation: string
           pitch_design: string
@@ -344,6 +345,7 @@ export type Database = {
           created_by?: string | null
           field_crop?: string
           id?: string
+          kit_override?: Json | null
           org_id: string
           orientation?: string
           pitch_design?: string
@@ -362,6 +364,7 @@ export type Database = {
           created_by?: string | null
           field_crop?: string
           id?: string
+          kit_override?: Json | null
           org_id?: string
           orientation?: string
           pitch_design?: string

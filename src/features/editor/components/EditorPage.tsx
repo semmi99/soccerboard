@@ -49,6 +49,7 @@ export function EditorPage() {
           fieldCrop: project.fieldCrop,
           pitchLengthM: project.pitchLengthM,
           pitchWidthM: project.pitchWidthM,
+          customKit: project.customKit,
           frames: project.frames,
         })
       })

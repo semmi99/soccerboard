@@ -2,7 +2,6 @@ import { useState, type FormEvent } from 'react'
 import { Button } from '../../../components/ui/Button'
 import { sendContactMessage } from '../../../lib/supabase/contact'
 import { LegalPageLayout } from './LegalPageLayout'
-import { Placeholder } from './Placeholder'
 
 const inputClass =
   'w-full rounded-md border border-white/15 bg-white/5 px-3 py-2 text-sm text-white outline-none focus:border-violet-accent'
@@ -39,7 +38,11 @@ export function KontaktPage() {
         melden uns so schnell wie möglich zurück.
       </p>
       <p className="text-white/60">
-        Du erreichst uns auch direkt unter <Placeholder>kontakt@9011soccer.com</Placeholder>.
+        Du erreichst uns auch direkt unter{' '}
+        <a href="mailto:office@9011soccer.com" className="text-brand-gold underline">
+          office@9011soccer.com
+        </a>
+        .
       </p>
 
       {sent ? (

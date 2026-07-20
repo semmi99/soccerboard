@@ -11,10 +11,10 @@ export function AgbPage() {
         <h2 className="mb-2 text-lg font-bold text-white">1. Geltungsbereich</h2>
         <p>
           Diese Allgemeinen Geschäftsbedingungen (AGB) gelten für die Nutzung von
-          „TacticBoard Pro" (nachfolgend „Dienst"), einem Angebot von{' '}
-          <Placeholder>Firmenname</Placeholder> (nachfolgend „Anbieter"), erreichbar unter
-          9011soccer.com und socceranalyticspro.com. Mit der Registrierung eines Nutzerkontos
-          erkennt der Nutzer diese AGB an.
+          „TacticBoard Pro" (nachfolgend „Dienst"), einem Angebot von 9011 Entertainment Ltd
+          (nachfolgend „Anbieter"), erreichbar unter 9011soccer.com und
+          socceranalyticspro.com. Mit der Registrierung eines Nutzerkontos erkennt der
+          Nutzer diese AGB an.
         </p>
       </section>
 
@@ -118,10 +118,10 @@ export function AgbPage() {
       <section>
         <h2 className="mb-2 text-lg font-bold text-white">10. Schlussbestimmungen</h2>
         <p>
-          Es gilt das Recht der Republik <Placeholder>Österreich</Placeholder> unter Ausschluss
-          des UN-Kaufrechts. Gerichtsstand ist, soweit gesetzlich zulässig,{' '}
-          <Placeholder>Sitz des Anbieters</Placeholder>. Sollten einzelne Bestimmungen unwirksam
-          sein, bleibt die Wirksamkeit der übrigen Bestimmungen unberührt.
+          Es gilt das Recht von England und Wales unter Ausschluss des UN-Kaufrechts.
+          Gerichtsstand ist, soweit gesetzlich zulässig, der Sitz des Anbieters in
+          Manchester, Vereinigtes Königreich. Sollten einzelne Bestimmungen unwirksam sein,
+          bleibt die Wirksamkeit der übrigen Bestimmungen unberührt.
         </p>
       </section>
     </LegalPageLayout>

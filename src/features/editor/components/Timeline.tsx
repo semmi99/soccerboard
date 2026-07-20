@@ -11,6 +11,7 @@ export function Timeline() {
   const removeFrame = useEditorStore((s) => s.removeFrame)
   const duplicateFrame = useEditorStore((s) => s.duplicateFrame)
   const setFrameDuration = useEditorStore((s) => s.setFrameDuration)
+  const clearActiveFrame = useEditorStore((s) => s.clearActiveFrame)
   const beginHistoryCheckpoint = useEditorStore((s) => s.beginHistoryCheckpoint)
   const isPlaying = useEditorStore((s) => s.isPlaying)
   const setIsPlaying = useEditorStore((s) => s.setIsPlaying)
@@ -105,6 +106,16 @@ export function Timeline() {
               onClick={() => duplicateFrame(activeFrameIndex, maxFrames)}
             >
               Frame duplizieren
+            </Button>
+            <Button
+              variant="danger"
+              disabled={isPlaying || activeFrame.objects.length === 0}
+              onClick={() => {
+                if (window.confirm('Alle Objekte in diesem Frame löschen?')) clearActiveFrame()
+              }}
+              title="Alle Objekte in diesem Frame entfernen"
+            >
+              Board leeren
             </Button>
           </div>
         )}

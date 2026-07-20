@@ -16,6 +16,10 @@ export interface PlayerChipData {
   label: string
   playerId?: string
   isGoalkeeper?: boolean
+  /** Overrides what's shown in the chip circle instead of `number` — a
+   * letter, other text, or (when explicitly set to '') nothing at all.
+   * `undefined` means "show the number" (the default). */
+  displayText?: string
   /** Pulses a glowing ring around the chip so it draws attention in this
    * frame — e.g. to call out who a sequence is about. */
   highlighted?: boolean
@@ -146,6 +150,7 @@ export type PitchDesign =
   | 'royal_blue'
   | 'maroon'
   | 'light_gray'
+  | 'brand_blue'
 export type PitchOrientation = 'vertical' | 'horizontal'
 export type ZoneGridStyle = 'none' | 'thirds_channels' | 'guardiola'
 /** How much of the pitch's length is shown/exported: the full pitch, or a

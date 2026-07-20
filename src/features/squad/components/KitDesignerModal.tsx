@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Button } from '../../../components/ui/Button'
 import { ColorSwatchPicker } from '../../../components/ui/ColorSwatchPicker'
-import { updateTeamKit, type Team, type TeamKitPatch } from '../../../lib/supabase/squad'
+import type { TeamKitPatch } from '../../../lib/supabase/squad'
 import type { KitPattern } from '../../editor/types'
 
 type Side = 'home' | 'away' | 'gk'
@@ -98,24 +98,28 @@ function SideEditor({
 }
 
 export function KitDesignerModal({
-  team,
+  title,
+  description,
+  initial,
   onClose,
-  onSaved,
+  onSave,
 }: {
-  team: Team
+  title: string
+  description?: string
+  initial: TeamKitPatch
   onClose: () => void
-  onSaved: (team: Team) => void
+  onSave: (patch: TeamKitPatch) => Promise<void> | void
 }) {
-  const [homePattern, setHomePattern] = useState(team.home_kit_pattern as KitPattern)
-  const [homeColor1, setHomeColor1] = useState(team.home_kit_color1)
-  const [homeColor2, setHomeColor2] = useState(team.home_kit_color2)
-  const [awayPattern, setAwayPattern] = useState(team.away_kit_pattern as KitPattern)
-  const [awayColor1, setAwayColor1] = useState(team.away_kit_color1)
-  const [awayColor2, setAwayColor2] = useState(team.away_kit_color2)
-  const [gkPattern, setGkPattern] = useState(team.gk_kit_pattern as KitPattern)
-  const [gkColor1, setGkColor1] = useState(team.gk_kit_color1)
-  const [gkColor2, setGkColor2] = useState(team.gk_kit_color2)
-  const [chipScale, setChipScale] = useState(team.chip_scale)
+  const [homePattern, setHomePattern] = useState(initial.homeKitPattern)
+  const [homeColor1, setHomeColor1] = useState(initial.homeKitColor1)
+  const [homeColor2, setHomeColor2] = useState(initial.homeKitColor2)
+  const [awayPattern, setAwayPattern] = useState(initial.awayKitPattern)
+  const [awayColor1, setAwayColor1] = useState(initial.awayKitColor1)
+  const [awayColor2, setAwayColor2] = useState(initial.awayKitColor2)
+  const [gkPattern, setGkPattern] = useState(initial.gkKitPattern)
+  const [gkColor1, setGkColor1] = useState(initial.gkKitColor1)
+  const [gkColor2, setGkColor2] = useState(initial.gkKitColor2)
+  const [chipScale, setChipScale] = useState(initial.chipScale)
   const [isSaving, setIsSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -123,7 +127,7 @@ export function KitDesignerModal({
     setIsSaving(true)
     setError(null)
     try {
-      const patch: TeamKitPatch = {
+      await onSave({
         homeKitPattern: homePattern,
         homeKitColor1: homeColor1,
         homeKitColor2: homeColor2,
@@ -134,9 +138,7 @@ export function KitDesignerModal({
         gkKitColor1: gkColor1,
         gkKitColor2: gkColor2,
         chipScale,
-      }
-      const updated = await updateTeamKit(team.id, patch)
-      onSaved(updated)
+      })
       onClose()
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Speichern fehlgeschlagen.')
@@ -154,9 +156,9 @@ export function KitDesignerModal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
       <div className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-xl border border-pitch-700 bg-pitch-900 p-6 shadow-2xl">
-        <h2 className="mb-1 text-sm font-semibold text-white">Kit-Design: {team.name}</h2>
+        <h2 className="mb-1 text-sm font-semibold text-white">{title}</h2>
         <p className="mb-4 text-xs text-white/50">
-          Farbe &amp; Muster für Heim-, Auswärts- und Torwart-Spieler-Chips dieses Teams.
+          {description ?? 'Farbe & Muster für Heim-, Auswärts- und Torwart-Spieler-Chips.'}
         </p>
 
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">

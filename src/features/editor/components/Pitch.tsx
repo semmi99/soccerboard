@@ -14,6 +14,7 @@ const THEMES: Record<PitchDesign, { grassA: string; grassB: string; line: string
   royal_blue: { grassA: '#1c4f8c', grassB: '#173f70', line: 'rgba(255,255,255,0.85)' },
   maroon: { grassA: '#5c1f1f', grassB: '#4a1818', line: 'rgba(240,216,120,0.85)' },
   light_gray: { grassA: '#e5e7eb', grassB: '#d1d5db', line: 'rgba(20,20,20,0.85)' },
+  brand_blue: { grassA: '#145f89', grassB: '#12557c', line: 'rgba(242,167,59,0.85)' },
 }
 
 function Stripes({ theme }: { theme: { grassA: string; grassB: string } }) {

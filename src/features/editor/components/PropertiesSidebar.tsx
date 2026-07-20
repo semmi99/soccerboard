@@ -108,6 +108,7 @@ export function PropertiesSidebar() {
               <option value="royal_blue">Königsblau</option>
               <option value="maroon">Bordeaux</option>
               <option value="light_gray">Hellgrau (Druck)</option>
+              <option value="brand_blue">9011 Soccer Blau</option>
             </select>
           </Field>
           <Field label="Ausrichtung">
@@ -347,6 +348,33 @@ function PlayerChipFields({
             onChange({ number: Number(e.target.value) })
           }
         />
+      </Field>
+      <Field label="Anzeige im Chip">
+        <div className="flex flex-col gap-1.5">
+          <label className="flex items-center gap-2 text-xs text-white/70">
+            <input
+              type="checkbox"
+              className="accent-violet-accent"
+              checked={data.displayText !== undefined}
+              onChange={(e) => {
+                onCheckpoint()
+                onChange({ displayText: e.target.checked ? '' : undefined })
+              }}
+            />
+            Statt Rückennummer eigenen Text zeigen
+          </label>
+          {data.displayText !== undefined && (
+            <input
+              type="text"
+              maxLength={4}
+              placeholder="z.B. A, leer lassen für nichts"
+              className={inputClass}
+              value={data.displayText}
+              onFocus={onCheckpoint}
+              onChange={(e) => onChange({ displayText: e.target.value })}
+            />
+          )}
+        </div>
       </Field>
       <Field label="Label (optional)">
         <input
