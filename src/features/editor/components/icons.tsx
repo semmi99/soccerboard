@@ -179,3 +179,11 @@ export function LadderIcon(props: SVGProps<SVGSVGElement>) {
     </Base>
   )
 }
+
+export function RingIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <Base {...props}>
+      <circle cx="12" cy="12" r="7" strokeWidth={3} />
+    </Base>
+  )
+}

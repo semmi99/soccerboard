@@ -7,6 +7,7 @@ export const EQUIPMENT_DEFAULT_COLORS: Record<EquipmentKind, string> = {
   mannequin: '#94a3b8',
   slalom_pole: '#facc15',
   ladder: '#e5e7eb',
+  ring: '#ef4444',
 }
 
 /** Darkens a hex color for the cone's base/shadow accent. */
@@ -60,6 +61,8 @@ export function EquipmentShape({ data }: { data: EquipmentData }) {
           ))}
         </Group>
       )
+    case 'ring':
+      return <Circle radius={15} stroke={color} strokeWidth={5} />
     default:
       return null
   }

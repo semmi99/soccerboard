@@ -16,6 +16,7 @@ import {
   PolygonShapeIcon,
   RectShapeIcon,
   ReleasePassIcon,
+  RingIcon,
   RunArrowIcon,
   SlalomPoleIcon,
   StraightArrowIcon,
@@ -37,6 +38,7 @@ const EQUIPMENT_ICONS: Record<EquipmentKind, ReactNode> = {
   mannequin: <MannequinIcon />,
   slalom_pole: <SlalomPoleIcon />,
   ladder: <LadderIcon />,
+  ring: <RingIcon />,
 }
 
 const EQUIPMENT_LABELS: Record<EquipmentKind, string> = {
@@ -45,6 +47,7 @@ const EQUIPMENT_LABELS: Record<EquipmentKind, string> = {
   mannequin: 'Dummy',
   slalom_pole: 'Slalomstange',
   ladder: 'Leiter',
+  ring: 'Ring',
 }
 
 const SECTIONS: ToolDef[][] = [
