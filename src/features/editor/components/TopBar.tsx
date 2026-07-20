@@ -60,7 +60,7 @@ export function TopBar({
         disabled={!isDirty && Boolean(projectId)}
         title="Speichern (Strg+S)"
       >
-        {projectId ? 'Speichern' : 'Projekt erstellen'}
+        Speichern
       </Button>
     </header>
   )
