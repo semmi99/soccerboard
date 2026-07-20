@@ -5,8 +5,8 @@ export interface TierLimits {
 }
 
 export const FREE_TIER_LIMITS: TierLimits = {
-  maxProjects: 3,
-  maxFrames: 7,
+  maxProjects: 1,
+  maxFrames: 4,
   maxExportPixelRatio: 2, // ~1080p on a standard pitch canvas size
 }
 

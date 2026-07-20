@@ -72,11 +72,10 @@ export function DatenschutzPage() {
           </li>
         </ul>
         <p className="mt-2">
-          <Placeholder>
-            Bitte prüfen und ergänzen: Serverstandort(e) der genutzten Supabase-/Vercel-Region,
-            ggf. Abschluss von Auftragsverarbeitungsverträgen (Art. 28 DSGVO) sowie
-            Standardvertragsklauseln bei Datenübermittlung in Drittländer (z.B. USA).
-          </Placeholder>
+          Unsere Datenbank läuft auf Supabase-Servern in der EU (Region Frankfurt, Deutschland).
+          Die Auslieferung der Anwendung selbst erfolgt über das Content-Delivery-Netzwerk von
+          Vercel, das Nutzer aus Europa über europäische Edge-Standorte bedient. Es findet keine
+          Datenübermittlung in Drittländer außerhalb der EU/des EWR statt.
         </p>
       </section>
 

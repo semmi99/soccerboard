@@ -212,7 +212,7 @@ export function PlayerChipShape({ data }: { data: PlayerChipData }) {
       {data.label && (
         <Text
           text={data.label}
-          fontSize={14}
+          fontSize={16}
           fontStyle="bold"
           fill="#ffffff"
           width={110}

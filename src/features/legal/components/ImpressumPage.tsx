@@ -1,5 +1,4 @@
 import { LegalPageLayout } from './LegalPageLayout'
-import { Placeholder } from './Placeholder'
 
 export function ImpressumPage() {
   return (
@@ -28,9 +27,7 @@ export function ImpressumPage() {
 
       <section>
         <h2 className="mb-2 text-lg font-bold text-white">Vertretungsberechtigt</h2>
-        <p>
-          <Placeholder>Name der vertretungsbefugten Person</Placeholder>
-        </p>
+        <p>Friedrich Schanner</p>
       </section>
 
       <section>
@@ -44,24 +41,6 @@ export function ImpressumPage() {
           Diese Anwendung sowie die Marken/Domains <strong>9011 Soccer</strong>{' '}
           (9011soccer.com) und <strong>Soccer Analytics Pro</strong> (socceranalyticspro.com)
           werden von der oben genannten Person/dem oben genannten Unternehmen betrieben.
-        </p>
-      </section>
-
-      <section>
-        <h2 className="mb-2 text-lg font-bold text-white">EU-Streitschlichtung</h2>
-        <p>
-          Die Europäische Kommission stellt eine Plattform zur Online-Streitbeilegung (OS)
-          bereit, abrufbar unter{' '}
-          <a
-            href="https://ec.europa.eu/consumers/odr"
-            target="_blank"
-            rel="noreferrer"
-            className="text-brand-gold underline"
-          >
-            ec.europa.eu/consumers/odr
-          </a>
-          . Wir sind zur Teilnahme an einem Streitbeilegungsverfahren vor einer
-          Verbraucherschlichtungsstelle <Placeholder>weder verpflichtet noch bereit / bereit, Details ergänzen</Placeholder>.
         </p>
       </section>
 

@@ -8,8 +8,10 @@ import {
   deletePlayer,
   listPlayers,
   listTeams,
+  removeTeamCrest,
   updatePlayer,
   uploadPlayerPhoto,
+  uploadTeamCrest,
   type Player,
   type PlayerFormValues,
   type Team,
@@ -129,6 +131,7 @@ export function SquadPage() {
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const [showNewTeam, setShowNewTeam] = useState(false)
   const [showBulkAdd, setShowBulkAdd] = useState(false)
+  const [isUploadingCrest, setIsUploadingCrest] = useState(false)
 
   useEffect(() => {
     if (!organization) return
@@ -171,6 +174,29 @@ export function SquadPage() {
       cancelled = true
     }
   }, [activeTeamId])
+
+  async function handleCrestFile(file: File) {
+    if (!organization || !activeTeamId) return
+    setIsUploadingCrest(true)
+    try {
+      const crestUrl = await uploadTeamCrest(organization.id, activeTeamId, file)
+      setTeams((ts) => ts.map((t) => (t.id === activeTeamId ? { ...t, crest_url: crestUrl } : t)))
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Wappen-Upload fehlgeschlagen.')
+    } finally {
+      setIsUploadingCrest(false)
+    }
+  }
+
+  async function handleRemoveCrest() {
+    if (!activeTeamId) return
+    try {
+      await removeTeamCrest(activeTeamId)
+      setTeams((ts) => ts.map((t) => (t.id === activeTeamId ? { ...t, crest_url: null } : t)))
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Konnte nicht entfernt werden.')
+    }
+  }
 
   async function handleCreateTeam(name: string, ageGroup: string) {
     if (!organization) return
@@ -270,6 +296,46 @@ export function SquadPage() {
           >
             + Neues Team
           </button>
+          {activeTeam && (
+            <div
+              className="flex items-center gap-2 rounded-lg border border-pitch-700 px-2 py-1"
+              title="Wappen ersetzt die Trikotfarben auf allen Spieler-Chips dieses Teams im Editor"
+            >
+              {activeTeam.crest_url ? (
+                <img
+                  src={activeTeam.crest_url}
+                  alt="Wappen"
+                  className="h-7 w-7 shrink-0 rounded-full bg-pitch-800 object-contain"
+                />
+              ) : (
+                <div className="h-7 w-7 shrink-0 rounded-full bg-pitch-800" />
+              )}
+              <label className="cursor-pointer text-xs text-white/50 hover:text-white/80">
+                {isUploadingCrest ? 'Lädt hoch…' : 'Wappen hochladen'}
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  disabled={isUploadingCrest}
+                  onChange={(e) => {
+                    const file = e.target.files?.[0]
+                    if (file) void handleCrestFile(file)
+                    e.target.value = ''
+                  }}
+                />
+              </label>
+              {activeTeam.crest_url && (
+                <button
+                  type="button"
+                  onClick={() => void handleRemoveCrest()}
+                  title="Wappen entfernen"
+                  className="text-xs text-white/40 hover:text-red-400"
+                >
+                  ×
+                </button>
+              )}
+            </div>
+          )}
         </div>
         {activeTeam && (
           <div className="flex gap-2">
