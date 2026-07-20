@@ -20,6 +20,14 @@ function darken(hex: string, amount = 0.3) {
 }
 
 export function EquipmentShape({ data }: { data: EquipmentData }) {
+  return (
+    <Group scaleX={data.scaleX ?? 1} scaleY={data.scaleY ?? 1}>
+      <EquipmentIcon data={data} />
+    </Group>
+  )
+}
+
+function EquipmentIcon({ data }: { data: EquipmentData }) {
   const color = data.color ?? EQUIPMENT_DEFAULT_COLORS[data.kind]
 
   switch (data.kind) {

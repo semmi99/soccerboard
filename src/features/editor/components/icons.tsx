@@ -104,35 +104,6 @@ export function PlayerZoneIcon(props: SVGProps<SVGSVGElement>) {
   )
 }
 
-export function ReleasePassIcon(props: SVGProps<SVGSVGElement>) {
-  return (
-    <Base {...props}>
-      <path d="M4 12h15" />
-      <path d="M14 6l6 6-6 6" />
-      <circle cx="4" cy="12" r="1.6" fill="currentColor" stroke="none" />
-    </Base>
-  )
-}
-
-export function BouncePassIcon(props: SVGProps<SVGSVGElement>) {
-  return (
-    <Base {...props}>
-      <path d="M4 16C4 8 10 6 19 9" strokeDasharray="1.5 3" />
-      <path d="M14 5l5 4-4 4" />
-      <circle cx="4" cy="16" r="1.6" fill="currentColor" stroke="none" />
-    </Base>
-  )
-}
-
-export function RunArrowIcon(props: SVGProps<SVGSVGElement>) {
-  return (
-    <Base {...props}>
-      <path d="M4 12h15" strokeDasharray="2.5 2.5" />
-      <path d="M14 6l6 6-6 6" />
-    </Base>
-  )
-}
-
 export function ConeIcon(props: SVGProps<SVGSVGElement>) {
   return (
     <Base {...props}>

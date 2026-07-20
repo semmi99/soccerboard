@@ -77,6 +77,11 @@ export interface TextData {
 export interface EquipmentData {
   kind: EquipmentKind
   color?: string
+  /** Independent width/height stretch (from a free corner-drag resize),
+   * applied on top of the object's own uniform `scale` — lets a cone or
+   * ladder be pulled long without also getting proportionally wider. */
+  scaleX?: number
+  scaleY?: number
 }
 
 export interface BallData {
@@ -156,9 +161,6 @@ export type ToolId =
   | 'player_away_gk'
   | 'arrow_straight'
   | 'line_straight'
-  | 'pass_release'
-  | 'pass_bounce'
-  | 'run_arrow'
   | 'shape_circle'
   | 'shape_rect'
   | 'shape_polygon'

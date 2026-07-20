@@ -58,7 +58,10 @@ export function createObjectForTool(
       objectType: 'arrow',
       data: {
         shape: 'straight',
-        points: [0, 0, 100, 0],
+        // Two interior bend points from the start, not just the endpoints —
+        // so there's immediately something to grab and bend without first
+        // discovering the "Ziehpunkt hinzufügen" button in the sidebar.
+        points: [0, 0, 33, 0, 67, 0, 100, 0],
         lineStyle: 'solid',
         color: '#f0d878',
         strokeWidth: 3,
@@ -77,51 +80,6 @@ export function createObjectForTool(
         color: '#38bdf8',
         strokeWidth: 2.5,
         showArrowhead: false,
-      },
-    }
-  }
-
-  // Tactical arrow presets: pre-styled shortcuts for the pass/run vocabulary
-  // used in coaching explainer diagrams, so a coach doesn't have to manually
-  // dial in shape/line-style/color combos for the same three recurring ideas.
-  if (tool === 'pass_release') {
-    return {
-      ...base,
-      objectType: 'arrow',
-      data: {
-        shape: 'straight',
-        points: [0, 0, 110, 0],
-        lineStyle: 'solid',
-        color: '#fb923c',
-        strokeWidth: 3,
-      },
-    }
-  }
-
-  if (tool === 'pass_bounce') {
-    return {
-      ...base,
-      objectType: 'arrow',
-      data: {
-        shape: 'curved',
-        points: [0, 0, 50, -40, 100, 0],
-        lineStyle: 'dotted',
-        color: '#fbbf24',
-        strokeWidth: 2.5,
-      },
-    }
-  }
-
-  if (tool === 'run_arrow') {
-    return {
-      ...base,
-      objectType: 'arrow',
-      data: {
-        shape: 'straight',
-        points: [0, 0, 100, 0],
-        lineStyle: 'dashed',
-        color: '#94a3b8',
-        strokeWidth: 2,
       },
     }
   }

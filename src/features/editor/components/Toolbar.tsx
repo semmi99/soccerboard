@@ -3,7 +3,6 @@ import { useEditorStore } from '../store/editorStore'
 import type { EquipmentKind, ToolId } from '../types'
 import {
   BallIcon,
-  BouncePassIcon,
   ConeIcon,
   ConnectorIcon,
   CircleShapeIcon,
@@ -15,9 +14,7 @@ import {
   PlayerZoneIcon,
   PolygonShapeIcon,
   RectShapeIcon,
-  ReleasePassIcon,
   RingIcon,
-  RunArrowIcon,
   SlalomPoleIcon,
   StraightArrowIcon,
   TextToolIcon,
@@ -76,11 +73,6 @@ const SECTIONS: ToolDef[][] = [
     { id: 'line_straight', label: 'Linie (Zone einzeichnen)', icon: <PlainLineIcon /> },
     { id: 'connector', label: 'Spieler verbinden', icon: <ConnectorIcon /> },
     { id: 'player_zone', label: 'Spielerzone (Fläche füllen)', icon: <PlayerZoneIcon /> },
-  ],
-  [
-    { id: 'pass_release', label: 'Passlinie (Release)', icon: <ReleasePassIcon /> },
-    { id: 'pass_bounce', label: 'Doppelpass (Bounce)', icon: <BouncePassIcon /> },
-    { id: 'run_arrow', label: 'Laufweg (ohne Ball)', icon: <RunArrowIcon /> },
   ],
   [
     { id: 'shape_circle', label: 'Kreis', icon: <CircleShapeIcon /> },

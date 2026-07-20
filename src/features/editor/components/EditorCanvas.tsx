@@ -507,15 +507,16 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
     updateObjectLive(id, { data: { ...obj.data, points } } as Partial<FrameObject>)
   }
 
-  // Shapes (zones/circles/rects/polygons) get free non-uniform corner
-  // resizing since their width/height are independently meaningful; other
-  // object kinds (chips, equipment, text, ball) keep proportional scaling
-  // since they don't have separate width/height to resize into.
+  // Shapes (zones/circles/rects/polygons) and training equipment get free
+  // non-uniform corner resizing (independent width/height); other object
+  // kinds (chips, text, ball) keep proportional scaling since they don't
+  // have separate width/height to resize into.
   const selectedObjects = selection
     .map((id) => frame.objects.find((o) => o.id === id))
     .filter((o): o is FrameObject => Boolean(o))
-  const allShapesSelected =
-    selectedObjects.length > 0 && selectedObjects.every((o) => o.objectType === 'shape')
+  const allFreelyResizableSelected =
+    selectedObjects.length > 0 &&
+    selectedObjects.every((o) => o.objectType === 'shape' || o.objectType === 'training_equipment')
 
   return (
     <div ref={containerRef} className="flex h-full w-full items-center justify-center overflow-hidden">
@@ -598,7 +599,7 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
             ref={trRef}
             onTransformStart={handleTransformStart}
             rotateEnabled
-            keepRatio={!allShapesSelected}
+            keepRatio={!allFreelyResizableSelected}
             boundBoxFunc={(oldBox, newBox) =>
               newBox.width < 8 || newBox.height < 8 ? oldBox : newBox
             }

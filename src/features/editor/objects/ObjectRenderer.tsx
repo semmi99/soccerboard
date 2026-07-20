@@ -164,6 +164,33 @@ export function ObjectRenderer({
       return
     }
 
+    // Training equipment keeps its usual uniform `scale` (from the "Größe"
+    // slider) as a baseline, but a free corner-drag can additionally stretch
+    // width/height independently — that extra non-uniform ratio is folded
+    // into the equipment's own scaleX/scaleY instead of the shared scale, so
+    // pulling a cone longer doesn't also puff it out sideways.
+    if (object.objectType === 'training_equipment') {
+      const baseScale = object.scale || 1
+      const dragRatioX = node.scaleX() / baseScale
+      const dragRatioY = node.scaleY() / baseScale
+      node.scaleX(baseScale)
+      node.scaleY(baseScale)
+      const prevScaleX = object.data.scaleX ?? 1
+      const prevScaleY = object.data.scaleY ?? 1
+      onTransformEnd(object.id, {
+        x: node.x(),
+        y: node.y(),
+        rotation: node.rotation(),
+        scale: baseScale,
+        data: {
+          ...object.data,
+          scaleX: prevScaleX * dragRatioX,
+          scaleY: prevScaleY * dragRatioY,
+        },
+      } as Partial<FrameObject>)
+      return
+    }
+
     onTransformEnd(object.id, {
       x: node.x(),
       y: node.y(),
