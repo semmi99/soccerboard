@@ -38,11 +38,13 @@ function ArrowPointHandles({
   scale,
   onDragStart,
   onDragMove,
+  onDragEnd,
 }: {
   points: number[]
   scale: number
   onDragStart: () => void
   onDragMove: (pairIndex: number, x: number, y: number) => void
+  onDragEnd: () => void
 }) {
   const safeScale = Math.max(scale, 0.2)
   const radius = 6 / safeScale
@@ -72,6 +74,10 @@ function ArrowPointHandles({
           onDragMove={(e: KonvaEventObject<DragEvent>) => {
             e.cancelBubble = true
             onDragMove(i, e.target.x(), e.target.y())
+          }}
+          onDragEnd={(e: KonvaEventObject<DragEvent>) => {
+            e.cancelBubble = true
+            onDragEnd()
           }}
           onClick={(e: KonvaEventObject<MouseEvent>) => {
             e.cancelBubble = true
@@ -177,6 +183,20 @@ export function ObjectRenderer({
     onArrowPointsChange(object.id, points)
   }
 
+  // Konva arms a drag on every draggable node under the pointer at mousedown,
+  // not just the topmost hit — with the point handle AND its parent object
+  // Group both draggable, the Group would otherwise hijack the drag and move
+  // the whole arrow instead of just the one point. Toggling the Group's own
+  // draggable flag off for the duration of a handle drag is the reliable fix.
+  function handleArrowPointDragStart() {
+    groupRef.current?.draggable(false)
+    onDragStart()
+  }
+
+  function handleArrowPointDragEnd() {
+    groupRef.current?.draggable(interactive)
+  }
+
   return (
     <Group
       ref={groupRef}
@@ -208,8 +228,9 @@ export function ObjectRenderer({
         <ArrowPointHandles
           points={object.data.points}
           scale={object.scale}
-          onDragStart={onDragStart}
+          onDragStart={handleArrowPointDragStart}
           onDragMove={handleArrowPointDragMove}
+          onDragEnd={handleArrowPointDragEnd}
         />
       )}
     </Group>

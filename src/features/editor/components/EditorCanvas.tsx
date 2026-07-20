@@ -229,7 +229,17 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
   useEffect(() => {
     const tr = trRef.current
     if (!tr) return
+    // Bendable straight/polyline arrows get their own point-drag handles
+    // (see ArrowPointHandles in ObjectRenderer) sitting right at the shape's
+    // corners — the Transformer's resize anchors would land almost exactly
+    // on top of them and hijack the drag, silently resizing/collapsing the
+    // arrow instead of moving a point. Curved arrows have no such handles
+    // and still rely on the Transformer normally.
     const nodes = selection
+      .filter((id) => {
+        const obj = frame.objects.find((o) => o.id === id)
+        return !(obj?.objectType === 'arrow' && obj.data.shape !== 'curved')
+      })
       .map((id) => nodeRefs.current[id])
       .filter((n): n is Konva.Group => Boolean(n))
     tr.nodes(nodes)
