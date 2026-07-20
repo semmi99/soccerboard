@@ -8,7 +8,8 @@ import { useElementSize } from '../hooks/useElementSize'
 import { Pitch } from './Pitch'
 import { ObjectRenderer } from '../objects/ObjectRenderer'
 import { ConnectorShape } from '../objects/shapes/Connector'
-import { PlayerZoneShape } from '../objects/shapes/PlayerZone'
+import { ConnectorZoneShape } from '../objects/shapes/PlayerZone'
+import { findConnectorZones } from '../objects/shapes/connectorZones'
 import type { FrameObject } from '../types'
 
 // Cubic ease-in-out: a touch smoother/slower off the start and into the end
@@ -323,9 +324,6 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
   const connectorDraftFromId = useEditorStore((s) => s.connectorDraftFromId)
   const setConnectorDraftFromId = useEditorStore((s) => s.setConnectorDraftFromId)
   const addConnector = useEditorStore((s) => s.addConnector)
-  const polygonDraftIds = useEditorStore((s) => s.polygonDraftIds)
-  const setPolygonDraftIds = useEditorStore((s) => s.setPolygonDraftIds)
-  const addPlayerZone = useEditorStore((s) => s.addPlayerZone)
 
   const frame = frames[activeFrameIndex] ?? frames[0]!
   const [playbackOverlay, setPlaybackOverlay] = useState<PlaybackOverlay>(EMPTY_OVERLAY)
@@ -354,6 +352,23 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
     return bucketDiff !== 0 ? -bucketDiff : a.zIndex - b.zIndex
   })
   const enteringIds = new Set(playbackOverlay.entering.map((o) => o.id))
+
+  // Auto-highlight: whenever connectors form a closed loop between players
+  // (e.g. 1-2-3-4-1), fill the enclosed area — derived fresh from the
+  // connectors themselves every render, so it always matches exactly what's
+  // connected instead of needing its own separately-drawn/maintained shape.
+  const connectorEdges = visibleObjects
+    .filter((o): o is Extract<FrameObject, { objectType: 'connector' }> => o.objectType === 'connector')
+    .map((o): [string, string] => [o.data.fromId, o.data.toId])
+  const connectorZones = findConnectorZones(connectorEdges)
+    .map((z) => {
+      const points = z.ids
+        .map((id) => visibleObjects.find((o) => o.id === id))
+        .filter((o): o is FrameObject => Boolean(o))
+      if (points.length !== z.ids.length) return null
+      return { key: z.key, points: points.flatMap((p) => [p.x, p.y]) }
+    })
+    .filter((z): z is { key: string; points: number[] } => Boolean(z))
 
   const trRef = useRef<Konva.Transformer>(null)
   const objectsLayerRef = useRef<Konva.Layer>(null)
@@ -486,17 +501,22 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
           })
           .filter((c): c is ConnectorSyncSpec => Boolean(c))
 
-        // Same idea as connectors: a player-zone polygon that persists across
-        // both frames needs its points glued to the live (tweened) positions
-        // of the player chips it references while the transition is in flight.
-        const zones: PolygonSyncSpec[] = toFrame.objects
-          .filter(
-            (o): o is Extract<FrameObject, { objectType: 'player_zone' }> =>
-              o.objectType === 'player_zone' && fromIds.has(o.id),
-          )
-          .map((o) => {
-            const line = zoneRefs.current[o.id]
-            return line ? { line, ids: o.data.playerIds } : null
+        // Same idea as connectors: an auto-detected connector-loop zone that
+        // persists across both frames needs its points glued to the live
+        // (tweened) positions of the player chips it connects while the
+        // transition is in flight. Only zones whose exact loop of players
+        // exists in BOTH frames are synced — a newly formed or broken loop
+        // just pops in/out with the rest of the frame's own render instead.
+        const edgesOf = (frameObjects: FrameObject[]) =>
+          frameObjects
+            .filter((o): o is Extract<FrameObject, { objectType: 'connector' }> => o.objectType === 'connector')
+            .map((o): [string, string] => [o.data.fromId, o.data.toId])
+        const fromZoneKeys = new Set(findConnectorZones(edgesOf(fromFrame.objects)).map((z) => z.key))
+        const zones: PolygonSyncSpec[] = findConnectorZones(edgesOf(toFrame.objects))
+          .filter((z) => fromZoneKeys.has(z.key))
+          .map((z) => {
+            const line = zoneRefs.current[z.key]
+            return line ? { line, ids: z.ids } : null
           })
           .filter((z): z is PolygonSyncSpec => Boolean(z))
 
@@ -587,19 +607,6 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
       }
       return
     }
-    if (tool === 'player_zone') {
-      const clicked = frame.objects.find((o) => o.id === id)
-      if (!clicked || clicked.objectType !== 'player_chip') return
-      if (polygonDraftIds.length >= 3 && polygonDraftIds[0] === id) {
-        addPlayerZone(polygonDraftIds)
-        return
-      }
-      if (polygonDraftIds.includes(id)) return
-      const next = [...polygonDraftIds, id]
-      setPolygonDraftIds(next)
-      setSelection(next)
-      return
-    }
     handleSelect(id, additive)
   }
 
@@ -614,11 +621,6 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
     }
     if (tool === 'connector') {
       setConnectorDraftFromId(null)
-      setSelection([])
-      return
-    }
-    if (tool === 'player_zone') {
-      setPolygonDraftIds([])
       setSelection([])
       return
     }
@@ -759,23 +761,10 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
           x={orientation === 'horizontal' ? -cropShift : 0}
           y={orientation === 'vertical' ? -cropShift : 0}
         >
+          {connectorZones.map((z) => (
+            <ConnectorZoneShape key={z.key} points={z.points} lineRef={(node) => registerZoneRef(z.key, node)} />
+          ))}
           {sortedObjects.map((object) => {
-            if (object.objectType === 'player_zone') {
-              const points = object.data.playerIds
-                .map((id) => visibleObjects.find((o) => o.id === id))
-                .filter((o): o is FrameObject => Boolean(o))
-              if (points.length !== object.data.playerIds.length) return null
-              return (
-                <PlayerZoneShape
-                  key={object.id}
-                  data={object.data}
-                  points={points.flatMap((p) => [p.x, p.y])}
-                  isSelected={selection.includes(object.id)}
-                  onSelect={(additive) => handleSelect(object.id, additive)}
-                  lineRef={(node) => registerZoneRef(object.id, node)}
-                />
-              )
-            }
             if (object.objectType === 'connector') {
               const from = visibleObjects.find((o) => o.id === object.data.fromId)
               const to = visibleObjects.find((o) => o.id === object.data.toId)

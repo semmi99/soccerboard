@@ -12,7 +12,6 @@ import type {
   PitchDesign,
   PitchOrientation,
   PlayerChipData,
-  PlayerZoneData,
   ShapeData,
   TextData,
 } from '../types'
@@ -260,14 +259,6 @@ export function PropertiesSidebar() {
               data={selectedObject.data}
               onCheckpoint={beginHistoryCheckpoint}
               onChange={(patch) => updateData<Extract<FrameObject, { objectType: 'ball' }>>(patch)}
-            />
-          )}
-
-          {selectedObject.objectType === 'player_zone' && (
-            <PlayerZoneFields
-              data={selectedObject.data}
-              onCheckpoint={beginHistoryCheckpoint}
-              onChange={(patch) => updateData<Extract<FrameObject, { objectType: 'player_zone' }>>(patch)}
             />
           )}
 
@@ -900,51 +891,6 @@ function BallFields({
             onCheckpoint()
             onChange({ color: c })
           }}
-        />
-      </Field>
-    </div>
-  )
-}
-
-function PlayerZoneFields({
-  data,
-  onCheckpoint,
-  onChange,
-}: {
-  data: PlayerZoneData
-  onCheckpoint: () => void
-  onChange: (patch: Partial<PlayerZoneData>) => void
-}) {
-  return (
-    <div className="flex flex-col gap-2">
-      <Field label="Füllfarbe">
-        <ColorSwatchPicker
-          value={rgbaToHex(data.fill)}
-          onChange={(c) => {
-            onCheckpoint()
-            onChange({ fill: hexToRgba(c, 0.45) })
-          }}
-        />
-      </Field>
-      <Field label="Rahmenfarbe">
-        <ColorSwatchPicker
-          value={data.stroke}
-          onChange={(c) => {
-            onCheckpoint()
-            onChange({ stroke: c })
-          }}
-        />
-      </Field>
-      <Field label={`Deckkraft (${Math.round(data.opacity * 100)}%)`}>
-        <input
-          type="range"
-          min={0.1}
-          max={1}
-          step={0.05}
-          className="w-full"
-          value={data.opacity}
-          onFocus={onCheckpoint}
-          onChange={(e) => onChange({ opacity: Number(e.target.value) })}
         />
       </Field>
     </div>

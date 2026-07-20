@@ -70,7 +70,6 @@ interface EditorState {
   pendingPlayers: PendingRealPlayer[]
   connectorDraftFromId: string | null
   lastConnectorColor: string
-  polygonDraftIds: string[]
   isPlaying: boolean
   isDirty: boolean
   past: FramesSnapshot[]
@@ -114,7 +113,6 @@ interface EditorState {
   setPendingPlayer: (player: PendingRealPlayer | null) => void
   setPendingPlayers: (players: PendingRealPlayer[]) => void
   setConnectorDraftFromId: (id: string | null) => void
-  setPolygonDraftIds: (ids: string[]) => void
 
   activeFrame: () => EditorFrame
 
@@ -122,7 +120,6 @@ interface EditorState {
   placeGroupAt: (x: number, y: number) => void
   addConnector: (fromId: string, toId: string) => void
   setLastConnectorColor: (color: string) => void
-  addPlayerZone: (playerIds: string[]) => void
   applyFormationToFrame: (positions: FormationPosition[], players: FormationPlayer[]) => void
   beginHistoryCheckpoint: () => void
   updateObjectLive: (objectId: string, patch: Partial<FrameObject>) => void
@@ -174,7 +171,6 @@ export const useEditorStore = create<EditorState>((set, get) => ({
   pendingPlayers: [],
   connectorDraftFromId: null,
   lastConnectorColor: '#f0d878',
-  polygonDraftIds: [],
   isPlaying: false,
   isDirty: false,
   past: [],
@@ -218,7 +214,6 @@ export const useEditorStore = create<EditorState>((set, get) => ({
       pendingPlayers: [],
       connectorDraftFromId: null,
       lastConnectorColor: '#f0d878',
-      polygonDraftIds: [],
       past: [],
       future: [],
       isDirty: false,
@@ -231,6 +226,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
     set({
       projectId: null,
       projectTitle: 'Neues Projekt',
+      pitchDesign: 'brand_blue',
       zoneGridStyle: 'none',
       zoneGridCustomId: null,
       zoneGridCustomLines: [],
@@ -249,7 +245,6 @@ export const useEditorStore = create<EditorState>((set, get) => ({
       pendingPlayers: [],
       connectorDraftFromId: null,
       lastConnectorColor: '#f0d878',
-      polygonDraftIds: [],
       past: [],
       future: [],
       isDirty: false,
@@ -272,12 +267,11 @@ export const useEditorStore = create<EditorState>((set, get) => ({
   setTeamKit: (kit) => set({ teamKit: kit }),
   setCustomKit: (kit) => set({ customKit: kit, teamKit: kit, isDirty: true }),
   setPlayerPhotos: (photos) => set({ playerPhotos: photos }),
-  setTool: (tool) => set({ tool, selection: [], polygonDraftIds: [] }),
+  setTool: (tool) => set({ tool, selection: [] }),
   setSelection: (ids) => set({ selection: ids }),
   setPendingPlayer: (player) => set({ pendingPlayer: player }),
   setPendingPlayers: (players) => set({ pendingPlayers: players }),
   setConnectorDraftFromId: (id) => set({ connectorDraftFromId: id }),
-  setPolygonDraftIds: (ids) => set({ polygonDraftIds: ids }),
 
   activeFrame: () => {
     const { frames, activeFrameIndex } = get()
@@ -398,33 +392,6 @@ export const useEditorStore = create<EditorState>((set, get) => ({
 
   setLastConnectorColor: (color) => set({ lastConnectorColor: color }),
 
-  addPlayerZone: (playerIds) => {
-    if (playerIds.length < 3) return
-    const { frames, activeFrameIndex } = get()
-    pushHistory(get, set)
-    const frame = frames[activeFrameIndex]!
-    const maxZ = frame.objects.reduce((m, o) => Math.max(m, o.zIndex), -1)
-    const newObject: FrameObject = {
-      id: crypto.randomUUID(),
-      x: 0,
-      y: 0,
-      rotation: 0,
-      scale: 1,
-      zIndex: maxZ + 1,
-      objectType: 'player_zone',
-      data: { playerIds, fill: 'rgba(15, 15, 15, 0.45)', stroke: '#f0d878', opacity: 1 },
-    }
-    const nextFrames = frames.map((f, i) =>
-      i === activeFrameIndex ? { ...f, objects: [...f.objects, newObject] } : f,
-    )
-    set({
-      frames: nextFrames,
-      selection: [newObject.id],
-      polygonDraftIds: [],
-      isDirty: true,
-    })
-  },
-
   applyFormationToFrame: (positions, players) => {
     pushHistory(get, set)
     const { frames, activeFrameIndex, orientation, teamKit } = get()
@@ -522,9 +489,6 @@ export const useEditorStore = create<EditorState>((set, get) => ({
               if (removedIds.has(o.id)) return false
               if (o.objectType === 'connector') {
                 return !removedIds.has(o.data.fromId) && !removedIds.has(o.data.toId)
-              }
-              if (o.objectType === 'player_zone') {
-                return !o.data.playerIds.some((id) => removedIds.has(id))
               }
               return true
             }),

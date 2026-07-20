@@ -11,7 +11,6 @@ import {
   MannequinIcon,
   MiniGoalIcon,
   PlainLineIcon,
-  PlayerZoneIcon,
   PolygonShapeIcon,
   RectShapeIcon,
   RingIcon,
@@ -72,7 +71,6 @@ const SECTIONS: ToolDef[][] = [
     { id: 'arrow_straight', label: 'Pfeil (Ziehpunkte zum Biegen)', icon: <StraightArrowIcon /> },
     { id: 'line_straight', label: 'Linie (Zone einzeichnen)', icon: <PlainLineIcon /> },
     { id: 'connector', label: 'Spieler verbinden', icon: <ConnectorIcon /> },
-    { id: 'player_zone', label: 'Spielerzone (Fläche füllen)', icon: <PlayerZoneIcon /> },
   ],
   [
     { id: 'shape_circle', label: 'Kreis', icon: <CircleShapeIcon /> },

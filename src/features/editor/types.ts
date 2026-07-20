@@ -118,13 +118,6 @@ export interface ConnectorData {
   lineStyle: LineStyle
 }
 
-export interface PlayerZoneData {
-  playerIds: string[] // ordered polygon vertices, resolved live from player_chip positions
-  fill: string
-  stroke: string
-  opacity: number
-}
-
 export type ObjectType =
   | 'player_chip'
   | 'arrow'
@@ -133,7 +126,6 @@ export type ObjectType =
   | 'training_equipment'
   | 'ball'
   | 'connector'
-  | 'player_zone'
 
 export interface FrameObjectBase {
   id: string
@@ -152,7 +144,6 @@ export type FrameObject =
   | (FrameObjectBase & { objectType: 'training_equipment'; data: EquipmentData })
   | (FrameObjectBase & { objectType: 'ball'; data: BallData })
   | (FrameObjectBase & { objectType: 'connector'; data: ConnectorData })
-  | (FrameObjectBase & { objectType: 'player_zone'; data: PlayerZoneData })
 
 export interface EditorFrame {
   id: string
@@ -200,5 +191,4 @@ export type ToolId =
   | 'text_subtitle'
   | 'ball'
   | 'connector'
-  | 'player_zone'
   | `equipment_${EquipmentKind}`
