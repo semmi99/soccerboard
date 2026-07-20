@@ -16,6 +16,10 @@ export const PRO_TIER_LIMITS: TierLimits = {
   maxExportPixelRatio: 4, // ~4K
 }
 
-export function limitsForTier(tier: string): TierLimits {
-  return tier === 'free' ? FREE_TIER_LIMITS : PRO_TIER_LIMITS
+export function limitsForTier(org: {
+  subscription_tier: string
+  free_override?: boolean | null
+}): TierLimits {
+  if (org.free_override) return PRO_TIER_LIMITS
+  return org.subscription_tier === 'free' ? FREE_TIER_LIMITS : PRO_TIER_LIMITS
 }

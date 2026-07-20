@@ -16,8 +16,8 @@ export function Timeline() {
   const isPlaying = useEditorStore((s) => s.isPlaying)
   const setIsPlaying = useEditorStore((s) => s.setIsPlaying)
 
-  const tier = useAuthStore((s) => s.organization?.subscription_tier ?? 'free')
-  const maxFrames = limitsForTier(tier).maxFrames
+  const organization = useAuthStore((s) => s.organization)
+  const maxFrames = limitsForTier(organization ?? { subscription_tier: 'free' }).maxFrames
   const activeFrame = frames[activeFrameIndex]
   const canPlay = frames.length > 1
 

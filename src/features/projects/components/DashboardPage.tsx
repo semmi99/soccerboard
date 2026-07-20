@@ -113,7 +113,7 @@ export function DashboardPage() {
     )
   }
 
-  const maxProjects = limitsForTier(organization.subscription_tier).maxProjects
+  const maxProjects = limitsForTier(organization).maxProjects
   const limitReached = projects.length >= maxProjects
 
   return (

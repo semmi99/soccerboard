@@ -12,6 +12,7 @@ import {
   type OrgMember,
   type OrgRole,
 } from '../../../lib/supabase/admin'
+import { PlatformAdminSection } from './PlatformAdminSection'
 
 const ROLE_LABELS: Record<OrgRole, string> = {
   admin: 'Admin',
@@ -231,6 +232,8 @@ export function AdminPage() {
             </div>
           )}
         </section>
+
+        {profile.is_platform_admin && <PlatformAdminSection />}
       </main>
     </div>
   )

@@ -31,9 +31,7 @@ export function ExportMenu({ stageRef }: { stageRef: RefObject<Konva.Stage | nul
   const frames = useEditorStore((s) => s.frames)
   const organization = useAuthStore((s) => s.organization)
 
-  const maxPixelRatio = organization
-    ? limitsForTier(organization.subscription_tier).maxExportPixelRatio
-    : 2
+  const maxPixelRatio = organization ? limitsForTier(organization).maxExportPixelRatio : 2
   const availableResolutions = RESOLUTION_OPTIONS.filter((r) => r.pixelRatio <= maxPixelRatio)
   const fileName = projectTitle.trim() || 'tacticboard-projekt'
 

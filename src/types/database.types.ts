@@ -222,6 +222,7 @@ export type Database = {
       organizations: {
         Row: {
           created_at: string
+          free_override: boolean
           id: string
           logo_url: string | null
           name: string
@@ -231,6 +232,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          free_override?: boolean
           id?: string
           logo_url?: string | null
           name: string
@@ -240,6 +242,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          free_override?: boolean
           id?: string
           logo_url?: string | null
           name?: string
@@ -371,6 +374,7 @@ export type Database = {
           email: string | null
           full_name: string | null
           id: string
+          is_platform_admin: boolean
           org_id: string
           role: string
         }
@@ -379,6 +383,7 @@ export type Database = {
           email?: string | null
           full_name?: string | null
           id: string
+          is_platform_admin?: boolean
           org_id: string
           role?: string
         }
@@ -387,6 +392,7 @@ export type Database = {
           email?: string | null
           full_name?: string | null
           id?: string
+          is_platform_admin?: boolean
           org_id?: string
           role?: string
         }

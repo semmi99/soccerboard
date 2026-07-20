@@ -46,7 +46,7 @@ export function useProjectSave() {
 
     try {
       if (!projectId) {
-        const maxProjects = limitsForTier(organization.subscription_tier).maxProjects
+        const maxProjects = limitsForTier(organization).maxProjects
         const existing = await countProjects(organization.id)
         if (existing >= maxProjects) {
           setSaveError(`Free-Limit erreicht: maximal ${maxProjects} Projekte. Upgrade für mehr.`)
