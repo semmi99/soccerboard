@@ -73,6 +73,38 @@ export type Database = {
           },
         ]
       }
+      zone_grids: {
+        Row: {
+          created_at: string
+          id: string
+          lines: Json
+          name: string
+          org_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          lines?: Json
+          name: string
+          org_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          lines?: Json
+          name?: string
+          org_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "zone_grids_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       frame_objects: {
         Row: {
           created_at: string
@@ -217,6 +249,51 @@ export type Database = {
         }
         Relationships: []
       }
+      org_invites: {
+        Row: {
+          accepted_at: string | null
+          created_at: string
+          email: string
+          id: string
+          invited_by: string | null
+          org_id: string
+          role: string
+        }
+        Insert: {
+          accepted_at?: string | null
+          created_at?: string
+          email: string
+          id?: string
+          invited_by?: string | null
+          org_id: string
+          role?: string
+        }
+        Update: {
+          accepted_at?: string | null
+          created_at?: string
+          email?: string
+          id?: string
+          invited_by?: string | null
+          org_id?: string
+          role?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "org_invites_invited_by_fkey"
+            columns: ["invited_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "org_invites_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       players: {
         Row: {
           attributes: Json
@@ -291,6 +368,7 @@ export type Database = {
       profiles: {
         Row: {
           created_at: string
+          email: string | null
           full_name: string | null
           id: string
           org_id: string
@@ -298,6 +376,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          email?: string | null
           full_name?: string | null
           id: string
           org_id: string
@@ -305,6 +384,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          email?: string | null
           full_name?: string | null
           id?: string
           org_id?: string
@@ -338,6 +418,7 @@ export type Database = {
           title: string
           type: string
           updated_at: string
+          zone_grid_custom_id: string | null
           zone_grid_style: string
         }
         Insert: {
@@ -357,6 +438,7 @@ export type Database = {
           title?: string
           type?: string
           updated_at?: string
+          zone_grid_custom_id?: string | null
           zone_grid_style?: string
         }
         Update: {
@@ -376,6 +458,7 @@ export type Database = {
           title?: string
           type?: string
           updated_at?: string
+          zone_grid_custom_id?: string | null
           zone_grid_style?: string
         }
         Relationships: [
@@ -410,6 +493,7 @@ export type Database = {
           away_kit_pattern: string
           chip_scale: number
           created_at: string
+          crest_url: string | null
           gk_kit_color1: string
           gk_kit_color2: string
           gk_kit_pattern: string
@@ -428,6 +512,7 @@ export type Database = {
           away_kit_pattern?: string
           chip_scale?: number
           created_at?: string
+          crest_url?: string | null
           gk_kit_color1?: string
           gk_kit_color2?: string
           gk_kit_pattern?: string
@@ -446,6 +531,7 @@ export type Database = {
           away_kit_pattern?: string
           chip_scale?: number
           created_at?: string
+          crest_url?: string | null
           gk_kit_color1?: string
           gk_kit_color2?: string
           gk_kit_pattern?: string

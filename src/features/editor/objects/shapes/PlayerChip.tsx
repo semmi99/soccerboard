@@ -1,5 +1,5 @@
-import { useEffect, useRef } from 'react'
-import { Circle, Group, Rect, Text } from 'react-konva'
+import { useEffect, useRef, useState } from 'react'
+import { Circle, Group, Image as KonvaImage, Rect, Text } from 'react-konva'
 import Konva from 'konva'
 import { TEAM_COLORS } from '../../constants'
 import type { KitConfig, PlayerChipData } from '../../types'
@@ -115,6 +115,53 @@ function KitPatternContent({ kit }: { kit: KitConfig }) {
   }
 }
 
+function useHtmlImage(url: string | null | undefined): HTMLImageElement | null {
+  const [img, setImg] = useState<HTMLImageElement | null>(null)
+  useEffect(() => {
+    if (!url) {
+      setImg(null)
+      return
+    }
+    const image = new window.Image()
+    image.crossOrigin = 'anonymous'
+    image.onload = () => setImg(image)
+    image.src = url
+    return () => {
+      image.onload = null
+    }
+  }, [url])
+  return img
+}
+
+function CrestFill({ url }: { url: string }) {
+  const img = useHtmlImage(url)
+  return (
+    <>
+      <Group clipFunc={(ctx) => ctx.arc(0, 0, CHIP_R, 0, Math.PI * 2, false)}>
+        <Rect x={-CHIP_R} y={-CHIP_R} width={CHIP_R * 2} height={CHIP_R * 2} fill="#1f2937" />
+        {img && (
+          <KonvaImage
+            image={img}
+            x={-CHIP_R}
+            y={-CHIP_R}
+            width={CHIP_R * 2}
+            height={CHIP_R * 2}
+          />
+        )}
+      </Group>
+      <Circle
+        radius={CHIP_R}
+        stroke="#ffffff"
+        strokeWidth={2}
+        shadowColor="#000000"
+        shadowBlur={6}
+        shadowOffsetY={3}
+        shadowOpacity={0.45}
+      />
+    </>
+  )
+}
+
 function KitFill({ kit }: { kit: KitConfig }) {
   return (
     <>
@@ -145,7 +192,7 @@ export function PlayerChipShape({ data }: { data: PlayerChipData }) {
   return (
     <Group>
       {data.highlighted && <HighlightRing />}
-      <KitFill kit={kit} />
+      {teamKit?.crestUrl ? <CrestFill url={teamKit.crestUrl} /> : <KitFill kit={kit} />}
       <Text
         text={data.displayText !== undefined ? data.displayText : String(data.number)}
         fontSize={15}

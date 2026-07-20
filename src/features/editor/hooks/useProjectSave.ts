@@ -12,6 +12,7 @@ export function useProjectSave() {
   const pitchDesign = useEditorStore((s) => s.pitchDesign)
   const orientation = useEditorStore((s) => s.orientation)
   const zoneGridStyle = useEditorStore((s) => s.zoneGridStyle)
+  const zoneGridCustomId = useEditorStore((s) => s.zoneGridCustomId)
   const showPitchMarkings = useEditorStore((s) => s.showPitchMarkings)
   const fieldCrop = useEditorStore((s) => s.fieldCrop)
   const pitchLengthM = useEditorStore((s) => s.pitchLengthM)
@@ -62,6 +63,7 @@ export function useProjectSave() {
         orientation,
         teamId,
         zoneGridStyle,
+        zoneGridCustomId,
         showPitchMarkings,
         fieldCrop,
         pitchLengthM,
@@ -91,6 +93,7 @@ export function useProjectSave() {
     teamId,
     customKit,
     zoneGridStyle,
+    zoneGridCustomId,
     showPitchMarkings,
     fieldCrop,
     pitchLengthM,

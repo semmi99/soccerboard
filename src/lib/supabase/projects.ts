@@ -73,6 +73,7 @@ export interface LoadedProject {
   orientation: PitchOrientation
   teamId: string | null
   zoneGridStyle: ZoneGridStyle
+  zoneGridCustomId: string | null
   showPitchMarkings: boolean
   fieldCrop: FieldCrop
   pitchLengthM: number
@@ -85,7 +86,7 @@ export async function loadProject(id: string): Promise<LoadedProject> {
   const { data: project, error: projectError } = await supabase
     .from('projects')
     .select(
-      'id, title, pitch_design, orientation, team_id, zone_grid_style, show_pitch_markings, field_crop, pitch_length_m, pitch_width_m, kit_override',
+      'id, title, pitch_design, orientation, team_id, zone_grid_style, zone_grid_custom_id, show_pitch_markings, field_crop, pitch_length_m, pitch_width_m, kit_override',
     )
     .eq('id', id)
     .single()
@@ -118,6 +119,7 @@ export async function loadProject(id: string): Promise<LoadedProject> {
     orientation: project.orientation as PitchOrientation,
     teamId: project.team_id,
     zoneGridStyle: project.zone_grid_style as ZoneGridStyle,
+    zoneGridCustomId: project.zone_grid_custom_id,
     showPitchMarkings: project.show_pitch_markings,
     fieldCrop: project.field_crop as FieldCrop,
     pitchLengthM: project.pitch_length_m,
@@ -136,6 +138,7 @@ export interface SaveProjectInput {
   orientation: PitchOrientation
   teamId: string | null
   zoneGridStyle: ZoneGridStyle
+  zoneGridCustomId: string | null
   showPitchMarkings: boolean
   fieldCrop: FieldCrop
   pitchLengthM: number
@@ -156,6 +159,7 @@ export async function saveProject(input: SaveProjectInput): Promise<string> {
         orientation: input.orientation,
         team_id: input.teamId,
         zone_grid_style: input.zoneGridStyle,
+        zone_grid_custom_id: input.zoneGridCustomId,
         show_pitch_markings: input.showPitchMarkings,
         field_crop: input.fieldCrop,
         pitch_length_m: input.pitchLengthM,
@@ -190,6 +194,7 @@ async function insertProjectRow(
     orientation: input.orientation,
     team_id: input.teamId,
     zone_grid_style: input.zoneGridStyle,
+    zone_grid_custom_id: input.zoneGridCustomId,
     show_pitch_markings: input.showPitchMarkings,
     field_crop: input.fieldCrop,
     pitch_length_m: input.pitchLengthM,

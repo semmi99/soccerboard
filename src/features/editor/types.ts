@@ -23,6 +23,11 @@ export interface PlayerChipData {
   /** Pulses a glowing ring around the chip so it draws attention in this
    * frame — e.g. to call out who a sequence is about. */
   highlighted?: boolean
+  /** Bends this object's playback path from the previous frame's position
+   * into this one — a quadratic-curve control point in stage coordinates,
+   * dragged via the editor's motion-guide handle. `undefined`/`null` means
+   * a straight line (the original behavior). */
+  motionBend?: [number, number] | null
 }
 
 export type KitPattern = 'solid' | 'stripes' | 'hoops' | 'sash' | 'split' | 'collar'
@@ -38,6 +43,9 @@ export interface TeamKit {
   away: KitConfig
   gk: KitConfig
   chipScale: number
+  /** When set, every chip of this team renders this badge image instead of
+   * its kit colors — a crest doesn't have a home/away variant. */
+  crestUrl?: string | null
 }
 
 export interface ArrowData {
@@ -90,6 +98,9 @@ export interface EquipmentData {
 
 export interface BallData {
   color?: string
+  /** Same as `PlayerChipData.motionBend` — bends the ball's playback path
+   * from the previous frame's position into this one. */
+  motionBend?: [number, number] | null
 }
 
 export interface ConnectorData {
@@ -97,6 +108,9 @@ export interface ConnectorData {
   toId: string
   color: string
   strokeWidth: number
+  /** Shows the real-world distance (from the project's pitch size) between
+   * the two connected players as a small label at the midpoint. */
+  showDistance?: boolean
   lineStyle: LineStyle
 }
 
@@ -152,7 +166,14 @@ export type PitchDesign =
   | 'light_gray'
   | 'brand_blue'
 export type PitchOrientation = 'vertical' | 'horizontal'
-export type ZoneGridStyle = 'none' | 'thirds_channels' | 'guardiola'
+export type ZoneGridStyle = 'none' | 'thirds_channels' | 'guardiola' | 'custom'
+
+export interface ZoneGridLine {
+  orientation: 'vertical' | 'horizontal'
+  /** Fraction across the pitch's length (vertical lines) or width
+   * (horizontal lines), 0..1. */
+  position: number
+}
 /** How much of the pitch's length is shown/exported: the full pitch, or a
  * zoomed-in slice of just the attacking end for corner-kick/set-piece
  * diagrams. */

@@ -1,6 +1,6 @@
 import { Arc, Circle, Group, Line, Rect } from 'react-konva'
 import { PITCH_LOGICAL, getCropLength, getCropOriginX, getCroppedStageSize } from '../constants'
-import type { FieldCrop, PitchDesign, PitchOrientation, ZoneGridStyle } from '../types'
+import type { FieldCrop, PitchDesign, PitchOrientation, ZoneGridLine, ZoneGridStyle } from '../types'
 
 const { width: L, height: B } = PITCH_LOGICAL // length (x), breadth (y)
 const CX = L / 2 // the pitch's true midfield line — a fixed anatomical point, independent of any crop
@@ -181,16 +181,35 @@ function GuardiolaGrid({ stroke }: { stroke: string }) {
   )
 }
 
+/** A coach's own saved zone grid — a flat list of vertical/horizontal lines
+ * at arbitrary fractional positions, instead of one of the fixed presets. */
+function CustomGrid({ lines, stroke }: { lines: ZoneGridLine[]; stroke: string }) {
+  const common = { stroke, strokeWidth: 1.5, dash: [7, 7], opacity: 0.7, listening: false }
+  return (
+    <>
+      {lines.map((l, i) =>
+        l.orientation === 'vertical' ? (
+          <Line key={i} points={[l.position * L, 0, l.position * L, B]} {...common} />
+        ) : (
+          <Line key={i} points={[0, l.position * B, L, l.position * B]} {...common} />
+        ),
+      )}
+    </>
+  )
+}
+
 export function Pitch({
   design,
   orientation,
   zoneGridStyle = 'none',
+  customGridLines = [],
   showPitchMarkings = true,
   fieldCrop = 'full',
 }: {
   design: PitchDesign
   orientation: PitchOrientation
   zoneGridStyle?: ZoneGridStyle
+  customGridLines?: ZoneGridLine[]
   showPitchMarkings?: boolean
   fieldCrop?: FieldCrop
 }) {
@@ -218,6 +237,7 @@ export function Pitch({
       {showPitchMarkings && <Markings stroke={theme.line} />}
       {zoneGridStyle === 'thirds_channels' && <ZoneLines stroke={theme.line} />}
       {zoneGridStyle === 'guardiola' && <GuardiolaGrid stroke={theme.line} />}
+      {zoneGridStyle === 'custom' && <CustomGrid lines={customGridLines} stroke={theme.line} />}
     </Group>
   )
 }

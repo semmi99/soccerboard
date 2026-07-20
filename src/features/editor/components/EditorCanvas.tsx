@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState, type RefObject } from 'react'
-import { Group, Layer, Stage, Transformer } from 'react-konva'
+import { Circle, Group, Layer, Line, Stage, Transformer } from 'react-konva'
 import Konva from 'konva'
 import type { KonvaEventObject } from 'konva/lib/Node'
 import { useEditorStore } from '../store/editorStore'
@@ -19,6 +19,28 @@ function easeInOut(t: number) {
   return t < 0.5 ? 4 * t * t * t : 1 - ((-2 * t + 2) ** 3) / 2
 }
 
+// A multi-frame sequence is one continuous motion, not N separate hops —
+// easing in AND out of every single transition brings velocity to zero at
+// every intermediate keyframe, which is exactly what reads as "choppy"
+// across a longer sequence. Only the very first transition eases in from
+// rest and only the very last eases out to rest; everything in between
+// keeps moving at constant speed through the keyframe instead of pausing.
+function easeInCubic(t: number) {
+  return t * t * t
+}
+function easeOutCubic(t: number) {
+  return 1 - (1 - t) ** 3
+}
+function linear(t: number) {
+  return t
+}
+function easingForTransition(isFirst: boolean, isLast: boolean) {
+  if (isFirst && isLast) return easeInOut
+  if (isFirst) return easeInCubic
+  if (isLast) return easeOutCubic
+  return linear
+}
+
 interface MoveSpec {
   node: Konva.Group
   fromX: number
@@ -29,6 +51,33 @@ interface MoveSpec {
   toRotation: number
   fromScale: number
   toScale: number
+  // Quadratic-bezier control point (stage coords) — set only when the
+  // object's motion-guide handle was dragged into a bend; otherwise the
+  // move stays a straight lerp (undefined), unchanged from before.
+  bendX?: number
+  bendY?: number
+}
+
+/** Evaluates a point along the straight line (no bend) or quadratic bezier
+ * (bend set) at t in [0, 1] — shared by the live tween and the guide's own
+ * preview curve so they always agree on the same path. */
+function pointOnMotionPath(
+  t: number,
+  fromX: number,
+  fromY: number,
+  toX: number,
+  toY: number,
+  bendX?: number,
+  bendY?: number,
+) {
+  if (bendX === undefined || bendY === undefined) {
+    return { x: fromX + (toX - fromX) * t, y: fromY + (toY - fromY) * t }
+  }
+  const mt = 1 - t
+  return {
+    x: mt * mt * fromX + 2 * mt * t * bendX + t * t * toX,
+    y: mt * mt * fromY + 2 * mt * t * bendY + t * t * toY,
+  }
 }
 
 interface FadeSpec {
@@ -41,6 +90,7 @@ interface FadeSpec {
 
 interface ConnectorSyncSpec {
   line: Konva.Line
+  label: Konva.Group | null
   fromId: string
   toId: string
 }
@@ -71,6 +121,7 @@ function runTransition(
   zones: PolygonSyncSpec[],
   arrows: ArrowPointsSpec[],
   nodeRefs: Record<string, Konva.Group>,
+  ease: (t: number) => number,
 ) {
   return new Promise<void>((resolve) => {
     let settled = false
@@ -87,11 +138,12 @@ function runTransition(
 
     const anim = new Konva.Animation(() => {
       const raw = Math.min(1, (performance.now() - start) / durationMs)
-      const eased = easeInOut(raw)
+      const eased = ease(raw)
 
       for (const m of moves) {
-        m.node.x(m.fromX + (m.toX - m.fromX) * eased)
-        m.node.y(m.fromY + (m.toY - m.fromY) * eased)
+        const p = pointOnMotionPath(eased, m.fromX, m.fromY, m.toX, m.toY, m.bendX, m.bendY)
+        m.node.x(p.x)
+        m.node.y(p.y)
         m.node.rotation(m.fromRotation + (m.toRotation - m.fromRotation) * eased)
         const s = m.fromScale + (m.toScale - m.fromScale) * eased
         m.node.scaleX(s)
@@ -106,7 +158,17 @@ function runTransition(
       for (const c of connectors) {
         const fromNode = nodeRefs[c.fromId]
         const toNode = nodeRefs[c.toId]
-        if (fromNode && toNode) c.line.points([fromNode.x(), fromNode.y(), toNode.x(), toNode.y()])
+        if (fromNode && toNode) {
+          const linePoints = [fromNode.x(), fromNode.y(), toNode.x(), toNode.y()]
+          c.line.points(linePoints)
+          if (c.label) {
+            c.label.position({ x: (linePoints[0]! + linePoints[2]!) / 2, y: (linePoints[1]! + linePoints[3]!) / 2 })
+            // Same reasoning as the arrow's distance label: the number only
+            // matches what's drawn at rest, so it dips out while the
+            // endpoints are actively moving instead of showing a stale value.
+            c.label.opacity(eased < 0.5 ? 1 - eased * 2 : (eased - 0.5) * 2)
+          }
+        }
       }
       for (const z of zones) {
         const nodes = z.ids.map((id) => nodeRefs[id]).filter((n): n is Konva.Group => Boolean(n))
@@ -146,7 +208,14 @@ function runTransition(
       for (const c of connectors) {
         const fromNode = nodeRefs[c.fromId]
         const toNode = nodeRefs[c.toId]
-        if (fromNode && toNode) c.line.points([fromNode.x(), fromNode.y(), toNode.x(), toNode.y()])
+        if (fromNode && toNode) {
+          const linePoints = [fromNode.x(), fromNode.y(), toNode.x(), toNode.y()]
+          c.line.points(linePoints)
+          if (c.label) {
+            c.label.position({ x: (linePoints[0]! + linePoints[2]!) / 2, y: (linePoints[1]! + linePoints[3]!) / 2 })
+            c.label.opacity(1)
+          }
+        }
       }
       for (const z of zones) {
         const nodes = z.ids.map((id) => nodeRefs[id]).filter((n): n is Konva.Group => Boolean(n))
@@ -170,11 +239,76 @@ interface PlaybackOverlay {
 
 const EMPTY_OVERLAY: PlaybackOverlay = { entering: [], exiting: [] }
 
+/** Editor-only "where did this come from" guide: a dashed path from a
+ * player/ball's previous-frame position to its position in the active
+ * frame, with a draggable handle that bends it (used both as a live
+ * preview here and, once dragged, as the actual playback path via
+ * `motionBend`). Only ever rendered for the current selection, so it
+ * disappears the same way the Transformer does — selection is cleared
+ * before every export/recording, never baked into an image or video. */
+function MotionGuide({
+  fromX,
+  fromY,
+  toX,
+  toY,
+  bend,
+  onDragStart,
+  onBendChange,
+  onReset,
+}: {
+  fromX: number
+  fromY: number
+  toX: number
+  toY: number
+  bend: [number, number] | null
+  onDragStart: () => void
+  onBendChange: (x: number, y: number) => void
+  onReset: () => void
+}) {
+  const cx = bend ? bend[0] : (fromX + toX) / 2
+  const cy = bend ? bend[1] : (fromY + toY) / 2
+  const SEGMENTS = 24
+  const points: number[] = []
+  for (let i = 0; i <= SEGMENTS; i++) {
+    const p = pointOnMotionPath(i / SEGMENTS, fromX, fromY, toX, toY, cx, cy)
+    points.push(p.x, p.y)
+  }
+
+  return (
+    <>
+      <Line points={points} stroke="#ffe100" strokeWidth={2} dash={[6, 6]} opacity={0.85} listening={false} />
+      <Circle
+        x={fromX}
+        y={fromY}
+        radius={4}
+        fill="#ffe100"
+        opacity={0.6}
+        listening={false}
+      />
+      <Circle
+        x={cx}
+        y={cy}
+        radius={6}
+        fill="#ffe100"
+        stroke="#111827"
+        strokeWidth={1.5}
+        draggable
+        onDragStart={onDragStart}
+        onDragMove={(e) => onBendChange(e.target.x(), e.target.y())}
+        onDragEnd={(e) => onBendChange(e.target.x(), e.target.y())}
+        onDblClick={onReset}
+        onDblTap={onReset}
+      />
+    </>
+  )
+}
+
 export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | null> }) {
   const { ref: containerRef, size } = useElementSize<HTMLDivElement>()
   const pitchDesign = useEditorStore((s) => s.pitchDesign)
   const orientation = useEditorStore((s) => s.orientation)
   const zoneGridStyle = useEditorStore((s) => s.zoneGridStyle)
+  const zoneGridCustomLines = useEditorStore((s) => s.zoneGridCustomLines)
   const showPitchMarkings = useEditorStore((s) => s.showPitchMarkings)
   const fieldCrop = useEditorStore((s) => s.fieldCrop)
   const frames = useEditorStore((s) => s.frames)
@@ -278,9 +412,13 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
 
         // Mount entering objects (at opacity 0, see initialOpacity below) and
         // keep exiting ones mounted past the frame boundary so both can be
-        // tweened instead of popping in/out abruptly.
+        // tweened instead of popping in/out abruptly. A rAF-based wait (not
+        // setTimeout) keeps this yield as short as the browser's own paint
+        // cycle instead of an arbitrary macrotask delay, so consecutive
+        // frames' transitions read as one continuous motion rather than
+        // hopping with a visible pause at each keyframe.
         setPlaybackOverlay({ entering, exiting })
-        await new Promise((resolve) => setTimeout(resolve, 0))
+        await new Promise((resolve) => requestAnimationFrame(() => resolve(undefined)))
         if (cancelled) return
 
         const moves: MoveSpec[] = toFrame.objects
@@ -288,6 +426,10 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
             const node = nodeRefs.current[toObj.id]
             const fromObj = fromFrame.objects.find((o) => o.id === toObj.id)
             if (!node || !fromObj) return null
+            const bend =
+              (toObj.objectType === 'player_chip' || toObj.objectType === 'ball') && toObj.data.motionBend
+                ? toObj.data.motionBend
+                : null
             return {
               node,
               fromX: fromObj.x,
@@ -298,6 +440,7 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
               toRotation: toObj.rotation,
               fromScale: fromObj.scale,
               toScale: toObj.scale,
+              ...(bend ? { bendX: bend[0], bendY: bend[1] } : {}),
             }
           })
           .filter((m): m is MoveSpec => Boolean(m))
@@ -328,7 +471,9 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
           )
           .map((o) => {
             const line = connectorRefs.current[o.id]
-            return line ? { line, fromId: o.data.fromId, toId: o.data.toId } : null
+            if (!line) return null
+            const label = line.getParent()?.findOne<Konva.Group>('.connector-distance-label') ?? null
+            return { line, label, fromId: o.data.fromId, toId: o.data.toId }
           })
           .filter((c): c is ConnectorSyncSpec => Boolean(c))
 
@@ -380,6 +525,7 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
           })
           .filter((a): a is ArrowPointsSpec => Boolean(a))
 
+        const ease = easingForTransition(currentIndex === 0, currentIndex === currentFrames.length - 2)
         await runTransition(
           objectsLayerRef.current,
           durationSec,
@@ -389,12 +535,13 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
           zones,
           arrows,
           nodeRefs.current,
+          ease,
         )
         if (cancelled) return
 
         useEditorStore.getState().setActiveFrameIndex(currentIndex + 1)
         setPlaybackOverlay(EMPTY_OVERLAY)
-        await new Promise((resolve) => setTimeout(resolve, 0))
+        await new Promise((resolve) => requestAnimationFrame(() => resolve(undefined)))
       }
       useEditorStore.getState().setIsPlaying(false)
       setPlaybackOverlay(EMPTY_OVERLAY)
@@ -497,6 +644,48 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
     updateObjectLive(id, { data: { ...obj.data, points } } as Partial<FrameObject>)
   }
 
+  function handleMotionBendChange(id: string, x: number, y: number) {
+    const obj = frame.objects.find((o) => o.id === id)
+    if (!obj || (obj.objectType !== 'player_chip' && obj.objectType !== 'ball')) return
+    updateObjectLive(id, { data: { ...obj.data, motionBend: [x, y] } } as Partial<FrameObject>)
+  }
+
+  function handleMotionBendReset(id: string) {
+    const obj = frame.objects.find((o) => o.id === id)
+    if (!obj || (obj.objectType !== 'player_chip' && obj.objectType !== 'ball')) return
+    beginHistoryCheckpoint()
+    updateObjectLive(id, { data: { ...obj.data, motionBend: null } } as Partial<FrameObject>)
+  }
+
+  // Only for the current selection (mirrors the Transformer's own gating),
+  // and only when moved from where it was in the previous frame — so this
+  // never clutters the board and always disappears once selection is
+  // cleared, exactly like the Transformer does before export/recording.
+  const prevFrame = activeFrameIndex > 0 ? frames[activeFrameIndex - 1] : null
+  const motionGuides =
+    !isPlaying && prevFrame
+      ? selection
+          .map((id) => frame.objects.find((o) => o.id === id))
+          .filter((o): o is FrameObject => Boolean(o))
+          .filter(
+            (o): o is Extract<FrameObject, { objectType: 'player_chip' | 'ball' }> =>
+              o.objectType === 'player_chip' || o.objectType === 'ball',
+          )
+          .map((o) => {
+            const prevObj = prevFrame.objects.find((p) => p.id === o.id)
+            if (!prevObj || (prevObj.x === o.x && prevObj.y === o.y)) return null
+            return {
+              id: o.id,
+              fromX: prevObj.x,
+              fromY: prevObj.y,
+              toX: o.x,
+              toY: o.y,
+              bend: o.data.motionBend ?? null,
+            }
+          })
+          .filter((g): g is NonNullable<typeof g> => Boolean(g))
+      : []
+
   // Shapes (zones/circles/rects/polygons) and training equipment get free
   // non-uniform corner resizing (independent width/height); other object
   // kinds (chips, text, ball) keep proportional scaling since they don't
@@ -537,6 +726,7 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
             design={pitchDesign}
             orientation={orientation}
             zoneGridStyle={zoneGridStyle}
+            customGridLines={zoneGridCustomLines}
             showPitchMarkings={showPitchMarkings}
             fieldCrop={fieldCrop}
           />
@@ -597,6 +787,19 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
               />
             )
           })}
+          {motionGuides.map((g) => (
+            <MotionGuide
+              key={`motion-${g.id}`}
+              fromX={g.fromX}
+              fromY={g.fromY}
+              toX={g.toX}
+              toY={g.toY}
+              bend={g.bend}
+              onDragStart={beginHistoryCheckpoint}
+              onBendChange={(x, y) => handleMotionBendChange(g.id, x, y)}
+              onReset={() => handleMotionBendReset(g.id)}
+            />
+          ))}
           <Transformer
             ref={trRef}
             onTransformStart={handleTransformStart}

@@ -137,6 +137,32 @@ export async function deletePlayer(id: string): Promise<void> {
   if (error) throw error
 }
 
+export async function uploadTeamCrest(orgId: string, teamId: string, file: File): Promise<string> {
+  const ext = file.name.split('.').pop() || 'png'
+  const path = `${orgId}/${teamId}.${ext}`
+
+  const { error: uploadError } = await supabase.storage
+    .from('team-crests')
+    .upload(path, file, { upsert: true, cacheControl: '3600' })
+  if (uploadError) throw uploadError
+
+  const { data } = supabase.storage.from('team-crests').getPublicUrl(path)
+  const crestUrl = `${data.publicUrl}?v=${Date.now()}`
+
+  const { error: updateError } = await supabase
+    .from('teams')
+    .update({ crest_url: crestUrl })
+    .eq('id', teamId)
+  if (updateError) throw updateError
+
+  return crestUrl
+}
+
+export async function removeTeamCrest(teamId: string): Promise<void> {
+  const { error } = await supabase.from('teams').update({ crest_url: null }).eq('id', teamId)
+  if (error) throw error
+}
+
 export async function uploadPlayerPhoto(orgId: string, playerId: string, file: File): Promise<string> {
   const ext = file.name.split('.').pop() || 'png'
   const path = `${orgId}/${playerId}.${ext}`

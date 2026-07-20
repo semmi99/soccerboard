@@ -15,10 +15,10 @@ import type {
   PlayerZoneData,
   ShapeData,
   TextData,
-  ZoneGridStyle,
 } from '../types'
 import { Button } from '../../../components/ui/Button'
 import { TeamSquadPanel } from './TeamSquadPanel'
+import { ZoneGridPicker } from './ZoneGridPicker'
 import { EQUIPMENT_DEFAULT_COLORS } from '../objects/shapes/Equipment'
 import { ColorSwatchPicker } from '../../../components/ui/ColorSwatchPicker'
 import { getCurveOffset } from '../objects/shapes/arrowCurve'
@@ -54,14 +54,12 @@ const inputClass =
 export function PropertiesSidebar() {
   const pitchDesign = useEditorStore((s) => s.pitchDesign)
   const orientation = useEditorStore((s) => s.orientation)
-  const zoneGridStyle = useEditorStore((s) => s.zoneGridStyle)
   const showPitchMarkings = useEditorStore((s) => s.showPitchMarkings)
   const fieldCrop = useEditorStore((s) => s.fieldCrop)
   const pitchLengthM = useEditorStore((s) => s.pitchLengthM)
   const pitchWidthM = useEditorStore((s) => s.pitchWidthM)
   const setPitchDesign = useEditorStore((s) => s.setPitchDesign)
   const setOrientation = useEditorStore((s) => s.setOrientation)
-  const setZoneGridStyle = useEditorStore((s) => s.setZoneGridStyle)
   const setShowPitchMarkings = useEditorStore((s) => s.setShowPitchMarkings)
   const setFieldCrop = useEditorStore((s) => s.setFieldCrop)
   const setPitchLengthM = useEditorStore((s) => s.setPitchLengthM)
@@ -133,17 +131,7 @@ export function PropertiesSidebar() {
               <option value="third">Letztes Drittel (Eckball)</option>
             </select>
           </Field>
-          <Field label="Zonenraster">
-            <select
-              className={selectClass}
-              value={zoneGridStyle}
-              onChange={(e) => setZoneGridStyle(e.target.value as ZoneGridStyle)}
-            >
-              <option value="none">Kein Raster</option>
-              <option value="thirds_channels">Drittel &amp; Kanäle</option>
-              <option value="guardiola">Guardiola (Positionsspiel)</option>
-            </select>
-          </Field>
+          <ZoneGridPicker />
           <label className="flex items-center gap-2 text-xs text-white/70">
             <input
               type="checkbox"
@@ -784,6 +772,18 @@ function ConnectorFields({
           onChange={(e) => onChange({ strokeWidth: Number(e.target.value) })}
         />
       </Field>
+      <label className="flex items-center gap-2 text-xs text-white/70">
+        <input
+          type="checkbox"
+          className="accent-violet-accent"
+          checked={data.showDistance ?? false}
+          onChange={(e) => {
+            onCheckpoint()
+            onChange({ showDistance: e.target.checked })
+          }}
+        />
+        Distanz anzeigen (m)
+      </label>
     </div>
   )
 }

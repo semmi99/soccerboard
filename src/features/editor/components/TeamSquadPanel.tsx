@@ -1,7 +1,15 @@
 import { useEffect, useState } from 'react'
 import { useEditorStore } from '../store/editorStore'
 import { useAuthStore } from '../../auth/store/authStore'
-import { listTeams, listPlayers, updateTeamKit, type Player, type Team } from '../../../lib/supabase/squad'
+import {
+  listTeams,
+  listPlayers,
+  updateTeamKit,
+  uploadTeamCrest,
+  removeTeamCrest,
+  type Player,
+  type Team,
+} from '../../../lib/supabase/squad'
 import { listFormations, type Formation } from '../../../lib/supabase/formations'
 import { PRESET_FORMATIONS } from '../../formations/presets'
 import { Button } from '../../../components/ui/Button'
@@ -41,6 +49,7 @@ export function TeamSquadPanel() {
   const [selectedFormationKey, setSelectedFormationKey] = useState<string>('')
   const [showKitDesigner, setShowKitDesigner] = useState(false)
   const [groupSelectIds, setGroupSelectIds] = useState<Set<string>>(new Set())
+  const [isUploadingCrest, setIsUploadingCrest] = useState(false)
 
   const activeTeam = teams.find((t) => t.id === teamId) ?? null
 
@@ -96,6 +105,7 @@ export function TeamSquadPanel() {
         color2: activeTeam.gk_kit_color2,
       },
       chipScale: activeTeam.chip_scale,
+      crestUrl: activeTeam.crest_url,
     })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTeam, setTeamKit])
@@ -134,6 +144,23 @@ export function TeamSquadPanel() {
     )
     setTool(team === 'home' ? 'player_home' : 'player_away')
     setGroupSelectIds(new Set())
+  }
+
+  async function handleCrestFile(file: File) {
+    if (!organization || !activeTeam) return
+    setIsUploadingCrest(true)
+    try {
+      const crestUrl = await uploadTeamCrest(organization.id, activeTeam.id, file)
+      setTeams((ts) => ts.map((t) => (t.id === activeTeam.id ? { ...t, crest_url: crestUrl } : t)))
+    } finally {
+      setIsUploadingCrest(false)
+    }
+  }
+
+  async function handleRemoveCrest() {
+    if (!activeTeam) return
+    await removeTeamCrest(activeTeam.id)
+    setTeams((ts) => ts.map((t) => (t.id === activeTeam.id ? { ...t, crest_url: null } : t)))
   }
 
   function handleApplyFormation() {
@@ -176,6 +203,44 @@ export function TeamSquadPanel() {
       <Button variant="secondary" className="w-full" onClick={() => setShowKitDesigner(true)}>
         {activeTeam ? 'Kit-Design bearbeiten' : 'Farben anpassen'}
       </Button>
+
+      {activeTeam && (
+        <div className="flex items-center gap-2 rounded-md border border-pitch-700 p-2">
+          {activeTeam.crest_url ? (
+            <img
+              src={activeTeam.crest_url}
+              alt="Wappen"
+              className="h-8 w-8 shrink-0 rounded-full bg-pitch-800 object-contain"
+            />
+          ) : (
+            <div className="h-8 w-8 shrink-0 rounded-full bg-pitch-800" />
+          )}
+          <label className="flex-1 cursor-pointer text-center text-xs text-white/70 hover:text-white">
+            {isUploadingCrest ? 'Lädt hoch…' : 'Wappen hochladen'}
+            <input
+              type="file"
+              accept="image/*"
+              className="hidden"
+              disabled={isUploadingCrest}
+              onChange={(e) => {
+                const file = e.target.files?.[0]
+                if (file) void handleCrestFile(file)
+                e.target.value = ''
+              }}
+            />
+          </label>
+          {activeTeam.crest_url && (
+            <Button variant="danger" onClick={() => void handleRemoveCrest()}>
+              ×
+            </Button>
+          )}
+        </div>
+      )}
+      {activeTeam?.crest_url && (
+        <p className="-mt-2 text-xs text-white/40">
+          Wappen ersetzt die Trikotfarben auf allen Spieler-Chips dieses Teams.
+        </p>
+      )}
 
       {showKitDesigner && (
         <KitDesignerModal

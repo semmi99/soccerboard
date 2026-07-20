@@ -8,6 +8,7 @@ import type {
   PitchOrientation,
   TeamKit,
   ToolId,
+  ZoneGridLine,
   ZoneGridStyle,
 } from '../types'
 import { createObjectForTool, type PendingRealPlayer } from '../objects/factory'
@@ -47,6 +48,10 @@ interface EditorState {
   pitchDesign: PitchDesign
   orientation: PitchOrientation
   zoneGridStyle: ZoneGridStyle
+  zoneGridCustomId: string | null
+  /** Resolved lines for `zoneGridCustomId`, pushed in by whoever fetched the
+   * org's saved zone grids (mirrors how `teamKit` is resolved from `teamId`). */
+  zoneGridCustomLines: ZoneGridLine[]
   showPitchMarkings: boolean
   fieldCrop: FieldCrop
   pitchLengthM: number
@@ -78,6 +83,7 @@ interface EditorState {
     orientation: PitchOrientation
     teamId: string | null
     zoneGridStyle: ZoneGridStyle
+    zoneGridCustomId: string | null
     showPitchMarkings: boolean
     fieldCrop: FieldCrop
     pitchLengthM: number
@@ -92,6 +98,8 @@ interface EditorState {
   setPitchDesign: (d: PitchDesign) => void
   setOrientation: (o: PitchOrientation) => void
   setZoneGridStyle: (style: ZoneGridStyle) => void
+  setZoneGridCustomId: (id: string | null) => void
+  setZoneGridCustomLines: (lines: ZoneGridLine[]) => void
   setShowPitchMarkings: (show: boolean) => void
   setFieldCrop: (crop: FieldCrop) => void
   setPitchLengthM: (m: number) => void
@@ -148,6 +156,8 @@ export const useEditorStore = create<EditorState>((set, get) => ({
   pitchDesign: 'classic_green',
   orientation: 'vertical',
   zoneGridStyle: 'none',
+  zoneGridCustomId: null,
+  zoneGridCustomLines: [],
   showPitchMarkings: true,
   fieldCrop: 'full',
   pitchLengthM: 105,
@@ -177,6 +187,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
     orientation,
     teamId,
     zoneGridStyle,
+    zoneGridCustomId,
     showPitchMarkings,
     fieldCrop,
     pitchLengthM,
@@ -190,6 +201,8 @@ export const useEditorStore = create<EditorState>((set, get) => ({
       pitchDesign,
       orientation,
       zoneGridStyle,
+      zoneGridCustomId,
+      zoneGridCustomLines: [],
       showPitchMarkings,
       fieldCrop,
       pitchLengthM,
@@ -219,6 +232,8 @@ export const useEditorStore = create<EditorState>((set, get) => ({
       projectId: null,
       projectTitle: 'Neues Projekt',
       zoneGridStyle: 'none',
+      zoneGridCustomId: null,
+      zoneGridCustomLines: [],
       showPitchMarkings: true,
       fieldCrop: 'full',
       pitchLengthM: 105,
@@ -246,6 +261,8 @@ export const useEditorStore = create<EditorState>((set, get) => ({
   setPitchDesign: (d) => set({ pitchDesign: d, isDirty: true }),
   setOrientation: (o) => set({ orientation: o, isDirty: true }),
   setZoneGridStyle: (style) => set({ zoneGridStyle: style, isDirty: true }),
+  setZoneGridCustomId: (id) => set({ zoneGridCustomId: id, isDirty: true }),
+  setZoneGridCustomLines: (lines) => set({ zoneGridCustomLines: lines }),
   setShowPitchMarkings: (show) => set({ showPitchMarkings: show, isDirty: true }),
   setFieldCrop: (crop) => set({ fieldCrop: crop, isDirty: true }),
   setPitchLengthM: (m) => set({ pitchLengthM: m, isDirty: true }),

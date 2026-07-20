@@ -45,6 +45,7 @@ export function EditorPage() {
           orientation: project.orientation,
           teamId: project.teamId,
           zoneGridStyle: project.zoneGridStyle,
+          zoneGridCustomId: project.zoneGridCustomId,
           showPitchMarkings: project.showPitchMarkings,
           fieldCrop: project.fieldCrop,
           pitchLengthM: project.pitchLengthM,

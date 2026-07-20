@@ -8,17 +8,22 @@ const NAV_ITEMS = [
   { to: '/account', label: 'Konto' },
 ]
 
+const ADMIN_NAV_ITEM = { to: '/admin', label: 'Team' }
+
 export function AppHeader() {
   const organization = useAuthStore((s) => s.organization)
+  const profile = useAuthStore((s) => s.profile)
   const signOut = useAuthStore((s) => s.signOut)
   const location = useLocation()
+
+  const navItems = profile?.role === 'admin' ? [...NAV_ITEMS, ADMIN_NAV_ITEM] : NAV_ITEMS
 
   return (
     <header className="flex items-center justify-between border-b border-pitch-700 px-8 py-4">
       <div className="flex items-center gap-6">
         <span className="text-sm font-semibold text-white">{organization?.name}</span>
         <nav className="flex items-center gap-1">
-          {NAV_ITEMS.map((item) => (
+          {navItems.map((item) => (
             <Link
               key={item.to}
               to={item.to}

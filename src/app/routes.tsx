@@ -7,6 +7,7 @@ import { SquadPage } from '../features/squad/components/SquadPage'
 import { FormationsPage } from '../features/formations/components/FormationsPage'
 import { LandingPage } from '../features/marketing/components/LandingPage'
 import { AccountPage } from '../features/account/components/AccountPage'
+import { AdminPage } from '../features/admin/components/AdminPage'
 import { ImpressumPage } from '../features/legal/components/ImpressumPage'
 import { AgbPage } from '../features/legal/components/AgbPage'
 import { DatenschutzPage } from '../features/legal/components/DatenschutzPage'
@@ -73,6 +74,14 @@ export function AppRoutes() {
         element={
           <AuthGuard>
             <AccountPage />
+          </AuthGuard>
+        }
+      />
+      <Route
+        path="/admin"
+        element={
+          <AuthGuard>
+            <AdminPage />
           </AuthGuard>
         }
       />

@@ -2,22 +2,11 @@ import { Arrow, Group, Rect, Text } from 'react-konva'
 import type { ArrowData } from '../../types'
 import { dashForLineStyle } from './dash'
 import { computeCurvedPoints } from './arrowCurve'
-import { computeArrowDistanceMeters } from './arrowDistance'
+import { computePathDistanceMeters, midpointOf } from './arrowDistance'
 import { useEditorStore } from '../../store/editorStore'
 
 const BASE_POINTER_SIZE = 12
 const BASE_LABEL_FONT_SIZE = 12
-
-function midpointOf(points: number[]): { x: number; y: number } {
-  let sx = 0
-  let sy = 0
-  const n = points.length / 2
-  for (let i = 0; i < points.length; i += 2) {
-    sx += points[i]!
-    sy += points[i + 1]!
-  }
-  return { x: sx / n, y: sy / n }
-}
 
 export function ArrowShape({ data, scale = 1 }: { data: ArrowData; scale?: number }) {
   const pitchLengthM = useEditorStore((s) => s.pitchLengthM)
@@ -33,7 +22,7 @@ export function ArrowShape({ data, scale = 1 }: { data: ArrowData; scale?: numbe
   const points = data.shape === 'curved' ? computeCurvedPoints(data) : data.points
 
   const distanceLabel = data.showDistance
-    ? `${Math.round(computeArrowDistanceMeters(data, pitchLengthM, pitchWidthM, scale))} m`
+    ? `${Math.round(computePathDistanceMeters(points, pitchLengthM, pitchWidthM, scale))} m`
     : null
   const mid = distanceLabel ? midpointOf(points) : null
   const labelFontSize = BASE_LABEL_FONT_SIZE / safeScale
