@@ -102,38 +102,44 @@ export function Toolbar() {
   const setTool = useEditorStore((s) => s.setTool)
 
   return (
-    <aside className="flex w-16 flex-col items-center gap-2 overflow-y-auto border-r border-black/40 bg-[#0a1628] py-3">
+    <aside className="flex w-28 flex-col items-center gap-2 overflow-y-auto border-r border-black/40 bg-[#0a1628] px-2 py-3">
       {SECTIONS.map((section, i) => (
         <div key={i} className="flex w-full flex-col items-center gap-1.5">
-          {i > 0 && <div className="my-1 h-px w-8 bg-gold-accent/20" />}
-          {section.map((t) => (
-            <button
-              key={t.id}
-              type="button"
-              title={t.label}
-              aria-label={t.label}
-              onClick={() => setTool(t.id)}
-              className={`flex h-11 w-11 items-center justify-center rounded-lg border transition-colors ${
-                tool === t.id
-                  ? 'border-gold-accent bg-[#132540] text-gold-accent-bright'
-                  : 'border-gold-accent/10 bg-[#0d1e35] text-gold-accent/70 hover:border-gold-accent/40 hover:text-gold-accent-bright'
-              }`}
-            >
-              {t.swatch ? (
-                <span
-                  className="relative flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-white/30 text-[7px] font-bold text-black/70"
-                  style={{
-                    backgroundColor: t.swatch,
-                    boxShadow: t.swatchRing ? `0 0 0 2px ${t.swatchRing}` : undefined,
-                  }}
-                >
-                  {t.swatchLabel}
-                </span>
-              ) : (
-                t.icon
-              )}
-            </button>
-          ))}
+          {i > 0 && <div className="my-1 h-px w-full bg-gold-accent/20" />}
+          <div
+            className={
+              section.length > 1 ? 'grid w-full grid-cols-2 gap-1.5' : 'flex w-full justify-center'
+            }
+          >
+            {section.map((t) => (
+              <button
+                key={t.id}
+                type="button"
+                title={t.label}
+                aria-label={t.label}
+                onClick={() => setTool(t.id)}
+                className={`flex h-11 w-11 items-center justify-center rounded-lg border transition-colors ${
+                  tool === t.id
+                    ? 'border-gold-accent bg-[#132540] text-gold-accent-bright'
+                    : 'border-gold-accent/10 bg-[#0d1e35] text-gold-accent/70 hover:border-gold-accent/40 hover:text-gold-accent-bright'
+                }`}
+              >
+                {t.swatch ? (
+                  <span
+                    className="relative flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-white/30 text-[7px] font-bold text-black/70"
+                    style={{
+                      backgroundColor: t.swatch,
+                      boxShadow: t.swatchRing ? `0 0 0 2px ${t.swatchRing}` : undefined,
+                    }}
+                  >
+                    {t.swatchLabel}
+                  </span>
+                ) : (
+                  t.icon
+                )}
+              </button>
+            ))}
+          </div>
         </div>
       ))}
     </aside>

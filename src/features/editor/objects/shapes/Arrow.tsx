@@ -33,7 +33,7 @@ export function ArrowShape({ data, scale = 1 }: { data: ArrowData; scale?: numbe
   const points = data.shape === 'curved' ? computeCurvedPoints(data) : data.points
 
   const distanceLabel = data.showDistance
-    ? `${Math.round(computeArrowDistanceMeters(data, pitchLengthM, pitchWidthM))} m`
+    ? `${Math.round(computeArrowDistanceMeters(data, pitchLengthM, pitchWidthM, scale))} m`
     : null
   const mid = distanceLabel ? midpointOf(points) : null
   const labelFontSize = BASE_LABEL_FONT_SIZE / safeScale

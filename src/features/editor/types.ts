@@ -15,9 +15,6 @@ export interface PlayerChipData {
   label: string
   playerId?: string
   isGoalkeeper?: boolean
-  /** Short tactical role tag rendered above the chip (e.g. "PIVOT", "FREE",
-   * "RB") — distinct from `label`, which is the player's name below it. */
-  roleLabel?: string
   /** Pulses a glowing ring around the chip so it draws attention in this
    * frame — e.g. to call out who a sequence is about. */
   highlighted?: boolean
@@ -98,8 +95,6 @@ export interface PlayerZoneData {
   fill: string
   stroke: string
   opacity: number
-  /** Optional call-out rendered centered in the zone (e.g. "4 v 3"). */
-  label?: string
 }
 
 export type ObjectType =

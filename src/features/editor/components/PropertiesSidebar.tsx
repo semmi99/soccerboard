@@ -153,24 +153,28 @@ export function PropertiesSidebar() {
             Spielfeldmarkierungen anzeigen
           </label>
           <div className="flex gap-2">
-            <Field label="Länge (m)">
-              <input
-                type="number"
-                min={1}
-                className={inputClass}
-                value={pitchLengthM}
-                onChange={(e) => setPitchLengthM(Number(e.target.value) || 105)}
-              />
-            </Field>
-            <Field label="Breite (m)">
-              <input
-                type="number"
-                min={1}
-                className={inputClass}
-                value={pitchWidthM}
-                onChange={(e) => setPitchWidthM(Number(e.target.value) || 68)}
-              />
-            </Field>
+            <div className="min-w-0 flex-1">
+              <Field label="Länge (m)">
+                <input
+                  type="number"
+                  min={1}
+                  className={`${inputClass} w-full`}
+                  value={pitchLengthM}
+                  onChange={(e) => setPitchLengthM(Number(e.target.value) || 105)}
+                />
+              </Field>
+            </div>
+            <div className="min-w-0 flex-1">
+              <Field label="Breite (m)">
+                <input
+                  type="number"
+                  min={1}
+                  className={`${inputClass} w-full`}
+                  value={pitchWidthM}
+                  onChange={(e) => setPitchWidthM(Number(e.target.value) || 68)}
+                />
+              </Field>
+            </div>
           </div>
           <p className="text-[11px] text-white/40">
             Echte Feldmaße — wird genutzt, um Pass-/Laufdistanzen in Metern anzuzeigen.
@@ -351,16 +355,6 @@ function PlayerChipFields({
           value={data.label}
           onFocus={onCheckpoint}
           onChange={(e) => onChange({ label: e.target.value })}
-        />
-      </Field>
-      <Field label="Taktische Rolle (optional)">
-        <input
-          type="text"
-          className={inputClass}
-          placeholder="z.B. PIVOT, FREE, PIN"
-          value={data.roleLabel ?? ''}
-          onFocus={onCheckpoint}
-          onChange={(e) => onChange({ roleLabel: e.target.value })}
         />
       </Field>
       <label className="flex items-center gap-2 text-xs text-white/70">
@@ -830,16 +824,6 @@ function PlayerZoneFields({
 }) {
   return (
     <div className="flex flex-col gap-2">
-      <Field label="Beschriftung (optional)">
-        <input
-          type="text"
-          className={inputClass}
-          placeholder="z.B. 4 v 3"
-          value={data.label ?? ''}
-          onFocus={onCheckpoint}
-          onChange={(e) => onChange({ label: e.target.value })}
-        />
-      </Field>
       <Field label="Füllfarbe">
         <ColorSwatchPicker
           value={rgbaToHex(data.fill)}
