@@ -5,6 +5,11 @@ import type { FieldCrop, PitchDesign, PitchOrientation, ZoneGridLine, ZoneGridSt
 const { width: L, height: B } = PITCH_LOGICAL // length (x), breadth (y)
 const CX = L / 2 // the pitch's true midfield line — a fixed anatomical point, independent of any crop
 const CY = B / 2
+// Shared with GuardiolaGrid below so its lane lines land exactly flush on
+// the penalty box edges instead of drifting from an independently-chosen
+// approximation.
+const PENALTY_DEPTH = 157
+const PENALTY_WIDTH = 385
 
 const THEMES: Record<PitchDesign, { grassA: string; grassB: string; line: string }> = {
   classic_green: { grassA: '#1e7d32', grassB: '#1a6b2b', line: 'rgba(255,255,255,0.85)' },
@@ -38,8 +43,8 @@ function Stripes({ theme }: { theme: { grassA: string; grassB: string } }) {
 }
 
 function Markings({ stroke }: { stroke: string }) {
-  const penaltyDepth = 157
-  const penaltyWidth = 385
+  const penaltyDepth = PENALTY_DEPTH
+  const penaltyWidth = PENALTY_WIDTH
   const penaltyY0 = CY - penaltyWidth / 2
 
   const sixYardDepth = 52
@@ -146,10 +151,10 @@ function ZoneLines({ stroke }: { stroke: string }) {
  * lines land flush on the box edge instead of drawing a redundant second
  * line right next to it when markings are shown alongside the grid. */
 function GuardiolaGrid({ stroke }: { stroke: string }) {
-  const topBandEnd = 157 // matches Markings' penaltyDepth
-  const bottomBandStart = L - 157
-  const laneLeftEnd = 0.191 * B
-  const laneRightStart = 0.804 * B
+  const topBandEnd = PENALTY_DEPTH
+  const bottomBandStart = L - PENALTY_DEPTH
+  const laneLeftEnd = CY - PENALTY_WIDTH / 2
+  const laneRightStart = CY + PENALTY_WIDTH / 2
 
   const centerWidth = laneRightStart - laneLeftEnd
   const centerSub1 = laneLeftEnd + 0.287 * centerWidth
