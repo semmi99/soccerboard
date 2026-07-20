@@ -131,6 +131,38 @@ eigene Migrationen dazu.
 4. In Supabase unter **Authentication → URL Configuration** die Vercel-Domain als
    Redirect-URL eintragen.
 
+## Stripe-Billing einrichten
+
+Die drei Edge Functions (`stripe-checkout`, `stripe-portal`, `stripe-webhook`,
+siehe `supabase/functions/`) sowie die DB-Felder auf `organizations`
+(`stripe_customer_id`, `stripe_subscription_id`, `subscription_status`) sind
+bereits deployed/migriert. Ohne die folgenden Secrets antworten
+`stripe-checkout`/`stripe-portal` mit „Stripe ist noch nicht konfiguriert“ und
+`stripe-webhook` mit HTTP 503 — bis dahin bleibt Free/Pro rein manuell (siehe
+Plattform-Admin-Dashboard, „Kostenloser, unbegrenzter Zugang“-Haken).
+
+Sobald ein Stripe-Konto existiert:
+
+1. **Produkt anlegen:** In Stripe unter *Product catalog* ein Produkt „Pro“ mit
+   einem wiederkehrenden Preis von 3,99 €/Monat anlegen → die **Price-ID**
+   (`price_...`) notieren.
+2. **Secrets in Supabase setzen** (Dashboard → Edge Functions → Secrets, oder
+   `supabase secrets set` via CLI):
+   - `STRIPE_SECRET_KEY` – der Secret Key aus Stripe (Test- oder Live-Modus)
+   - `STRIPE_PRICE_ID_PRO` – die Price-ID aus Schritt 1
+   - `APP_URL` – die öffentliche URL der App (z.B. `https://tacticboard.pro`),
+     für die Checkout-Redirect-Ziele
+   - `STRIPE_WEBHOOK_SECRET` – erst nach Schritt 3 verfügbar
+3. **Webhook registrieren:** In Stripe unter *Developers → Webhooks* einen
+   Endpoint auf `https://<project-ref>.supabase.co/functions/v1/stripe-webhook`
+   anlegen, mit den Events `customer.subscription.created`,
+   `customer.subscription.updated`, `customer.subscription.deleted` und
+   `invoice.payment_failed`. Das dabei angezeigte **Signing secret**
+   (`whsec_...`) als `STRIPE_WEBHOOK_SECRET` in Supabase hinterlegen.
+4. Fertig — „Pro werden“ auf der Konto-Seite startet jetzt einen echten
+   Stripe-Checkout, und der Webhook schaltet `organizations.subscription_tier`
+   automatisch auf `pro`/`free` um.
+
 ## Vor Produktivbetrieb
 
 - Supabase Security Advisor meldet **„Leaked Password Protection Disabled“** – unter

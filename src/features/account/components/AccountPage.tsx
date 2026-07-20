@@ -4,6 +4,17 @@ import { Button } from '../../../components/ui/Button'
 import { Input } from '../../../components/ui/Input'
 import { useAuthStore } from '../../auth/store/authStore'
 import { applyTheme, getStoredTheme, type AppTheme } from '../../../lib/theme'
+import { openBillingPortal, startCheckout } from '../../../lib/supabase/billing'
+
+const STATUS_LABELS: Record<string, string> = {
+  active: 'Aktiv',
+  trialing: 'Testphase',
+  past_due: 'Zahlung fehlgeschlagen',
+  canceled: 'Gekündigt',
+  incomplete: 'Unvollständig',
+  incomplete_expired: 'Abgelaufen',
+  unpaid: 'Unbezahlt',
+}
 
 const THEME_OPTIONS: { value: AppTheme; label: string; swatch: string }[] = [
   { value: 'brand', label: '9011 Blau', swatch: '#0f3d59' },
@@ -34,6 +45,33 @@ export function AccountPage() {
   const [passwordSaving, setPasswordSaving] = useState(false)
   const [passwordMessage, setPasswordMessage] = useState<string | null>(null)
   const [passwordError, setPasswordError] = useState<string | null>(null)
+
+  const [billingLoading, setBillingLoading] = useState(false)
+  const [billingError, setBillingError] = useState<string | null>(null)
+
+  async function handleUpgrade() {
+    setBillingError(null)
+    setBillingLoading(true)
+    try {
+      const url = await startCheckout()
+      window.location.href = url
+    } catch (err) {
+      setBillingError(err instanceof Error ? err.message : 'Checkout fehlgeschlagen.')
+      setBillingLoading(false)
+    }
+  }
+
+  async function handleManageBilling() {
+    setBillingError(null)
+    setBillingLoading(true)
+    try {
+      const url = await openBillingPortal()
+      window.location.href = url
+    } catch (err) {
+      setBillingError(err instanceof Error ? err.message : 'Öffnen fehlgeschlagen.')
+      setBillingLoading(false)
+    }
+  }
 
   async function handleNameSubmit(e: FormEvent) {
     e.preventDefault()
@@ -105,6 +143,33 @@ export function AccountPage() {
               Namen speichern
             </Button>
           </form>
+        </section>
+
+        <section className="mb-8 rounded-xl border border-pitch-700 bg-pitch-900 p-5">
+          <h2 className="mb-4 text-[11px] font-semibold uppercase tracking-wide text-white/40">
+            Abo
+          </h2>
+          <div className="mb-4 flex flex-col gap-1 text-sm">
+            <span className="font-medium text-white/60">Aktueller Plan</span>
+            <span className="text-white">
+              {organization?.subscription_tier === 'pro' ? 'Pro' : 'Free'}
+              {organization?.subscription_status && (
+                <span className="ml-2 text-xs text-white/40">
+                  ({STATUS_LABELS[organization.subscription_status] ?? organization.subscription_status})
+                </span>
+              )}
+            </span>
+          </div>
+          {billingError && <p className="mb-3 text-sm text-red-400">{billingError}</p>}
+          {organization?.stripe_customer_id ? (
+            <Button variant="secondary" loading={billingLoading} onClick={() => void handleManageBilling()}>
+              Abo verwalten
+            </Button>
+          ) : (
+            <Button loading={billingLoading} onClick={() => void handleUpgrade()}>
+              Pro werden
+            </Button>
+          )}
         </section>
 
         <section className="mb-8 rounded-xl border border-pitch-700 bg-pitch-900 p-5">

@@ -228,6 +228,9 @@ export type Database = {
           name: string
           primary_color: string
           secondary_color: string
+          stripe_customer_id: string | null
+          stripe_subscription_id: string | null
+          subscription_status: string | null
           subscription_tier: string
         }
         Insert: {
@@ -238,6 +241,9 @@ export type Database = {
           name: string
           primary_color?: string
           secondary_color?: string
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          subscription_status?: string | null
           subscription_tier?: string
         }
         Update: {
@@ -248,6 +254,9 @@ export type Database = {
           name?: string
           primary_color?: string
           secondary_color?: string
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          subscription_status?: string | null
           subscription_tier?: string
         }
         Relationships: []
