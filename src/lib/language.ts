@@ -1,10 +1,11 @@
-export type MarketingLang = 'de' | 'en'
+export type MarketingLang = 'de' | 'en' | 'es'
 
 const STORAGE_KEY = 'tacticboard-lang'
 
 export function getStoredLang(): MarketingLang {
   try {
-    return localStorage.getItem(STORAGE_KEY) === 'en' ? 'en' : 'de'
+    const stored = localStorage.getItem(STORAGE_KEY)
+    return stored === 'en' || stored === 'es' ? stored : 'de'
   } catch {
     return 'de'
   }

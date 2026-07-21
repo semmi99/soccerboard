@@ -14,16 +14,24 @@ const LEGAL_LINKS: Record<MarketingLang, { to: string; label: string }[]> = {
     { to: '/agb', label: 'Terms' },
     { to: '/datenschutz', label: 'Privacy Policy' },
   ],
+  es: [
+    { to: '/kontakt', label: 'Contacto' },
+    { to: '/impressum', label: 'Aviso Legal' },
+    { to: '/agb', label: 'Términos' },
+    { to: '/datenschutz', label: 'Política de Privacidad' },
+  ],
 }
 
 const FOOTER_TEXT: Record<MarketingLang, string> = {
   de: 'TacticBoard Pro — ein Produkt von 9011 Soccer, Teil der Marken',
   en: 'TacticBoard Pro — a product by 9011 Soccer, part of the',
+  es: 'TacticBoard Pro — un producto de 9011 Soccer, parte de las marcas',
 }
 
 const FOOTER_JOIN: Record<MarketingLang, string> = {
   de: 'und',
   en: 'and',
+  es: 'y',
 }
 
 export function MarketingFooter({ lang = 'de' }: { lang?: MarketingLang }) {

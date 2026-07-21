@@ -7,6 +7,7 @@ import { MarketingFooter } from './MarketingFooter'
 const NAV = {
   de: { features: 'Funktionen', pricing: 'Preise', login: 'Anmelden', signup: 'Registrieren' },
   en: { features: 'Features', pricing: 'Pricing', login: 'Log in', signup: 'Sign up' },
+  es: { features: 'Características', pricing: 'Precios', login: 'Iniciar sesión', signup: 'Registrarse' },
 }
 
 const HERO = {
@@ -37,6 +38,20 @@ const HERO = {
     ctaSecondary: 'View pricing',
     imageAlt:
       'Tactics board in the TacticBoard Pro editor: overload zone, curved through pass, run path, highlight, and caption in one scene',
+  },
+  es: {
+    title: (
+      <>
+        Planifica tácticas. Anima jugadas.
+        <br />
+        Para tu equipo.
+      </>
+    ),
+    text: 'El editor táctico para entrenadores: crea formaciones, anima jugadas y compártelas con tu plantilla — directamente en el navegador.',
+    ctaPrimary: 'Empieza gratis',
+    ctaSecondary: 'Ver precios',
+    imageAlt:
+      'Pizarra táctica en el editor de TacticBoard Pro: zona de superioridad numérica, pase curvo al espacio, trayectoria de carrera, resaltado y título en una escena',
   },
 }
 
@@ -93,80 +108,141 @@ const FEATURES = {
       text: 'Multiple projects, multiple coaches, one shared squad — all in one place.',
     },
   ],
+  es: [
+    {
+      title: 'Editor Táctico',
+      text: 'Coloca, rota y escala libremente jugadores, flechas, formas, zonas y material de entrenamiento sobre el campo.',
+    },
+    {
+      title: 'Jugadas Animadas',
+      text: 'Crea varios fotogramas y reprodúcelos con fluidez — las jugadas cobran vida en lugar de quedarse estáticas.',
+    },
+    {
+      title: 'Formaciones Propias',
+      text: 'Arrastra y suelta para crear posiciones, ponles nombre y reutilízalas en cada proyecto.',
+    },
+    {
+      title: 'Gestión de Plantilla',
+      text: 'Mantén tu plantilla real y vincula jugadores directamente con las fichas del editor — incluido el diseño de la equipación.',
+    },
+    {
+      title: 'Exportación en Alta Resolución',
+      text: 'Exporta las pizarras tácticas como PNG/JPG, hasta 4K para presentaciones e impresiones.',
+    },
+    {
+      title: 'Hecho para tu Equipo',
+      text: 'Varios proyectos, varios entrenadores, una plantilla compartida — todo en un solo lugar.',
+    },
+  ],
 }
 
 const SECTION_HEADINGS = {
   de: { features: 'Alles, was dein Training braucht', pricing: 'Einfache, faire Preise', pricingSub: 'Jederzeit kündbar. Kein Risiko.' },
   en: { features: 'Everything your training needs', pricing: 'Simple, Fair Pricing', pricingSub: 'Cancel anytime. No risk.' },
+  es: { features: 'Todo lo que necesita tu entrenamiento', pricing: 'Precios simples y justos', pricingSub: 'Cancela cuando quieras. Sin riesgo.' },
 }
 
 function plans(lang: MarketingLang) {
-  return lang === 'de'
-    ? [
-        {
-          name: 'Free',
-          price: '0 €',
-          period: '',
-          description: 'Zum Ausprobieren und für kleine Teams.',
-          features: [
-            `${FREE_TIER_LIMITS.maxProjects} Projekte`,
-            `${FREE_TIER_LIMITS.maxFrames} Frames pro Projekt`,
-            `Export bis ${FREE_TIER_LIMITS.maxExportPixelRatio}x Auflösung`,
-            'Alle Editor-Werkzeuge',
-          ],
-          cta: 'Kostenlos starten',
-          highlighted: false,
-        },
-        {
-          name: 'Pro',
-          price: '4,99 €',
-          period: '/ Monat',
-          description: 'Für Vereine und Trainer, die keine Grenzen wollen.',
-          features: [
-            'Unbegrenzte Projekte',
-            'Unbegrenzte Frames pro Projekt',
-            `Export bis ${PRO_TIER_LIMITS.maxExportPixelRatio}x Auflösung`,
-            'Alle Editor-Werkzeuge',
-            'Priorisierter Support',
-          ],
-          cta: 'Pro werden',
-          highlighted: true,
-        },
-      ]
-    : [
-        {
-          name: 'Free',
-          price: '€0',
-          period: '',
-          description: 'To try it out and for small teams.',
-          features: [
-            `${FREE_TIER_LIMITS.maxProjects} project${FREE_TIER_LIMITS.maxProjects === 1 ? '' : 's'}`,
-            `${FREE_TIER_LIMITS.maxFrames} frames per project`,
-            `Export up to ${FREE_TIER_LIMITS.maxExportPixelRatio}x resolution`,
-            'All editor tools',
-          ],
-          cta: 'Start for free',
-          highlighted: false,
-        },
-        {
-          name: 'Pro',
-          price: '€4.99',
-          period: '/ month',
-          description: "For clubs and coaches who don't want limits.",
-          features: [
-            'Unlimited projects',
-            'Unlimited frames per project',
-            `Export up to ${PRO_TIER_LIMITS.maxExportPixelRatio}x resolution`,
-            'All editor tools',
-            'Priority support',
-          ],
-          cta: 'Go Pro',
-          highlighted: true,
-        },
-      ]
+  if (lang === 'de') {
+    return [
+      {
+        name: 'Free',
+        price: '0 €',
+        period: '',
+        description: 'Zum Ausprobieren und für kleine Teams.',
+        features: [
+          `${FREE_TIER_LIMITS.maxProjects} Projekte`,
+          `${FREE_TIER_LIMITS.maxFrames} Frames pro Projekt`,
+          `Export bis ${FREE_TIER_LIMITS.maxExportPixelRatio}x Auflösung`,
+          'Alle Editor-Werkzeuge',
+        ],
+        cta: 'Kostenlos starten',
+        highlighted: false,
+      },
+      {
+        name: 'Pro',
+        price: '4,99 €',
+        period: '/ Monat',
+        description: 'Für Vereine und Trainer, die keine Grenzen wollen.',
+        features: [
+          'Unbegrenzte Projekte',
+          'Unbegrenzte Frames pro Projekt',
+          `Export bis ${PRO_TIER_LIMITS.maxExportPixelRatio}x Auflösung`,
+          'Alle Editor-Werkzeuge',
+          'Priorisierter Support',
+        ],
+        cta: 'Pro werden',
+        highlighted: true,
+      },
+    ]
+  }
+  if (lang === 'es') {
+    return [
+      {
+        name: 'Free',
+        price: '0 €',
+        period: '',
+        description: 'Para probarlo y para equipos pequeños.',
+        features: [
+          `${FREE_TIER_LIMITS.maxProjects} proyecto${FREE_TIER_LIMITS.maxProjects === 1 ? '' : 's'}`,
+          `${FREE_TIER_LIMITS.maxFrames} fotogramas por proyecto`,
+          `Exportación hasta ${FREE_TIER_LIMITS.maxExportPixelRatio}x de resolución`,
+          'Todas las herramientas del editor',
+        ],
+        cta: 'Empieza gratis',
+        highlighted: false,
+      },
+      {
+        name: 'Pro',
+        price: '4,99 €',
+        period: '/ mes',
+        description: 'Para clubes y entrenadores que no quieren límites.',
+        features: [
+          'Proyectos ilimitados',
+          'Fotogramas ilimitados por proyecto',
+          `Exportación hasta ${PRO_TIER_LIMITS.maxExportPixelRatio}x de resolución`,
+          'Todas las herramientas del editor',
+          'Soporte prioritario',
+        ],
+        cta: 'Hazte Pro',
+        highlighted: true,
+      },
+    ]
+  }
+  return [
+    {
+      name: 'Free',
+      price: '€0',
+      period: '',
+      description: 'To try it out and for small teams.',
+      features: [
+        `${FREE_TIER_LIMITS.maxProjects} project${FREE_TIER_LIMITS.maxProjects === 1 ? '' : 's'}`,
+        `${FREE_TIER_LIMITS.maxFrames} frames per project`,
+        `Export up to ${FREE_TIER_LIMITS.maxExportPixelRatio}x resolution`,
+        'All editor tools',
+      ],
+      cta: 'Start for free',
+      highlighted: false,
+    },
+    {
+      name: 'Pro',
+      price: '€4.99',
+      period: '/ month',
+      description: "For clubs and coaches who don't want limits.",
+      features: [
+        'Unlimited projects',
+        'Unlimited frames per project',
+        `Export up to ${PRO_TIER_LIMITS.maxExportPixelRatio}x resolution`,
+        'All editor tools',
+        'Priority support',
+      ],
+      cta: 'Go Pro',
+      highlighted: true,
+    },
+  ]
 }
 
-const POPULAR_BADGE = { de: 'BELIEBT', en: 'POPULAR' }
+const POPULAR_BADGE = { de: 'BELIEBT', en: 'POPULAR', es: 'POPULAR' }
 
 export function LandingPage() {
   const [lang, setLang] = useState<MarketingLang>(getStoredLang)
@@ -233,11 +309,21 @@ export function LandingPage() {
                 type="button"
                 onClick={() => handleLangChange('en')}
                 aria-pressed={lang === 'en'}
-                className={`rounded-r-md px-2 py-1 transition-colors ${
+                className={`px-2 py-1 transition-colors ${
                   lang === 'en' ? 'bg-brand-yellow text-brand-blue-dark' : 'text-white/60 hover:text-white'
                 }`}
               >
                 EN
+              </button>
+              <button
+                type="button"
+                onClick={() => handleLangChange('es')}
+                aria-pressed={lang === 'es'}
+                className={`rounded-r-md px-2 py-1 transition-colors ${
+                  lang === 'es' ? 'bg-brand-yellow text-brand-blue-dark' : 'text-white/60 hover:text-white'
+                }`}
+              >
+                ES
               </button>
             </div>
             <Link to="/login" className="text-sm font-medium text-white/80 hover:text-white">
