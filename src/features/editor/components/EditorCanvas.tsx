@@ -357,18 +357,33 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
   // (e.g. 1-2-3-4-1), fill the enclosed area — derived fresh from the
   // connectors themselves every render, so it always matches exactly what's
   // connected instead of needing its own separately-drawn/maintained shape.
-  const connectorEdges = visibleObjects
-    .filter((o): o is Extract<FrameObject, { objectType: 'connector' }> => o.objectType === 'connector')
-    .map((o): [string, string] => [o.data.fromId, o.data.toId])
+  const connectorObjects = visibleObjects.filter(
+    (o): o is Extract<FrameObject, { objectType: 'connector' }> => o.objectType === 'connector',
+  )
+  const connectorEdges = connectorObjects.map((o): [string, string] => [o.data.fromId, o.data.toId])
   const connectorZones = findConnectorZones(connectorEdges)
     .map((z) => {
       const points = z.ids
         .map((id) => visibleObjects.find((o) => o.id === id))
         .filter((o): o is FrameObject => Boolean(o))
       if (points.length !== z.ids.length) return null
-      return { key: z.key, points: points.flatMap((p) => [p.x, p.y]) }
+      // The zone's own color follows whichever connector forms its first
+      // edge — loops are realistically drawn with one consistent color
+      // already (connector color is sticky across new connectors), so this
+      // just carries that same color into the derived fill instead of a
+      // fixed one.
+      const firstEdgeConnector = connectorObjects.find(
+        (o) =>
+          (o.data.fromId === z.ids[0] && o.data.toId === z.ids[1]) ||
+          (o.data.toId === z.ids[0] && o.data.fromId === z.ids[1]),
+      )
+      return {
+        key: z.key,
+        points: points.flatMap((p) => [p.x, p.y]),
+        color: firstEdgeConnector?.data.color,
+      }
     })
-    .filter((z): z is { key: string; points: number[] } => Boolean(z))
+    .filter((z): z is { key: string; points: number[]; color: string | undefined } => Boolean(z))
 
   const trRef = useRef<Konva.Transformer>(null)
   const objectsLayerRef = useRef<Konva.Layer>(null)
@@ -770,7 +785,12 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
           y={orientation === 'vertical' ? -cropShift : 0}
         >
           {connectorZones.map((z) => (
-            <ConnectorZoneShape key={z.key} points={z.points} lineRef={(node) => registerZoneRef(z.key, node)} />
+            <ConnectorZoneShape
+              key={z.key}
+              points={z.points}
+              color={z.color}
+              lineRef={(node) => registerZoneRef(z.key, node)}
+            />
           ))}
           {sortedObjects.map((object) => {
             if (object.objectType === 'connector') {

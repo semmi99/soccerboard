@@ -152,7 +152,7 @@ export function AccountPage() {
           <div className="mb-4 flex flex-col gap-1 text-sm">
             <span className="font-medium text-white/60">Aktueller Plan</span>
             <span className="text-white">
-              {organization?.subscription_tier === 'pro' ? 'Pro' : 'Free'}
+              {organization?.subscription_tier === 'pro' ? 'Trainer' : 'Beobachter (Demo)'}
               {organization?.subscription_status && (
                 <span className="ml-2 text-xs text-white/40">
                   ({STATUS_LABELS[organization.subscription_status] ?? organization.subscription_status})
@@ -175,7 +175,7 @@ export function AccountPage() {
             </Button>
           ) : (
             <Button loading={billingLoading} onClick={() => void handleUpgrade()}>
-              Pro werden
+              Trainer werden
             </Button>
           )}
         </section>

@@ -126,7 +126,7 @@ export function DashboardPage() {
             <h1 className="text-lg font-semibold text-white">Projekte</h1>
             <p className="text-sm text-white/40">
               {projects.length} / {Number.isFinite(maxProjects) ? maxProjects : '∞'} Projekte ·{' '}
-              {organization.subscription_tier === 'free' ? 'Free-Tier' : organization.subscription_tier}
+              {organization.subscription_tier === 'free' ? 'Beobachter (Demo)' : 'Trainer'}
             </p>
           </div>
         </div>

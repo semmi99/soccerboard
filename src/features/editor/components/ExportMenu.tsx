@@ -164,7 +164,7 @@ export function ExportMenu({ stageRef }: { stageRef: RefObject<Konva.Stage | nul
 
                     {maxPixelRatio < 4 && (
                       <p className="text-[11px] text-white/40">
-                        Free-Tier: Export bis {maxPixelRatio}x. Für 4K auf Pro upgraden.
+                        Beobachter-Modus: Export bis {maxPixelRatio}x. Für 4K auf Trainer upgraden.
                       </p>
                     )}
                   </>
