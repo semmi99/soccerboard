@@ -144,7 +144,7 @@ Plattform-Admin-Dashboard, „Kostenloser, unbegrenzter Zugang“-Haken).
 Sobald ein Stripe-Konto existiert:
 
 1. **Produkt anlegen:** In Stripe unter *Product catalog* ein Produkt „Pro“ mit
-   einem wiederkehrenden Preis von 3,99 €/Monat anlegen → die **Price-ID**
+   einem wiederkehrenden Preis von 4,99 €/Monat anlegen → die **Price-ID**
    (`price_...`) notieren.
 2. **Secrets in Supabase setzen** (Dashboard → Edge Functions → Secrets, oder
    `supabase secrets set` via CLI):

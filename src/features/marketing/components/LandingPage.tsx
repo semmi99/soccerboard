@@ -46,7 +46,7 @@ const PLANS = [
   },
   {
     name: 'Pro',
-    price: '3,99 €',
+    price: '4,99 €',
     period: '/ Monat',
     description: 'Für Vereine und Trainer, die keine Grenzen wollen.',
     features: [
