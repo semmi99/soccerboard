@@ -118,27 +118,6 @@ export function createObjectForTool(
     }
   }
 
-  if (tool === 'shape_polygon') {
-    return {
-      ...base,
-      objectType: 'shape',
-      data: {
-        kind: 'polygon',
-        width: 100,
-        height: 70,
-        // A trapezoid by default (not a rectangle!) so this reads as its own
-        // freely-reshapeable zone shape from the moment it's placed, instead
-        // of looking identical to the plain Rechteck tool until dragged.
-        points: [-30, -35, 30, -35, 55, 35, -55, 35],
-        fill: 'rgba(124, 58, 237, 0.25)',
-        stroke: '#a855f7',
-        strokeWidth: 2,
-        lineStyle: 'solid',
-        opacity: 1,
-      },
-    }
-  }
-
   if (tool === 'text') {
     return {
       ...base,

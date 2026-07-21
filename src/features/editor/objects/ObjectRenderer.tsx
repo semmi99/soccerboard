@@ -133,29 +133,21 @@ export function ObjectRenderer({
     const node = groupRef.current
     if (!node) return
 
-    // Shapes support independent width/height (and, for polygons, per-point
-    // scaling) instead of a single uniform scale factor, so a free 4-corner
-    // resize can actually stretch them non-uniformly. The resize is folded
-    // into the shape's own data and the node's scale is reset to 1 so it
-    // doesn't get double-applied on the next render.
+    // Shapes support independent width/height instead of a single uniform
+    // scale factor, so a free 4-corner resize can actually stretch them
+    // non-uniformly. The resize is folded into the shape's own data and the
+    // node's scale is reset to 1 so it doesn't get double-applied on the
+    // next render.
     if (object.objectType === 'shape') {
       const scaleX = node.scaleX()
       const scaleY = node.scaleY()
       node.scaleX(1)
       node.scaleY(1)
-      const data =
-        object.data.kind === 'polygon'
-          ? {
-              ...object.data,
-              points: (object.data.points ?? []).map((v, i) =>
-                i % 2 === 0 ? v * scaleX : v * scaleY,
-              ),
-            }
-          : {
-              ...object.data,
-              width: Math.max(8, object.data.width * scaleX),
-              height: Math.max(8, object.data.height * scaleY),
-            }
+      const data = {
+        ...object.data,
+        width: Math.max(8, object.data.width * scaleX),
+        height: Math.max(8, object.data.height * scaleY),
+      }
       onTransformEnd(object.id, {
         x: node.x(),
         y: node.y(),

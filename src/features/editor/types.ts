@@ -1,7 +1,7 @@
 export type Team = 'home' | 'away'
 export type LineStyle = 'solid' | 'dashed' | 'dotted'
 export type ArrowShape = 'straight' | 'curved' | 'polyline'
-export type ShapeKind = 'circle' | 'rect' | 'polygon'
+export type ShapeKind = 'circle' | 'rect'
 export type EquipmentKind =
   | 'cone'
   | 'mini_goal'
@@ -65,16 +65,21 @@ export interface ShapeData {
   kind: ShapeKind
   width: number
   height: number
-  points?: number[] // polygon only, relative to x/y anchor
   fill: string
   stroke: string
   strokeWidth: number
   lineStyle: LineStyle
   opacity: number
   /** When set, the shape fills with a radial gradient from this color
-   * (solid at the center) fading to transparent at its edge — e.g. for
-   * heatmap-style pitch zones — instead of the flat `fill` color. */
+   * (solid at the center) fading out at its edge — e.g. for heatmap-style
+   * pitch zones — instead of the flat `fill` color. */
   gradientColor?: string | null
+  /** Second gradient stop color (the edge). When unset/null, falls back to
+   * gradientColor faded to fully transparent (the original single-color
+   * look) instead of a genuine two-color blend. */
+  gradientColor2?: string | null
+  /** Hides the border entirely, regardless of `stroke`/`strokeWidth`. */
+  noBorder?: boolean
 }
 
 export interface TextData {
@@ -184,7 +189,6 @@ export type ToolId =
   | 'line_straight'
   | 'shape_circle'
   | 'shape_rect'
-  | 'shape_polygon'
   | 'text'
   | 'text_badge'
   | 'text_title'

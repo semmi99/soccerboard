@@ -427,7 +427,15 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
 
         const fromFrame = currentFrames[currentIndex]!
         const toFrame = currentFrames[currentIndex + 1]!
-        const durationSec = Math.max(fromFrame.durationMs, 50) / 1000
+        // The TARGET frame's own duration governs its transition, not the
+        // source's — matching the natural "duplicate frame, adjust this
+        // frame's duration" workflow, where the frame you just edited is the
+        // one whose duration you expect to see take effect. The first
+        // frame's duration is inherently unused either way (nothing
+        // transitions into it), but leaving the LAST frame's duration dead
+        // (the old behavior) is the case people actually hit and report as
+        // "changing the duration does nothing."
+        const durationSec = Math.max(toFrame.durationMs, 50) / 1000
 
         const fromIds = new Set(fromFrame.objects.map((o) => o.id))
         const toIds = new Set(toFrame.objects.map((o) => o.id))

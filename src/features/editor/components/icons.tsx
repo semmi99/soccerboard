@@ -49,14 +49,6 @@ export function RectShapeIcon(props: SVGProps<SVGSVGElement>) {
   )
 }
 
-export function PolygonShapeIcon(props: SVGProps<SVGSVGElement>) {
-  return (
-    <Base {...props}>
-      <path d="M12 4l8 6-3 9H7l-3-9z" />
-    </Base>
-  )
-}
-
 export function TextToolIcon(props: SVGProps<SVGSVGElement>) {
   return (
     <Base {...props}>

@@ -11,7 +11,6 @@ import {
   MannequinIcon,
   MiniGoalIcon,
   PlainLineIcon,
-  PolygonShapeIcon,
   RectShapeIcon,
   RingIcon,
   SlalomPoleIcon,
@@ -75,7 +74,6 @@ const SECTIONS: ToolDef[][] = [
   [
     { id: 'shape_circle', label: 'Kreis', icon: <CircleShapeIcon /> },
     { id: 'shape_rect', label: 'Rechteck', icon: <RectShapeIcon /> },
-    { id: 'shape_polygon', label: 'Polygon (Zone)', icon: <PolygonShapeIcon /> },
   ],
   [
     { id: 'text', label: 'Text', icon: <TextToolIcon /> },

@@ -1,4 +1,4 @@
-import type { ChangeEvent, ReactNode } from 'react'
+import { useState, type ChangeEvent, type ReactNode } from 'react'
 import { useEditorStore } from '../store/editorStore'
 import type {
   ArrowData,
@@ -79,6 +79,8 @@ export function PropertiesSidebar() {
   const selectedObject: FrameObject | undefined = frame?.objects.find(
     (o) => o.id === selection[0],
   )
+
+  const [isTeamPanelOpen, setIsTeamPanelOpen] = useState(true)
 
   function updateData<T extends FrameObject>(patch: Partial<T['data']>) {
     if (!selectedObject) return
@@ -171,10 +173,15 @@ export function PropertiesSidebar() {
       </div>
 
       <div>
-        <h3 className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-white/40">
+        <button
+          type="button"
+          onClick={() => setIsTeamPanelOpen((v) => !v)}
+          className="mb-2 flex w-full items-center justify-between text-[11px] font-semibold uppercase tracking-wide text-white/40 hover:text-white/70"
+        >
           Team &amp; Kader
-        </h3>
-        <TeamSquadPanel />
+          <span className="text-sm">{isTeamPanelOpen ? '−' : '+'}</span>
+        </button>
+        {isTeamPanelOpen && <TeamSquadPanel />}
       </div>
 
       {selection.length > 1 && (
@@ -525,67 +532,102 @@ function ShapeFields({
             Statt flacher Füllfarbe ein Farbverlauf von der Mitte nach außen
           </label>
           {data.gradientColor && (
-            <ColorSwatchPicker
-              value={data.gradientColor}
-              onChange={(color) => {
-                onCheckpoint()
-                onChange({ gradientColor: color })
-              }}
-            />
+            <>
+              <ColorSwatchPicker
+                value={data.gradientColor}
+                onChange={(color) => {
+                  onCheckpoint()
+                  onChange({ gradientColor: color })
+                }}
+              />
+              <label className="flex items-center gap-2 text-xs text-white/70">
+                <input
+                  type="checkbox"
+                  className="accent-violet-accent"
+                  checked={Boolean(data.gradientColor2)}
+                  onChange={(e) => {
+                    onCheckpoint()
+                    onChange({ gradientColor2: e.target.checked ? data.stroke : null })
+                  }}
+                />
+                Zweifarbiger Verlauf (statt Verblassen ins Transparente)
+              </label>
+              {data.gradientColor2 && (
+                <ColorSwatchPicker
+                  value={data.gradientColor2}
+                  onChange={(color) => {
+                    onCheckpoint()
+                    onChange({ gradientColor2: color })
+                  }}
+                />
+              )}
+            </>
           )}
         </div>
       </Field>
-      <Field label="Rahmenfarbe">
-        <ColorSwatchPicker
-          value={data.stroke}
-          onChange={(color) => {
-            onCheckpoint()
-            onChange({ stroke: color })
-          }}
+      <Field label="Rahmen">
+        <div className="flex flex-col gap-1.5">
+          <label className="flex items-center gap-2 text-xs text-white/70">
+            <input
+              type="checkbox"
+              className="accent-violet-accent"
+              checked={!data.noBorder}
+              onChange={(e) => {
+                onCheckpoint()
+                onChange({ noBorder: !e.target.checked })
+              }}
+            />
+            Rahmen anzeigen
+          </label>
+          {!data.noBorder && (
+            <>
+              <ColorSwatchPicker
+                value={data.stroke}
+                onChange={(color) => {
+                  onCheckpoint()
+                  onChange({ stroke: color })
+                }}
+              />
+              <select
+                className={selectClass}
+                value={data.lineStyle}
+                onChange={(e) => {
+                  onCheckpoint()
+                  onChange({ lineStyle: e.target.value as LineStyle })
+                }}
+              >
+                {LINE_STYLES.map((s) => (
+                  <option key={s.value} value={s.value}>
+                    {s.label}
+                  </option>
+                ))}
+              </select>
+            </>
+          )}
+        </div>
+      </Field>
+      <Field label={`Breite (${data.width}px)`}>
+        <input
+          type="range"
+          min={20}
+          max={300}
+          className="w-full"
+          value={data.width}
+          onFocus={onCheckpoint}
+          onChange={(e) => onChange({ width: Number(e.target.value) })}
         />
       </Field>
-      <Field label="Rahmenstil">
-        <select
-          className={selectClass}
-          value={data.lineStyle}
-          onChange={(e) => {
-            onCheckpoint()
-            onChange({ lineStyle: e.target.value as LineStyle })
-          }}
-        >
-          {LINE_STYLES.map((s) => (
-            <option key={s.value} value={s.value}>
-              {s.label}
-            </option>
-          ))}
-        </select>
+      <Field label={`Höhe (${data.height}px)`}>
+        <input
+          type="range"
+          min={20}
+          max={300}
+          className="w-full"
+          value={data.height}
+          onFocus={onCheckpoint}
+          onChange={(e) => onChange({ height: Number(e.target.value) })}
+        />
       </Field>
-      {data.kind !== 'polygon' && (
-        <>
-          <Field label={`Breite (${data.width}px)`}>
-            <input
-              type="range"
-              min={20}
-              max={300}
-              className="w-full"
-              value={data.width}
-              onFocus={onCheckpoint}
-              onChange={(e) => onChange({ width: Number(e.target.value) })}
-            />
-          </Field>
-          <Field label={`Höhe (${data.height}px)`}>
-            <input
-              type="range"
-              min={20}
-              max={300}
-              className="w-full"
-              value={data.height}
-              onFocus={onCheckpoint}
-              onChange={(e) => onChange({ height: Number(e.target.value) })}
-            />
-          </Field>
-        </>
-      )}
       <Field label={`Deckkraft (${Math.round(data.opacity * 100)}%)`}>
         <input
           type="range"
