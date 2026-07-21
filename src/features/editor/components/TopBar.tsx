@@ -1,10 +1,11 @@
-import type { RefObject } from 'react'
+import { useState, type RefObject } from 'react'
 import { useNavigate } from 'react-router-dom'
 import type Konva from 'konva'
 import { useEditorStore } from '../store/editorStore'
 import type { useProjectSave } from '../hooks/useProjectSave'
 import { Button } from '../../../components/ui/Button'
 import { ExportMenu } from './ExportMenu'
+import { ExercisesModal } from './ExercisesModal'
 
 export function TopBar({
   stageRef,
@@ -22,13 +23,14 @@ export function TopBar({
   const canRedo = useEditorStore((s) => s.future.length > 0)
 
   const { handleSave, isSaving, saveError, isDirty, projectId } = save
+  const [showExercises, setShowExercises] = useState(false)
 
   return (
-    <header className="flex h-14 shrink-0 items-center gap-3 border-b border-pitch-700 bg-pitch-900 px-4">
+    <header className="flex h-14 shrink-0 items-center gap-3 overflow-x-auto border-b border-pitch-700 bg-pitch-900 px-4">
       <button
         type="button"
         onClick={() => navigate('/dashboard')}
-        className="rounded-md px-2 py-1 text-sm text-white/60 hover:bg-pitch-800 hover:text-white"
+        className="shrink-0 rounded-md px-2 py-1 text-sm text-white/60 hover:bg-pitch-800 hover:text-white"
       >
         ← Dashboard
       </button>
@@ -38,10 +40,10 @@ export function TopBar({
         onChange={(e) => setProjectTitle(e.target.value)}
         placeholder="Projektname"
         title="Projektname (klicken zum Umbenennen)"
-        className="min-w-0 max-w-xs truncate rounded-md border border-pitch-700 bg-pitch-800/60 px-2 py-1 text-sm font-medium text-white outline-none hover:border-pitch-600 focus:border-violet-accent focus:bg-pitch-800"
+        className="min-w-0 max-w-xs shrink truncate rounded-md border border-pitch-700 bg-pitch-800/60 px-2 py-1 text-sm font-medium text-white outline-none hover:border-pitch-600 focus:border-violet-accent focus:bg-pitch-800"
       />
 
-      <div className="flex items-center gap-1">
+      <div className="flex shrink-0 items-center gap-1">
         <Button variant="ghost" disabled={!canUndo} onClick={undo} title="Rückgängig (Strg+Z)">
           Rückgängig
         </Button>
@@ -50,18 +52,32 @@ export function TopBar({
         </Button>
       </div>
 
-      {saveError && <p className="max-w-xs truncate text-xs text-red-400">{saveError}</p>}
+      {saveError && <p className="max-w-xs shrink-0 truncate text-xs text-red-400">{saveError}</p>}
 
-      <ExportMenu stageRef={stageRef} />
+      {!saveError && (
+        <p className="shrink-0 text-xs text-white/40">
+          {isSaving ? 'Speichert …' : isDirty ? 'Ungespeicherte Änderungen' : projectId ? 'Gespeichert' : ''}
+        </p>
+      )}
 
-      <Button
-        onClick={() => void handleSave()}
-        loading={isSaving}
-        disabled={!isDirty && Boolean(projectId)}
-        title="Speichern (Strg+S)"
-      >
-        Speichern
-      </Button>
+      <div className="ml-auto flex shrink-0 items-center gap-3">
+        <Button variant="secondary" onClick={() => setShowExercises(true)}>
+          Übungen
+        </Button>
+
+        <ExportMenu stageRef={stageRef} />
+
+        <Button
+          onClick={() => void handleSave()}
+          loading={isSaving}
+          disabled={!isDirty && Boolean(projectId)}
+          title="Speichern (Strg+S) — wird auch automatisch gespeichert"
+        >
+          Speichern
+        </Button>
+      </div>
+
+      {showExercises && <ExercisesModal onClose={() => setShowExercises(false)} />}
     </header>
   )
 }

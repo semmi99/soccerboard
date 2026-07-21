@@ -38,6 +38,44 @@ export type Database = {
         }
         Relationships: []
       }
+      exercises: {
+        Row: {
+          category: string
+          created_at: string
+          data: Json
+          description: string | null
+          id: string
+          name: string
+          org_id: string
+        }
+        Insert: {
+          category?: string
+          created_at?: string
+          data?: Json
+          description?: string | null
+          id?: string
+          name: string
+          org_id: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          data?: Json
+          description?: string | null
+          id?: string
+          name?: string
+          org_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "exercises_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       formations: {
         Row: {
           created_at: string

@@ -136,6 +136,7 @@ interface EditorState {
   addFrame: (maxFrames: number) => boolean
   removeFrame: (index: number) => void
   duplicateFrame: (index: number, maxFrames: number) => boolean
+  appendFrames: (newFrames: EditorFrame[], maxFrames: number) => boolean
   reorderFrames: (fromIndex: number, toIndex: number) => void
   setActiveFrameIndex: (index: number) => void
   setFrameDuration: (index: number, durationMs: number) => void
@@ -608,6 +609,26 @@ export const useEditorStore = create<EditorState>((set, get) => ({
     const nextFrames = [...frames]
     nextFrames.splice(index + 1, 0, copy)
     set({ frames: nextFrames, activeFrameIndex: index + 1, isDirty: true })
+    return true
+  },
+
+  // Inserts a saved exercise's frames (see src/lib/supabase/exercises.ts) at
+  // the end of the current sequence, so a full training session is built by
+  // chaining several exercises one after another. Every id is regenerated —
+  // unlike duplicateFrame, these frames never need to tween from/into the
+  // project's existing frames, so there's no reason to keep the source
+  // exercise's own ids (and reusing them risks colliding with a second
+  // insert of the same exercise later).
+  appendFrames: (newFrames, maxFrames) => {
+    const { frames } = get()
+    if (frames.length + newFrames.length > maxFrames) return false
+    pushHistory(get, set)
+    const cloned: EditorFrame[] = newFrames.map((f) => ({
+      id: crypto.randomUUID(),
+      durationMs: f.durationMs,
+      objects: f.objects.map((o) => ({ ...cloneObject(o), id: crypto.randomUUID() })),
+    }))
+    set({ frames: [...frames, ...cloned], activeFrameIndex: frames.length, isDirty: true })
     return true
   },
 

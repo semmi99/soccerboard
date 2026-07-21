@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useEditorStore } from '../store/editorStore'
 import { useAuthStore } from '../../auth/store/authStore'
@@ -103,6 +103,20 @@ export function useProjectSave() {
     setProjectIdInStore,
     markSaved,
   ])
+
+  // Autosave: once nothing has changed for AUTOSAVE_DELAY_MS, save
+  // automatically — so forgetting Strg+S never loses work. handleSave's own
+  // identity already changes on every tracked field (frames, title, pitch
+  // settings, ...), so watching it here is enough to reset the debounce on
+  // any edit without repeating that whole dependency list.
+  const AUTOSAVE_DELAY_MS = 3000
+  useEffect(() => {
+    if (!isDirty) return
+    const timer = setTimeout(() => {
+      void handleSave()
+    }, AUTOSAVE_DELAY_MS)
+    return () => clearTimeout(timer)
+  }, [isDirty, handleSave])
 
   return { handleSave, isSaving, saveError, isDirty, projectId }
 }
