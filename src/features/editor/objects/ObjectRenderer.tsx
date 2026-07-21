@@ -193,12 +193,12 @@ export function ObjectRenderer({
     })
   }
 
+  // `bendable: false` only hides the "add another point" button in the
+  // sidebar (see ArrowFields) — the arrow's own start/end points still need
+  // their drag handles here regardless, so it can be repositioned/resized
+  // by its tips even though it can never grow a third, interior point.
   const showArrowHandles =
-    object.objectType === 'arrow' &&
-    object.data.shape !== 'curved' &&
-    object.data.bendable !== false &&
-    isSelected &&
-    interactive
+    object.objectType === 'arrow' && object.data.shape !== 'curved' && isSelected && interactive
 
   function handleArrowPointDragMove(pairIndex: number, x: number, y: number) {
     if (object.objectType !== 'arrow' || !onArrowPointsChange) return
