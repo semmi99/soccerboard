@@ -1,11 +1,10 @@
-import { useState, type RefObject } from 'react'
+import type { RefObject } from 'react'
 import { useNavigate } from 'react-router-dom'
 import type Konva from 'konva'
 import { useEditorStore } from '../store/editorStore'
 import type { useProjectSave } from '../hooks/useProjectSave'
 import { Button } from '../../../components/ui/Button'
 import { ExportMenu } from './ExportMenu'
-import { ExercisesModal } from './ExercisesModal'
 
 export function TopBar({
   stageRef,
@@ -23,7 +22,6 @@ export function TopBar({
   const canRedo = useEditorStore((s) => s.future.length > 0)
 
   const { handleSave, isSaving, saveError, isDirty, projectId } = save
-  const [showExercises, setShowExercises] = useState(false)
 
   return (
     <header className="flex h-14 shrink-0 items-center gap-3 overflow-x-auto border-b border-pitch-700 bg-pitch-900 px-4">
@@ -61,10 +59,6 @@ export function TopBar({
       )}
 
       <div className="ml-auto flex shrink-0 items-center gap-3">
-        <Button variant="secondary" onClick={() => setShowExercises(true)}>
-          Übungen
-        </Button>
-
         <ExportMenu stageRef={stageRef} />
 
         <Button
@@ -76,8 +70,6 @@ export function TopBar({
           Speichern
         </Button>
       </div>
-
-      {showExercises && <ExercisesModal onClose={() => setShowExercises(false)} />}
     </header>
   )
 }
