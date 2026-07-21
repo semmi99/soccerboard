@@ -19,6 +19,15 @@ function darken(hex: string, amount = 0.3) {
   return `rgb(${r}, ${g}, ${b})`
 }
 
+/** Lightens a hex color toward white — the cone marker's glossy highlight. */
+function lighten(hex: string, amount = 0.4) {
+  const n = parseInt(hex.slice(1), 16)
+  const r = Math.round(((n >> 16) & 0xff) + (255 - ((n >> 16) & 0xff)) * amount)
+  const g = Math.round(((n >> 8) & 0xff) + (255 - ((n >> 8) & 0xff)) * amount)
+  const b = Math.round((n & 0xff) + (255 - (n & 0xff)) * amount)
+  return `rgb(${r}, ${g}, ${b})`
+}
+
 export function EquipmentShape({ data }: { data: EquipmentData }) {
   return (
     <Group scaleX={data.scaleX ?? 1} scaleY={data.scaleY ?? 1}>
@@ -31,13 +40,28 @@ function EquipmentIcon({ data }: { data: EquipmentData }) {
   const color = data.color ?? EQUIPMENT_DEFAULT_COLORS[data.kind]
 
   switch (data.kind) {
-    case 'cone':
+    case 'cone': {
+      // A top-down marker disc (matching how it actually reads on a
+      // bird's-eye tactics pitch) rather than the old side-view triangle
+      // silhouette — glossy radial shading plus the small stacking-hole
+      // dot, same look regardless of which of the 6 marker colors is picked.
+      const r = 13
       return (
         <Group>
-          <Line points={[0, -16, 9, 10, -9, 10]} closed fill={color} stroke={darken(color)} strokeWidth={1} />
-          <Rect x={-11} y={9} width={22} height={4} fill={darken(color)} cornerRadius={1} />
+          <Circle
+            radius={r}
+            fillRadialGradientStartPoint={{ x: -r * 0.35, y: -r * 0.35 }}
+            fillRadialGradientStartRadius={0}
+            fillRadialGradientEndPoint={{ x: 0, y: 0 }}
+            fillRadialGradientEndRadius={r * 1.3}
+            fillRadialGradientColorStops={[0, lighten(color, 0.55), 0.55, color, 1, darken(color, 0.3)]}
+            stroke={darken(color, 0.5)}
+            strokeWidth={0.5}
+          />
+          <Circle x={-r * 0.15} y={-r * 0.32} radius={r * 0.18} fill="rgba(0, 0, 0, 0.5)" />
         </Group>
       )
+    }
     case 'mini_goal':
       return (
         <Group>

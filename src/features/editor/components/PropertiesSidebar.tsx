@@ -506,7 +506,7 @@ function ArrowFields({
         />
         Leuchteffekt (weicher Farbkanal entlang der Linie)
       </label>
-      {data.shape !== 'curved' && (
+      {data.shape !== 'curved' && data.bendable !== false && (
         <Button
           variant="secondary"
           onClick={() => {

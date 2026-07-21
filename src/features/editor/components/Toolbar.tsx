@@ -6,6 +6,7 @@ import {
   ConeIcon,
   ConnectorIcon,
   CircleShapeIcon,
+  CurvedArrowIcon,
   CursorIcon,
   LadderIcon,
   MannequinIcon,
@@ -67,7 +68,8 @@ const SECTIONS: ToolDef[][] = [
     { id: 'ball', label: 'Ball', icon: <BallIcon /> },
   ],
   [
-    { id: 'arrow_straight', label: 'Pfeil (Ziehpunkte zum Biegen)', icon: <StraightArrowIcon /> },
+    { id: 'arrow_straight', label: 'Pfeil (Ziehpunkte zum Biegen)', icon: <CurvedArrowIcon /> },
+    { id: 'arrow_rigid', label: 'Gerader Pfeil (nicht biegbar)', icon: <StraightArrowIcon /> },
     { id: 'line_straight', label: 'Linie (Zone einzeichnen)', icon: <PlainLineIcon /> },
     { id: 'connector', label: 'Spieler verbinden', icon: <ConnectorIcon /> },
   ],

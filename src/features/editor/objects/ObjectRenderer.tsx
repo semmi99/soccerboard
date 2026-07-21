@@ -194,7 +194,11 @@ export function ObjectRenderer({
   }
 
   const showArrowHandles =
-    object.objectType === 'arrow' && object.data.shape !== 'curved' && isSelected && interactive
+    object.objectType === 'arrow' &&
+    object.data.shape !== 'curved' &&
+    object.data.bendable !== false &&
+    isSelected &&
+    interactive
 
   function handleArrowPointDragMove(pairIndex: number, x: number, y: number) {
     if (object.objectType !== 'arrow' || !onArrowPointsChange) return

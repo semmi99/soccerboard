@@ -33,6 +33,15 @@ export function StraightArrowIcon(props: SVGProps<SVGSVGElement>) {
   )
 }
 
+export function CurvedArrowIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <Base {...props}>
+      <path d="M4 19c2-8 8-13 15-13" />
+      <path d="M13 4l6 2-2 6" />
+    </Base>
+  )
+}
+
 export function CircleShapeIcon(props: SVGProps<SVGSVGElement>) {
   return (
     <Base {...props}>

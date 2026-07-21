@@ -63,6 +63,11 @@ export interface ArrowData {
    * full strength to fully transparent at the edges) — a lane/channel
    * highlight, not a large filled area. */
   glow?: boolean
+  /** false = a rigid, fixed straight arrow: no draggable interior points and
+   * no "Ziehpunkt hinzufügen" button, so it can only be moved/rotated/scaled
+   * as a whole, never reshaped. Unset/undefined behaves as bendable (the
+   * original behavior), matching every arrow saved before this existed. */
+  bendable?: boolean
 }
 
 export interface ShapeData {
@@ -206,6 +211,7 @@ export type ToolId =
   | 'player_home_gk'
   | 'player_away_gk'
   | 'arrow_straight'
+  | 'arrow_rigid'
   | 'line_straight'
   | 'shape_circle'
   | 'shape_rect'

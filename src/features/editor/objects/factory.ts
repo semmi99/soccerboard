@@ -69,6 +69,21 @@ export function createObjectForTool(
     }
   }
 
+  if (tool === 'arrow_rigid') {
+    return {
+      ...base,
+      objectType: 'arrow',
+      data: {
+        shape: 'straight',
+        points: [-50, 0, 50, 0],
+        lineStyle: 'solid',
+        color: '#f0d878',
+        strokeWidth: 3,
+        bendable: false,
+      },
+    }
+  }
+
   if (tool === 'line_straight') {
     return {
       ...base,
