@@ -179,7 +179,9 @@ export function PropertiesSidebar() {
           className="mb-2 flex w-full items-center justify-between text-[11px] font-semibold uppercase tracking-wide text-white/40 hover:text-white/70"
         >
           Team &amp; Kader
-          <span className="text-sm">{isTeamPanelOpen ? '−' : '+'}</span>
+          <span className="flex h-5 w-5 shrink-0 items-center justify-center text-base font-bold text-white/70">
+            {isTeamPanelOpen ? '−' : '+'}
+          </span>
         </button>
         {isTeamPanelOpen && <TeamSquadPanel />}
       </div>
@@ -481,6 +483,18 @@ function ArrowFields({
           }}
         />
         Distanz anzeigen (m)
+      </label>
+      <label className="flex items-center gap-2 text-xs text-white/70">
+        <input
+          type="checkbox"
+          className="accent-violet-accent"
+          checked={data.glow ?? false}
+          onChange={(e) => {
+            onCheckpoint()
+            onChange({ glow: e.target.checked })
+          }}
+        />
+        Leuchteffekt (weicher Farbkanal entlang der Linie)
       </label>
       {data.shape !== 'curved' && (
         <Button
@@ -852,6 +866,18 @@ function ConnectorFields({
           }}
         />
         Distanz anzeigen (m)
+      </label>
+      <label className="flex items-center gap-2 text-xs text-white/70">
+        <input
+          type="checkbox"
+          className="accent-violet-accent"
+          checked={data.glow ?? false}
+          onChange={(e) => {
+            onCheckpoint()
+            onChange({ glow: e.target.checked })
+          }}
+        />
+        Leuchteffekt (weicher Farbkanal entlang der Linie)
       </label>
     </div>
   )

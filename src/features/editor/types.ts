@@ -59,6 +59,10 @@ export interface ArrowData {
   /** Shows the real-world pass/run distance (computed from the project's
    * pitch size) as a small label near the arrow's midpoint. */
   showDistance?: boolean
+  /** Soft, narrow glow following the line's path (fading from `color` at
+   * full strength to fully transparent at the edges) — a lane/channel
+   * highlight, not a large filled area. */
+  glow?: boolean
 }
 
 export interface ShapeData {
@@ -125,6 +129,8 @@ export interface ConnectorData {
    * the two connected players as a small label at the midpoint. */
   showDistance?: boolean
   lineStyle: LineStyle
+  /** Soft, narrow glow following the connector's path — see ArrowData.glow. */
+  glow?: boolean
 }
 
 export type ObjectType =

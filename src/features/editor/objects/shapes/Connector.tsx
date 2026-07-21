@@ -43,9 +43,9 @@ export function ConnectorShape({
         dash={dashForLineStyle(data.lineStyle)}
         lineCap="round"
         hitStrokeWidth={16}
-        shadowColor={isSelected ? '#a855f7' : undefined}
-        shadowBlur={isSelected ? 6 : 0}
-        shadowOpacity={0.7}
+        shadowColor={isSelected ? '#a855f7' : data.glow ? data.color : undefined}
+        shadowBlur={isSelected ? 6 : data.glow ? data.strokeWidth * 3 : 0}
+        shadowOpacity={isSelected ? 0.7 : data.glow ? 0.8 : 0}
         onClick={(e: KonvaEventObject<MouseEvent>) => {
           e.cancelBubble = true
           onSelect(e.evt.shiftKey)

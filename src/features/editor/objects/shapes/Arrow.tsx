@@ -43,6 +43,9 @@ export function ArrowShape({ data, scale = 1 }: { data: ArrowData; scale?: numbe
         lineCap="round"
         lineJoin="round"
         hitStrokeWidth={16}
+        shadowColor={data.glow ? data.color : undefined}
+        shadowBlur={data.glow ? data.strokeWidth * 3 : 0}
+        shadowOpacity={data.glow ? 0.8 : 0}
       />
       {distanceLabel && mid && (
         <Group name="distance-label" x={mid.x} y={mid.y} listening={false}>
