@@ -98,6 +98,16 @@ export interface TextData {
   /** Pill background color — the "Badge" text preset's look, but available
    * to any text object. */
   background?: string
+  /** When true, the pill background renders as a gradient (from
+   * `background` as the first stop) instead of a flat fill — same recipe
+   * as ShapeData's gradient. */
+  backgroundGradient?: boolean
+  /** Second gradient stop color. When unset/null, falls back to
+   * `background` faded to fully transparent. */
+  backgroundGradientColor2?: string | null
+  /** 'radial' (from the center) or 'linear' (left edge to right edge).
+   * Unset behaves as 'radial'. */
+  backgroundGradientDirection?: 'radial' | 'linear'
   /** Drop shadow for legibility over busy pitch backgrounds — used by the
    * "Titel"/"Untertitel" text presets. */
   shadow?: boolean

@@ -81,6 +81,7 @@ export function PropertiesSidebar() {
   )
 
   const [isTeamPanelOpen, setIsTeamPanelOpen] = useState(true)
+  const [isFieldPanelOpen, setIsFieldPanelOpen] = useState(true)
 
   function updateData<T extends FrameObject>(patch: Partial<T['data']>) {
     if (!selectedObject) return
@@ -90,9 +91,17 @@ export function PropertiesSidebar() {
   return (
     <aside className="flex w-64 flex-col gap-5 overflow-y-auto border-l border-pitch-700 bg-pitch-900 p-4">
       <div>
-        <h3 className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-white/40">
+        <button
+          type="button"
+          onClick={() => setIsFieldPanelOpen((v) => !v)}
+          className="mb-2 flex w-full items-center justify-between text-[11px] font-semibold uppercase tracking-wide text-white/40 hover:text-white/70"
+        >
           Feld
-        </h3>
+          <span className="flex h-5 w-5 shrink-0 items-center justify-center text-base font-bold text-white/70">
+            {isFieldPanelOpen ? '−' : '+'}
+          </span>
+        </button>
+        {isFieldPanelOpen && (
         <div className="flex flex-col gap-2">
           <Field label="Design">
             <select
@@ -170,6 +179,7 @@ export function PropertiesSidebar() {
             Echte Feldmaße — wird genutzt, um Pass-/Laufdistanzen in Metern anzuzeigen.
           </p>
         </div>
+        )}
       </div>
 
       <div>
@@ -779,6 +789,55 @@ function TextFields({
                 onFocus={onCheckpoint}
                 onChange={(e) => onChange({ background: e.target.value })}
               />
+              <label className="flex items-center gap-2 text-xs text-white/70">
+                <input
+                  type="checkbox"
+                  className="accent-violet-accent"
+                  checked={Boolean(data.backgroundGradient)}
+                  onChange={(e) => {
+                    onCheckpoint()
+                    onChange({ backgroundGradient: e.target.checked })
+                  }}
+                />
+                Farbverlauf statt flacher Füllung
+              </label>
+              {data.backgroundGradient && (
+                <>
+                  <select
+                    className={selectClass}
+                    value={data.backgroundGradientDirection ?? 'radial'}
+                    onChange={(e) => {
+                      onCheckpoint()
+                      onChange({ backgroundGradientDirection: e.target.value as 'radial' | 'linear' })
+                    }}
+                  >
+                    <option value="radial">Radial (von der Mitte)</option>
+                    <option value="linear">Linear (links nach rechts)</option>
+                  </select>
+                  <label className="flex items-center gap-2 text-xs text-white/70">
+                    <input
+                      type="checkbox"
+                      className="accent-violet-accent"
+                      checked={Boolean(data.backgroundGradientColor2)}
+                      onChange={(e) => {
+                        onCheckpoint()
+                        onChange({ backgroundGradientColor2: e.target.checked ? data.color : null })
+                      }}
+                    />
+                    Zweifarbiger Verlauf (statt Verblassen ins Transparente)
+                  </label>
+                  {data.backgroundGradientColor2 && (
+                    <ColorSwatchPicker
+                      size="sm"
+                      value={data.backgroundGradientColor2}
+                      onChange={(color) => {
+                        onCheckpoint()
+                        onChange({ backgroundGradientColor2: color })
+                      }}
+                    />
+                  )}
+                </>
+              )}
             </div>
           )}
         </div>
