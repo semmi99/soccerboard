@@ -39,6 +39,35 @@ function gradientProps(
   }
 }
 
+/** A straight sweep from the shape's left edge to its right edge — the
+ * alternative to `gradientProps`'s centered radial look, for shapes that
+ * shouldn't visually "bulge" from the middle (e.g. a directional pitch-zone
+ * shade). Same color-stop rules as the radial version. */
+function gradientLinearProps(
+  color: string,
+  color2: string | null | undefined,
+  leftX: number,
+  rightX: number,
+  y: number,
+) {
+  const [r, g, b] = hexToRgbTriplet(color)
+  const stops = color2
+    ? (() => {
+        const [r2, g2, b2] = hexToRgbTriplet(color2)
+        return [0, `rgba(${r}, ${g}, ${b}, 0.9)`, 1, `rgba(${r2}, ${g2}, ${b2}, 0.85)`]
+      })()
+    : [
+        0, `rgba(${r}, ${g}, ${b}, 0.9)`,
+        0.6, `rgba(${r}, ${g}, ${b}, 0.45)`,
+        1, `rgba(${r}, ${g}, ${b}, 0)`,
+      ]
+  return {
+    fillLinearGradientStartPoint: { x: leftX, y },
+    fillLinearGradientEndPoint: { x: rightX, y },
+    fillLinearGradientColorStops: stops,
+  }
+}
+
 export function ShapeItem({ data }: { data: ShapeData }) {
   const common = {
     stroke: data.noBorder ? undefined : data.stroke,
@@ -48,20 +77,25 @@ export function ShapeItem({ data }: { data: ShapeData }) {
   }
 
   if (data.kind === 'circle') {
+    const radius = Math.max(data.width, data.height) / 2
     const fillProps = data.gradientColor
-      ? gradientProps(data.gradientColor, data.gradientColor2, 0, 0, Math.max(data.width, data.height) / 2)
+      ? data.gradientDirection === 'linear'
+        ? gradientLinearProps(data.gradientColor, data.gradientColor2, -radius, radius, 0)
+        : gradientProps(data.gradientColor, data.gradientColor2, 0, 0, radius)
       : { fill: data.fill }
     return <Ellipse radiusX={data.width / 2} radiusY={data.height / 2} {...common} {...fillProps} />
   }
 
   const fillProps = data.gradientColor
-    ? gradientProps(
-        data.gradientColor,
-        data.gradientColor2,
-        data.width / 2,
-        data.height / 2,
-        Math.max(data.width, data.height) / 2,
-      )
+    ? data.gradientDirection === 'linear'
+      ? gradientLinearProps(data.gradientColor, data.gradientColor2, 0, data.width, data.height / 2)
+      : gradientProps(
+          data.gradientColor,
+          data.gradientColor2,
+          data.width / 2,
+          data.height / 2,
+          Math.max(data.width, data.height) / 2,
+        )
     : { fill: data.fill }
   return (
     <Rect

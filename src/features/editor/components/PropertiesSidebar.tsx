@@ -540,6 +540,17 @@ function ShapeFields({
                   onChange({ gradientColor: color })
                 }}
               />
+              <select
+                className={selectClass}
+                value={data.gradientDirection ?? 'radial'}
+                onChange={(e) => {
+                  onCheckpoint()
+                  onChange({ gradientDirection: e.target.value as 'radial' | 'linear' })
+                }}
+              >
+                <option value="radial">Radial (von der Mitte)</option>
+                <option value="linear">Linear (links nach rechts)</option>
+              </select>
               <label className="flex items-center gap-2 text-xs text-white/70">
                 <input
                   type="checkbox"

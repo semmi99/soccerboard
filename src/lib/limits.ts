@@ -18,8 +18,15 @@ export const PRO_TIER_LIMITS: TierLimits = {
 
 export function limitsForTier(org: {
   subscription_tier: string
+  subscription_valid_until?: string | null
   free_override?: boolean | null
 }): TierLimits {
   if (org.free_override) return PRO_TIER_LIMITS
-  return org.subscription_tier === 'free' ? FREE_TIER_LIMITS : PRO_TIER_LIMITS
+  if (org.subscription_tier === 'free') return FREE_TIER_LIMITS
+  // Re-verified against the actual last payment on every check (see
+  // stripe-webhook's invoice.payment_succeeded handler) rather than trusting
+  // subscription_tier alone — protects against a missed/delayed
+  // cancellation webhook granting unpaid access past the paid-for window.
+  const stillPaid = Boolean(org.subscription_valid_until) && new Date(org.subscription_valid_until!) > new Date()
+  return stillPaid ? PRO_TIER_LIMITS : FREE_TIER_LIMITS
 }

@@ -78,6 +78,10 @@ export interface ShapeData {
    * gradientColor faded to fully transparent (the original single-color
    * look) instead of a genuine two-color blend. */
   gradientColor2?: string | null
+  /** 'radial' (the original centered heatmap look) or 'linear' (a straight
+   * sweep from the shape's left edge to its right edge). Unset/undefined
+   * behaves as 'radial' for shapes saved before this option existed. */
+  gradientDirection?: 'radial' | 'linear'
   /** Hides the border entirely, regardless of `stroke`/`strokeWidth`. */
   noBorder?: boolean
 }

@@ -55,18 +55,39 @@ Deno.serve(async (req: Request) => {
       break
     }
     case "customer.subscription.deleted": {
+      // Deliberately does NOT zero out subscription_tier/subscription_valid_until
+      // here: the customer already paid for their current 30-day window, so
+      // access should keep running until that window actually elapses (checked
+      // against subscription_valid_until on every read, see src/lib/limits.ts),
+      // not end abruptly the moment they cancel.
       const sub = event.data.object as Stripe.Subscription
-      await setOrgByCustomer(sub.customer as string, {
-        subscription_tier: "free",
-        subscription_status: "canceled",
-        stripe_subscription_id: null,
-      })
+      await setOrgByCustomer(sub.customer as string, { subscription_status: "canceled" })
       break
     }
     case "invoice.payment_failed": {
       const invoice = event.data.object as Stripe.Invoice
       if (invoice.customer) {
         await setOrgByCustomer(invoice.customer as string, { subscription_status: "past_due" })
+      }
+      break
+    }
+    case "invoice.payment_succeeded": {
+      // The actual, verified "who paid and when" event — every access grant
+      // is anchored to a real successful payment here, valid for exactly 30
+      // days from that payment, regardless of Stripe's own billing-cycle
+      // dates. This re-confirms tier/customer on every renewal too, so a
+      // stale or manually-edited row can never grant access beyond what was
+      // actually paid for.
+      const invoice = event.data.object as Stripe.Invoice
+      if (invoice.customer) {
+        const paidAtSeconds = invoice.status_transitions?.paid_at ?? event.created
+        const paidAt = new Date(paidAtSeconds * 1000)
+        const validUntil = new Date(paidAt.getTime() + 30 * 24 * 60 * 60 * 1000)
+        await setOrgByCustomer(invoice.customer as string, {
+          subscription_tier: "pro",
+          subscription_status: "active",
+          subscription_valid_until: validUntil.toISOString(),
+        })
       }
       break
     }

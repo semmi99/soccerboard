@@ -160,6 +160,14 @@ export function AccountPage() {
               )}
             </span>
           </div>
+          {organization?.subscription_valid_until && (
+            <div className="mb-4 flex flex-col gap-1 text-sm">
+              <span className="font-medium text-white/60">Bezahlt bis</span>
+              <span className="text-white">
+                {new Date(organization.subscription_valid_until).toLocaleDateString('de-DE')}
+              </span>
+            </div>
+          )}
           {billingError && <p className="mb-3 text-sm text-red-400">{billingError}</p>}
           {organization?.stripe_customer_id ? (
             <Button variant="secondary" loading={billingLoading} onClick={() => void handleManageBilling()}>

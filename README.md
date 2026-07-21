@@ -156,12 +156,22 @@ Sobald ein Stripe-Konto existiert:
 3. **Webhook registrieren:** In Stripe unter *Developers → Webhooks* einen
    Endpoint auf `https://<project-ref>.supabase.co/functions/v1/stripe-webhook`
    anlegen, mit den Events `customer.subscription.created`,
-   `customer.subscription.updated`, `customer.subscription.deleted` und
-   `invoice.payment_failed`. Das dabei angezeigte **Signing secret**
-   (`whsec_...`) als `STRIPE_WEBHOOK_SECRET` in Supabase hinterlegen.
+   `customer.subscription.updated`, `customer.subscription.deleted`,
+   `invoice.payment_failed` und **`invoice.payment_succeeded`**. Das dabei
+   angezeigte **Signing secret** (`whsec_...`) als `STRIPE_WEBHOOK_SECRET` in
+   Supabase hinterlegen.
 4. Fertig — „Pro werden“ auf der Konto-Seite startet jetzt einen echten
    Stripe-Checkout, und der Webhook schaltet `organizations.subscription_tier`
    automatisch auf `pro`/`free` um.
+
+**Zugang gilt immer nur 30 Tage ab der letzten bestätigten Zahlung**, nicht
+dauerhaft: `invoice.payment_succeeded` ist das einzige Event, das
+`subscription_valid_until` auf `Zahlungsdatum + 30 Tage` setzt, und
+`limitsForTier` (`src/lib/limits.ts`) prüft bei jedem Zugriff live gegen dieses
+Datum statt sich dauerhaft auf `subscription_tier` zu verlassen. Kündigt ein
+Kunde, bleibt der Zugang bis zum Ende des bereits bezahlten Zeitraums bestehen
+und läuft dann automatisch ab — auch falls das
+`customer.subscription.deleted`-Event verspätet oder gar nicht ankommt.
 
 ## Vor Produktivbetrieb
 
