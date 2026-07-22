@@ -11,7 +11,7 @@ import type {
   ZoneGridLine,
   ZoneGridStyle,
 } from '../types'
-import { createObjectForTool, type PendingRealPlayer } from '../objects/factory'
+import { createLineObjectForTool, createObjectForTool, type PendingRealPlayer } from '../objects/factory'
 import { PITCH_STAGE_SIZE } from '../constants'
 import type { FormationPosition } from '../../formations/presets'
 
@@ -117,6 +117,7 @@ interface EditorState {
   activeFrame: () => EditorFrame
 
   addObjectAt: (x: number, y: number) => void
+  addLineAt: (fromX: number, fromY: number, toX: number, toY: number) => void
   placeGroupAt: (x: number, y: number) => void
   addConnector: (fromId: string, toId: string) => void
   setLastConnectorColor: (color: string) => void
@@ -307,6 +308,21 @@ export const useEditorStore = create<EditorState>((set, get) => ({
       pendingPlayer: null,
       isDirty: true,
     })
+  },
+
+  addLineAt: (fromX, fromY, toX, toY) => {
+    const { tool, frames, activeFrameIndex } = get()
+    const created = createLineObjectForTool(tool, fromX, fromY, toX, toY)
+    if (!created) return
+
+    pushHistory(get, set)
+    const frame = frames[activeFrameIndex]!
+    const maxZ = frame.objects.reduce((m, o) => Math.max(m, o.zIndex), -1)
+    const newObject: FrameObject = { ...created, zIndex: maxZ + 1 }
+    const nextFrames = frames.map((f, i) =>
+      i === activeFrameIndex ? { ...f, objects: [...f.objects, newObject] } : f,
+    )
+    set({ frames: nextFrames, selection: [newObject.id], isDirty: true })
   },
 
   placeGroupAt: (x, y) => {

@@ -4,6 +4,7 @@ import Konva from 'konva'
 import type { KonvaEventObject } from 'konva/lib/Node'
 import { useEditorStore } from '../store/editorStore'
 import { getCropOriginX, getCroppedStageSize } from '../constants'
+import { isLineTool } from '../objects/factory'
 import { useElementSize } from '../hooks/useElementSize'
 import { Pitch } from './Pitch'
 import { ObjectRenderer } from '../objects/ObjectRenderer'
@@ -328,6 +329,7 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
   const selection = useEditorStore((s) => s.selection)
   const setSelection = useEditorStore((s) => s.setSelection)
   const addObjectAt = useEditorStore((s) => s.addObjectAt)
+  const addLineAt = useEditorStore((s) => s.addLineAt)
   const beginHistoryCheckpoint = useEditorStore((s) => s.beginHistoryCheckpoint)
   const updateObjectLive = useEditorStore((s) => s.updateObjectLive)
   const isPlaying = useEditorStore((s) => s.isPlaying)
@@ -337,6 +339,33 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
 
   const frame = frames[activeFrameIndex] ?? frames[0]!
   const [playbackOverlay, setPlaybackOverlay] = useState<PlaybackOverlay>(EMPTY_OVERLAY)
+
+  // Click-click drawing for the arrow/line tools: the first click drops the
+  // start point (`lineDraftStart`), the pointer is tracked live until the
+  // second click supplies the end point — instead of a single click-drag-
+  // release gesture, which is easy to fumble (a slightly-too-short drag
+  // reads as a click and drops the old fixed-length placeholder instead).
+  const [lineDraftStart, setLineDraftStart] = useState<{ x: number; y: number } | null>(null)
+  const [lineDraftCursor, setLineDraftCursor] = useState<{ x: number; y: number } | null>(null)
+
+  useEffect(() => {
+    if (!isLineTool(tool)) {
+      setLineDraftStart(null)
+      setLineDraftCursor(null)
+    }
+  }, [tool])
+
+  useEffect(() => {
+    if (!lineDraftStart) return
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === 'Escape') {
+        setLineDraftStart(null)
+        setLineDraftCursor(null)
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [lineDraftStart])
 
   // While a frame transition is in flight, objects that only exist in the
   // target frame (entering) or only in the source frame (exiting) are kept
@@ -483,8 +512,17 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
             const node = nodeRefs.current[toObj.id]
             const fromObj = fromFrame.objects.find((o) => o.id === toObj.id)
             if (!node || !fromObj) return null
+            // A bend point only makes sense alongside actual displacement —
+            // once a frame with a bend gets duplicated (keeping the same
+            // position, and with it the same stored motionBend), applying
+            // that bend to a zero-distance move would bow the object out
+            // and back to the same spot for no visible reason instead of
+            // just holding still.
+            const hasMoved = fromObj.x !== toObj.x || fromObj.y !== toObj.y
             const bend =
-              (toObj.objectType === 'player_chip' || toObj.objectType === 'ball') && toObj.data.motionBend
+              hasMoved &&
+              (toObj.objectType === 'player_chip' || toObj.objectType === 'ball') &&
+              toObj.data.motionBend
                 ? toObj.data.motionBend
                 : null
             return {
@@ -643,6 +681,15 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
     handleSelect(id, additive)
   }
 
+  // getRelativePointerPosition() is relative to the (possibly cropped)
+  // stage; shift it back into the full-pitch coordinate space objects are
+  // stored in (see the cropShift comment above).
+  function getCanvasPointerPos(): { x: number; y: number } | null {
+    const pos = stageRef.current?.getRelativePointerPosition()
+    if (!pos) return null
+    return orientation === 'vertical' ? { x: pos.x, y: pos.y + cropShift } : { x: pos.x + cropShift, y: pos.y }
+  }
+
   function handleStageMouseDown(e: KonvaEventObject<MouseEvent | TouchEvent>) {
     if (isPlaying) return
     const clickedOnEmpty = e.target === e.target.getStage()
@@ -657,13 +704,34 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
       setSelection([])
       return
     }
-    const pos = stageRef.current?.getRelativePointerPosition()
+    if (isLineTool(tool)) {
+      const pos = getCanvasPointerPos()
+      if (!pos) return
+      if (!lineDraftStart) {
+        setLineDraftStart(pos)
+        setLineDraftCursor(pos)
+        return
+      }
+      // A near-zero-length second click reads as a misclick rather than an
+      // intentionally tiny arrow — cancel the draft instead of creating an
+      // invisible sliver of a line.
+      const dist = Math.hypot(pos.x - lineDraftStart.x, pos.y - lineDraftStart.y)
+      if (dist >= 8) {
+        addLineAt(lineDraftStart.x, lineDraftStart.y, pos.x, pos.y)
+      }
+      setLineDraftStart(null)
+      setLineDraftCursor(null)
+      return
+    }
+    const pos = getCanvasPointerPos()
     if (!pos) return
-    // getRelativePointerPosition() is relative to the (possibly cropped)
-    // stage; shift it back into the full-pitch coordinate space objects
-    // are stored in (see the cropShift comment above).
-    if (orientation === 'vertical') addObjectAt(pos.x, pos.y + cropShift)
-    else addObjectAt(pos.x + cropShift, pos.y)
+    addObjectAt(pos.x, pos.y)
+  }
+
+  function handleStageMouseMove() {
+    if (!lineDraftStart) return
+    const pos = getCanvasPointerPos()
+    if (pos) setLineDraftCursor(pos)
   }
 
   function handleDragStart() {
@@ -777,6 +845,8 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
         scaleY={scale}
         onMouseDown={handleStageMouseDown}
         onTouchStart={handleStageMouseDown}
+        onMouseMove={handleStageMouseMove}
+        onTouchMove={handleStageMouseMove}
         className="rounded-lg shadow-2xl shadow-black/60"
       >
         <Layer>
@@ -851,6 +921,19 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
               onReset={() => handleMotionBendReset(g.id)}
             />
           ))}
+          {lineDraftStart && lineDraftCursor && (
+            <>
+              <Line
+                points={[lineDraftStart.x, lineDraftStart.y, lineDraftCursor.x, lineDraftCursor.y]}
+                stroke="#ffe100"
+                strokeWidth={2.5}
+                dash={[6, 6]}
+                opacity={0.9}
+                listening={false}
+              />
+              <Circle x={lineDraftStart.x} y={lineDraftStart.y} radius={5} fill="#ffe100" listening={false} />
+            </>
+          )}
           <Transformer
             ref={trRef}
             onTransformStart={handleTransformStart}

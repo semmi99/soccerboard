@@ -180,3 +180,66 @@ export function createObjectForTool(
 
   return null
 }
+
+const LINE_TOOL_IDS: ToolId[] = ['arrow_straight', 'arrow_rigid', 'line_straight']
+
+export function isLineTool(tool: ToolId): boolean {
+  return LINE_TOOL_IDS.includes(tool)
+}
+
+/** Click-click variant for the arrow/line tools: the object's exact start
+ * and end come straight from where the coach actually clicked (start, then
+ * end), instead of always dropping a fixed-length placeholder centered on a
+ * single click that then has to be dragged into shape by hand. */
+export function createLineObjectForTool(
+  tool: ToolId,
+  fromX: number,
+  fromY: number,
+  toX: number,
+  toY: number,
+): FrameObject | null {
+  const midX = (fromX + toX) / 2
+  const midY = (fromY + toY) / 2
+  const base = { id: crypto.randomUUID(), x: midX, y: midY, rotation: 0, scale: 1, zIndex: 0 }
+  const points = [fromX - midX, fromY - midY, toX - midX, toY - midY]
+
+  if (tool === 'arrow_straight') {
+    return {
+      ...base,
+      objectType: 'arrow',
+      data: { shape: 'straight', points, lineStyle: 'solid', color: '#f0d878', strokeWidth: 3 },
+    }
+  }
+
+  if (tool === 'arrow_rigid') {
+    return {
+      ...base,
+      objectType: 'arrow',
+      data: {
+        shape: 'straight',
+        points,
+        lineStyle: 'solid',
+        color: '#f0d878',
+        strokeWidth: 3,
+        bendable: false,
+      },
+    }
+  }
+
+  if (tool === 'line_straight') {
+    return {
+      ...base,
+      objectType: 'arrow',
+      data: {
+        shape: 'straight',
+        points,
+        lineStyle: 'dashed',
+        color: '#38bdf8',
+        strokeWidth: 2.5,
+        showArrowhead: false,
+      },
+    }
+  }
+
+  return null
+}

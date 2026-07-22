@@ -1,4 +1,5 @@
-import { useRef, useState, type RefObject } from 'react'
+import { useEffect, useRef, useState, type RefObject } from 'react'
+import { createPortal } from 'react-dom'
 import type Konva from 'konva'
 import { useEditorStore } from '../store/editorStore'
 import { useAuthStore } from '../../auth/store/authStore'
@@ -23,7 +24,20 @@ export function ExportMenu({ stageRef }: { stageRef: RefObject<Konva.Stage | nul
   const [socialFormat, setSocialFormat] = useState(false)
   const [isRecording, setIsRecording] = useState(false)
   const [videoError, setVideoError] = useState<string | null>(null)
+  const [menuPos, setMenuPos] = useState<{ top: number; right: number } | null>(null)
   const containerRef = useRef<HTMLDivElement>(null)
+
+  // Rendered through a portal (see below) so the dropdown always sits above
+  // the whole app instead of getting clipped by an ancestor's overflow (the
+  // header scrolls horizontally on narrow viewports, which was silently
+  // cutting this menu off instead of showing it on top like every other
+  // dropdown).
+  useEffect(() => {
+    if (!isOpen) return
+    const rect = containerRef.current?.getBoundingClientRect()
+    if (!rect) return
+    setMenuPos({ top: rect.bottom + 8, right: window.innerWidth - rect.right })
+  }, [isOpen])
 
   const projectTitle = useEditorStore((s) => s.projectTitle)
   const selection = useEditorStore((s) => s.selection)
@@ -90,8 +104,11 @@ export function ExportMenu({ stageRef }: { stageRef: RefObject<Konva.Stage | nul
         Exportieren
       </Button>
 
-      {isOpen && (
-        <div className="absolute right-0 top-full z-20 mt-2 w-64 rounded-lg border border-pitch-700 bg-pitch-900 p-4 shadow-2xl">
+      {isOpen && menuPos && createPortal(
+        <div
+          className="fixed z-50 w-64 rounded-lg border border-pitch-700 bg-pitch-900 p-4 shadow-2xl"
+          style={{ top: menuPos.top, right: menuPos.right }}
+        >
           <div className="flex flex-col gap-3">
             <label className="flex flex-col gap-1 text-xs">
               <span className="font-medium text-white/60">Format</span>
@@ -176,7 +193,8 @@ export function ExportMenu({ stageRef }: { stageRef: RefObject<Konva.Stage | nul
               </>
             )}
           </div>
-        </div>
+        </div>,
+        document.body,
       )}
     </div>
   )
