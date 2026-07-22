@@ -414,7 +414,6 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
   const lengthAxis: 'x' | 'y' = orientation === 'vertical' ? 'y' : 'x'
   const fullStageSize = PITCH_STAGE_SIZE[orientation]
   const lengthSize = lengthAxis === 'y' ? fullStageSize.height : fullStageSize.width
-  const widthSize = lengthAxis === 'y' ? fullStageSize.width : fullStageSize.height
 
   const spaceBehindZones = sortedObjects
     .filter(
@@ -424,26 +423,35 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
     .map((o) => {
       const pts = o.data.points
       const n = pts.length / 2
-      const avgLocal =
-        (lengthAxis === 'y'
-          ? pts.filter((_, i) => i % 2 === 1)
-          : pts.filter((_, i) => i % 2 === 0)
-        ).reduce((a, b) => a + b, 0) / n
+      const lengthVals = lengthAxis === 'y' ? pts.filter((_, i) => i % 2 === 1) : pts.filter((_, i) => i % 2 === 0)
+      const crossVals = lengthAxis === 'y' ? pts.filter((_, i) => i % 2 === 0) : pts.filter((_, i) => i % 2 === 1)
+      const avgLocal = lengthVals.reduce((a, b) => a + b, 0) / n
       const anchor = lengthAxis === 'y' ? o.y : o.x
+      const crossAnchor = lengthAxis === 'y' ? o.x : o.y
       const absPos = anchor + avgLocal * o.scale
       const edge = absPos < lengthSize / 2 ? 0 : lengthSize
       const depth = Math.abs(edge - absPos)
       const meters = depth * (pitchLengthM / lengthSize)
       const near = Math.min(absPos, edge)
+      // The shaded zone only spans the line's own width (its local point
+      // extent), not the full pitch — it marks the depth behind this
+      // specific line, not a full-width defensive line unless the line
+      // itself is drawn that wide.
+      const crossMin = crossAnchor + Math.min(...crossVals) * o.scale
+      const crossMax = crossAnchor + Math.max(...crossVals) * o.scale
+      const crossSpan = Math.max(crossMax - crossMin, 1)
       return {
         id: o.id,
         color: o.data.color,
         meters,
         rect:
           lengthAxis === 'y'
-            ? { x: 0, y: near, width: widthSize, height: depth }
-            : { x: near, y: 0, width: depth, height: widthSize },
-        labelPos: lengthAxis === 'y' ? { x: widthSize / 2, y: (absPos + edge) / 2 } : { x: (absPos + edge) / 2, y: widthSize / 2 },
+            ? { x: crossMin, y: near, width: crossSpan, height: depth }
+            : { x: near, y: crossMin, width: depth, height: crossSpan },
+        labelPos:
+          lengthAxis === 'y'
+            ? { x: (crossMin + crossMax) / 2, y: (absPos + edge) / 2 }
+            : { x: (absPos + edge) / 2, y: (crossMin + crossMax) / 2 },
       }
     })
 
