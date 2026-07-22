@@ -129,18 +129,7 @@ function runTransition(
     const durationMs = durationSec * 1000
     const start = performance.now()
 
-    function settle() {
-      if (settled) return
-      settled = true
-      clearTimeout(fallbackId)
-      anim.stop()
-      resolve()
-    }
-
-    const anim = new Konva.Animation(() => {
-      const raw = Math.min(1, (performance.now() - start) / durationMs)
-      const eased = ease(raw)
-
+    function applyProgress(eased: number) {
       for (const m of moves) {
         const p = pointOnMotionPath(eased, m.fromX, m.fromY, m.toX, m.toY, m.bendX, m.bendY)
         m.node.x(p.x)
@@ -187,17 +176,9 @@ function runTransition(
         // as broken rather than animated, so it dips out and back in instead.
         if (a.label) a.label.opacity(eased < 0.5 ? 1 - eased * 2 : (eased - 0.5) * 2)
       }
+    }
 
-      if (raw >= 1) settle()
-    }, layer)
-
-    anim.start()
-
-    // Safety net: if the tab is backgrounded (rAF throttled/paused) and the
-    // animation frame callback stalls, force-finish instead of leaving
-    // playback stuck on this frame forever.
-    const fallbackId = setTimeout(() => {
-      if (settled) return
+    function applyFinal() {
       for (const m of moves) {
         m.node.setAttrs({ x: m.toX, y: m.toY, rotation: m.toRotation, scaleX: m.toScale, scaleY: m.toScale })
       }
@@ -228,8 +209,37 @@ function runTransition(
         a.arrowLine.points(a.toPoints)
         if (a.label) a.label.opacity(1)
       }
-      settle()
-    }, durationMs + 500)
+    }
+
+    function settle() {
+      if (settled) return
+      settled = true
+      clearTimeout(timerId)
+      anim.stop()
+      applyFinal()
+      resolve()
+    }
+
+    const anim = new Konva.Animation(() => {
+      const raw = Math.min(1, (performance.now() - start) / durationMs)
+      applyProgress(ease(raw))
+      if (raw >= 1) settle()
+    }, layer)
+
+    anim.start()
+
+    // The definitive "this transition is over" signal is a plain timer, not
+    // a requestAnimationFrame tick — rAF can stall for a long stretch (a
+    // backgrounded tab, a throttled compositor, a busy main thread), and
+    // waiting on it to eventually notice `raw >= 1` used to leave playback
+    // hanging well past the configured duration (previously papered over by
+    // a fallback timer set 500ms *after* that same unreliable point). A
+    // setTimeout for exactly `durationMs` keeps the frame-to-frame timing
+    // accurate regardless of rAF health; the animation above still renders
+    // the smoothest interpolation it can manage in the meantime, and
+    // applyFinal() snaps everything to its exact resting value the instant
+    // the timer fires.
+    const timerId = setTimeout(settle, durationMs)
   })
 }
 
