@@ -1,4 +1,4 @@
-import { Arrow, Group, Rect, Text } from 'react-konva'
+import { Arrow, Group, Line, Rect, Text } from 'react-konva'
 import type { ArrowData } from '../../types'
 import { dashForLineStyle } from './dash'
 import { computeCurvedPoints } from './arrowCurve'
@@ -47,6 +47,19 @@ export function ArrowShape({ data, scale = 1 }: { data: ArrowData; scale?: numbe
         shadowBlur={data.glow ? data.strokeWidth * 3 : 0}
         shadowOpacity={data.glow ? 0.8 : 0}
       />
+      {data.blocked && (() => {
+        const n = points.length
+        const ex = points[n - 2]!
+        const ey = points[n - 1]!
+        const s = 9 / safeScale
+        const w = 3 / safeScale
+        return (
+          <Group x={ex} y={ey}>
+            <Line points={[-s, -s, s, s]} stroke={data.color} strokeWidth={w} lineCap="round" />
+            <Line points={[-s, s, s, -s]} stroke={data.color} strokeWidth={w} lineCap="round" />
+          </Group>
+        )
+      })()}
       {distanceLabel && mid && (
         <Group name="distance-label" x={mid.x} y={mid.y} listening={false}>
           <Rect

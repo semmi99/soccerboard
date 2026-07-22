@@ -3,6 +3,7 @@ import type {
   EditorFrame,
   EquipmentKind,
   FieldCrop,
+  FrameCaption,
   FrameObject,
   PitchDesign,
   PitchOrientation,
@@ -140,6 +141,7 @@ interface EditorState {
   reorderFrames: (fromIndex: number, toIndex: number) => void
   setActiveFrameIndex: (index: number) => void
   setFrameDuration: (index: number, durationMs: number) => void
+  setFrameCaption: (index: number, patch: Partial<FrameCaption>) => void
   setIsPlaying: (playing: boolean) => void
 
   undo: () => void
@@ -605,6 +607,10 @@ export const useEditorStore = create<EditorState>((set, get) => ({
       // moving them in the new frame produces a smooth tween during playback
       // instead of an instant swap (matching is done by id, see EditorCanvas).
       objects: source.objects.map(cloneObject),
+      // The story caption is this frame's own beat in the narrative — a
+      // duplicate is a new moment, so it starts without one instead of
+      // silently repeating the source frame's headline.
+      caption: null,
     }
     const nextFrames = [...frames]
     nextFrames.splice(index + 1, 0, copy)
@@ -654,6 +660,14 @@ export const useEditorStore = create<EditorState>((set, get) => ({
   setFrameDuration: (index, durationMs) => {
     const { frames } = get()
     const nextFrames = frames.map((f, i) => (i === index ? { ...f, durationMs } : f))
+    set({ frames: nextFrames, isDirty: true })
+  },
+
+  setFrameCaption: (index, patch) => {
+    const { frames } = get()
+    const nextFrames = frames.map((f, i) =>
+      i === index ? { ...f, caption: { ...f.caption, ...patch } } : f,
+    )
     set({ frames: nextFrames, isDirty: true })
   },
 

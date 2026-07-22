@@ -86,6 +86,16 @@ export function ConnectorIcon(props: SVGProps<SVGSVGElement>) {
   )
 }
 
+export function BlockedPassIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <Base {...props}>
+      <path d="M4 15L15 8" strokeDasharray="3 3" />
+      <path d="M13 5l5 5" />
+      <path d="M13 10l5 -5" />
+    </Base>
+  )
+}
+
 export function PlainLineIcon(props: SVGProps<SVGSVGElement>) {
   return (
     <Base {...props}>

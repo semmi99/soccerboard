@@ -84,6 +84,23 @@ export function createObjectForTool(
     }
   }
 
+  if (tool === 'arrow_blocked') {
+    return {
+      ...base,
+      objectType: 'arrow',
+      data: {
+        shape: 'straight',
+        points: [-60, 0, 60, 0],
+        lineStyle: 'dashed',
+        color: '#ef4444',
+        strokeWidth: 3,
+        showArrowhead: false,
+        blocked: true,
+        bendable: false,
+      },
+    }
+  }
+
   if (tool === 'line_straight') {
     return {
       ...base,

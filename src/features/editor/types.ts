@@ -28,6 +28,12 @@ export interface PlayerChipData {
    * dragged via the editor's motion-guide handle. `undefined`/`null` means
    * a straight line (the original behavior). */
   motionBend?: [number, number] | null
+  /** Marks this chip as the offside-line reference (the last outfield
+   * defender) — every opposing-team chip then gets an automatic "Onside/
+   * Abseits by X.Xm" label relative to this player's position. At most one
+   * chip should carry this per frame; if several do, the first one found
+   * wins. */
+  offsideReference?: boolean
 }
 
 export type KitPattern = 'solid' | 'stripes' | 'hoops' | 'sash' | 'split' | 'collar'
@@ -68,6 +74,14 @@ export interface ArrowData {
    * as a whole, never reshaped. Unset/undefined behaves as bendable (the
    * original behavior), matching every arrow saved before this existed. */
   bendable?: boolean
+  /** Marks this as a "blocked option" — a passing lane that was considered
+   * but cut off — rendering a small X at its end instead of relying on the
+   * arrowhead alone. */
+  blocked?: boolean
+  /** Treats this line as an opponent's defensive line: shades the pitch
+   * area between it and the nearer goal line and labels that gap's real-
+   * world depth in meters, recomputed live from the line's own position. */
+  spaceBehind?: boolean
 }
 
 export interface ShapeData {
@@ -175,10 +189,22 @@ export type FrameObject =
   | (FrameObjectBase & { objectType: 'ball'; data: BallData })
   | (FrameObjectBase & { objectType: 'connector'; data: ConnectorData })
 
+/** A short "broadcast graphic" style story beat shown over this frame — an
+ * eyebrow label, a bold headline, and an optional supporting line, matching
+ * the callout-card look of tactical-analysis explainer reels. Any of the
+ * three left empty/undefined just renders nothing for that line; when all
+ * three are empty the whole overlay is skipped. */
+export interface FrameCaption {
+  badge?: string
+  title?: string
+  subtitle?: string
+}
+
 export interface EditorFrame {
   id: string
   durationMs: number
   objects: FrameObject[]
+  caption?: FrameCaption | null
 }
 
 export type PitchDesign =
@@ -212,6 +238,7 @@ export type ToolId =
   | 'player_away_gk'
   | 'arrow_straight'
   | 'arrow_rigid'
+  | 'arrow_blocked'
   | 'line_straight'
   | 'shape_circle'
   | 'shape_rect'

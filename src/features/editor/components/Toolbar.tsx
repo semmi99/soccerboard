@@ -3,6 +3,7 @@ import { useEditorStore } from '../store/editorStore'
 import type { EquipmentKind, ToolId } from '../types'
 import {
   BallIcon,
+  BlockedPassIcon,
   ConeIcon,
   ConnectorIcon,
   CircleShapeIcon,
@@ -70,6 +71,7 @@ const SECTIONS: ToolDef[][] = [
   [
     { id: 'arrow_straight', label: 'Pfeil (Ziehpunkte zum Biegen)', icon: <CurvedArrowIcon /> },
     { id: 'arrow_rigid', label: 'Gerader Pfeil (nicht biegbar)', icon: <StraightArrowIcon /> },
+    { id: 'arrow_blocked', label: 'Blockierte Option (X am Ende)', icon: <BlockedPassIcon /> },
     { id: 'line_straight', label: 'Linie (Zone einzeichnen)', icon: <PlainLineIcon /> },
     { id: 'connector', label: 'Spieler verbinden', icon: <ConnectorIcon /> },
   ],

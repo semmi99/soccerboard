@@ -64,6 +64,7 @@ export function PropertiesSidebar() {
   const setPitchLengthM = useEditorStore((s) => s.setPitchLengthM)
   const setPitchWidthM = useEditorStore((s) => s.setPitchWidthM)
   const setLastConnectorColor = useEditorStore((s) => s.setLastConnectorColor)
+  const setFrameCaption = useEditorStore((s) => s.setFrameCaption)
   const selection = useEditorStore((s) => s.selection)
   const activeFrameIndex = useEditorStore((s) => s.activeFrameIndex)
   const frames = useEditorStore((s) => s.frames)
@@ -82,6 +83,7 @@ export function PropertiesSidebar() {
 
   const [isTeamPanelOpen, setIsTeamPanelOpen] = useState(true)
   const [isFieldPanelOpen, setIsFieldPanelOpen] = useState(true)
+  const [isCaptionPanelOpen, setIsCaptionPanelOpen] = useState(true)
 
   function updateData<T extends FrameObject>(patch: Partial<T['data']>) {
     if (!selectedObject) return
@@ -181,6 +183,52 @@ export function PropertiesSidebar() {
         </div>
         )}
       </div>
+
+      {frame && (
+        <div>
+          <button
+            type="button"
+            onClick={() => setIsCaptionPanelOpen((v) => !v)}
+            className="mb-2 flex w-full items-center justify-between text-[11px] font-semibold uppercase tracking-wide text-white/40 hover:text-white/70"
+          >
+            Frame-Beschriftung
+            <span className="flex h-5 w-5 shrink-0 items-center justify-center text-base font-bold text-white/70">
+              {isCaptionPanelOpen ? '−' : '+'}
+            </span>
+          </button>
+          {isCaptionPanelOpen && (
+            <div className="flex flex-col gap-2">
+              <Field label="Label (z.B. THE PROBLEM)">
+                <input
+                  type="text"
+                  className={inputClass}
+                  value={frame.caption?.badge ?? ''}
+                  onChange={(e) => setFrameCaption(activeFrameIndex, { badge: e.target.value })}
+                />
+              </Field>
+              <Field label="Titel">
+                <input
+                  type="text"
+                  className={inputClass}
+                  value={frame.caption?.title ?? ''}
+                  onChange={(e) => setFrameCaption(activeFrameIndex, { title: e.target.value })}
+                />
+              </Field>
+              <Field label="Untertitel">
+                <input
+                  type="text"
+                  className={inputClass}
+                  value={frame.caption?.subtitle ?? ''}
+                  onChange={(e) => setFrameCaption(activeFrameIndex, { subtitle: e.target.value })}
+                />
+              </Field>
+              <p className="text-[11px] text-white/40">
+                Erscheint als Story-Karte über diesem Frame — leer lassen für keine Beschriftung.
+              </p>
+            </div>
+          )}
+        </div>
+      )}
 
       <div>
         <button
@@ -395,6 +443,18 @@ function PlayerChipFields({
         />
         Hervorheben (blinkt in diesem Frame)
       </label>
+      <label className="flex items-center gap-2 text-xs text-white/70">
+        <input
+          type="checkbox"
+          className="accent-violet-accent"
+          checked={data.offsideReference ?? false}
+          onChange={(e) => {
+            onCheckpoint()
+            onChange({ offsideReference: e.target.checked })
+          }}
+        />
+        Als Abseits-Referenz markieren (letzter Verteidiger)
+      </label>
     </div>
   )
 }
@@ -506,6 +566,32 @@ function ArrowFields({
         />
         Leuchteffekt (weicher Farbkanal entlang der Linie)
       </label>
+      <label className="flex items-center gap-2 text-xs text-white/70">
+        <input
+          type="checkbox"
+          className="accent-violet-accent"
+          checked={data.blocked ?? false}
+          onChange={(e) => {
+            onCheckpoint()
+            onChange({ blocked: e.target.checked })
+          }}
+        />
+        Blockierte Option (X am Ende)
+      </label>
+      {data.shape !== 'curved' && (
+        <label className="flex items-center gap-2 text-xs text-white/70">
+          <input
+            type="checkbox"
+            className="accent-violet-accent"
+            checked={data.spaceBehind ?? false}
+            onChange={(e) => {
+              onCheckpoint()
+              onChange({ spaceBehind: e.target.checked })
+            }}
+          />
+          Als Abwehrlinie markieren (Raum dahinter anzeigen)
+        </label>
+      )}
       {data.shape !== 'curved' && data.bendable !== false && (
         <Button
           variant="secondary"

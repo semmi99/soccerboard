@@ -1,16 +1,24 @@
 import { useCallback, useEffect, useRef, useState, type RefObject } from 'react'
-import { Circle, Group, Layer, Line, Stage, Transformer } from 'react-konva'
+import { Circle, Group, Layer, Line, Rect, Stage, Text, Transformer } from 'react-konva'
 import Konva from 'konva'
 import type { KonvaEventObject } from 'konva/lib/Node'
 import { useEditorStore } from '../store/editorStore'
-import { getCropOriginX, getCroppedStageSize } from '../constants'
+import { PITCH_STAGE_SIZE, getCropOriginX, getCroppedStageSize } from '../constants'
 import { useElementSize } from '../hooks/useElementSize'
 import { Pitch } from './Pitch'
 import { ObjectRenderer } from '../objects/ObjectRenderer'
 import { ConnectorShape } from '../objects/shapes/Connector'
 import { ConnectorZoneShape } from '../objects/shapes/PlayerZone'
 import { findConnectorZones } from '../objects/shapes/connectorZones'
+import { FrameCaptionOverlay } from '../objects/shapes/FrameCaptionOverlay'
 import type { FrameObject } from '../types'
+
+function hexToRgba(hex: string, alpha: number): string {
+  const r = parseInt(hex.slice(1, 3), 16)
+  const g = parseInt(hex.slice(3, 5), 16)
+  const b = parseInt(hex.slice(5, 7), 16)
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`
+}
 
 // Cubic ease-in-out: a touch smoother/slower off the start and into the end
 // than a quadratic curve, closer to what motion-design tools use by default.
@@ -322,6 +330,7 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
   const zoneGridCustomLines = useEditorStore((s) => s.zoneGridCustomLines)
   const showPitchMarkings = useEditorStore((s) => s.showPitchMarkings)
   const fieldCrop = useEditorStore((s) => s.fieldCrop)
+  const pitchLengthM = useEditorStore((s) => s.pitchLengthM)
   const frames = useEditorStore((s) => s.frames)
   const activeFrameIndex = useEditorStore((s) => s.activeFrameIndex)
   const tool = useEditorStore((s) => s.tool)
@@ -394,6 +403,85 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
       }
     })
     .filter((z): z is { key: string; points: number[]; color: string | undefined } => Boolean(z))
+
+  // A defensive line ("Abwehrlinie") arrow shades the gap between itself and
+  // whichever full-pitch edge is nearer along the length (goal-to-goal)
+  // axis — vertical orientation runs that axis top-to-bottom, horizontal
+  // left-to-right, matching how the pitch itself is laid out (see Pitch.tsx
+  // and PITCH_STAGE_SIZE). Recomputed from the line's live position every
+  // render, so dragging it updates the shaded depth immediately.
+  const lengthAxis: 'x' | 'y' = orientation === 'vertical' ? 'y' : 'x'
+  const fullStageSize = PITCH_STAGE_SIZE[orientation]
+  const lengthSize = lengthAxis === 'y' ? fullStageSize.height : fullStageSize.width
+  const widthSize = lengthAxis === 'y' ? fullStageSize.width : fullStageSize.height
+
+  const spaceBehindZones = sortedObjects
+    .filter(
+      (o): o is Extract<FrameObject, { objectType: 'arrow' }> =>
+        o.objectType === 'arrow' && Boolean(o.data.spaceBehind),
+    )
+    .map((o) => {
+      const pts = o.data.points
+      const n = pts.length / 2
+      const avgLocal =
+        (lengthAxis === 'y'
+          ? pts.filter((_, i) => i % 2 === 1)
+          : pts.filter((_, i) => i % 2 === 0)
+        ).reduce((a, b) => a + b, 0) / n
+      const anchor = lengthAxis === 'y' ? o.y : o.x
+      const absPos = anchor + avgLocal * o.scale
+      const edge = absPos < lengthSize / 2 ? 0 : lengthSize
+      const depth = Math.abs(edge - absPos)
+      const meters = depth * (pitchLengthM / lengthSize)
+      const near = Math.min(absPos, edge)
+      return {
+        id: o.id,
+        color: o.data.color,
+        meters,
+        rect:
+          lengthAxis === 'y'
+            ? { x: 0, y: near, width: widthSize, height: depth }
+            : { x: near, y: 0, width: depth, height: widthSize },
+        labelPos: lengthAxis === 'y' ? { x: widthSize / 2, y: (absPos + edge) / 2 } : { x: (absPos + edge) / 2, y: widthSize / 2 },
+      }
+    })
+
+  // Offside check: the first player_chip marked as the offside reference
+  // (the last outfield defender) sets the line; every opposing-team chip
+  // then gets a live "Onside/Abseits by X.Xm" label. The attacking
+  // direction isn't tracked explicitly anywhere in the data model, so it's
+  // inferred from which side of the reference the opposing team is
+  // predominantly sitting on — defenders naturally cluster near their own
+  // goal, attackers push toward the other end.
+  const offsideRef = visibleObjects.find(
+    (o): o is Extract<FrameObject, { objectType: 'player_chip' }> =>
+      o.objectType === 'player_chip' && Boolean(o.data.offsideReference),
+  )
+  const offsideLabels = (() => {
+    if (!offsideRef) return []
+    const attackers = visibleObjects.filter(
+      (o): o is Extract<FrameObject, { objectType: 'player_chip' }> =>
+        o.objectType === 'player_chip' && o.data.team !== offsideRef.data.team,
+    )
+    if (attackers.length === 0) return []
+    const refPos = lengthAxis === 'y' ? offsideRef.y : offsideRef.x
+    const avgAttackerPos =
+      attackers.reduce((s, a) => s + (lengthAxis === 'y' ? a.y : a.x), 0) / attackers.length
+    const dirSign = avgAttackerPos >= refPos ? 1 : -1
+    return attackers.map((a) => {
+      const pos = lengthAxis === 'y' ? a.y : a.x
+      const deltaPx = (pos - refPos) * dirSign
+      const deltaM = Math.abs(deltaPx) * (pitchLengthM / lengthSize)
+      const offside = deltaPx > 0
+      return {
+        id: a.id,
+        x: a.x,
+        y: a.y,
+        offside,
+        text: `${offside ? 'Abseits' : 'Onside'} ${deltaM.toFixed(1)}m`,
+      }
+    })
+  })()
 
   const trRef = useRef<Konva.Transformer>(null)
   const objectsLayerRef = useRef<Konva.Layer>(null)
@@ -811,6 +899,24 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
               lineRef={(node) => registerZoneRef(z.key, node)}
             />
           ))}
+          {spaceBehindZones.map((z) => (
+            <Group key={`spacebehind-${z.id}`} listening={false}>
+              <Rect {...z.rect} fill={hexToRgba(z.color, 0.16)} />
+              <Text
+                x={z.labelPos.x - 50}
+                y={z.labelPos.y - 12}
+                width={100}
+                align="center"
+                text={`${Math.round(z.meters)}m`}
+                fontStyle="bold"
+                fontSize={24}
+                fill={z.color}
+                shadowColor="black"
+                shadowBlur={6}
+                shadowOpacity={0.6}
+              />
+            </Group>
+          ))}
           {sortedObjects.map((object) => {
             if (object.objectType === 'connector') {
               const from = visibleObjects.find((o) => o.id === object.data.fromId)
@@ -847,6 +953,31 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
               />
             )
           })}
+          {offsideLabels.map((l) => (
+            <Group key={`offside-${l.id}`} x={l.x} y={l.y - 46} listening={false}>
+              <Rect
+                x={-42}
+                y={-11}
+                width={84}
+                height={22}
+                fill={l.offside ? '#ef4444' : '#22c55e'}
+                cornerRadius={4}
+                opacity={0.92}
+              />
+              <Text
+                text={l.text}
+                x={-42}
+                y={-11}
+                width={84}
+                height={22}
+                align="center"
+                verticalAlign="middle"
+                fontSize={10}
+                fontStyle="bold"
+                fill="#ffffff"
+              />
+            </Group>
+          ))}
           {motionGuides.map((g) => (
             <MotionGuide
               key={`motion-${g.id}`}
@@ -871,6 +1002,9 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
             }
           />
         </Group>
+        </Layer>
+        <Layer listening={false}>
+          <FrameCaptionOverlay caption={frame.caption} />
         </Layer>
       </Stage>
     </div>

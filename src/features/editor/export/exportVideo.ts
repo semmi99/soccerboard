@@ -1,4 +1,4 @@
-import type Konva from 'konva'
+import Konva from 'konva'
 import { useEditorStore } from '../store/editorStore'
 import {
   SOCIAL_HEIGHT,
@@ -8,6 +8,7 @@ import {
   loadImageElement,
   paintSocialBackground,
 } from './socialFrame'
+import { computeSequenceStats } from './sequenceStats'
 
 export interface VideoRecordingResult {
   blob: Blob
@@ -21,6 +22,85 @@ export interface RecordVideoOptions {
    * watermark instead of recording the stage at its native size. */
   social?: boolean
   logoUrl?: string | null
+  /** Appends a few seconds of a generated recap card (pass count, frame
+   * count, total distance covered) after the sequence finishes playing. */
+  recap?: boolean
+}
+
+const RECAP_DURATION_MS = 3200
+
+/** Builds the recap card as a plain Konva layer added directly to the
+ * stage — the export records whatever the stage's own layers composite
+ * each tick (see `compositeOnce` below), so this needs no separate
+ * rendering path to show up in the recording. */
+function buildRecapLayer(stage: Konva.Stage): Konva.Layer {
+  const { frames, pitchLengthM, pitchWidthM, projectTitle } = useEditorStore.getState()
+  const stats = computeSequenceStats(frames, pitchLengthM, pitchWidthM)
+
+  const w = stage.width()
+  const h = stage.height()
+  const cardW = Math.min(w * 0.82, 380)
+  const cardX = (w - cardW) / 2
+  const rowH = 46
+  const rows: { label: string; value: string }[] = [
+    { label: 'FRAMES', value: String(stats.frameCount) },
+    { label: 'PÄSSE / LÄUFE EINGEZEICHNET', value: String(stats.passCount) },
+    { label: 'GESAMTDISTANZ', value: `${Math.round(stats.totalDistanceM)} m` },
+  ]
+  const cardH = 56 + rows.length * rowH + 20
+  const cardY = (h - cardH) / 2
+
+  const layer = new Konva.Layer()
+  layer.add(
+    new Konva.Rect({ x: 0, y: 0, width: w, height: h, fill: 'rgba(8, 14, 24, 0.72)' }),
+    new Konva.Rect({
+      x: cardX,
+      y: cardY,
+      width: cardW,
+      height: cardH,
+      fill: '#ffffff',
+      cornerRadius: 14,
+      shadowColor: 'black',
+      shadowBlur: 24,
+      shadowOpacity: 0.4,
+    }),
+    new Konva.Text({
+      x: cardX + 22,
+      y: cardY + 18,
+      width: cardW - 44,
+      text: 'ZUSAMMENFASSUNG',
+      fontSize: 12,
+      fontStyle: 'bold',
+      fill: '#94a3b8',
+      letterSpacing: 1,
+    }),
+    new Konva.Text({
+      x: cardX + 22,
+      y: cardY + 34,
+      width: cardW - 44,
+      text: projectTitle || 'Spielzug',
+      fontSize: 18,
+      fontStyle: 'bold',
+      fill: '#0f172a',
+    }),
+  )
+  rows.forEach((row, i) => {
+    const y = cardY + 66 + i * rowH
+    layer.add(
+      new Konva.Text({ x: cardX + 22, y: y + 10, width: cardW * 0.6, text: row.label, fontSize: 11, fill: '#64748b' }),
+      new Konva.Text({
+        x: cardX + cardW - 22 - 140,
+        y: y,
+        width: 140,
+        align: 'right',
+        text: row.value,
+        fontSize: 26,
+        fontStyle: 'bold',
+        fill: '#0f172a',
+      }),
+    )
+  })
+  return layer
 }
 
 const CANDIDATE_MIME_TYPES = [
@@ -51,7 +131,7 @@ export async function recordFramesAsVideo(
   stage: Konva.Stage,
   options: RecordVideoOptions = {},
 ): Promise<VideoRecordingResult> {
-  const { fps = 30, social = false, logoUrl = null } = options
+  const { fps = 30, social = false, logoUrl = null, recap = false } = options
   const { frames } = useEditorStore.getState()
   if (frames.length < 2) {
     throw new Error('Mindestens 2 Frames für ein Video nötig.')
@@ -147,7 +227,19 @@ export async function recordFramesAsVideo(
         // One extra frame's worth of delay so the final composited frame
         // (last object positions after the transition settles) is flushed
         // into the recording before we stop it.
-        setTimeout(() => recorder.stop(), 150)
+        setTimeout(() => {
+          if (!recap) {
+            recorder.stop()
+            return
+          }
+          const recapLayer = buildRecapLayer(stage)
+          stage.add(recapLayer)
+          recapLayer.draw()
+          setTimeout(() => {
+            recapLayer.destroy()
+            recorder.stop()
+          }, RECAP_DURATION_MS)
+        }, 150)
       }
     })
   })

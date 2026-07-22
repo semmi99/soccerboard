@@ -22,6 +22,7 @@ export function ExportMenu({ stageRef }: { stageRef: RefObject<Konva.Stage | nul
   const [format, setFormat] = useState<ExportKind>('png')
   const [pixelRatio, setPixelRatio] = useState(2)
   const [socialFormat, setSocialFormat] = useState(false)
+  const [appendRecap, setAppendRecap] = useState(false)
   const [isRecording, setIsRecording] = useState(false)
   const [videoError, setVideoError] = useState<string | null>(null)
   const [menuPos, setMenuPos] = useState<{ top: number; right: number } | null>(null)
@@ -88,6 +89,7 @@ export function ExportMenu({ stageRef }: { stageRef: RefObject<Konva.Stage | nul
       const result = await recordFramesAsVideo(stage, {
         social: socialFormat,
         logoUrl: organization?.logo_url,
+        recap: appendRecap,
       })
       downloadVideo(result, fileName)
       setIsOpen(false)
@@ -142,6 +144,15 @@ export function ExportMenu({ stageRef }: { stageRef: RefObject<Konva.Stage | nul
                   Spielt alle Frames einmal ab und nimmt die Wiedergabe als Video auf. Mindestens 2 Frames
                   nötig. Je nach Browser wird MP4 oder WebM erzeugt.
                 </p>
+                <label className="flex items-center gap-2 text-xs text-white/70">
+                  <input
+                    type="checkbox"
+                    className="accent-violet-accent"
+                    checked={appendRecap}
+                    onChange={(e) => setAppendRecap(e.target.checked)}
+                  />
+                  Zusammenfassungs-Karte am Ende anhängen
+                </label>
                 {frames.length < 2 && (
                   <p className="text-[11px] text-amber-400">Mindestens 2 Frames für ein Video nötig.</p>
                 )}
