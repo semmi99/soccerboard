@@ -184,6 +184,20 @@ export function PropertiesSidebar() {
         )}
       </div>
 
+      <div>
+        <button
+          type="button"
+          onClick={() => setIsTeamPanelOpen((v) => !v)}
+          className="mb-2 flex w-full items-center justify-between text-[11px] font-semibold uppercase tracking-wide text-white/40 hover:text-white/70"
+        >
+          Team &amp; Kader
+          <span className="flex h-5 w-5 shrink-0 items-center justify-center text-base font-bold text-white/70">
+            {isTeamPanelOpen ? '−' : '+'}
+          </span>
+        </button>
+        {isTeamPanelOpen && <TeamSquadPanel />}
+      </div>
+
       {frame && (
         <div>
           <button
@@ -206,6 +220,15 @@ export function PropertiesSidebar() {
                   onChange={(e) => setFrameCaption(activeFrameIndex, { badge: e.target.value })}
                 />
               </Field>
+              {frame.caption?.badge && (
+                <Field label="Label-Farbe">
+                  <ColorSwatchPicker
+                    size="sm"
+                    value={frame.caption?.badgeColor ?? '#ef4444'}
+                    onChange={(c) => setFrameCaption(activeFrameIndex, { badgeColor: c })}
+                  />
+                </Field>
+              )}
               <Field label="Titel">
                 <input
                   type="text"
@@ -223,26 +246,13 @@ export function PropertiesSidebar() {
                 />
               </Field>
               <p className="text-[11px] text-white/40">
-                Erscheint als Story-Karte über diesem Frame — leer lassen für keine Beschriftung.
+                Erscheint als Story-Karte über diesem Frame — leer lassen für keine Beschriftung. Das
+                Label lässt sich direkt auf dem Feld verschieben.
               </p>
             </div>
           )}
         </div>
       )}
-
-      <div>
-        <button
-          type="button"
-          onClick={() => setIsTeamPanelOpen((v) => !v)}
-          className="mb-2 flex w-full items-center justify-between text-[11px] font-semibold uppercase tracking-wide text-white/40 hover:text-white/70"
-        >
-          Team &amp; Kader
-          <span className="flex h-5 w-5 shrink-0 items-center justify-center text-base font-bold text-white/70">
-            {isTeamPanelOpen ? '−' : '+'}
-          </span>
-        </button>
-        {isTeamPanelOpen && <TeamSquadPanel />}
-      </div>
 
       {selection.length > 1 && (
         <div>

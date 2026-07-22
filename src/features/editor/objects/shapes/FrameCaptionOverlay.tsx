@@ -1,8 +1,11 @@
 import { Group, Rect, Text } from 'react-konva'
+import type { KonvaEventObject } from 'konva/lib/Node'
 import type { FrameCaption } from '../../types'
 
 const CARD_X = 24
-const CARD_Y = 28
+const CARD_Y = 58
+const BADGE_DEFAULT_X = 24
+const BADGE_DEFAULT_Y = 28
 const CARD_WIDTH = 300
 const PAD_X = 16
 
@@ -10,23 +13,43 @@ const PAD_X = 16
  * eyebrow badge, a bold headline, and an optional supporting line — styled
  * after the callout cards tactical-analysis explainer reels use to narrate
  * a sequence beat by beat. Rendered in plain stage coordinates (not inside
- * the pitch's crop/orientation transform) so it always sits top-left
- * regardless of pitch design or crop. */
-export function FrameCaptionOverlay({ caption }: { caption: FrameCaption | null | undefined }) {
+ * the pitch's crop/orientation transform) so it always sits top-left by
+ * default regardless of pitch design or crop. The badge alone is
+ * draggable — coaches point it at a specific spot on the pitch the same
+ * way those reels drop a small pill label right next to the action,
+ * instead of it always being stuck to the title card above. */
+export function FrameCaptionOverlay({
+  caption,
+  interactive = true,
+  onBadgeDragEnd,
+}: {
+  caption: FrameCaption | null | undefined
+  interactive?: boolean
+  onBadgeDragEnd?: (x: number, y: number) => void
+}) {
   if (!caption || (!caption.badge && !caption.title && !caption.subtitle)) return null
 
-  const badgeHeight = caption.badge ? 22 : 0
-  const badgeGap = caption.badge ? 8 : 0
+  const badgeHeight = 22
   const titleHeight = caption.title ? 30 : 0
   const subtitleHeight = caption.subtitle ? 20 : 0
   const cardPadY = 14
   const cardHeight = cardPadY * 2 + titleHeight + subtitleHeight
 
   return (
-    <Group x={CARD_X} y={CARD_Y} listening={false}>
+    <>
       {caption.badge && (
-        <Group y={0}>
-          <Rect width={caption.badge.length * 7.5 + 20} height={badgeHeight} fill="#ef4444" cornerRadius={4} />
+        <Group
+          x={caption.badgeX ?? BADGE_DEFAULT_X}
+          y={caption.badgeY ?? BADGE_DEFAULT_Y}
+          draggable={interactive}
+          onDragEnd={(e: KonvaEventObject<DragEvent>) => onBadgeDragEnd?.(e.target.x(), e.target.y())}
+        >
+          <Rect
+            width={caption.badge.length * 7.5 + 20}
+            height={badgeHeight}
+            fill={caption.badgeColor ?? '#ef4444'}
+            cornerRadius={4}
+          />
           <Text
             text={caption.badge.toUpperCase()}
             x={10}
@@ -35,11 +58,12 @@ export function FrameCaptionOverlay({ caption }: { caption: FrameCaption | null 
             fontStyle="bold"
             fill="#ffffff"
             letterSpacing={0.5}
+            listening={false}
           />
         </Group>
       )}
       {(caption.title || caption.subtitle) && (
-        <Group y={badgeHeight + badgeGap}>
+        <Group x={CARD_X} y={CARD_Y} listening={false}>
           <Rect
             width={CARD_WIDTH}
             height={cardHeight}
@@ -74,6 +98,6 @@ export function FrameCaptionOverlay({ caption }: { caption: FrameCaption | null 
           )}
         </Group>
       )}
-    </Group>
+    </>
   )
 }

@@ -198,6 +198,14 @@ export interface FrameCaption {
   badge?: string
   title?: string
   subtitle?: string
+  /** Badge pill color — defaults to a fixed red when unset. */
+  badgeColor?: string
+  /** The badge's own draggable offset from its default position (stage
+   * coordinates), so it can be pointed at a specific spot on the pitch
+   * instead of always sitting fixed above the title card. Unset means the
+   * default position right above the card. */
+  badgeX?: number
+  badgeY?: number
 }
 
 export interface EditorFrame {

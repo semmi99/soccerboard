@@ -94,7 +94,9 @@ export async function loadProject(id: string): Promise<LoadedProject> {
 
   const { data: frameRows, error: framesError } = await supabase
     .from('frames')
-    .select('id, duration_ms, order_index, caption_badge, caption_title, caption_subtitle')
+    .select(
+      'id, duration_ms, order_index, caption_badge, caption_title, caption_subtitle, caption_badge_color, caption_x, caption_y',
+    )
     .eq('project_id', id)
     .order('order_index', { ascending: true })
   if (framesError) throw framesError
@@ -116,6 +118,9 @@ export async function loadProject(id: string): Promise<LoadedProject> {
             badge: f.caption_badge ?? undefined,
             title: f.caption_title ?? undefined,
             subtitle: f.caption_subtitle ?? undefined,
+            badgeColor: f.caption_badge_color ?? undefined,
+            badgeX: f.caption_x ?? undefined,
+            badgeY: f.caption_y ?? undefined,
           }
         : null,
   }))
@@ -229,6 +234,9 @@ async function insertFramesAndObjects(projectId: string, frames: EditorFrame[]) 
     caption_badge: f.caption?.badge ?? null,
     caption_title: f.caption?.title ?? null,
     caption_subtitle: f.caption?.subtitle ?? null,
+    caption_badge_color: f.caption?.badgeColor ?? null,
+    caption_x: f.caption?.badgeX ?? null,
+    caption_y: f.caption?.badgeY ?? null,
   }))
   const { error: framesError } = await supabase.from('frames').insert(frameInserts)
   if (framesError) throw framesError
