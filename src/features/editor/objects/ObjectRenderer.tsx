@@ -9,6 +9,7 @@ import { ShapeItem } from './shapes/ShapeItem'
 import { TextItem } from './shapes/TextItem'
 import { EquipmentShape } from './shapes/Equipment'
 import { BallShape } from './shapes/Ball'
+import { straightenInteriorPoints } from './shapes/arrowPoints'
 
 function renderContent(object: FrameObject) {
   switch (object.objectType) {
@@ -202,10 +203,12 @@ export function ObjectRenderer({
 
   function handleArrowPointDragMove(pairIndex: number, x: number, y: number) {
     if (object.objectType !== 'arrow' || !onArrowPointsChange) return
-    const points = [...object.data.points]
-    points[pairIndex * 2] = x
-    points[pairIndex * 2 + 1] = y
-    onArrowPointsChange(object.id, points)
+    const points = object.data.points
+    const isEndpoint = pairIndex === 0 || pairIndex === points.length / 2 - 1
+    const nextPoints = isEndpoint
+      ? straightenInteriorPoints(points, pairIndex, x, y)
+      : points.map((v, i) => (i === pairIndex * 2 ? x : i === pairIndex * 2 + 1 ? y : v))
+    onArrowPointsChange(object.id, nextPoints)
   }
 
   // Konva arms a drag on every draggable node under the pointer at mousedown,
