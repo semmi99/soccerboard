@@ -34,6 +34,12 @@ export interface PlayerChipData {
    * chip should carry this per frame; if several do, the first one found
    * wins. */
   offsideReference?: boolean
+  /** Overrides the number/custom-text color inside the chip circle.
+   * Unset falls back to white — the original look. */
+  numberColor?: string
+  /** Overrides the label text color below the chip. Unset falls back to
+   * white — the original look. */
+  labelColor?: string
 }
 
 export type KitPattern = 'solid' | 'stripes' | 'hoops' | 'sash' | 'split' | 'collar'

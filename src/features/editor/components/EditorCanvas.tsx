@@ -449,22 +449,22 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
       const edge = avgPos < lengthSize / 2 ? 0 : lengthSize
       const depth = Math.abs(edge - avgPos)
       const meters = depth * (pitchLengthM / lengthSize)
-      const near = Math.min(avgPos, edge)
-      // The shaded zone only spans the line's own width (its own point
-      // extent), not the full pitch — it marks the depth behind this
-      // specific line, not a full-width defensive line unless the line
-      // itself is drawn that wide.
+      // The shaded zone hugs the line's own (possibly bent) path on one
+      // side and the goal-line edge on the other — a flat rectangle at the
+      // average depth used to let a bend that swings toward/away from goal
+      // poke out past a straight-edged box instead of staying covered.
+      const farSide = absPoints
+        .slice()
+        .reverse()
+        .map((p) => (lengthAxis === 'y' ? { x: p.x, y: edge } : { x: edge, y: p.y }))
+      const polygonPoints = [...absPoints, ...farSide].flatMap((p) => [p.x, p.y])
       const crossMin = Math.min(...crossVals)
       const crossMax = Math.max(...crossVals)
-      const crossSpan = Math.max(crossMax - crossMin, 1)
       return {
         id: o.id,
         color: o.data.color,
         meters,
-        rect:
-          lengthAxis === 'y'
-            ? { x: crossMin, y: near, width: crossSpan, height: depth }
-            : { x: near, y: crossMin, width: depth, height: crossSpan },
+        points: polygonPoints,
         labelPos:
           lengthAxis === 'y'
             ? { x: (crossMin + crossMax) / 2, y: (avgPos + edge) / 2 }
@@ -977,7 +977,7 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
           ))}
           {spaceBehindZones.map((z) => (
             <Group key={`spacebehind-${z.id}`} listening={false}>
-              <Rect {...z.rect} fill={hexToRgba(z.color, 0.16)} />
+              <Line points={z.points} closed fill={hexToRgba(z.color, 0.16)} />
               <Text
                 x={z.labelPos.x - 50}
                 y={z.labelPos.y - 12}

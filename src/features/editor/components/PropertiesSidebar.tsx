@@ -548,6 +548,16 @@ function PlayerChipFields({
           )}
         </div>
       </Field>
+      <Field label="Farbe der Nummer/des Texts im Chip">
+        <ColorSwatchPicker
+          size="sm"
+          value={data.numberColor ?? '#ffffff'}
+          onChange={(c) => {
+            onCheckpoint()
+            onChange({ numberColor: c })
+          }}
+        />
+      </Field>
       <Field label="Label (optional)">
         <input
           type="text"
@@ -557,6 +567,18 @@ function PlayerChipFields({
           onChange={(e) => onChange({ label: e.target.value })}
         />
       </Field>
+      {data.label && (
+        <Field label="Farbe des Labels">
+          <ColorSwatchPicker
+            size="sm"
+            value={data.labelColor ?? '#ffffff'}
+            onChange={(c) => {
+              onCheckpoint()
+              onChange({ labelColor: c })
+            }}
+          />
+        </Field>
+      )}
       <label className="flex items-center gap-2 text-xs text-white/70">
         <input
           type="checkbox"

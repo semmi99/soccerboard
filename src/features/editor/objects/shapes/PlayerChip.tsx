@@ -197,7 +197,7 @@ export function PlayerChipShape({ data }: { data: PlayerChipData }) {
         text={data.displayText !== undefined ? data.displayText : String(data.number)}
         fontSize={15}
         fontStyle="bold"
-        fill="#ffffff"
+        fill={data.numberColor ?? '#ffffff'}
         width={36}
         height={36}
         offsetX={18}
@@ -214,7 +214,7 @@ export function PlayerChipShape({ data }: { data: PlayerChipData }) {
           text={data.label}
           fontSize={16}
           fontStyle="bold"
-          fill="#ffffff"
+          fill={data.labelColor ?? '#ffffff'}
           width={110}
           offsetX={55}
           y={22}
