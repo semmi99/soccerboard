@@ -368,7 +368,17 @@ export const useEditorStore = create<EditorState>((set, get) => ({
     pushHistory(get, set)
     const stage = PITCH_STAGE_SIZE[orientation]
     const maxDim = 220
-    const ratio = Math.min(maxDim / naturalWidth, maxDim / naturalHeight, 1)
+    // A small source image (an icon or logo well under maxDim) would
+    // otherwise insert at its tiny native pixel size — smaller than the
+    // Transformer's own resize handles, so a plain drag lands on a handle
+    // instead of the image and triggers a runaway resize that flings it far
+    // off the pitch instead of just moving it. Upscaling so the larger side
+    // is at least minDim keeps it comfortably bigger than the handles.
+    const minDim = 90
+    let ratio = Math.min(maxDim / naturalWidth, maxDim / naturalHeight, 1)
+    if (Math.max(naturalWidth, naturalHeight) * ratio < minDim) {
+      ratio = minDim / Math.max(naturalWidth, naturalHeight)
+    }
     const width = naturalWidth * ratio
     const height = naturalHeight * ratio
     const frame = frames[activeFrameIndex]!

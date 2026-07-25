@@ -78,7 +78,6 @@ export function PropertiesSidebar() {
   const applyEquipmentStyleToAll = useEditorStore((s) => s.applyEquipmentStyleToAll)
   const removeSelected = useEditorStore((s) => s.removeSelected)
   const duplicateSelected = useEditorStore((s) => s.duplicateSelected)
-  const addRatioBadgeFromSelection = useEditorStore((s) => s.addRatioBadgeFromSelection)
   const bringToFront = useEditorStore((s) => s.bringToFront)
   const sendToBack = useEditorStore((s) => s.sendToBack)
 
@@ -463,12 +462,6 @@ export function PropertiesSidebar() {
               Löschen
             </Button>
           </div>
-          {(frame?.objects.filter((o) => o.objectType === 'player_chip' && selection.includes(o.id)).length ?? 0) >=
-            2 && (
-            <Button variant="secondary" className="mt-1.5 w-full" onClick={addRatioBadgeFromSelection}>
-              Verhältnis-Badge erstellen (z.B. 3 v 4)
-            </Button>
-          )}
         </div>
       )}
 
