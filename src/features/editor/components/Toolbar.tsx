@@ -1,5 +1,7 @@
-import type { ReactNode } from 'react'
+import { useState, type ReactNode } from 'react'
 import { useEditorStore } from '../store/editorStore'
+import { useAuthStore } from '../../auth/store/authStore'
+import { uploadBoardImage, readImageDimensions } from '../../../lib/supabase/images'
 import type { EquipmentKind, ToolId } from '../types'
 import {
   BallIcon,
@@ -9,6 +11,8 @@ import {
   CircleShapeIcon,
   CurvedArrowIcon,
   CursorIcon,
+  DribbleLineIcon,
+  ImageInsertIcon,
   LadderIcon,
   MannequinIcon,
   MiniGoalIcon,
@@ -72,6 +76,7 @@ const SECTIONS: ToolDef[][] = [
     { id: 'arrow_straight', label: 'Pfeil (Ziehpunkte zum Biegen)', icon: <CurvedArrowIcon /> },
     { id: 'arrow_rigid', label: 'Gerader Pfeil (nicht biegbar)', icon: <StraightArrowIcon /> },
     { id: 'arrow_blocked', label: 'Blockierte Option (X am Ende)', icon: <BlockedPassIcon /> },
+    { id: 'arrow_dribble', label: 'Dribbellinie (Ziehpunkte zum Biegen)', icon: <DribbleLineIcon /> },
     { id: 'line_straight', label: 'Linie (Zone einzeichnen)', icon: <PlainLineIcon /> },
     { id: 'connector', label: 'Spieler verbinden', icon: <ConnectorIcon /> },
   ],
@@ -95,6 +100,23 @@ const SECTIONS: ToolDef[][] = [
 export function Toolbar() {
   const tool = useEditorStore((s) => s.tool)
   const setTool = useEditorStore((s) => s.setTool)
+  const addImageObject = useEditorStore((s) => s.addImageObject)
+  const organization = useAuthStore((s) => s.organization)
+  const [isUploadingImage, setIsUploadingImage] = useState(false)
+
+  async function handleImageFile(file: File) {
+    if (!organization) return
+    setIsUploadingImage(true)
+    try {
+      const [{ width, height }, url] = await Promise.all([
+        readImageDimensions(file),
+        uploadBoardImage(organization.id, file),
+      ])
+      addImageObject(url, width, height)
+    } finally {
+      setIsUploadingImage(false)
+    }
+  }
 
   return (
     <aside className="flex w-28 flex-col items-center gap-2 overflow-y-auto border-r border-black/40 bg-[#0a1628] px-2 py-3">
@@ -137,6 +159,27 @@ export function Toolbar() {
           </div>
         </div>
       ))}
+      <div className="my-1 h-px w-full bg-gold-accent/20" />
+      <label
+        title="Bild einfügen"
+        aria-label="Bild einfügen"
+        className={`flex h-11 w-11 cursor-pointer items-center justify-center rounded-lg border border-gold-accent/10 bg-[#0d1e35] text-gold-accent/70 transition-colors hover:border-gold-accent/40 hover:text-gold-accent-bright ${
+          isUploadingImage ? 'pointer-events-none opacity-50' : ''
+        }`}
+      >
+        <ImageInsertIcon />
+        <input
+          type="file"
+          accept="image/*"
+          className="hidden"
+          disabled={isUploadingImage}
+          onChange={(e) => {
+            const file = e.target.files?.[0]
+            if (file) void handleImageFile(file)
+            e.target.value = ''
+          }}
+        />
+      </label>
     </aside>
   )
 }

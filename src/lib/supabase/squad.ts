@@ -163,6 +163,22 @@ export async function removeTeamCrest(teamId: string): Promise<void> {
   if (error) throw error
 }
 
+/** For a project with no linked team — the crest lives only in that
+ * project's own kit_override (see saveProject), so unlike uploadTeamCrest
+ * there's no `teams` row to update, just a public URL to hand back. */
+export async function uploadCustomCrest(orgId: string, file: File): Promise<string> {
+  const ext = file.name.split('.').pop() || 'png'
+  const path = `${orgId}/custom-${crypto.randomUUID()}.${ext}`
+
+  const { error: uploadError } = await supabase.storage
+    .from('team-crests')
+    .upload(path, file, { upsert: true, cacheControl: '3600' })
+  if (uploadError) throw uploadError
+
+  const { data } = supabase.storage.from('team-crests').getPublicUrl(path)
+  return data.publicUrl
+}
+
 export async function uploadPlayerPhoto(orgId: string, playerId: string, file: File): Promise<string> {
   const ext = file.name.split('.').pop() || 'png'
   const path = `${orgId}/${playerId}.${ext}`

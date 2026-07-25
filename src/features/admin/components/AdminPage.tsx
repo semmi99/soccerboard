@@ -7,6 +7,7 @@ import {
   inviteMember,
   listOrgMembers,
   listPendingInvites,
+  removeMember,
   updateMemberRole,
   type OrgInvite,
   type OrgMember,
@@ -37,6 +38,7 @@ export function AdminPage() {
   const [inviteEmail, setInviteEmail] = useState('')
   const [inviteRole, setInviteRole] = useState<OrgRole>('coach')
   const [isInviting, setIsInviting] = useState(false)
+  const [removingId, setRemovingId] = useState<string | null>(null)
 
   useEffect(() => {
     if (!organization) return
@@ -86,6 +88,25 @@ export function AdminPage() {
       setError(err instanceof Error ? err.message : 'Einladung fehlgeschlagen.')
     } finally {
       setIsInviting(false)
+    }
+  }
+
+  async function handleRemoveMember(member: OrgMember) {
+    if (
+      !window.confirm(
+        `„${member.full_name || member.email || 'Dieses Mitglied'}" endgültig entfernen? Das Konto wird komplett gelöscht.`,
+      )
+    )
+      return
+    setRemovingId(member.id)
+    setError(null)
+    try {
+      await removeMember(member.id)
+      setMembers((ms) => ms.filter((m) => m.id !== member.id))
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Konnte nicht entfernt werden.')
+    } finally {
+      setRemovingId(null)
     }
   }
 
@@ -214,19 +235,31 @@ export function AdminPage() {
                       <p className="truncate text-xs text-white/40">{m.email}</p>
                     )}
                   </div>
-                  <select
-                    className={selectClass}
-                    value={m.role}
-                    disabled={m.id === profile.id}
-                    title={m.id === profile.id ? 'Du kannst deine eigene Rolle nicht ändern' : undefined}
-                    onChange={(e) => void handleRoleChange(m.id, e.target.value as OrgRole)}
-                  >
-                    {(Object.keys(ROLE_LABELS) as OrgRole[]).map((r) => (
-                      <option key={r} value={r}>
-                        {ROLE_LABELS[r]}
-                      </option>
-                    ))}
-                  </select>
+                  <div className="flex shrink-0 items-center gap-2">
+                    <select
+                      className={selectClass}
+                      value={m.role}
+                      disabled={m.id === profile.id}
+                      title={m.id === profile.id ? 'Du kannst deine eigene Rolle nicht ändern' : undefined}
+                      onChange={(e) => void handleRoleChange(m.id, e.target.value as OrgRole)}
+                    >
+                      {(Object.keys(ROLE_LABELS) as OrgRole[]).map((r) => (
+                        <option key={r} value={r}>
+                          {ROLE_LABELS[r]}
+                        </option>
+                      ))}
+                    </select>
+                    {m.id !== profile.id && (
+                      <Button
+                        variant="danger"
+                        loading={removingId === m.id}
+                        onClick={() => void handleRemoveMember(m)}
+                        title="Mitglied endgültig entfernen"
+                      >
+                        Entfernen
+                      </Button>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>

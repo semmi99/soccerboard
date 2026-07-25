@@ -2,6 +2,7 @@ import { Arrow, Group, Line, Rect, Text } from 'react-konva'
 import type { ArrowData } from '../../types'
 import { dashForLineStyle } from './dash'
 import { computeCurvedPoints } from './arrowCurve'
+import { computeDribblePoints } from './dribble'
 import { computePathDistanceMeters, midpointOf } from './arrowDistance'
 import { useEditorStore } from '../../store/editorStore'
 
@@ -19,7 +20,8 @@ export function ArrowShape({ data, scale = 1 }: { data: ArrowData; scale?: numbe
   const showArrowhead = data.showArrowhead ?? true
   const safeScale = Math.max(scale, 0.2)
   const pointerSize = showArrowhead ? BASE_POINTER_SIZE / safeScale : 0
-  const points = data.shape === 'curved' ? computeCurvedPoints(data) : data.points
+  const spinePoints = data.shape === 'curved' ? computeCurvedPoints(data) : data.points
+  const points = data.dribble ? computeDribblePoints(spinePoints, 6 / safeScale, 22 / safeScale) : spinePoints
 
   const distanceLabel = data.showDistance
     ? `${Math.round(computePathDistanceMeters(points, pitchLengthM, pitchWidthM, scale))} m`
@@ -40,6 +42,8 @@ export function ArrowShape({ data, scale = 1 }: { data: ArrowData; scale?: numbe
         tension={data.shape === 'curved' ? 0.5 : 0.4}
         pointerLength={pointerSize}
         pointerWidth={pointerSize}
+        pointerAtBeginning={showArrowhead && Boolean(data.arrowheadStart)}
+        pointerAtEnding={showArrowhead}
         lineCap="round"
         lineJoin="round"
         hitStrokeWidth={16}

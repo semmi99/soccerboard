@@ -668,6 +668,20 @@ function ArrowFields({
         />
         Pfeilspitze anzeigen
       </label>
+      {(data.showArrowhead ?? true) && (
+        <label className="flex items-center gap-2 pl-5 text-xs text-white/70">
+          <input
+            type="checkbox"
+            className="accent-violet-accent"
+            checked={data.arrowheadStart ?? false}
+            onChange={(e) => {
+              onCheckpoint()
+              onChange({ arrowheadStart: e.target.checked })
+            }}
+          />
+          Auch am Start (beide Enden)
+        </label>
+      )}
       <label className="flex items-center gap-2 text-xs text-white/70">
         <input
           type="checkbox"
@@ -703,6 +717,18 @@ function ArrowFields({
           }}
         />
         Blockierte Option (X am Ende)
+      </label>
+      <label className="flex items-center gap-2 text-xs text-white/70">
+        <input
+          type="checkbox"
+          className="accent-violet-accent"
+          checked={data.dribble ?? false}
+          onChange={(e) => {
+            onCheckpoint()
+            onChange({ dribble: e.target.checked })
+          }}
+        />
+        Dribbellinie (gewellt)
       </label>
       {data.shape !== 'curved' && (
         <label className="flex items-center gap-2 text-xs text-white/70">

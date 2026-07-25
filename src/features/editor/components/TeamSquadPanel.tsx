@@ -7,6 +7,7 @@ import {
   updateTeamKit,
   uploadTeamCrest,
   removeTeamCrest,
+  uploadCustomCrest,
   type Player,
   type Team,
 } from '../../../lib/supabase/squad'
@@ -147,20 +148,28 @@ export function TeamSquadPanel() {
   }
 
   async function handleCrestFile(file: File) {
-    if (!organization || !activeTeam) return
+    if (!organization) return
     setIsUploadingCrest(true)
     try {
-      const crestUrl = await uploadTeamCrest(organization.id, activeTeam.id, file)
-      setTeams((ts) => ts.map((t) => (t.id === activeTeam.id ? { ...t, crest_url: crestUrl } : t)))
+      if (activeTeam) {
+        const crestUrl = await uploadTeamCrest(organization.id, activeTeam.id, file)
+        setTeams((ts) => ts.map((t) => (t.id === activeTeam.id ? { ...t, crest_url: crestUrl } : t)))
+      } else {
+        const crestUrl = await uploadCustomCrest(organization.id, file)
+        setCustomKit({ ...(customKit ?? DEFAULT_CUSTOM_KIT), crestUrl })
+      }
     } finally {
       setIsUploadingCrest(false)
     }
   }
 
   async function handleRemoveCrest() {
-    if (!activeTeam) return
-    await removeTeamCrest(activeTeam.id)
-    setTeams((ts) => ts.map((t) => (t.id === activeTeam.id ? { ...t, crest_url: null } : t)))
+    if (activeTeam) {
+      await removeTeamCrest(activeTeam.id)
+      setTeams((ts) => ts.map((t) => (t.id === activeTeam.id ? { ...t, crest_url: null } : t)))
+    } else if (customKit) {
+      setCustomKit({ ...customKit, crestUrl: null })
+    }
   }
 
   function handleApplyFormation() {
@@ -204,43 +213,50 @@ export function TeamSquadPanel() {
         {activeTeam ? 'Kit-Design bearbeiten' : 'Farben anpassen'}
       </Button>
 
-      {activeTeam && (
-        <div className="flex items-center gap-2 rounded-md border border-pitch-700 p-2">
-          {activeTeam.crest_url ? (
-            <img
-              src={activeTeam.crest_url}
-              alt="Wappen"
-              className="h-8 w-8 shrink-0 rounded-full bg-pitch-800 object-contain"
-            />
-          ) : (
-            <div className="h-8 w-8 shrink-0 rounded-full bg-pitch-800" />
-          )}
-          <label className="flex-1 cursor-pointer text-center text-xs text-white/70 hover:text-white">
-            {isUploadingCrest ? 'Lädt hoch…' : 'Wappen hochladen'}
-            <input
-              type="file"
-              accept="image/*"
-              className="hidden"
-              disabled={isUploadingCrest}
-              onChange={(e) => {
-                const file = e.target.files?.[0]
-                if (file) void handleCrestFile(file)
-                e.target.value = ''
-              }}
-            />
-          </label>
-          {activeTeam.crest_url && (
-            <Button variant="danger" onClick={() => void handleRemoveCrest()}>
-              ×
-            </Button>
-          )}
-        </div>
-      )}
-      {activeTeam?.crest_url && (
-        <p className="-mt-2 text-xs text-white/40">
-          Wappen ersetzt die Trikotfarben auf allen Spieler-Chips dieses Teams.
-        </p>
-      )}
+      {(() => {
+        const crestUrl = activeTeam ? activeTeam.crest_url : (customKit?.crestUrl ?? null)
+        return (
+          <>
+            <div className="flex items-center gap-2 rounded-md border border-pitch-700 p-2">
+              {crestUrl ? (
+                <img
+                  src={crestUrl}
+                  alt="Wappen"
+                  className="h-8 w-8 shrink-0 rounded-full bg-pitch-800 object-contain"
+                />
+              ) : (
+                <div className="h-8 w-8 shrink-0 rounded-full bg-pitch-800" />
+              )}
+              <label className="flex-1 cursor-pointer text-center text-xs text-white/70 hover:text-white">
+                {isUploadingCrest ? 'Lädt hoch…' : 'Wappen hochladen'}
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  disabled={isUploadingCrest}
+                  onChange={(e) => {
+                    const file = e.target.files?.[0]
+                    if (file) void handleCrestFile(file)
+                    e.target.value = ''
+                  }}
+                />
+              </label>
+              {crestUrl && (
+                <Button variant="danger" onClick={() => void handleRemoveCrest()}>
+                  ×
+                </Button>
+              )}
+            </div>
+            {crestUrl && (
+              <p className="-mt-2 text-xs text-white/40">
+                {activeTeam
+                  ? 'Wappen ersetzt die Trikotfarben auf allen Spieler-Chips dieses Teams.'
+                  : 'Wappen ersetzt die Trikotfarben auf allen Spieler-Chips (nur in diesem Projekt).'}
+              </p>
+            )}
+          </>
+        )
+      })()}
 
       {showKitDesigner && (
         <KitDesignerModal

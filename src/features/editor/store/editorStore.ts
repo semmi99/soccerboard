@@ -145,6 +145,7 @@ interface EditorState {
   activeFrame: () => EditorFrame
 
   addObjectAt: (x: number, y: number) => void
+  addImageObject: (url: string, naturalWidth: number, naturalHeight: number) => void
   placeGroupAt: (x: number, y: number) => void
   addConnector: (fromId: string, toId: string) => void
   setLastConnectorColor: (color: string) => void
@@ -343,6 +344,37 @@ export const useEditorStore = create<EditorState>((set, get) => ({
       pendingPlayer: null,
       isDirty: true,
     })
+  },
+
+  // Images are placed immediately after upload (there's no click-to-place
+  // step like other tools, since the file has to exist first) — dropped at
+  // the pitch center, capped to a reasonable max size so a huge photo
+  // doesn't blow past the pitch, then selected so the user can drag/resize
+  // it right away.
+  addImageObject: (url, naturalWidth, naturalHeight) => {
+    const { frames, activeFrameIndex, orientation } = get()
+    pushHistory(get, set)
+    const stage = PITCH_STAGE_SIZE[orientation]
+    const maxDim = 220
+    const ratio = Math.min(maxDim / naturalWidth, maxDim / naturalHeight, 1)
+    const width = naturalWidth * ratio
+    const height = naturalHeight * ratio
+    const frame = frames[activeFrameIndex]!
+    const maxZ = frame.objects.reduce((m, o) => Math.max(m, o.zIndex), -1)
+    const newObject: FrameObject = {
+      id: crypto.randomUUID(),
+      x: stage.width / 2,
+      y: stage.height / 2,
+      rotation: 0,
+      scale: 1,
+      zIndex: maxZ + 1,
+      objectType: 'image',
+      data: { url, width, height },
+    }
+    const nextFrames = frames.map((f, i) =>
+      i === activeFrameIndex ? { ...f, objects: [...f.objects, newObject] } : f,
+    )
+    set({ frames: nextFrames, selection: [newObject.id], tool: 'select', isDirty: true })
   },
 
   placeGroupAt: (x, y) => {

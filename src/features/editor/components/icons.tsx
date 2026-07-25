@@ -104,6 +104,25 @@ export function PlainLineIcon(props: SVGProps<SVGSVGElement>) {
   )
 }
 
+export function DribbleLineIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <Base {...props}>
+      <path d="M3 18c2 0 2-4 4-4s2 4 4 4 2-4 4-4 2 4 4 4" />
+      <path d="M17 16l3 2-1-3" />
+    </Base>
+  )
+}
+
+export function ImageInsertIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <Base {...props}>
+      <rect x="3" y="4" width="18" height="16" rx="2" />
+      <circle cx="9" cy="10" r="1.75" />
+      <path d="M3 17l5-5 4 4 4-5 5 6" />
+    </Base>
+  )
+}
+
 export function ConeIcon(props: SVGProps<SVGSVGElement>) {
   return (
     <Base {...props}>

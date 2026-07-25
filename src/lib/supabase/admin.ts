@@ -58,3 +58,14 @@ export async function cancelInvite(inviteId: string): Promise<void> {
   const { error } = await supabase.from('org_invites').delete().eq('id', inviteId)
   if (error) throw error
 }
+
+/** Fully removes a member's account (not just their org membership) via the
+ * org-remove-member Edge Function — deleting the auth user cascades to
+ * their profile row, so there's nothing left to clean up client-side. */
+export async function removeMember(userId: string): Promise<void> {
+  const { data, error } = await supabase.functions.invoke<{ error?: string }>('org-remove-member', {
+    body: { userId },
+  })
+  if (error) throw error
+  if (data?.error) throw new Error(data.error)
+}

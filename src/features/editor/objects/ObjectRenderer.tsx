@@ -9,6 +9,7 @@ import { ShapeItem } from './shapes/ShapeItem'
 import { TextItem } from './shapes/TextItem'
 import { EquipmentShape } from './shapes/Equipment'
 import { BallShape } from './shapes/Ball'
+import { ImageShape } from './shapes/ImageShape'
 import { straightenInteriorPoints } from './shapes/arrowPoints'
 
 function renderContent(object: FrameObject) {
@@ -25,6 +26,8 @@ function renderContent(object: FrameObject) {
       return <EquipmentShape data={object.data} />
     case 'ball':
       return <BallShape data={object.data} />
+    case 'image':
+      return <ImageShape data={object.data} />
   }
 }
 

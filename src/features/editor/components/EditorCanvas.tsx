@@ -348,6 +348,10 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
 
   const frame = frames[activeFrameIndex] ?? frames[0]!
   const [playbackOverlay, setPlaybackOverlay] = useState<PlaybackOverlay>(EMPTY_OVERLAY)
+  const [marqueeStart, setMarqueeStart] = useState<{ x: number; y: number } | null>(null)
+  const [marqueeRect, setMarqueeRect] = useState<{ x: number; y: number; width: number; height: number } | null>(
+    null,
+  )
 
   // While a frame transition is in flight, objects that only exist in the
   // target frame (entering) or only in the source frame (exiting) are kept
@@ -424,22 +428,34 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
     .map((o) => {
       const pts = o.data.points
       const n = pts.length / 2
-      const lengthVals = lengthAxis === 'y' ? pts.filter((_, i) => i % 2 === 1) : pts.filter((_, i) => i % 2 === 0)
-      const crossVals = lengthAxis === 'y' ? pts.filter((_, i) => i % 2 === 0) : pts.filter((_, i) => i % 2 === 1)
-      const avgLocal = lengthVals.reduce((a, b) => a + b, 0) / n
-      const anchor = lengthAxis === 'y' ? o.y : o.x
-      const crossAnchor = lengthAxis === 'y' ? o.x : o.y
-      const absPos = anchor + avgLocal * o.scale
-      const edge = absPos < lengthSize / 2 ? 0 : lengthSize
-      const depth = Math.abs(edge - absPos)
+      // The Group these points render in applies x/y/rotation/scale (in that
+      // order, no offset) — so a rotated line's true on-screen points must go
+      // through the same rotation before they're usable, otherwise the
+      // shaded zone lands wherever the UNROTATED points would have been.
+      const rad = (o.rotation * Math.PI) / 180
+      const cos = Math.cos(rad)
+      const sin = Math.sin(rad)
+      const absPoints = Array.from({ length: n }, (_, i) => {
+        const lx = (pts[i * 2] ?? 0) * o.scale
+        const ly = (pts[i * 2 + 1] ?? 0) * o.scale
+        return {
+          x: o.x + lx * cos - ly * sin,
+          y: o.y + lx * sin + ly * cos,
+        }
+      })
+      const lengthVals = absPoints.map((p) => (lengthAxis === 'y' ? p.y : p.x))
+      const crossVals = absPoints.map((p) => (lengthAxis === 'y' ? p.x : p.y))
+      const avgPos = lengthVals.reduce((a, b) => a + b, 0) / n
+      const edge = avgPos < lengthSize / 2 ? 0 : lengthSize
+      const depth = Math.abs(edge - avgPos)
       const meters = depth * (pitchLengthM / lengthSize)
-      const near = Math.min(absPos, edge)
-      // The shaded zone only spans the line's own width (its local point
+      const near = Math.min(avgPos, edge)
+      // The shaded zone only spans the line's own width (its own point
       // extent), not the full pitch — it marks the depth behind this
       // specific line, not a full-width defensive line unless the line
       // itself is drawn that wide.
-      const crossMin = crossAnchor + Math.min(...crossVals) * o.scale
-      const crossMax = crossAnchor + Math.max(...crossVals) * o.scale
+      const crossMin = Math.min(...crossVals)
+      const crossMax = Math.max(...crossVals)
       const crossSpan = Math.max(crossMax - crossMin, 1)
       return {
         id: o.id,
@@ -451,8 +467,8 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
             : { x: near, y: crossMin, width: depth, height: crossSpan },
         labelPos:
           lengthAxis === 'y'
-            ? { x: (crossMin + crossMax) / 2, y: (absPos + edge) / 2 }
-            : { x: (absPos + edge) / 2, y: (crossMin + crossMax) / 2 },
+            ? { x: (crossMin + crossMax) / 2, y: (avgPos + edge) / 2 }
+            : { x: (avgPos + edge) / 2, y: (crossMin + crossMax) / 2 },
       }
     })
 
@@ -756,7 +772,12 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
     if (!clickedOnEmpty) return
 
     if (tool === 'select') {
-      setSelection([])
+      // Don't clear the selection yet — a plain click (no real drag) still
+      // should, but a press-and-drag over empty pitch space starts a
+      // marquee instead (resolved in handleStageMouseUp once we know which
+      // one this gesture turned out to be).
+      const pos = stageRef.current?.getRelativePointerPosition()
+      if (pos) setMarqueeStart(pos)
       return
     }
     if (tool === 'connector') {
@@ -771,6 +792,47 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
     // are stored in (see the cropShift comment above).
     if (orientation === 'vertical') addObjectAt(pos.x, pos.y + cropShift)
     else addObjectAt(pos.x + cropShift, pos.y)
+  }
+
+  const MARQUEE_DRAG_THRESHOLD = 4
+
+  function handleStageMouseMove() {
+    if (!marqueeStart) return
+    const pos = stageRef.current?.getRelativePointerPosition()
+    if (!pos) return
+    const x = Math.min(marqueeStart.x, pos.x)
+    const y = Math.min(marqueeStart.y, pos.y)
+    const width = Math.abs(pos.x - marqueeStart.x)
+    const height = Math.abs(pos.y - marqueeStart.y)
+    setMarqueeRect(width > MARQUEE_DRAG_THRESHOLD || height > MARQUEE_DRAG_THRESHOLD ? { x, y, width, height } : null)
+  }
+
+  function handleStageMouseUp(e: KonvaEventObject<MouseEvent | TouchEvent>) {
+    if (!marqueeStart) return
+    const rect = marqueeRect
+    setMarqueeStart(null)
+    setMarqueeRect(null)
+    if (!rect) {
+      // No real drag happened — treat it as the plain "click empty pitch to
+      // deselect" gesture the marquee start pre-empted above.
+      setSelection([])
+      return
+    }
+    const ids = frame.objects
+      .filter((o) => {
+        const node = nodeRefs.current[o.id]
+        if (!node) return false
+        const box = node.getClientRect({ relativeTo: stageRef.current ?? undefined })
+        return (
+          box.x < rect.x + rect.width &&
+          box.x + box.width > rect.x &&
+          box.y < rect.y + rect.height &&
+          box.y + box.height > rect.y
+        )
+      })
+      .map((o) => o.id)
+    const additive = 'evt' in e && 'shiftKey' in e.evt && e.evt.shiftKey
+    setSelection(additive ? Array.from(new Set([...selection, ...ids])) : ids)
   }
 
   function handleDragStart() {
@@ -884,6 +946,10 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
         scaleY={scale}
         onMouseDown={handleStageMouseDown}
         onTouchStart={handleStageMouseDown}
+        onMouseMove={handleStageMouseMove}
+        onTouchMove={handleStageMouseMove}
+        onMouseUp={handleStageMouseUp}
+        onTouchEnd={handleStageMouseUp}
         className="rounded-lg shadow-2xl shadow-black/60"
       >
         <Layer>
@@ -1022,6 +1088,20 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
             onCardResize={(width) => setFrameCaptionCard(activeFrameIndex, { cardWidth: width })}
           />
         </Layer>
+        {marqueeRect && (
+          <Layer listening={false}>
+            <Rect
+              x={marqueeRect.x}
+              y={marqueeRect.y}
+              width={marqueeRect.width}
+              height={marqueeRect.height}
+              fill="rgba(124, 58, 237, 0.15)"
+              stroke="#7c3aed"
+              strokeWidth={1}
+              dash={[4, 4]}
+            />
+          </Layer>
+        )}
       </Stage>
     </div>
   )

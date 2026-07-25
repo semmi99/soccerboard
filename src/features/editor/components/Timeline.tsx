@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { useEditorStore } from '../store/editorStore'
 import { useAuthStore } from '../../auth/store/authStore'
 import { limitsForTier } from '../../../lib/limits'
@@ -10,11 +11,15 @@ export function Timeline() {
   const addFrame = useEditorStore((s) => s.addFrame)
   const removeFrame = useEditorStore((s) => s.removeFrame)
   const duplicateFrame = useEditorStore((s) => s.duplicateFrame)
+  const reorderFrames = useEditorStore((s) => s.reorderFrames)
   const setFrameDuration = useEditorStore((s) => s.setFrameDuration)
   const clearActiveFrame = useEditorStore((s) => s.clearActiveFrame)
   const beginHistoryCheckpoint = useEditorStore((s) => s.beginHistoryCheckpoint)
   const isPlaying = useEditorStore((s) => s.isPlaying)
   const setIsPlaying = useEditorStore((s) => s.setIsPlaying)
+
+  const [draggedIndex, setDraggedIndex] = useState<number | null>(null)
+  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null)
 
   const organization = useAuthStore((s) => s.organization)
   const maxFrames = limitsForTier(organization ?? { subscription_tier: 'free' }).maxFrames
@@ -26,7 +31,13 @@ export function Timeline() {
       setIsPlaying(false)
       return
     }
-    setActiveFrameIndex(0)
+    // Resume from wherever the user is parked, only restarting from the top
+    // once playback has actually reached the end — otherwise picking a
+    // frame in the middle and hitting play would jump back to frame 1
+    // instead of previewing the sequence from there.
+    if (activeFrameIndex >= frames.length - 1) {
+      setActiveFrameIndex(0)
+    }
     setIsPlaying(true)
   }
 
@@ -47,10 +58,31 @@ export function Timeline() {
           {frames.map((frame, index) => (
             <div
               key={frame.id}
-              className={`group relative flex h-14 w-20 shrink-0 cursor-pointer flex-col items-center justify-center rounded-md border text-xs transition-colors ${
+              draggable={!isPlaying}
+              onDragStart={() => setDraggedIndex(index)}
+              onDragOver={(e) => {
+                e.preventDefault()
+                if (draggedIndex !== null && draggedIndex !== index) setDragOverIndex(index)
+              }}
+              onDragLeave={() => setDragOverIndex((cur) => (cur === index ? null : cur))}
+              onDrop={(e) => {
+                e.preventDefault()
+                if (draggedIndex !== null && draggedIndex !== index) {
+                  reorderFrames(draggedIndex, index)
+                }
+                setDraggedIndex(null)
+                setDragOverIndex(null)
+              }}
+              onDragEnd={() => {
+                setDraggedIndex(null)
+                setDragOverIndex(null)
+              }}
+              className={`group relative flex h-14 w-20 shrink-0 cursor-grab flex-col items-center justify-center rounded-md border text-xs transition-colors active:cursor-grabbing ${
                 index === activeFrameIndex
                   ? 'border-violet-accent bg-violet-accent/20 text-white'
                   : 'border-pitch-600 bg-pitch-800 text-white/60 hover:border-pitch-500'
+              } ${dragOverIndex === index ? 'border-violet-accent-bright ring-2 ring-violet-accent-bright' : ''} ${
+                draggedIndex === index ? 'opacity-40' : ''
               } ${isPlaying ? 'pointer-events-none opacity-60' : ''}`}
               onClick={() => setActiveFrameIndex(index)}
             >

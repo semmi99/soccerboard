@@ -61,6 +61,10 @@ export interface ArrowData {
   color: string
   strokeWidth: number
   showArrowhead?: boolean // false renders as a plain line (e.g. freehand zone dividers)
+  /** Adds a second arrowhead at the line's start point too, alongside the
+   * regular one at the end — a double pass/run indicator. No effect when
+   * showArrowhead is false. */
+  arrowheadStart?: boolean
   curveOffset?: number // curved arrows only: perpendicular bend depth, user-adjustable
   /** Shows the real-world pass/run distance (computed from the project's
    * pitch size) as a small label near the arrow's midpoint. */
@@ -82,6 +86,10 @@ export interface ArrowData {
    * area between it and the nearer goal line and labels that gap's real-
    * world depth in meters, recomputed live from the line's own position. */
   spaceBehind?: boolean
+  /** Renders the line as a wavy "dribble" path (through cones/opponents)
+   * instead of a smooth line — works alongside either the straight or
+   * curved shape and any bend points already on it. */
+  dribble?: boolean
 }
 
 export interface ShapeData {
@@ -149,6 +157,14 @@ export interface BallData {
   motionBend?: [number, number] | null
 }
 
+export interface ImageData {
+  url: string
+  /** Base (unscaled) size in stage pixels — the object's own `scale` (via
+   * the Transformer, same as chips/equipment) multiplies on top of this. */
+  width: number
+  height: number
+}
+
 export interface ConnectorData {
   fromId: string
   toId: string
@@ -170,6 +186,7 @@ export type ObjectType =
   | 'training_equipment'
   | 'ball'
   | 'connector'
+  | 'image'
 
 export interface FrameObjectBase {
   id: string
@@ -188,6 +205,7 @@ export type FrameObject =
   | (FrameObjectBase & { objectType: 'training_equipment'; data: EquipmentData })
   | (FrameObjectBase & { objectType: 'ball'; data: BallData })
   | (FrameObjectBase & { objectType: 'connector'; data: ConnectorData })
+  | (FrameObjectBase & { objectType: 'image'; data: ImageData })
 
 /** One small draggable pill label (e.g. "THE PROBLEM") — a frame can carry
  * several, each pointed at a different spot on the pitch, matching how
@@ -261,6 +279,7 @@ export type ToolId =
   | 'arrow_straight'
   | 'arrow_rigid'
   | 'arrow_blocked'
+  | 'arrow_dribble'
   | 'line_straight'
   | 'shape_circle'
   | 'shape_rect'
