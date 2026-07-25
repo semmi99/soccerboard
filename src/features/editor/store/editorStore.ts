@@ -5,6 +5,7 @@ import type {
   EquipmentKind,
   FieldCrop,
   FrameCaption,
+  FrameCaptionCard,
   FrameObject,
   PitchDesign,
   PitchOrientation,
@@ -51,13 +52,7 @@ const DEFAULT_BADGE_X = 24
 const DEFAULT_BADGE_Y = 28
 
 function defaultFrameCaption(): FrameCaption {
-  return {
-    badges: [],
-    cardX: DEFAULT_CARD_X,
-    cardY: DEFAULT_CARD_Y,
-    cardWidth: DEFAULT_CARD_WIDTH,
-    background: 'rgba(255,255,255,0.97)',
-  }
+  return { badges: [], cards: [] }
 }
 
 function defaultCaptionBadge(existingCount: number): CaptionBadge {
@@ -67,6 +62,16 @@ function defaultCaptionBadge(existingCount: number): CaptionBadge {
     x: DEFAULT_BADGE_X,
     y: DEFAULT_BADGE_Y + existingCount * 32,
     color: '#ef4444',
+  }
+}
+
+function defaultFrameCaptionCard(existingCount: number): FrameCaptionCard {
+  return {
+    id: crypto.randomUUID(),
+    cardX: DEFAULT_CARD_X + existingCount * 24,
+    cardY: DEFAULT_CARD_Y + existingCount * 24,
+    cardWidth: DEFAULT_CARD_WIDTH,
+    background: 'rgba(255,255,255,0.97)',
   }
 }
 
@@ -170,14 +175,12 @@ interface EditorState {
   reorderFrames: (fromIndex: number, toIndex: number) => void
   setActiveFrameIndex: (index: number) => void
   setFrameDuration: (index: number, durationMs: number) => void
-  setFrameCaptionText: (index: number, patch: { title?: string; subtitle?: string }) => void
-  setFrameCaptionCard: (
-    index: number,
-    patch: Partial<Omit<FrameCaption, 'badges' | 'title' | 'subtitle'>>,
-  ) => void
   addFrameCaptionBadge: (index: number) => void
   updateFrameCaptionBadge: (index: number, badgeId: string, patch: Partial<CaptionBadge>) => void
   removeFrameCaptionBadge: (index: number, badgeId: string) => void
+  addFrameCaptionCard: (index: number) => void
+  updateFrameCaptionCard: (index: number, cardId: string, patch: Partial<FrameCaptionCard>) => void
+  removeFrameCaptionCard: (index: number, cardId: string) => void
   setIsPlaying: (playing: boolean) => void
 
   undo: () => void
@@ -772,22 +775,6 @@ export const useEditorStore = create<EditorState>((set, get) => ({
     set({ frames: nextFrames, isDirty: true })
   },
 
-  setFrameCaptionText: (index, patch) => {
-    const { frames } = get()
-    const nextFrames = frames.map((f, i) =>
-      i === index ? { ...f, caption: { ...(f.caption ?? defaultFrameCaption()), ...patch } } : f,
-    )
-    set({ frames: nextFrames, isDirty: true })
-  },
-
-  setFrameCaptionCard: (index, patch) => {
-    const { frames } = get()
-    const nextFrames = frames.map((f, i) =>
-      i === index ? { ...f, caption: { ...(f.caption ?? defaultFrameCaption()), ...patch } } : f,
-    )
-    set({ frames: nextFrames, isDirty: true })
-  },
-
   addFrameCaptionBadge: (index) => {
     const { frames } = get()
     const nextFrames = frames.map((f, i) => {
@@ -818,6 +805,40 @@ export const useEditorStore = create<EditorState>((set, get) => ({
     const nextFrames = frames.map((f, i) => {
       if (i !== index || !f.caption) return f
       return { ...f, caption: { ...f.caption, badges: f.caption.badges.filter((b) => b.id !== badgeId) } }
+    })
+    set({ frames: nextFrames, isDirty: true })
+  },
+
+  addFrameCaptionCard: (index) => {
+    const { frames } = get()
+    const nextFrames = frames.map((f, i) => {
+      if (i !== index) return f
+      const caption = f.caption ?? defaultFrameCaption()
+      return { ...f, caption: { ...caption, cards: [...caption.cards, defaultFrameCaptionCard(caption.cards.length)] } }
+    })
+    set({ frames: nextFrames, isDirty: true })
+  },
+
+  updateFrameCaptionCard: (index, cardId, patch) => {
+    const { frames } = get()
+    const nextFrames = frames.map((f, i) => {
+      if (i !== index || !f.caption) return f
+      return {
+        ...f,
+        caption: {
+          ...f.caption,
+          cards: f.caption.cards.map((c) => (c.id === cardId ? { ...c, ...patch } : c)),
+        },
+      }
+    })
+    set({ frames: nextFrames, isDirty: true })
+  },
+
+  removeFrameCaptionCard: (index, cardId) => {
+    const { frames } = get()
+    const nextFrames = frames.map((f, i) => {
+      if (i !== index || !f.caption) return f
+      return { ...f, caption: { ...f.caption, cards: f.caption.cards.filter((c) => c.id !== cardId) } }
     })
     set({ frames: nextFrames, isDirty: true })
   },

@@ -58,12 +58,20 @@ function legacyCaptionRowToFrameCaption(row: {
           },
         ]
       : [],
-    title: row.caption_title ?? undefined,
-    subtitle: row.caption_subtitle ?? undefined,
-    cardX: 24,
-    cardY: 58,
-    cardWidth: 300,
-    background: 'rgba(255,255,255,0.97)',
+    cards:
+      row.caption_title || row.caption_subtitle
+        ? [
+            {
+              id: crypto.randomUUID(),
+              title: row.caption_title ?? undefined,
+              subtitle: row.caption_subtitle ?? undefined,
+              cardX: 24,
+              cardY: 58,
+              cardWidth: 300,
+              background: 'rgba(255,255,255,0.97)',
+            },
+          ]
+        : [],
   }
 }
 

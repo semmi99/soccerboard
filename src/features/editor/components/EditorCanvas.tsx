@@ -334,7 +334,7 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
   const frames = useEditorStore((s) => s.frames)
   const activeFrameIndex = useEditorStore((s) => s.activeFrameIndex)
   const updateFrameCaptionBadge = useEditorStore((s) => s.updateFrameCaptionBadge)
-  const setFrameCaptionCard = useEditorStore((s) => s.setFrameCaptionCard)
+  const updateFrameCaptionCard = useEditorStore((s) => s.updateFrameCaptionCard)
   const tool = useEditorStore((s) => s.tool)
   const selection = useEditorStore((s) => s.selection)
   const setSelection = useEditorStore((s) => s.setSelection)
@@ -465,6 +465,14 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
         color: o.data.color,
         meters,
         points: polygonPoints,
+        showLabel: o.data.spaceBehindShowLabel ?? true,
+        opacity: o.data.spaceBehindOpacity ?? 0.3,
+        gradient: o.data.spaceBehindGradient ?? false,
+        // Gradient points are in the Line's own local space (no x/y offset on
+        // the shape itself, since points are already absolute), running along
+        // the length axis from the line's own position to the goal edge.
+        gradientStart: lengthAxis === 'y' ? { x: crossMin, y: avgPos } : { x: avgPos, y: crossMin },
+        gradientEnd: lengthAxis === 'y' ? { x: crossMin, y: edge } : { x: edge, y: crossMin },
         labelPos:
           lengthAxis === 'y'
             ? { x: (crossMin + crossMax) / 2, y: (avgPos + edge) / 2 }
@@ -979,20 +987,32 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
           ))}
           {spaceBehindZones.map((z) => (
             <Group key={`spacebehind-${z.id}`} listening={false}>
-              <Line points={z.points} closed fill={hexToRgba(z.color, 0.16)} />
-              <Text
-                x={z.labelPos.x - 50}
-                y={z.labelPos.y - 12}
-                width={100}
-                align="center"
-                text={`${Math.round(z.meters)}m`}
-                fontStyle="bold"
-                fontSize={24}
-                fill={z.color}
-                shadowColor="black"
-                shadowBlur={6}
-                shadowOpacity={0.6}
+              <Line
+                points={z.points}
+                closed
+                {...(z.gradient
+                  ? {
+                      fillLinearGradientStartPoint: z.gradientStart,
+                      fillLinearGradientEndPoint: z.gradientEnd,
+                      fillLinearGradientColorStops: [0, hexToRgba(z.color, z.opacity), 1, hexToRgba(z.color, 0)],
+                    }
+                  : { fill: hexToRgba(z.color, z.opacity) })}
               />
+              {z.showLabel && (
+                <Text
+                  x={z.labelPos.x - 50}
+                  y={z.labelPos.y - 12}
+                  width={100}
+                  align="center"
+                  text={`${Math.round(z.meters)}m`}
+                  fontStyle="bold"
+                  fontSize={24}
+                  fill={z.color}
+                  shadowColor="black"
+                  shadowBlur={6}
+                  shadowOpacity={0.6}
+                />
+              )}
             </Group>
           ))}
           {sortedObjects.map((object) => {
@@ -1089,8 +1109,8 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
             caption={frame.caption}
             interactive={!isPlaying}
             onBadgeDragEnd={(badgeId, x, y) => updateFrameCaptionBadge(activeFrameIndex, badgeId, { x, y })}
-            onCardDragEnd={(x, y) => setFrameCaptionCard(activeFrameIndex, { cardX: x, cardY: y })}
-            onCardResize={(width) => setFrameCaptionCard(activeFrameIndex, { cardWidth: width })}
+            onCardDragEnd={(cardId, x, y) => updateFrameCaptionCard(activeFrameIndex, cardId, { cardX: x, cardY: y })}
+            onCardResize={(cardId, width) => updateFrameCaptionCard(activeFrameIndex, cardId, { cardWidth: width })}
           />
         </Layer>
         {marqueeRect && (

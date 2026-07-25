@@ -98,6 +98,16 @@ export interface ArrowData {
    * area between it and the nearer goal line and labels that gap's real-
    * world depth in meters, recomputed live from the line's own position. */
   spaceBehind?: boolean
+  /** Hides the "Xm" depth label for the space-behind zone while still
+   * shading the area. Unset shows the label (the original behavior). */
+  spaceBehindShowLabel?: boolean
+  /** Fill opacity for the shaded space-behind zone, 0..1. Unset falls back
+   * to a visible default — the original fixed 0.16 was reported as barely
+   * visible against the pitch. */
+  spaceBehindOpacity?: number
+  /** Fades the shaded zone from full `color` at the line itself to
+   * transparent at the goal line, instead of one flat fill throughout. */
+  spaceBehindGradient?: boolean
   /** Renders the line as a wavy "dribble" path (through cones/opponents)
    * instead of a smooth line — works alongside either the straight or
    * curved shape and any bend points already on it. */
@@ -233,14 +243,14 @@ export interface CaptionBadge {
   gradientDirection?: 'radial' | 'linear'
 }
 
-/** A short "broadcast graphic" style story beat shown over this frame — one
- * or more eyebrow badges plus a title card (bold headline + optional
- * supporting line), matching the callout-card look of tactical-analysis
- * explainer reels. No badges and no title/subtitle means the whole overlay
- * is skipped. The title card itself is draggable and resizable and can take
- * the same solid/gradient background any shape or text object can. */
-export interface FrameCaption {
-  badges: CaptionBadge[]
+/** One title/subtitle callout card. A frame can carry several — most
+ * sequences only need one, but a longer explainer beat can stack a headline
+ * and a separate follow-up line at different spots on the pitch, matching
+ * how tactical-analysis reels sometimes layer more than one callout over a
+ * single still. Draggable and resizable, and can take the same solid/
+ * gradient background any shape or text object can. */
+export interface FrameCaptionCard {
+  id: string
   title?: string
   subtitle?: string
   cardX: number
@@ -250,6 +260,15 @@ export interface FrameCaption {
   gradient?: boolean
   background2?: string | null
   gradientDirection?: 'radial' | 'linear'
+}
+
+/** A short "broadcast graphic" style story beat shown over this frame — one
+ * or more eyebrow badges plus zero or more title cards, matching the
+ * callout-card look of tactical-analysis explainer reels. Empty badges and
+ * cards means the whole overlay is skipped. */
+export interface FrameCaption {
+  badges: CaptionBadge[]
+  cards: FrameCaptionCard[]
 }
 
 export interface EditorFrame {
