@@ -875,6 +875,26 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
     updateObjectLive(id, patch)
   }
 
+  // Dragging the Transformer's own bounding box (enabled only for multi-
+  // select) moves every selected object together — clicking empty space
+  // inside the box, not just directly on one of the shapes, now drags the
+  // whole group. Konva repositions the attached nodes itself during the
+  // drag; this only needs to fold that offset into each object's stored
+  // x/y once the gesture ends, then zero the Transformer's own position so
+  // the next selection/objects update (which re-fits it from the nodes'
+  // real positions) doesn't apply the offset a second time.
+  function handleGroupDragEnd(e: KonvaEventObject<DragEvent>) {
+    const dx = e.target.x()
+    const dy = e.target.y()
+    if (dx !== 0 || dy !== 0) {
+      for (const id of selection) {
+        const obj = frame.objects.find((o) => o.id === id)
+        if (obj) updateObjectLive(id, { x: obj.x + dx, y: obj.y + dy })
+      }
+    }
+    e.target.position({ x: 0, y: 0 })
+  }
+
   function handleArrowPointsChange(id: string, points: number[]) {
     const obj = frame.objects.find((o) => o.id === id)
     if (!obj || obj.objectType !== 'arrow') return
@@ -1101,6 +1121,14 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
             boundBoxFunc={(oldBox, newBox) =>
               newBox.width < 8 || newBox.height < 8 ? oldBox : newBox
             }
+            draggable={selection.length > 1}
+            // Konva's Transformer only hit-tests its interior (as opposed to
+            // just the anchors) when this is on — without it, a mousedown
+            // inside the box but off every shape falls through to the stage
+            // and starts a marquee-select instead of a drag.
+            shouldOverdrawWholeArea={selection.length > 1}
+            onDragStart={handleTransformStart}
+            onDragEnd={handleGroupDragEnd}
           />
         </Group>
         </Layer>
