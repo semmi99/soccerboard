@@ -64,11 +64,12 @@ export function PropertiesSidebar() {
   const setPitchLengthM = useEditorStore((s) => s.setPitchLengthM)
   const setPitchWidthM = useEditorStore((s) => s.setPitchWidthM)
   const setLastConnectorColor = useEditorStore((s) => s.setLastConnectorColor)
-  const setFrameCaptionText = useEditorStore((s) => s.setFrameCaptionText)
-  const setFrameCaptionCard = useEditorStore((s) => s.setFrameCaptionCard)
   const addFrameCaptionBadge = useEditorStore((s) => s.addFrameCaptionBadge)
   const updateFrameCaptionBadge = useEditorStore((s) => s.updateFrameCaptionBadge)
   const removeFrameCaptionBadge = useEditorStore((s) => s.removeFrameCaptionBadge)
+  const addFrameCaptionCard = useEditorStore((s) => s.addFrameCaptionCard)
+  const updateFrameCaptionCard = useEditorStore((s) => s.updateFrameCaptionCard)
+  const removeFrameCaptionCard = useEditorStore((s) => s.removeFrameCaptionCard)
   const selection = useEditorStore((s) => s.selection)
   const activeFrameIndex = useEditorStore((s) => s.activeFrameIndex)
   const frames = useEditorStore((s) => s.frames)
@@ -313,79 +314,97 @@ export function PropertiesSidebar() {
                 </Button>
               </div>
 
-              <Field label="Titel">
-                <input
-                  type="text"
-                  className={inputClass}
-                  value={frame.caption?.title ?? ''}
-                  onChange={(e) => setFrameCaptionText(activeFrameIndex, { title: e.target.value })}
-                />
-              </Field>
-              <Field label="Untertitel">
-                <input
-                  type="text"
-                  className={inputClass}
-                  value={frame.caption?.subtitle ?? ''}
-                  onChange={(e) => setFrameCaptionText(activeFrameIndex, { subtitle: e.target.value })}
-                />
-              </Field>
-              {(frame.caption?.title || frame.caption?.subtitle) && (
-                <div className="flex flex-col gap-1.5 rounded-md border border-pitch-700 p-2">
-                  <span className="text-xs font-medium text-white/60">Karten-Hintergrund</span>
-                  <ColorSwatchPicker
-                    size="sm"
-                    value={frame.caption?.background ?? 'rgba(255,255,255,0.97)'}
-                    onChange={(c) => setFrameCaptionCard(activeFrameIndex, { background: c })}
-                  />
-                  <label className="flex items-center gap-2 text-xs text-white/70">
-                    <input
-                      type="checkbox"
-                      className="accent-violet-accent"
-                      checked={Boolean(frame.caption?.gradient)}
-                      onChange={(e) => setFrameCaptionCard(activeFrameIndex, { gradient: e.target.checked })}
-                    />
-                    Farbverlauf statt flacher Füllung
-                  </label>
-                  {frame.caption?.gradient && (
-                    <>
-                      <select
-                        className={selectClass}
-                        value={frame.caption?.gradientDirection ?? 'radial'}
-                        onChange={(e) =>
-                          setFrameCaptionCard(activeFrameIndex, { gradientDirection: e.target.value as 'radial' | 'linear' })
-                        }
+              <div className="flex flex-col gap-2">
+                {(frame.caption?.cards ?? []).map((card, i) => (
+                  <div key={card.id} className="flex flex-col gap-2 rounded-md border border-pitch-700 p-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-medium text-white/60">Titelkarte {i + 1}</span>
+                      <button
+                        type="button"
+                        className="shrink-0 rounded-md border border-pitch-600 px-2 py-1.5 text-xs text-white/60 hover:text-white"
+                        onClick={() => removeFrameCaptionCard(activeFrameIndex, card.id)}
                       >
-                        <option value="radial">Radial (von der Mitte)</option>
-                        <option value="linear">Linear (links nach rechts)</option>
-                      </select>
+                        ✕
+                      </button>
+                    </div>
+                    <Field label="Titel">
+                      <input
+                        type="text"
+                        className={inputClass}
+                        value={card.title ?? ''}
+                        onChange={(e) => updateFrameCaptionCard(activeFrameIndex, card.id, { title: e.target.value })}
+                      />
+                    </Field>
+                    <Field label="Untertitel">
+                      <input
+                        type="text"
+                        className={inputClass}
+                        value={card.subtitle ?? ''}
+                        onChange={(e) => updateFrameCaptionCard(activeFrameIndex, card.id, { subtitle: e.target.value })}
+                      />
+                    </Field>
+                    <div className="flex flex-col gap-1.5">
+                      <span className="text-xs font-medium text-white/60">Karten-Hintergrund</span>
+                      <ColorSwatchPicker
+                        size="sm"
+                        value={card.background}
+                        onChange={(c) => updateFrameCaptionCard(activeFrameIndex, card.id, { background: c })}
+                      />
                       <label className="flex items-center gap-2 text-xs text-white/70">
                         <input
                           type="checkbox"
                           className="accent-violet-accent"
-                          checked={Boolean(frame.caption?.background2)}
-                          onChange={(e) =>
-                            setFrameCaptionCard(activeFrameIndex, {
-                              background2: e.target.checked ? (frame.caption?.background ?? '#ffffff') : null,
-                            })
-                          }
+                          checked={Boolean(card.gradient)}
+                          onChange={(e) => updateFrameCaptionCard(activeFrameIndex, card.id, { gradient: e.target.checked })}
                         />
-                        Zweifarbiger Verlauf
+                        Farbverlauf statt flacher Füllung
                       </label>
-                      {frame.caption?.background2 && (
-                        <ColorSwatchPicker
-                          size="sm"
-                          value={frame.caption.background2}
-                          onChange={(color) => setFrameCaptionCard(activeFrameIndex, { background2: color })}
-                        />
+                      {card.gradient && (
+                        <>
+                          <select
+                            className={selectClass}
+                            value={card.gradientDirection ?? 'radial'}
+                            onChange={(e) =>
+                              updateFrameCaptionCard(activeFrameIndex, card.id, {
+                                gradientDirection: e.target.value as 'radial' | 'linear',
+                              })
+                            }
+                          >
+                            <option value="radial">Radial (von der Mitte)</option>
+                            <option value="linear">Linear (links nach rechts)</option>
+                          </select>
+                          <label className="flex items-center gap-2 text-xs text-white/70">
+                            <input
+                              type="checkbox"
+                              className="accent-violet-accent"
+                              checked={Boolean(card.background2)}
+                              onChange={(e) =>
+                                updateFrameCaptionCard(activeFrameIndex, card.id, {
+                                  background2: e.target.checked ? card.background : null,
+                                })
+                              }
+                            />
+                            Zweifarbiger Verlauf
+                          </label>
+                          {card.background2 && (
+                            <ColorSwatchPicker
+                              size="sm"
+                              value={card.background2}
+                              onChange={(color) => updateFrameCaptionCard(activeFrameIndex, card.id, { background2: color })}
+                            />
+                          )}
+                        </>
                       )}
-                    </>
-                  )}
-                </div>
-              )}
+                    </div>
+                  </div>
+                ))}
+                <Button variant="secondary" onClick={() => addFrameCaptionCard(activeFrameIndex)}>
+                  + Titelkarte hinzufügen
+                </Button>
+              </div>
               <p className="text-[11px] text-white/40">
-                Erscheint als Story-Karte über diesem Frame — leer lassen für keine Beschriftung. Labels und
-                die Karte lassen sich direkt auf dem Feld verschieben, die Karte am blauen Punkt in der Ecke
-                in der Breite anpassen.
+                Labels und Titelkarten erscheinen über diesem Frame und lassen sich direkt auf dem Feld
+                verschieben; eine Titelkarte am blauen Punkt in der Ecke in der Breite anpassen.
               </p>
             </div>
           )}
@@ -781,18 +800,60 @@ function ArrowFields({
         Dribbellinie (gewellt)
       </label>
       {data.shape !== 'curved' && (
-        <label className="flex items-center gap-2 text-xs text-white/70">
-          <input
-            type="checkbox"
-            className="accent-violet-accent"
-            checked={data.spaceBehind ?? false}
-            onChange={(e) => {
-              onCheckpoint()
-              onChange({ spaceBehind: e.target.checked })
-            }}
-          />
-          Als Abwehrlinie markieren (Raum dahinter anzeigen)
-        </label>
+        <>
+          <label className="flex items-center gap-2 text-xs text-white/70">
+            <input
+              type="checkbox"
+              className="accent-violet-accent"
+              checked={data.spaceBehind ?? false}
+              onChange={(e) => {
+                onCheckpoint()
+                onChange({ spaceBehind: e.target.checked })
+              }}
+            />
+            Als Abwehrlinie markieren (Raum dahinter anzeigen)
+          </label>
+          {data.spaceBehind && (
+            <div className="flex flex-col gap-2 pl-5">
+              <label className="flex items-center gap-2 text-xs text-white/70">
+                <input
+                  type="checkbox"
+                  className="accent-violet-accent"
+                  checked={data.spaceBehindShowLabel ?? true}
+                  onChange={(e) => {
+                    onCheckpoint()
+                    onChange({ spaceBehindShowLabel: e.target.checked })
+                  }}
+                />
+                Meter-Label anzeigen
+              </label>
+              <Field label={`Deckkraft (${Math.round((data.spaceBehindOpacity ?? 0.3) * 100)}%)`}>
+                <input
+                  type="range"
+                  min={0.1}
+                  max={0.7}
+                  step={0.05}
+                  className="w-full"
+                  value={data.spaceBehindOpacity ?? 0.3}
+                  onFocus={onCheckpoint}
+                  onChange={(e) => onChange({ spaceBehindOpacity: Number(e.target.value) })}
+                />
+              </Field>
+              <label className="flex items-center gap-2 text-xs text-white/70">
+                <input
+                  type="checkbox"
+                  className="accent-violet-accent"
+                  checked={data.spaceBehindGradient ?? false}
+                  onChange={(e) => {
+                    onCheckpoint()
+                    onChange({ spaceBehindGradient: e.target.checked })
+                  }}
+                />
+                Farbverlauf (zum Tor hin ausblendend)
+              </label>
+            </div>
+          )}
+        </>
       )}
       {data.shape !== 'curved' && data.bendable !== false && (
         <Button
