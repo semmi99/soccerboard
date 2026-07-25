@@ -967,19 +967,6 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
   // Transformer's corner resize, so it's hidden for every arrow shape.
   const hasBendableArrowSelected = selectedObjects.some((o) => o.objectType === 'arrow')
 
-  // Konva's rotate handle sits a FIXED pixel distance out from the shape,
-  // regardless of the shape's own size — so for a long arrow (a large lever
-  // arm from the pivot to the far tip), the tiny mouse movement needed to
-  // reach that fixed offset translates into a large angle change, which in
-  // turn swings the far tip across a huge on-screen distance. That reads as
-  // the arrow "jumping" when someone just meant to drag it. Straight/polyline
-  // arrows already have a precise, 1:1 way to reorient — dragging either end
-  // point handle — so the risky rotate handle is turned off for them. Curved
-  // arrows have no point handles, so rotation stays their only way to turn.
-  const hasHandledArrowSelected = selectedObjects.some(
-    (o) => o.objectType === 'arrow' && o.data.shape !== 'curved',
-  )
-
   return (
     <div ref={containerRef} className="flex h-full w-full items-center justify-center overflow-hidden">
       <Stage
@@ -1129,7 +1116,7 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
           <Transformer
             ref={trRef}
             onTransformStart={handleTransformStart}
-            rotateEnabled={!hasHandledArrowSelected}
+            rotateEnabled
             enabledAnchors={hasBendableArrowSelected ? [] : undefined}
             keepRatio={!allFreelyResizableSelected}
             boundBoxFunc={(oldBox, newBox) =>
