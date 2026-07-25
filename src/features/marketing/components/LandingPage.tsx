@@ -55,83 +55,200 @@ const HERO = {
   },
 }
 
-const FEATURES = {
+const FEATURE_CATEGORIES = {
   de: [
     {
-      title: 'Taktik-Editor',
-      text: 'Spieler, Pfeile, Formen, Zonen und Trainingsutensilien frei auf dem Feld platzieren, drehen und skalieren.',
+      category: 'Editor & Werkzeuge',
+      items: [
+        {
+          title: 'Taktik-Editor',
+          text: 'Spieler, Pfeile, Formen, Zonen und Trainingsutensilien frei auf dem Feld platzieren, drehen und skalieren.',
+        },
+        {
+          title: 'Eigene Formationen',
+          text: 'Positionen frei per Drag & Drop anlegen, benennen und für jedes Projekt wiederverwenden.',
+        },
+        {
+          title: 'Taktische Zonen',
+          text: 'Raum hinter der Kette, Guardiola-Raster und frei einfärbbare Zonen zeigen automatisch, wo der Platz entsteht.',
+        },
+        {
+          title: 'Mehr Werkzeuge',
+          text: 'Dribbellinien, Bilder einfügen und Mehrfachauswahl per Auswahlrahmen — für jede Idee das passende Werkzeug.',
+        },
+      ],
     },
     {
-      title: 'Animierte Spielzüge',
-      text: 'Mehrere Frames anlegen und flüssig, synchron abspielen — Spielzüge werden lebendig statt statisch.',
+      category: 'Animation & Export',
+      items: [
+        {
+          title: 'Animierte Spielzüge',
+          text: 'Mehrere Frames anlegen und flüssig, synchron abspielen — Spielzüge werden lebendig statt statisch.',
+        },
+        {
+          title: 'Frames frei sortieren',
+          text: 'Reihenfolge der Frames per Drag & Drop ändern und die Wiedergabe ab jedem beliebigen Frame starten.',
+        },
+        {
+          title: 'Export in hoher Auflösung',
+          text: 'Taktiktafeln als PNG/JPG exportieren, bis zu 4K für Präsentationen und Ausdrucke.',
+        },
+        {
+          title: 'Video-Recap',
+          text: 'Spielzüge als Video exportieren, inklusive Story-Untertiteln und Vorher/Nachher-Vergleich.',
+        },
+      ],
     },
     {
-      title: 'Eigene Formationen',
-      text: 'Positionen frei per Drag & Drop anlegen, benennen und für jedes Projekt wiederverwenden.',
-    },
-    {
-      title: 'Kaderverwaltung',
-      text: 'Echten Kader pflegen und Spieler direkt mit Chips im Editor verknüpfen — inklusive Trikot-Design.',
-    },
-    {
-      title: 'Export in hoher Auflösung',
-      text: 'Taktiktafeln als PNG/JPG exportieren, bis zu 4K für Präsentationen und Ausdrucke.',
-    },
-    {
-      title: 'Für dein Team gemacht',
-      text: 'Mehrere Projekte, mehrere Trainer, ein gemeinsamer Kader — alles an einem Ort.',
+      category: 'Team & Verwaltung',
+      items: [
+        {
+          title: 'Kaderverwaltung',
+          text: 'Echten Kader pflegen und Spieler direkt mit Chips im Editor verknüpfen — inklusive Trikot-Design.',
+        },
+        {
+          title: 'Abseits-Check',
+          text: 'Abseitsposition auf Knopfdruck prüfen — mit Meterangabe zur Abseitslinie.',
+        },
+        {
+          title: 'Verhältnis-Badges',
+          text: 'Über- und Unterzahl-Situationen mit einem Klick als Badge markieren (z. B. „3 v 4").',
+        },
+        {
+          title: 'Benutzerverwaltung',
+          text: 'Kolleg:innen per Einladung oder direkt mit gesetztem Passwort zum Team hinzufügen.',
+        },
+      ],
     },
   ],
   en: [
     {
-      title: 'Tactics Editor',
-      text: 'Freely place, rotate, and scale players, arrows, shapes, zones, and training equipment on the pitch.',
+      category: 'Editor & Tools',
+      items: [
+        {
+          title: 'Tactics Editor',
+          text: 'Freely place, rotate, and scale players, arrows, shapes, zones, and training equipment on the pitch.',
+        },
+        {
+          title: 'Custom Formations',
+          text: 'Drag and drop to build positions, name them, and reuse them across every project.',
+        },
+        {
+          title: 'Tactical Zones',
+          text: 'Space behind the line, the Guardiola grid, and freely colored zones automatically show where the space opens up.',
+        },
+        {
+          title: 'More Tools',
+          text: 'Dribble lines, image insertion, and rubber-band multi-select — the right tool for every idea.',
+        },
+      ],
     },
     {
-      title: 'Animated Plays',
-      text: 'Create multiple frames and play them back smoothly — plays come alive instead of staying static.',
+      category: 'Animation & Export',
+      items: [
+        {
+          title: 'Animated Plays',
+          text: 'Create multiple frames and play them back smoothly — plays come alive instead of staying static.',
+        },
+        {
+          title: 'Reorder Frames Freely',
+          text: 'Reorder frames by drag and drop and start playback from any frame you choose.',
+        },
+        {
+          title: 'High-Resolution Export',
+          text: 'Export tactics boards as PNG/JPG, up to 4K for presentations and printouts.',
+        },
+        {
+          title: 'Video Recap',
+          text: 'Export plays as video, including story captions and a before/after comparison.',
+        },
+      ],
     },
     {
-      title: 'Custom Formations',
-      text: 'Drag and drop to build positions, name them, and reuse them across every project.',
-    },
-    {
-      title: 'Squad Management',
-      text: 'Maintain your real squad and link players directly to chips in the editor — including kit design.',
-    },
-    {
-      title: 'High-Resolution Export',
-      text: 'Export tactics boards as PNG/JPG, up to 4K for presentations and printouts.',
-    },
-    {
-      title: 'Built for Your Team',
-      text: 'Multiple projects, multiple coaches, one shared squad — all in one place.',
+      category: 'Team & Management',
+      items: [
+        {
+          title: 'Squad Management',
+          text: 'Maintain your real squad and link players directly to chips in the editor — including kit design.',
+        },
+        {
+          title: 'Offside Check',
+          text: 'Check offside position at the push of a button — with the distance in meters to the offside line.',
+        },
+        {
+          title: 'Ratio Badges',
+          text: 'Mark overload/underload situations as a badge with one click (e.g. "3 v 4").',
+        },
+        {
+          title: 'User Management',
+          text: 'Add teammates by invite, or create their account immediately with a password you set.',
+        },
+      ],
     },
   ],
   es: [
     {
-      title: 'Editor Táctico',
-      text: 'Coloca, rota y escala libremente jugadores, flechas, formas, zonas y material de entrenamiento sobre el campo.',
+      category: 'Editor y Herramientas',
+      items: [
+        {
+          title: 'Editor Táctico',
+          text: 'Coloca, rota y escala libremente jugadores, flechas, formas, zonas y material de entrenamiento sobre el campo.',
+        },
+        {
+          title: 'Formaciones Propias',
+          text: 'Arrastra y suelta para crear posiciones, ponles nombre y reutilízalas en cada proyecto.',
+        },
+        {
+          title: 'Zonas Tácticas',
+          text: 'El espacio detrás de la línea, la cuadrícula de Guardiola y zonas de color libre muestran automáticamente dónde se abre el espacio.',
+        },
+        {
+          title: 'Más Herramientas',
+          text: 'Líneas de regate, inserción de imágenes y selección múltiple por rectángulo — la herramienta adecuada para cada idea.',
+        },
+      ],
     },
     {
-      title: 'Jugadas Animadas',
-      text: 'Crea varios fotogramas y reprodúcelos con fluidez — las jugadas cobran vida en lugar de quedarse estáticas.',
+      category: 'Animación y Exportación',
+      items: [
+        {
+          title: 'Jugadas Animadas',
+          text: 'Crea varios fotogramas y reprodúcelos con fluidez — las jugadas cobran vida en lugar de quedarse estáticas.',
+        },
+        {
+          title: 'Reordena los Fotogramas',
+          text: 'Reordena los fotogramas por arrastre y empieza la reproducción desde el que quieras.',
+        },
+        {
+          title: 'Exportación en Alta Resolución',
+          text: 'Exporta las pizarras tácticas como PNG/JPG, hasta 4K para presentaciones e impresiones.',
+        },
+        {
+          title: 'Resumen en Vídeo',
+          text: 'Exporta las jugadas como vídeo, con títulos de historia y una comparación antes/después.',
+        },
+      ],
     },
     {
-      title: 'Formaciones Propias',
-      text: 'Arrastra y suelta para crear posiciones, ponles nombre y reutilízalas en cada proyecto.',
-    },
-    {
-      title: 'Gestión de Plantilla',
-      text: 'Mantén tu plantilla real y vincula jugadores directamente con las fichas del editor — incluido el diseño de la equipación.',
-    },
-    {
-      title: 'Exportación en Alta Resolución',
-      text: 'Exporta las pizarras tácticas como PNG/JPG, hasta 4K para presentaciones e impresiones.',
-    },
-    {
-      title: 'Hecho para tu Equipo',
-      text: 'Varios proyectos, varios entrenadores, una plantilla compartida — todo en un solo lugar.',
+      category: 'Equipo y Gestión',
+      items: [
+        {
+          title: 'Gestión de Plantilla',
+          text: 'Mantén tu plantilla real y vincula jugadores directamente con las fichas del editor — incluido el diseño de la equipación.',
+        },
+        {
+          title: 'Chequeo de Fuera de Juego',
+          text: 'Comprueba la posición de fuera de juego con un botón — con la distancia en metros a la línea.',
+        },
+        {
+          title: 'Insignias de Proporción',
+          text: 'Marca situaciones de superioridad/inferioridad numérica con una insignia de un clic (p. ej. "3 v 4").',
+        },
+        {
+          title: 'Gestión de Usuarios',
+          text: 'Añade compañeros por invitación o crea su cuenta al instante con una contraseña que tú defines.',
+        },
+      ],
     },
   ],
 }
@@ -374,15 +491,24 @@ export function LandingPage() {
 
       <section id="features" className="mx-auto max-w-6xl px-6 py-20">
         <h2 className="text-center text-2xl font-bold text-white sm:text-3xl">{headings.features}</h2>
-        <div className="mt-12 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {FEATURES[lang].map((f) => (
-            <div
-              key={f.title}
-              className="rounded-xl border border-white/10 bg-white/5 p-5 transition-colors hover:border-brand-gold/40"
-            >
-              <div className="mb-3 h-1.5 w-8 rounded-full bg-brand-maroon" />
-              <h3 className="mb-1.5 text-sm font-semibold text-white">{f.title}</h3>
-              <p className="text-sm text-white/60">{f.text}</p>
+        <div className="mt-12 flex flex-col gap-12">
+          {FEATURE_CATEGORIES[lang].map((cat) => (
+            <div key={cat.category}>
+              <h3 className="mb-5 text-xs font-semibold uppercase tracking-wide text-brand-gold">
+                {cat.category}
+              </h3>
+              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+                {cat.items.map((f) => (
+                  <div
+                    key={f.title}
+                    className="rounded-xl border border-white/10 bg-white/5 p-5 transition-colors hover:border-brand-gold/40"
+                  >
+                    <div className="mb-3 h-1.5 w-8 rounded-full bg-brand-maroon" />
+                    <h4 className="mb-1.5 text-sm font-semibold text-white">{f.title}</h4>
+                    <p className="text-sm text-white/60">{f.text}</p>
+                  </div>
+                ))}
+              </div>
             </div>
           ))}
         </div>
