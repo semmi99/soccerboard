@@ -17,6 +17,7 @@ import {
   MannequinIcon,
   MiniGoalIcon,
   PlainLineIcon,
+  RatioBadgeIcon,
   RectShapeIcon,
   RingIcon,
   SlalomPoleIcon,
@@ -101,6 +102,12 @@ export function Toolbar() {
   const tool = useEditorStore((s) => s.tool)
   const setTool = useEditorStore((s) => s.setTool)
   const addImageObject = useEditorStore((s) => s.addImageObject)
+  const addRatioBadgeFromSelection = useEditorStore((s) => s.addRatioBadgeFromSelection)
+  const selectedChipCount = useEditorStore((s) => {
+    const frame = s.frames[s.activeFrameIndex]
+    if (!frame) return 0
+    return frame.objects.filter((o) => o.objectType === 'player_chip' && s.selection.includes(o.id)).length
+  })
   const organization = useAuthStore((s) => s.organization)
   const [isUploadingImage, setIsUploadingImage] = useState(false)
 
@@ -180,6 +187,24 @@ export function Toolbar() {
           }}
         />
       </label>
+      <button
+        type="button"
+        title={
+          selectedChipCount >= 2
+            ? 'Verhältnis-Badge erstellen (z.B. 3 v 4)'
+            : 'Wähle 2 oder mehr Spieler-Chips aus (z.B. mit dem Auswahlrahmen), um ein Verhältnis-Badge zu erstellen'
+        }
+        aria-label="Verhältnis-Badge erstellen"
+        disabled={selectedChipCount < 2}
+        onClick={addRatioBadgeFromSelection}
+        className={`flex h-11 w-11 items-center justify-center rounded-lg border transition-colors ${
+          selectedChipCount >= 2
+            ? 'border-gold-accent/10 bg-[#0d1e35] text-gold-accent/70 hover:border-gold-accent/40 hover:text-gold-accent-bright'
+            : 'cursor-not-allowed border-gold-accent/10 bg-[#0d1e35] text-gold-accent/30'
+        }`}
+      >
+        <RatioBadgeIcon />
+      </button>
     </aside>
   )
 }

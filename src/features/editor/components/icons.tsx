@@ -176,3 +176,13 @@ export function RingIcon(props: SVGProps<SVGSVGElement>) {
     </Base>
   )
 }
+
+export function RatioBadgeIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <Base {...props}>
+      <circle cx="7" cy="9" r="3" />
+      <circle cx="7" cy="9" r="3" transform="translate(10 6)" />
+      <path d="M12 5v14" strokeDasharray="2 2" />
+    </Base>
+  )
+}
