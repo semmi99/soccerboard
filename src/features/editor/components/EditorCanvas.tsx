@@ -1117,6 +1117,16 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
             ref={trRef}
             onTransformStart={handleTransformStart}
             rotateEnabled
+            // Default (50) sits close enough to the shape that a plain drag
+            // meant for the shape's body can land on the rotate handle
+            // instead — and once grabbed, a couple of pixels of mouse
+            // movement near the shape swing it through a huge angle (the
+            // handle-to-pivot distance barely grows with the shape's own
+            // size, so the same small movement is far more sensitive on a
+            // long thin arrow than on a big chunky shape). Pushing the
+            // handle further out both makes it harder to grab by accident
+            // and makes each drag pixel correspond to a smaller angle.
+            rotateAnchorOffset={150}
             enabledAnchors={hasBendableArrowSelected ? [] : undefined}
             keepRatio={!allFreelyResizableSelected}
             boundBoxFunc={(oldBox, newBox) =>
