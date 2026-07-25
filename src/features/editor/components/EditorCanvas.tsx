@@ -954,17 +954,21 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
     selectedObjects.length > 0 &&
     selectedObjects.every((o) => o.objectType === 'shape' || o.objectType === 'training_equipment')
 
-  // Bendable straight/polyline arrows get their own point-drag handles (see
-  // ArrowPointHandles in ObjectRenderer) sitting right at the shape's own
-  // corners — the Transformer's resize anchors would land almost exactly on
-  // top of them and hijack the drag. Rotation doesn't have that conflict
-  // (the rotate handle sits above the shape, not on its corners), so these
-  // arrows stay attached to the Transformer for rotating, just with the
-  // resize anchors hidden. Curved arrows have no point handles and keep the
-  // normal full set.
-  const hasBendableArrowSelected = selectedObjects.some(
-    (o) => o.objectType === 'arrow' && o.data.shape !== 'curved',
-  )
+  // Arrows/lines are thin — their bounding box is only as tall as the
+  // stroke, so the Transformer's resize anchors end up overlapping almost
+  // the entire shape instead of sitting outside it. A plain drag then often
+  // grabs a corner anchor instead of the line body, and resizing from a
+  // near-zero-height box turns a small mouse movement into a huge jump
+  // (exactly the bug that made small images fly off the pitch — see
+  // addImageObject's minDim comment in editorStore.ts). Bendable
+  // straight/polyline arrows have their own point-drag handles (see
+  // ArrowPointHandles in ObjectRenderer) for reshaping, and curved arrows
+  // reshape via the "Kurvenradius" slider in the sidebar — neither needs the
+  // Transformer's corner resize, so it's hidden for every arrow shape.
+  // Rotation doesn't have that conflict (the rotate handle sits above the
+  // shape, not on its corners), so arrows stay attached to the Transformer
+  // for rotating.
+  const hasBendableArrowSelected = selectedObjects.some((o) => o.objectType === 'arrow')
 
   return (
     <div ref={containerRef} className="flex h-full w-full items-center justify-center overflow-hidden">
