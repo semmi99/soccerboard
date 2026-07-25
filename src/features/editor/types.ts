@@ -189,23 +189,37 @@ export type FrameObject =
   | (FrameObjectBase & { objectType: 'ball'; data: BallData })
   | (FrameObjectBase & { objectType: 'connector'; data: ConnectorData })
 
-/** A short "broadcast graphic" style story beat shown over this frame — an
- * eyebrow label, a bold headline, and an optional supporting line, matching
- * the callout-card look of tactical-analysis explainer reels. Any of the
- * three left empty/undefined just renders nothing for that line; when all
- * three are empty the whole overlay is skipped. */
+/** One small draggable pill label (e.g. "THE PROBLEM") — a frame can carry
+ * several, each pointed at a different spot on the pitch, matching how
+ * tactical-analysis reels drop more than one callout onto the same still. */
+export interface CaptionBadge {
+  id: string
+  text: string
+  x: number
+  y: number
+  color: string
+  gradient?: boolean
+  color2?: string | null
+  gradientDirection?: 'radial' | 'linear'
+}
+
+/** A short "broadcast graphic" style story beat shown over this frame — one
+ * or more eyebrow badges plus a title card (bold headline + optional
+ * supporting line), matching the callout-card look of tactical-analysis
+ * explainer reels. No badges and no title/subtitle means the whole overlay
+ * is skipped. The title card itself is draggable and resizable and can take
+ * the same solid/gradient background any shape or text object can. */
 export interface FrameCaption {
-  badge?: string
+  badges: CaptionBadge[]
   title?: string
   subtitle?: string
-  /** Badge pill color — defaults to a fixed red when unset. */
-  badgeColor?: string
-  /** The badge's own draggable offset from its default position (stage
-   * coordinates), so it can be pointed at a specific spot on the pitch
-   * instead of always sitting fixed above the title card. Unset means the
-   * default position right above the card. */
-  badgeX?: number
-  badgeY?: number
+  cardX: number
+  cardY: number
+  cardWidth: number
+  background: string
+  gradient?: boolean
+  background2?: string | null
+  gradientDirection?: 'radial' | 'linear'
 }
 
 export interface EditorFrame {

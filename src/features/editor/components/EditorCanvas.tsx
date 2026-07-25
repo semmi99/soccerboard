@@ -333,7 +333,8 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
   const pitchLengthM = useEditorStore((s) => s.pitchLengthM)
   const frames = useEditorStore((s) => s.frames)
   const activeFrameIndex = useEditorStore((s) => s.activeFrameIndex)
-  const setFrameCaption = useEditorStore((s) => s.setFrameCaption)
+  const updateFrameCaptionBadge = useEditorStore((s) => s.updateFrameCaptionBadge)
+  const setFrameCaptionCard = useEditorStore((s) => s.setFrameCaptionCard)
   const tool = useEditorStore((s) => s.tool)
   const selection = useEditorStore((s) => s.selection)
   const setSelection = useEditorStore((s) => s.setSelection)
@@ -1016,7 +1017,9 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
           <FrameCaptionOverlay
             caption={frame.caption}
             interactive={!isPlaying}
-            onBadgeDragEnd={(x, y) => setFrameCaption(activeFrameIndex, { badgeX: x, badgeY: y })}
+            onBadgeDragEnd={(badgeId, x, y) => updateFrameCaptionBadge(activeFrameIndex, badgeId, { x, y })}
+            onCardDragEnd={(x, y) => setFrameCaptionCard(activeFrameIndex, { cardX: x, cardY: y })}
+            onCardResize={(width) => setFrameCaptionCard(activeFrameIndex, { cardWidth: width })}
           />
         </Layer>
       </Stage>

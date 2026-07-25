@@ -172,6 +172,7 @@ export type Database = {
         Row: {
           caption_badge: string | null
           caption_badge_color: string | null
+          caption_data: Json | null
           caption_subtitle: string | null
           caption_title: string | null
           caption_x: number | null
@@ -186,6 +187,7 @@ export type Database = {
         Insert: {
           caption_badge?: string | null
           caption_badge_color?: string | null
+          caption_data?: Json | null
           caption_subtitle?: string | null
           caption_title?: string | null
           caption_x?: number | null
@@ -200,6 +202,7 @@ export type Database = {
         Update: {
           caption_badge?: string | null
           caption_badge_color?: string | null
+          caption_data?: Json | null
           caption_subtitle?: string | null
           caption_title?: string | null
           caption_x?: number | null
