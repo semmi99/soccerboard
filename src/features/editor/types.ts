@@ -55,9 +55,15 @@ export interface TeamKit {
   away: KitConfig
   gk: KitConfig
   chipScale: number
-  /** When set, every chip of this team renders this badge image instead of
-   * its kit colors — a crest doesn't have a home/away variant. */
-  crestUrl?: string | null
+  /** When set, every HOME chip renders this badge image instead of its kit
+   * colors. Independent from awayCrestUrl — without a linked team, home and
+   * away represent two distinct sides (e.g. us vs. an opponent), so one
+   * side's crest must never bleed onto the other. For a linked real team,
+   * both fields are set to that team's own single crest (see
+   * TeamSquadPanel), since there it's the same club's badge either way. */
+  homeCrestUrl?: string | null
+  /** Same as homeCrestUrl, for AWAY chips. */
+  awayCrestUrl?: string | null
 }
 
 export interface ArrowData {

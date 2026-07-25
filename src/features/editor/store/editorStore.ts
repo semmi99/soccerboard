@@ -159,6 +159,7 @@ interface EditorState {
   removeSelected: () => void
   clearActiveFrame: () => void
   duplicateSelected: () => void
+  addRatioBadgeFromSelection: () => void
   bringToFront: (objectId: string) => void
   sendToBack: (objectId: string) => void
 
@@ -601,6 +602,48 @@ export const useEditorStore = create<EditorState>((set, get) => ({
       selection: duplicates.map((d) => d.id),
       isDirty: true,
     })
+  },
+
+  // Counts home vs away among the currently-selected player chips (e.g. from
+  // a marquee drag over a group) and drops a "X v Y" badge at their
+  // centroid — the numbers-up/down callout tactical explainers use, without
+  // having to type the ratio by hand or recount it after moving players.
+  addRatioBadgeFromSelection: () => {
+    const { frames, activeFrameIndex, selection } = get()
+    const frame = frames[activeFrameIndex]
+    if (!frame) return
+    const chips = frame.objects.filter(
+      (o): o is Extract<FrameObject, { objectType: 'player_chip' }> =>
+        o.objectType === 'player_chip' && selection.includes(o.id),
+    )
+    if (chips.length < 2) return
+    const homeCount = chips.filter((c) => c.data.team === 'home').length
+    const awayCount = chips.filter((c) => c.data.team === 'away').length
+    const cx = chips.reduce((s, c) => s + c.x, 0) / chips.length
+    const cy = chips.reduce((s, c) => s + c.y, 0) / chips.length
+
+    pushHistory(get, set)
+    const maxZ = frame.objects.reduce((m, o) => Math.max(m, o.zIndex), -1)
+    const newObject: FrameObject = {
+      id: crypto.randomUUID(),
+      x: cx,
+      y: cy - 55,
+      rotation: 0,
+      scale: 1,
+      zIndex: maxZ + 1,
+      objectType: 'text',
+      data: {
+        text: `${homeCount} v ${awayCount}`,
+        fontSize: 20,
+        color: '#0f172a',
+        fontStyle: 'bold',
+        background: '#ffe100',
+      },
+    }
+    const nextFrames = frames.map((f, i) =>
+      i === activeFrameIndex ? { ...f, objects: [...f.objects, newObject] } : f,
+    )
+    set({ frames: nextFrames, selection: [newObject.id], isDirty: true })
   },
 
   bringToFront: (objectId) => {

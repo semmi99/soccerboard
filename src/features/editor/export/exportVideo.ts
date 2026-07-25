@@ -47,7 +47,16 @@ function buildRecapLayer(stage: Konva.Stage): Konva.Layer {
     { label: 'PÄSSE / LÄUFE EINGEZEICHNET', value: String(stats.passCount) },
     { label: 'GESAMTDISTANZ', value: `${Math.round(stats.totalDistanceM)} m` },
   ]
-  const cardH = 56 + rows.length * rowH + 20
+  // A before/after comparison — same idea as a broadcast graphic's payoff
+  // card comparing two outcomes side by side — only earns its place when
+  // the numbers actually shifted over the sequence; an unchanged ratio
+  // (or no players at all) has nothing worth comparing.
+  const showRatioCompare =
+    stats.startRatio.home + stats.startRatio.away > 0 &&
+    stats.endRatio.home + stats.endRatio.away > 0 &&
+    (stats.startRatio.home !== stats.endRatio.home || stats.startRatio.away !== stats.endRatio.away)
+  const compareH = showRatioCompare ? 92 : 0
+  const cardH = 56 + rows.length * rowH + compareH + 20
   const cardY = (h - cardH) / 2
 
   const layer = new Konva.Layer()
@@ -100,6 +109,49 @@ function buildRecapLayer(stage: Konva.Stage): Konva.Layer {
       }),
     )
   })
+
+  if (showRatioCompare) {
+    const compareY = cardY + 56 + rows.length * rowH + 8
+    const half = (cardW - 44) / 2
+    const columns: { label: string; ratio: { home: number; away: number } }[] = [
+      { label: 'START', ratio: stats.startRatio },
+      { label: 'ENDE', ratio: stats.endRatio },
+    ]
+    layer.add(
+      new Konva.Line({
+        points: [cardX + cardW / 2, compareY + 6, cardX + cardW / 2, compareY + compareH - 14],
+        stroke: '#e2e8f0',
+        strokeWidth: 1,
+      }),
+    )
+    columns.forEach((col, i) => {
+      const x = cardX + 22 + i * half
+      layer.add(
+        new Konva.Text({
+          x,
+          y: compareY,
+          width: half - 10,
+          align: 'center',
+          text: col.label,
+          fontSize: 11,
+          fontStyle: 'bold',
+          fill: '#64748b',
+          letterSpacing: 1,
+        }),
+        new Konva.Text({
+          x,
+          y: compareY + 20,
+          width: half - 10,
+          align: 'center',
+          text: `${col.ratio.home} v ${col.ratio.away}`,
+          fontSize: 30,
+          fontStyle: 'bold',
+          fill: '#0f172a',
+        }),
+      )
+    })
+  }
+
   return layer
 }
 

@@ -192,7 +192,10 @@ export function PlayerChipShape({ data }: { data: PlayerChipData }) {
   return (
     <Group>
       {data.highlighted && <HighlightRing />}
-      {teamKit?.crestUrl ? <CrestFill url={teamKit.crestUrl} /> : <KitFill kit={kit} />}
+      {(() => {
+        const crestUrl = data.team === 'home' ? teamKit?.homeCrestUrl : teamKit?.awayCrestUrl
+        return crestUrl ? <CrestFill url={crestUrl} /> : <KitFill kit={kit} />
+      })()}
       <Text
         text={data.displayText !== undefined ? data.displayText : String(data.number)}
         fontSize={15}
