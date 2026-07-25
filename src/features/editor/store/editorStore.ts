@@ -55,6 +55,14 @@ function defaultFrameCaption(): FrameCaption {
   return { badges: [], cards: [] }
 }
 
+function cloneCaption(caption: FrameCaption | null | undefined): FrameCaption | null {
+  if (!caption) return null
+  return {
+    badges: caption.badges.map((b) => ({ ...b, id: crypto.randomUUID() })),
+    cards: caption.cards.map((c) => ({ ...c, id: crypto.randomUUID() })),
+  }
+}
+
 function defaultCaptionBadge(existingCount: number): CaptionBadge {
   return {
     id: crypto.randomUUID(),
@@ -719,10 +727,10 @@ export const useEditorStore = create<EditorState>((set, get) => ({
       // moving them in the new frame produces a smooth tween during playback
       // instead of an instant swap (matching is done by id, see EditorCanvas).
       objects: source.objects.map(cloneObject),
-      // The story caption is this frame's own beat in the narrative — a
-      // duplicate is a new moment, so it starts without one instead of
-      // silently repeating the source frame's headline.
-      caption: null,
+      // Carries the caption over instead of dropping it — losing the
+      // title/subtitle card on every duplicate meant retyping it for each
+      // new beat of what's usually the same ongoing sequence.
+      caption: cloneCaption(source.caption),
     }
     const nextFrames = [...frames]
     nextFrames.splice(index + 1, 0, copy)

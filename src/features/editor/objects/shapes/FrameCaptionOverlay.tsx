@@ -87,8 +87,10 @@ function TitleCard({
   onDragEnd: (x: number, y: number) => void
   onResize?: (width: number, height: number) => void
 }) {
-  const titleHeight = card.title ? 30 : 0
-  const subtitleHeight = card.subtitle ? 20 : 0
+  const titleFontSize = card.titleFontSize ?? 20
+  const subtitleFontSize = card.subtitleFontSize ?? 12
+  const titleHeight = card.title ? titleFontSize + 10 : 0
+  const subtitleHeight = card.subtitle ? subtitleFontSize + 8 : 0
   const cardPadY = 14
   const autoHeight = cardPadY * 2 + titleHeight + subtitleHeight
   const cardHeight = card.cardHeight ?? autoHeight
@@ -110,9 +112,9 @@ function TitleCard({
           x={16}
           y={cardPadY}
           width={card.cardWidth - 32}
-          fontSize={20}
+          fontSize={titleFontSize}
           fontStyle="bold"
-          fill="#0f172a"
+          fill={card.titleColor ?? '#0f172a'}
           wrap="word"
           listening={false}
         />
@@ -123,8 +125,8 @@ function TitleCard({
           x={16}
           y={cardPadY + titleHeight}
           width={card.cardWidth - 32}
-          fontSize={12}
-          fill="#475569"
+          fontSize={subtitleFontSize}
+          fill={card.subtitleColor ?? '#475569'}
           wrap="word"
           listening={false}
         />
