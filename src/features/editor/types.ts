@@ -256,6 +256,10 @@ export interface FrameCaptionCard {
   cardX: number
   cardY: number
   cardWidth: number
+  /** Overrides the card's height (drag-resizable independently from width).
+   * Unset falls back to auto-sizing from title/subtitle content — the
+   * original behavior. */
+  cardHeight?: number
   background: string
   gradient?: boolean
   background2?: string | null

@@ -94,9 +94,12 @@ export function PropertiesSidebar() {
   // Selecting an object collapses the Feld/Team & Kader/Frame-Beschriftung
   // sections so its own properties are reachable without scrolling past
   // all three — especially painful on a tablet's shorter viewport.
-  // Deselecting restores the normal expanded view. Only fires on the
-  // none-⇄-some transition, so a manual re-expand while something stays
-  // selected isn't immediately fought on the next selection change.
+  // Deliberately one-way: deselecting does NOT force them back open, since
+  // that fought a manually-collapsed section every time selection emptied
+  // out (e.g. after clicking empty canvas) even though the user never
+  // touched the +/− toggle. Only fires on the none→some transition, so
+  // re-selecting a different object while one is already selected doesn't
+  // re-collapse a section the user just reopened by hand.
   const hadSelectionRef = useRef(false)
   useEffect(() => {
     const hasSelection = selection.length > 0
@@ -104,10 +107,6 @@ export function PropertiesSidebar() {
       setIsFieldPanelOpen(false)
       setIsTeamPanelOpen(false)
       setIsCaptionPanelOpen(false)
-    } else if (!hasSelection && hadSelectionRef.current) {
-      setIsFieldPanelOpen(true)
-      setIsTeamPanelOpen(true)
-      setIsCaptionPanelOpen(true)
     }
     hadSelectionRef.current = hasSelection
   }, [selection.length])
@@ -333,6 +332,9 @@ export function PropertiesSidebar() {
                         className={inputClass}
                         value={card.title ?? ''}
                         onChange={(e) => updateFrameCaptionCard(activeFrameIndex, card.id, { title: e.target.value })}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') e.currentTarget.blur()
+                        }}
                       />
                     </Field>
                     <Field label="Untertitel">
@@ -341,6 +343,9 @@ export function PropertiesSidebar() {
                         className={inputClass}
                         value={card.subtitle ?? ''}
                         onChange={(e) => updateFrameCaptionCard(activeFrameIndex, card.id, { subtitle: e.target.value })}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') e.currentTarget.blur()
+                        }}
                       />
                     </Field>
                     <div className="flex flex-col gap-1.5">
