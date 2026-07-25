@@ -69,3 +69,22 @@ export async function removeMember(userId: string): Promise<void> {
   if (error) throw error
   if (data?.error) throw new Error(data.error)
 }
+
+/** Creates a fully-usable teammate account immediately, with a password the
+ * admin sets, via the org-create-member Edge Function — unlike
+ * inviteMember, there's no wait for the person to self-register. */
+export async function createMember(input: {
+  email: string
+  password: string
+  fullName: string
+  role: OrgRole
+}): Promise<OrgMember> {
+  const { data, error } = await supabase.functions.invoke<{ profile?: OrgMember; error?: string }>(
+    'org-create-member',
+    { body: input },
+  )
+  if (error) throw error
+  if (data?.error) throw new Error(data.error)
+  if (!data?.profile) throw new Error('Unerwartete Antwort vom Server.')
+  return data.profile
+}

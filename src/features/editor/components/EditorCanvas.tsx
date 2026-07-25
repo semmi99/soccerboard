@@ -474,11 +474,14 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
 
   // Offside check: the first player_chip marked as the offside reference
   // (the last outfield defender) sets the line; every opposing-team chip
-  // then gets a live "Onside/Abseits by X.Xm" label. The attacking
-  // direction isn't tracked explicitly anywhere in the data model, so it's
-  // inferred from which side of the reference the opposing team is
-  // predominantly sitting on — defenders naturally cluster near their own
-  // goal, attackers push toward the other end.
+  // then gets a live "Nicht abseits/Abseits by X.Xm" label. The attacking
+  // direction isn't tracked explicitly anywhere in the data model, so —
+  // same trick as the space-behind zone above — it's inferred from
+  // whichever pitch edge the reference defender is nearer to: defenders
+  // sit closer to their OWN goal than to the opponent's, regardless of how
+  // the attackers happen to be scattered (averaging attacker positions,
+  // the previous approach, broke as soon as one attacker sat deep — e.g. a
+  // withdrawn midfielder — which skewed the average onto the wrong side).
   const offsideRef = visibleObjects.find(
     (o): o is Extract<FrameObject, { objectType: 'player_chip' }> =>
       o.objectType === 'player_chip' && Boolean(o.data.offsideReference),
@@ -491,20 +494,19 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
     )
     if (attackers.length === 0) return []
     const refPos = lengthAxis === 'y' ? offsideRef.y : offsideRef.x
-    const avgAttackerPos =
-      attackers.reduce((s, a) => s + (lengthAxis === 'y' ? a.y : a.x), 0) / attackers.length
-    const dirSign = avgAttackerPos >= refPos ? 1 : -1
+    const ownGoalEdge = refPos < lengthSize / 2 ? 0 : lengthSize
+    const refDistToGoal = Math.abs(refPos - ownGoalEdge)
     return attackers.map((a) => {
       const pos = lengthAxis === 'y' ? a.y : a.x
-      const deltaPx = (pos - refPos) * dirSign
-      const deltaM = Math.abs(deltaPx) * (pitchLengthM / lengthSize)
-      const offside = deltaPx > 0
+      const distToGoal = Math.abs(pos - ownGoalEdge)
+      const deltaM = Math.abs(distToGoal - refDistToGoal) * (pitchLengthM / lengthSize)
+      const offside = distToGoal < refDistToGoal
       return {
         id: a.id,
         x: a.x,
         y: a.y,
         offside,
-        text: `${offside ? 'Abseits' : 'Onside'} ${deltaM.toFixed(1)}m`,
+        text: `${offside ? 'Abseits' : 'Nicht abseits'} ${deltaM.toFixed(1)}m`,
       }
     })
   })()
@@ -1029,31 +1031,34 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
               />
             )
           })}
-          {offsideLabels.map((l) => (
-            <Group key={`offside-${l.id}`} x={l.x} y={l.y - 46} listening={false}>
-              <Rect
-                x={-42}
-                y={-11}
-                width={84}
-                height={22}
-                fill={l.offside ? '#ef4444' : '#22c55e'}
-                cornerRadius={4}
-                opacity={0.92}
-              />
-              <Text
-                text={l.text}
-                x={-42}
-                y={-11}
-                width={84}
-                height={22}
-                align="center"
-                verticalAlign="middle"
-                fontSize={10}
-                fontStyle="bold"
-                fill="#ffffff"
-              />
-            </Group>
-          ))}
+          {offsideLabels.map((l) => {
+            const labelWidth = Math.max(84, l.text.length * 6.2 + 16)
+            return (
+              <Group key={`offside-${l.id}`} x={l.x} y={l.y - 46} listening={false}>
+                <Rect
+                  x={-labelWidth / 2}
+                  y={-11}
+                  width={labelWidth}
+                  height={22}
+                  fill={l.offside ? '#ef4444' : '#22c55e'}
+                  cornerRadius={4}
+                  opacity={0.92}
+                />
+                <Text
+                  text={l.text}
+                  x={-labelWidth / 2}
+                  y={-11}
+                  width={labelWidth}
+                  height={22}
+                  align="center"
+                  verticalAlign="middle"
+                  fontSize={10}
+                  fontStyle="bold"
+                  fill="#ffffff"
+                />
+              </Group>
+            )
+          })}
           {motionGuides.map((g) => (
             <MotionGuide
               key={`motion-${g.id}`}

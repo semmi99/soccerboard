@@ -1,4 +1,4 @@
-import { useState, type ChangeEvent, type ReactNode } from 'react'
+import { useEffect, useRef, useState, type ChangeEvent, type ReactNode } from 'react'
 import { useEditorStore } from '../store/editorStore'
 import type {
   ArrowData,
@@ -89,6 +89,27 @@ export function PropertiesSidebar() {
   const [isTeamPanelOpen, setIsTeamPanelOpen] = useState(true)
   const [isFieldPanelOpen, setIsFieldPanelOpen] = useState(true)
   const [isCaptionPanelOpen, setIsCaptionPanelOpen] = useState(true)
+
+  // Selecting an object collapses the Feld/Team & Kader/Frame-Beschriftung
+  // sections so its own properties are reachable without scrolling past
+  // all three — especially painful on a tablet's shorter viewport.
+  // Deselecting restores the normal expanded view. Only fires on the
+  // none-⇄-some transition, so a manual re-expand while something stays
+  // selected isn't immediately fought on the next selection change.
+  const hadSelectionRef = useRef(false)
+  useEffect(() => {
+    const hasSelection = selection.length > 0
+    if (hasSelection && !hadSelectionRef.current) {
+      setIsFieldPanelOpen(false)
+      setIsTeamPanelOpen(false)
+      setIsCaptionPanelOpen(false)
+    } else if (!hasSelection && hadSelectionRef.current) {
+      setIsFieldPanelOpen(true)
+      setIsTeamPanelOpen(true)
+      setIsCaptionPanelOpen(true)
+    }
+    hadSelectionRef.current = hasSelection
+  }, [selection.length])
 
   function updateData<T extends FrameObject>(patch: Partial<T['data']>) {
     if (!selectedObject) return

@@ -154,8 +154,7 @@ export function MannequinIcon(props: SVGProps<SVGSVGElement>) {
 export function SlalomPoleIcon(props: SVGProps<SVGSVGElement>) {
   return (
     <Base {...props}>
-      <path d="M12 4v13" />
-      <circle cx="12" cy="19" r="2" />
+      <path d="M12 4v16" />
     </Base>
   )
 }

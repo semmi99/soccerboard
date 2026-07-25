@@ -78,12 +78,7 @@ function EquipmentIcon({ data }: { data: EquipmentData }) {
         </Group>
       )
     case 'slalom_pole':
-      return (
-        <Group>
-          <Line points={[0, -22, 0, 10]} stroke={color} strokeWidth={3} />
-          <Circle y={12} radius={5} fill="#1f1f3a" stroke={color} strokeWidth={2} />
-        </Group>
-      )
+      return <Line points={[0, -22, 0, 10]} stroke={color} strokeWidth={3} />
     case 'ladder':
       return (
         <Group>

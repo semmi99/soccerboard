@@ -4,6 +4,7 @@ import { AppHeader } from '../../../app/AppHeader'
 import { Button } from '../../../components/ui/Button'
 import {
   cancelInvite,
+  createMember,
   inviteMember,
   listOrgMembers,
   listPendingInvites,
@@ -39,6 +40,12 @@ export function AdminPage() {
   const [inviteRole, setInviteRole] = useState<OrgRole>('coach')
   const [isInviting, setIsInviting] = useState(false)
   const [removingId, setRemovingId] = useState<string | null>(null)
+
+  const [createEmail, setCreateEmail] = useState('')
+  const [createFullName, setCreateFullName] = useState('')
+  const [createPassword, setCreatePassword] = useState('')
+  const [createRole, setCreateRole] = useState<OrgRole>('coach')
+  const [isCreating, setIsCreating] = useState(false)
 
   useEffect(() => {
     if (!organization) return
@@ -88,6 +95,28 @@ export function AdminPage() {
       setError(err instanceof Error ? err.message : 'Einladung fehlgeschlagen.')
     } finally {
       setIsInviting(false)
+    }
+  }
+
+  async function handleCreateMember() {
+    if (!createEmail.trim() || createPassword.length < 8) return
+    setIsCreating(true)
+    setError(null)
+    try {
+      const profile = await createMember({
+        email: createEmail,
+        password: createPassword,
+        fullName: createFullName,
+        role: createRole,
+      })
+      setMembers((ms) => [...ms, profile])
+      setCreateEmail('')
+      setCreateFullName('')
+      setCreatePassword('')
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Konto konnte nicht angelegt werden.')
+    } finally {
+      setIsCreating(false)
     }
   }
 
@@ -211,6 +240,67 @@ export function AdminPage() {
               ))}
             </div>
           )}
+        </section>
+
+        <section className="mt-6 rounded-xl border border-pitch-700 bg-pitch-900 p-5">
+          <h2 className="mb-1 text-sm font-semibold text-white">Manuell anlegen</h2>
+          <p className="mb-3 text-xs text-white/40">
+            Erstellt das Konto sofort mit dem hier gesetzten Passwort — ohne auf eine
+            Selbstregistrierung zu warten. Gib der Person das Passwort separat weiter.
+          </p>
+          <div className="flex flex-wrap items-end gap-2">
+            <label className="flex flex-1 flex-col gap-1 text-xs" style={{ minWidth: 140 }}>
+              <span className="font-medium text-white/60">E-Mail</span>
+              <input
+                type="email"
+                className={inputClass}
+                value={createEmail}
+                onChange={(e) => setCreateEmail(e.target.value)}
+                placeholder="trainer@verein.de"
+              />
+            </label>
+            <label className="flex flex-1 flex-col gap-1 text-xs" style={{ minWidth: 120 }}>
+              <span className="font-medium text-white/60">Name</span>
+              <input
+                type="text"
+                className={inputClass}
+                value={createFullName}
+                onChange={(e) => setCreateFullName(e.target.value)}
+                placeholder="Max Mustermann"
+              />
+            </label>
+            <label className="flex flex-1 flex-col gap-1 text-xs" style={{ minWidth: 140 }}>
+              <span className="font-medium text-white/60">Passwort</span>
+              <input
+                type="text"
+                className={inputClass}
+                value={createPassword}
+                onChange={(e) => setCreatePassword(e.target.value)}
+                placeholder="Min. 8 Zeichen"
+              />
+            </label>
+            <label className="flex flex-col gap-1 text-xs">
+              <span className="font-medium text-white/60">Rolle</span>
+              <select
+                className={selectClass}
+                value={createRole}
+                onChange={(e) => setCreateRole(e.target.value as OrgRole)}
+              >
+                {(Object.keys(ROLE_LABELS) as OrgRole[]).map((r) => (
+                  <option key={r} value={r}>
+                    {ROLE_LABELS[r]}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <Button
+              onClick={() => void handleCreateMember()}
+              loading={isCreating}
+              disabled={!createEmail.trim() || createPassword.length < 8}
+            >
+              Anlegen
+            </Button>
+          </div>
         </section>
 
         <section className="mt-6 rounded-xl border border-pitch-700 bg-pitch-900 p-5">
