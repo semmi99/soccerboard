@@ -135,9 +135,9 @@ export function ConeIcon(props: SVGProps<SVGSVGElement>) {
 export function MiniGoalIcon(props: SVGProps<SVGSVGElement>) {
   return (
     <Base {...props}>
-      <path d="M4 7l3-3h10l3 3" />
       <rect x="4" y="7" width="16" height="10" rx="1" />
-      <path d="M9 7v10M15 7v10M4 11h16" opacity="0.5" />
+      <path d="M4 7l16 10" />
+      <path d="M20 7L4 17" />
     </Base>
   )
 }
@@ -173,16 +173,6 @@ export function RingIcon(props: SVGProps<SVGSVGElement>) {
   return (
     <Base {...props}>
       <circle cx="12" cy="12" r="7" strokeWidth={3} />
-    </Base>
-  )
-}
-
-export function RatioBadgeIcon(props: SVGProps<SVGSVGElement>) {
-  return (
-    <Base {...props}>
-      <circle cx="7" cy="9" r="3" />
-      <circle cx="7" cy="9" r="3" transform="translate(10 6)" />
-      <path d="M12 5v14" strokeDasharray="2 2" />
     </Base>
   )
 }
