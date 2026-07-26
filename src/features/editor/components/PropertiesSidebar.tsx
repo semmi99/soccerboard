@@ -832,18 +832,60 @@ function ArrowFields({
         Dribbellinie (gewellt)
       </label>
       {data.shape !== 'curved' && (
-        <label className="flex items-center gap-2 text-xs text-white/70">
-          <input
-            type="checkbox"
-            className="accent-violet-accent"
-            checked={data.spaceBehind ?? false}
-            onChange={(e) => {
-              onCheckpoint()
-              onChange({ spaceBehind: e.target.checked })
-            }}
-          />
-          Als Abwehrlinie markieren (Raum dahinter anzeigen)
-        </label>
+        <>
+          <label className="flex items-center gap-2 text-xs text-white/70">
+            <input
+              type="checkbox"
+              className="accent-violet-accent"
+              checked={data.spaceBehind ?? false}
+              onChange={(e) => {
+                onCheckpoint()
+                onChange({ spaceBehind: e.target.checked })
+              }}
+            />
+            Als Abwehrlinie markieren (Raum dahinter anzeigen)
+          </label>
+          {data.spaceBehind && (
+            <div className="flex flex-col gap-2 pl-5">
+              <label className="flex items-center gap-2 text-xs text-white/70">
+                <input
+                  type="checkbox"
+                  className="accent-violet-accent"
+                  checked={data.spaceBehindShowLabel ?? true}
+                  onChange={(e) => {
+                    onCheckpoint()
+                    onChange({ spaceBehindShowLabel: e.target.checked })
+                  }}
+                />
+                Meter-Label anzeigen
+              </label>
+              <Field label={`Deckkraft (${Math.round((data.spaceBehindOpacity ?? 0.3) * 100)}%)`}>
+                <input
+                  type="range"
+                  min={0.1}
+                  max={0.7}
+                  step={0.05}
+                  className="w-full"
+                  value={data.spaceBehindOpacity ?? 0.3}
+                  onFocus={onCheckpoint}
+                  onChange={(e) => onChange({ spaceBehindOpacity: Number(e.target.value) })}
+                />
+              </Field>
+              <label className="flex items-center gap-2 text-xs text-white/70">
+                <input
+                  type="checkbox"
+                  className="accent-violet-accent"
+                  checked={data.spaceBehindGradient ?? false}
+                  onChange={(e) => {
+                    onCheckpoint()
+                    onChange({ spaceBehindGradient: e.target.checked })
+                  }}
+                />
+                Farbverlauf (zum Tor hin ausblendend)
+              </label>
+            </div>
+          )}
+        </>
       )}
       {data.shape !== 'curved' && data.bendable !== false && (
         <Button
