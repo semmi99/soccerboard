@@ -145,9 +145,9 @@ export function ConeIcon(props: SVGProps<SVGSVGElement>) {
 export function MiniGoalIcon(props: SVGProps<SVGSVGElement>) {
   return (
     <Base {...props}>
+      <path d="M4 7l3-3h10l3 3" />
       <rect x="4" y="7" width="16" height="10" rx="1" />
-      <path d="M4 7l16 10" />
-      <path d="M20 7L4 17" />
+      <path d="M9 7v10M15 7v10M4 11h16" opacity="0.5" />
     </Base>
   )
 }
