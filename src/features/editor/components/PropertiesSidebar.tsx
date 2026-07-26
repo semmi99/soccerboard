@@ -656,18 +656,34 @@ function ArrowFields({
         Dribbellinie (gewellt)
       </label>
       {data.shape !== 'curved' && (
-        <label className="flex items-center gap-2 text-xs text-white/70">
-          <input
-            type="checkbox"
-            className="accent-violet-accent"
-            checked={data.spaceBehind ?? false}
-            onChange={(e) => {
-              onCheckpoint()
-              onChange({ spaceBehind: e.target.checked })
-            }}
-          />
-          Als Abwehrlinie markieren (Raum dahinter anzeigen)
-        </label>
+        <>
+          <label className="flex items-center gap-2 text-xs text-white/70">
+            <input
+              type="checkbox"
+              className="accent-violet-accent"
+              checked={data.spaceBehind ?? false}
+              onChange={(e) => {
+                onCheckpoint()
+                onChange({ spaceBehind: e.target.checked })
+              }}
+            />
+            Als Abwehrlinie markieren (Raum dahinter anzeigen)
+          </label>
+          {data.spaceBehind && (
+            <label className="flex items-center gap-2 pl-5 text-xs text-white/70">
+              <input
+                type="checkbox"
+                className="accent-violet-accent"
+                checked={data.spaceBehindShowLabel ?? true}
+                onChange={(e) => {
+                  onCheckpoint()
+                  onChange({ spaceBehindShowLabel: e.target.checked })
+                }}
+              />
+              Meter-Anzeige einblenden
+            </label>
+          )}
+        </>
       )}
       {data.shape !== 'curved' && data.bendable !== false && (
         <Button

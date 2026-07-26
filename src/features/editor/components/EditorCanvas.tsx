@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState, type RefObject } from 'react'
-import { Circle, Group, Layer, Line, Rect, Stage, Text, Transformer } from 'react-konva'
+import { Arrow, Circle, Group, Layer, Line, Rect, Stage, Text, Transformer } from 'react-konva'
 import Konva from 'konva'
 import type { KonvaEventObject } from 'konva/lib/Node'
 import { useEditorStore } from '../store/editorStore'
@@ -467,15 +467,22 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
       const polygonPoints = [...absPoints, ...farSide].flatMap((p) => [p.x, p.y])
       const crossMin = Math.min(...crossVals)
       const crossMax = Math.max(...crossVals)
+      const crossCenter = (crossMin + crossMax) / 2
       return {
         id: o.id,
         color: o.data.color,
         meters,
         points: polygonPoints,
+        showLabel: o.data.spaceBehindShowLabel ?? true,
+        // A double-headed dimension arrow spanning the same depth the "Xm"
+        // label describes, so the measurement reads like an actual
+        // measurement instead of a bare number floating in the zone.
+        dimensionStart: lengthAxis === 'y' ? { x: crossCenter, y: avgPos } : { x: avgPos, y: crossCenter },
+        dimensionEnd: lengthAxis === 'y' ? { x: crossCenter, y: edge } : { x: edge, y: crossCenter },
         labelPos:
           lengthAxis === 'y'
-            ? { x: (crossMin + crossMax) / 2, y: (avgPos + edge) / 2 }
-            : { x: (avgPos + edge) / 2, y: (crossMin + crossMax) / 2 },
+            ? { x: crossCenter, y: (avgPos + edge) / 2 }
+            : { x: (avgPos + edge) / 2, y: crossCenter },
       }
     })
 
@@ -989,19 +996,35 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
           {spaceBehindZones.map((z) => (
             <Group key={`spacebehind-${z.id}`} listening={false}>
               <Line points={z.points} closed fill={hexToRgba(z.color, 0.16)} />
-              <Text
-                x={z.labelPos.x - 50}
-                y={z.labelPos.y - 12}
-                width={100}
-                align="center"
-                text={`${Math.round(z.meters)}m`}
-                fontStyle="bold"
-                fontSize={24}
-                fill={z.color}
-                shadowColor="black"
-                shadowBlur={6}
-                shadowOpacity={0.6}
-              />
+              {z.showLabel && (
+                <>
+                  <Arrow
+                    points={[z.dimensionStart.x, z.dimensionStart.y, z.dimensionEnd.x, z.dimensionEnd.y]}
+                    pointerAtBeginning
+                    pointerLength={7}
+                    pointerWidth={7}
+                    fill={z.color}
+                    stroke={z.color}
+                    strokeWidth={1.5}
+                    shadowColor="black"
+                    shadowBlur={4}
+                    shadowOpacity={0.6}
+                  />
+                  <Text
+                    x={z.labelPos.x - 50}
+                    y={z.labelPos.y - 12}
+                    width={100}
+                    align="center"
+                    text={`${Math.round(z.meters)}m`}
+                    fontStyle="bold"
+                    fontSize={24}
+                    fill={z.color}
+                    shadowColor="black"
+                    shadowBlur={6}
+                    shadowOpacity={0.6}
+                  />
+                </>
+              )}
             </Group>
           ))}
           {sortedObjects.map((object) => {

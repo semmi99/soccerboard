@@ -98,6 +98,10 @@ export interface ArrowData {
    * area between it and the nearer goal line and labels that gap's real-
    * world depth in meters, recomputed live from the line's own position. */
   spaceBehind?: boolean
+  /** Hides the depth-arrow + "Xm" label for the space-behind zone while
+   * still shading the area. Unset shows the label (the original
+   * behavior). */
+  spaceBehindShowLabel?: boolean
   /** Renders the line as a wavy "dribble" path (through cones/opponents)
    * instead of a smooth line — works alongside either the straight or
    * curved shape and any bend points already on it. */
