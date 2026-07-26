@@ -965,7 +965,41 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
   // ArrowPointHandles in ObjectRenderer) for reshaping, and curved arrows
   // reshape via the "Kurvenradius" slider in the sidebar — neither needs the
   // Transformer's corner resize, so it's hidden for every arrow shape.
-  const hasBendableArrowSelected = selectedObjects.some((o) => o.objectType === 'arrow')
+  //
+  // Player chips and the ball have the same problem from the opposite
+  // direction: they're small (a chip's whole bounding box can render at
+  // well under 15px on screen when zoomed to see the full pitch), while
+  // Konva's anchors have a fixed ~10px hit radius regardless of zoom — so
+  // the 8 anchors blanket almost the entire chip and a plain click meant
+  // for the body very often lands on one instead, resizing (or, before the
+  // scale clamp, collapsing) it and shifting its position as a side effect
+  // of resizing from a corner. Confirmed live. Both now have their own
+  // "Größe" slider in the sidebar, so the Transformer's corner resize isn't
+  // needed for them either.
+  const hasHiddenAnchorObjectSelected = selectedObjects.some(
+    (o) => o.objectType === 'arrow' || o.objectType === 'player_chip' || o.objectType === 'ball',
+  )
+
+  // Confirmed on video: dragging a bendable arrow's rotate handle isn't a
+  // one-off mis-click — the whole gesture reads as one continuous rotation
+  // for several seconds, because the pivot sits at one end of the line
+  // rather than its center, so rotating swings the far tip across a huge
+  // arc. From the user's side that looks exactly like "I tried to move it
+  // and it jumped somewhere random," repeatedly, regardless of how far the
+  // handle is pushed out (150 and 80 both still got grabbed by accident).
+  // Straight/polyline arrows already have a precise, 1:1 way to reorient —
+  // dragging either end point handle — so the risky rotate handle is off
+  // for them. Curved arrows have no point handles, so rotation stays their
+  // only way to turn. Player chips and the ball have no tactical need to
+  // rotate at all (a circle with a number looks the same at any angle), so
+  // their rotate handle is just extra accidental-grab risk for nothing —
+  // off for them too.
+  const hasHandledArrowSelected = selectedObjects.some(
+    (o) =>
+      (o.objectType === 'arrow' && o.data.shape !== 'curved') ||
+      o.objectType === 'player_chip' ||
+      o.objectType === 'ball',
+  )
 
   return (
     <div ref={containerRef} className="flex h-full w-full items-center justify-center overflow-hidden">
@@ -1116,22 +1150,9 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
           <Transformer
             ref={trRef}
             onTransformStart={handleTransformStart}
-            rotateEnabled
-            // Default (50) sits close enough to the shape that a plain drag
-            // meant for the shape's body can land on the rotate handle
-            // instead — and once grabbed, a couple of pixels of mouse
-            // movement near the shape swing it through a huge angle (the
-            // handle-to-pivot distance barely grows with the shape's own
-            // size, so the same small movement is far more sensitive on a
-            // long thin arrow than on a big chunky shape). A much larger
-            // offset (150) cut that sensitivity a lot, but visually
-            // stranded the handle far off the shape on a long dangling
-            // line, which read as broken and was still no easier to avoid
-            // grabbing. A moderate bump plus the position/scale clamps in
-            // updateObjectLive (which now contain the worst case even if
-            // the handle is grabbed by accident) is the better trade-off.
+            rotateEnabled={!hasHandledArrowSelected}
             rotateAnchorOffset={80}
-            enabledAnchors={hasBendableArrowSelected ? [] : undefined}
+            enabledAnchors={hasHiddenAnchorObjectSelected ? [] : undefined}
             keepRatio={!allFreelyResizableSelected}
             boundBoxFunc={(oldBox, newBox) =>
               newBox.width < 8 || newBox.height < 8 ? oldBox : newBox

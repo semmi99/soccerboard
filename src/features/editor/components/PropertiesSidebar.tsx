@@ -474,8 +474,10 @@ export function PropertiesSidebar() {
           {selectedObject.objectType === 'player_chip' && (
             <PlayerChipFields
               data={selectedObject.data}
+              scale={selectedObject.scale}
               onCheckpoint={beginHistoryCheckpoint}
               onChange={(patch) => updateData<Extract<FrameObject, { objectType: 'player_chip' }>>(patch)}
+              onChangeScale={(scale) => updateObjectLive(selectedObject.id, { scale })}
             />
           )}
 
@@ -529,8 +531,10 @@ export function PropertiesSidebar() {
           {selectedObject.objectType === 'ball' && (
             <BallFields
               data={selectedObject.data}
+              scale={selectedObject.scale}
               onCheckpoint={beginHistoryCheckpoint}
               onChange={(patch) => updateData<Extract<FrameObject, { objectType: 'ball' }>>(patch)}
+              onChangeScale={(scale) => updateObjectLive(selectedObject.id, { scale })}
             />
           )}
 
@@ -562,12 +566,16 @@ export function PropertiesSidebar() {
 
 function PlayerChipFields({
   data,
+  scale,
   onCheckpoint,
   onChange,
+  onChangeScale,
 }: {
   data: PlayerChipData
+  scale: number
   onCheckpoint: () => void
   onChange: (patch: Partial<PlayerChipData>) => void
+  onChangeScale: (scale: number) => void
 }) {
   return (
     <div className="flex flex-col gap-2">
@@ -576,6 +584,18 @@ function PlayerChipFields({
           Verknüpft mit Kaderspieler
         </p>
       )}
+      <Field label={`Größe (${Math.round(scale * 100)}%)`}>
+        <input
+          type="range"
+          min={0.5}
+          max={2.5}
+          step={0.05}
+          className="w-full"
+          value={scale}
+          onFocus={onCheckpoint}
+          onChange={(e) => onChangeScale(Number(e.target.value))}
+        />
+      </Field>
       <Field label="Team">
         <select
           className={selectClass}
@@ -1393,12 +1413,16 @@ function EquipmentFields({
 
 function BallFields({
   data,
+  scale,
   onCheckpoint,
   onChange,
+  onChangeScale,
 }: {
   data: BallData
+  scale: number
   onCheckpoint: () => void
   onChange: (patch: Partial<BallData>) => void
+  onChangeScale: (scale: number) => void
 }) {
   return (
     <div className="flex flex-col gap-2">
@@ -1410,6 +1434,18 @@ function BallFields({
             onCheckpoint()
             onChange({ color: c })
           }}
+        />
+      </Field>
+      <Field label={`Größe (${Math.round(scale * 100)}%)`}>
+        <input
+          type="range"
+          min={0.5}
+          max={2.5}
+          step={0.05}
+          className="w-full"
+          value={scale}
+          onFocus={onCheckpoint}
+          onChange={(e) => onChangeScale(Number(e.target.value))}
         />
       </Field>
     </div>
