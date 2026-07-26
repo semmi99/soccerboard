@@ -334,7 +334,7 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
   const frames = useEditorStore((s) => s.frames)
   const activeFrameIndex = useEditorStore((s) => s.activeFrameIndex)
   const updateFrameCaptionBadge = useEditorStore((s) => s.updateFrameCaptionBadge)
-  const updateFrameCaptionCard = useEditorStore((s) => s.updateFrameCaptionCard)
+  const setFrameCaptionCard = useEditorStore((s) => s.setFrameCaptionCard)
   const tool = useEditorStore((s) => s.tool)
   const selection = useEditorStore((s) => s.selection)
   const setSelection = useEditorStore((s) => s.setSelection)
@@ -465,14 +465,6 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
         color: o.data.color,
         meters,
         points: polygonPoints,
-        showLabel: o.data.spaceBehindShowLabel ?? true,
-        opacity: o.data.spaceBehindOpacity ?? 0.3,
-        gradient: o.data.spaceBehindGradient ?? false,
-        // Gradient points are in the Line's own local space (no x/y offset on
-        // the shape itself, since points are already absolute), running along
-        // the length axis from the line's own position to the goal edge.
-        gradientStart: lengthAxis === 'y' ? { x: crossMin, y: avgPos } : { x: avgPos, y: crossMin },
-        gradientEnd: lengthAxis === 'y' ? { x: crossMin, y: edge } : { x: edge, y: crossMin },
         labelPos:
           lengthAxis === 'y'
             ? { x: (crossMin + crossMax) / 2, y: (avgPos + edge) / 2 }
@@ -875,26 +867,6 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
     updateObjectLive(id, patch)
   }
 
-  // Dragging the Transformer's own bounding box (enabled only for multi-
-  // select) moves every selected object together — clicking empty space
-  // inside the box, not just directly on one of the shapes, now drags the
-  // whole group. Konva repositions the attached nodes itself during the
-  // drag; this only needs to fold that offset into each object's stored
-  // x/y once the gesture ends, then zero the Transformer's own position so
-  // the next selection/objects update (which re-fits it from the nodes'
-  // real positions) doesn't apply the offset a second time.
-  function handleGroupDragEnd(e: KonvaEventObject<DragEvent>) {
-    const dx = e.target.x()
-    const dy = e.target.y()
-    if (dx !== 0 || dy !== 0) {
-      for (const id of selection) {
-        const obj = frame.objects.find((o) => o.id === id)
-        if (obj) updateObjectLive(id, { x: obj.x + dx, y: obj.y + dy })
-      }
-    }
-    e.target.position({ x: 0, y: 0 })
-  }
-
   function handleArrowPointsChange(id: string, points: number[]) {
     const obj = frame.objects.find((o) => o.id === id)
     if (!obj || obj.objectType !== 'arrow') return
@@ -1007,32 +979,20 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
           ))}
           {spaceBehindZones.map((z) => (
             <Group key={`spacebehind-${z.id}`} listening={false}>
-              <Line
-                points={z.points}
-                closed
-                {...(z.gradient
-                  ? {
-                      fillLinearGradientStartPoint: z.gradientStart,
-                      fillLinearGradientEndPoint: z.gradientEnd,
-                      fillLinearGradientColorStops: [0, hexToRgba(z.color, z.opacity), 1, hexToRgba(z.color, 0)],
-                    }
-                  : { fill: hexToRgba(z.color, z.opacity) })}
+              <Line points={z.points} closed fill={hexToRgba(z.color, 0.16)} />
+              <Text
+                x={z.labelPos.x - 50}
+                y={z.labelPos.y - 12}
+                width={100}
+                align="center"
+                text={`${Math.round(z.meters)}m`}
+                fontStyle="bold"
+                fontSize={24}
+                fill={z.color}
+                shadowColor="black"
+                shadowBlur={6}
+                shadowOpacity={0.6}
               />
-              {z.showLabel && (
-                <Text
-                  x={z.labelPos.x - 50}
-                  y={z.labelPos.y - 12}
-                  width={100}
-                  align="center"
-                  text={`${Math.round(z.meters)}m`}
-                  fontStyle="bold"
-                  fontSize={24}
-                  fill={z.color}
-                  shadowColor="black"
-                  shadowBlur={6}
-                  shadowOpacity={0.6}
-                />
-              )}
             </Group>
           ))}
           {sortedObjects.map((object) => {
@@ -1121,14 +1081,6 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
             boundBoxFunc={(oldBox, newBox) =>
               newBox.width < 8 || newBox.height < 8 ? oldBox : newBox
             }
-            draggable={selection.length > 1}
-            // Konva's Transformer only hit-tests its interior (as opposed to
-            // just the anchors) when this is on — without it, a mousedown
-            // inside the box but off every shape falls through to the stage
-            // and starts a marquee-select instead of a drag.
-            shouldOverdrawWholeArea={selection.length > 1}
-            onDragStart={handleTransformStart}
-            onDragEnd={handleGroupDragEnd}
           />
         </Group>
         </Layer>
@@ -1137,10 +1089,8 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
             caption={frame.caption}
             interactive={!isPlaying}
             onBadgeDragEnd={(badgeId, x, y) => updateFrameCaptionBadge(activeFrameIndex, badgeId, { x, y })}
-            onCardDragEnd={(cardId, x, y) => updateFrameCaptionCard(activeFrameIndex, cardId, { cardX: x, cardY: y })}
-            onCardResize={(cardId, width, height) =>
-              updateFrameCaptionCard(activeFrameIndex, cardId, { cardWidth: width, cardHeight: height })
-            }
+            onCardDragEnd={(x, y) => setFrameCaptionCard(activeFrameIndex, { cardX: x, cardY: y })}
+            onCardResize={(width) => setFrameCaptionCard(activeFrameIndex, { cardWidth: width })}
           />
         </Layer>
         {marqueeRect && (

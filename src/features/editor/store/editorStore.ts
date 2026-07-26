@@ -5,7 +5,6 @@ import type {
   EquipmentKind,
   FieldCrop,
   FrameCaption,
-  FrameCaptionCard,
   FrameObject,
   PitchDesign,
   PitchOrientation,
@@ -52,14 +51,12 @@ const DEFAULT_BADGE_X = 24
 const DEFAULT_BADGE_Y = 28
 
 function defaultFrameCaption(): FrameCaption {
-  return { badges: [], cards: [] }
-}
-
-function cloneCaption(caption: FrameCaption | null | undefined): FrameCaption | null {
-  if (!caption) return null
   return {
-    badges: caption.badges.map((b) => ({ ...b, id: crypto.randomUUID() })),
-    cards: caption.cards.map((c) => ({ ...c, id: crypto.randomUUID() })),
+    badges: [],
+    cardX: DEFAULT_CARD_X,
+    cardY: DEFAULT_CARD_Y,
+    cardWidth: DEFAULT_CARD_WIDTH,
+    background: 'rgba(255,255,255,0.97)',
   }
 }
 
@@ -70,16 +67,6 @@ function defaultCaptionBadge(existingCount: number): CaptionBadge {
     x: DEFAULT_BADGE_X,
     y: DEFAULT_BADGE_Y + existingCount * 32,
     color: '#ef4444',
-  }
-}
-
-function defaultFrameCaptionCard(existingCount: number): FrameCaptionCard {
-  return {
-    id: crypto.randomUUID(),
-    cardX: DEFAULT_CARD_X + existingCount * 24,
-    cardY: DEFAULT_CARD_Y + existingCount * 24,
-    cardWidth: DEFAULT_CARD_WIDTH,
-    background: 'rgba(255,255,255,0.97)',
   }
 }
 
@@ -183,12 +170,14 @@ interface EditorState {
   reorderFrames: (fromIndex: number, toIndex: number) => void
   setActiveFrameIndex: (index: number) => void
   setFrameDuration: (index: number, durationMs: number) => void
+  setFrameCaptionText: (index: number, patch: { title?: string; subtitle?: string }) => void
+  setFrameCaptionCard: (
+    index: number,
+    patch: Partial<Omit<FrameCaption, 'badges' | 'title' | 'subtitle'>>,
+  ) => void
   addFrameCaptionBadge: (index: number) => void
   updateFrameCaptionBadge: (index: number, badgeId: string, patch: Partial<CaptionBadge>) => void
   removeFrameCaptionBadge: (index: number, badgeId: string) => void
-  addFrameCaptionCard: (index: number) => void
-  updateFrameCaptionCard: (index: number, cardId: string, patch: Partial<FrameCaptionCard>) => void
-  removeFrameCaptionCard: (index: number, cardId: string) => void
   setIsPlaying: (playing: boolean) => void
 
   undo: () => void
@@ -368,17 +357,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
     pushHistory(get, set)
     const stage = PITCH_STAGE_SIZE[orientation]
     const maxDim = 220
-    // A small source image (an icon or logo well under maxDim) would
-    // otherwise insert at its tiny native pixel size — smaller than the
-    // Transformer's own resize handles, so a plain drag lands on a handle
-    // instead of the image and triggers a runaway resize that flings it far
-    // off the pitch instead of just moving it. Upscaling so the larger side
-    // is at least minDim keeps it comfortably bigger than the handles.
-    const minDim = 90
-    let ratio = Math.min(maxDim / naturalWidth, maxDim / naturalHeight, 1)
-    if (Math.max(naturalWidth, naturalHeight) * ratio < minDim) {
-      ratio = minDim / Math.max(naturalWidth, naturalHeight)
-    }
+    const ratio = Math.min(maxDim / naturalWidth, maxDim / naturalHeight, 1)
     const width = naturalWidth * ratio
     const height = naturalHeight * ratio
     const frame = frames[activeFrameIndex]!
@@ -530,40 +509,13 @@ export const useEditorStore = create<EditorState>((set, get) => ({
   beginHistoryCheckpoint: () => pushHistory(get, set),
 
   updateObjectLive: (objectId, patch) => {
-    const { frames, activeFrameIndex, orientation } = get()
-    // The Stage's own canvas is sized to exactly match the pitch — there is
-    // no "just past the touchline but still visible" margin, the canvas
-    // simply stops there. Any object whose x/y ends up past that edge is
-    // drawn outside the canvas's pixel bounds and doesn't render at all —
-    // invisible, with no on-screen anchor left to grab and pull it back. A
-    // runaway drag or rotation (a long arrow especially: a small angle
-    // change swings its far end a long way) can push a pivot that far
-    // without any error, so it silently vanishes and even survives a save.
-    // Clamping the pivot to the pitch's own bounds keeps it always visible
-    // regardless of what a stray transform tried to do.
-    const stage = PITCH_STAGE_SIZE[orientation]
-    const margin = 0
-    const clampedPatch = { ...patch }
-    if (typeof clampedPatch.x === 'number') {
-      clampedPatch.x = Math.max(-margin, Math.min(stage.width + margin, clampedPatch.x))
-    }
-    if (typeof clampedPatch.y === 'number') {
-      clampedPatch.y = Math.max(-margin, Math.min(stage.height + margin, clampedPatch.y))
-    }
-    // A runaway resize (grabbing a corner anchor instead of the shape body,
-    // the same accidental-transform class of bug as the position drift
-    // above) can collapse an object's scale toward 0 — shrinking it to an
-    // invisible dot with its position unaffected, so the x/y clamp above
-    // does nothing for it. Bounding scale keeps it visible either way.
-    if (typeof clampedPatch.scale === 'number') {
-      clampedPatch.scale = Math.max(0.1, Math.min(10, clampedPatch.scale))
-    }
+    const { frames, activeFrameIndex } = get()
     const nextFrames = frames.map((f, i) =>
       i === activeFrameIndex
         ? {
             ...f,
             objects: f.objects.map((o) =>
-              o.id === objectId ? ({ ...o, ...clampedPatch } as typeof o) : o,
+              o.id === objectId ? ({ ...o, ...patch } as typeof o) : o,
             ),
           }
         : f,
@@ -764,10 +716,10 @@ export const useEditorStore = create<EditorState>((set, get) => ({
       // moving them in the new frame produces a smooth tween during playback
       // instead of an instant swap (matching is done by id, see EditorCanvas).
       objects: source.objects.map(cloneObject),
-      // Carries the caption over instead of dropping it — losing the
-      // title/subtitle card on every duplicate meant retyping it for each
-      // new beat of what's usually the same ongoing sequence.
-      caption: cloneCaption(source.caption),
+      // The story caption is this frame's own beat in the narrative — a
+      // duplicate is a new moment, so it starts without one instead of
+      // silently repeating the source frame's headline.
+      caption: null,
     }
     const nextFrames = [...frames]
     nextFrames.splice(index + 1, 0, copy)
@@ -820,6 +772,22 @@ export const useEditorStore = create<EditorState>((set, get) => ({
     set({ frames: nextFrames, isDirty: true })
   },
 
+  setFrameCaptionText: (index, patch) => {
+    const { frames } = get()
+    const nextFrames = frames.map((f, i) =>
+      i === index ? { ...f, caption: { ...(f.caption ?? defaultFrameCaption()), ...patch } } : f,
+    )
+    set({ frames: nextFrames, isDirty: true })
+  },
+
+  setFrameCaptionCard: (index, patch) => {
+    const { frames } = get()
+    const nextFrames = frames.map((f, i) =>
+      i === index ? { ...f, caption: { ...(f.caption ?? defaultFrameCaption()), ...patch } } : f,
+    )
+    set({ frames: nextFrames, isDirty: true })
+  },
+
   addFrameCaptionBadge: (index) => {
     const { frames } = get()
     const nextFrames = frames.map((f, i) => {
@@ -850,40 +818,6 @@ export const useEditorStore = create<EditorState>((set, get) => ({
     const nextFrames = frames.map((f, i) => {
       if (i !== index || !f.caption) return f
       return { ...f, caption: { ...f.caption, badges: f.caption.badges.filter((b) => b.id !== badgeId) } }
-    })
-    set({ frames: nextFrames, isDirty: true })
-  },
-
-  addFrameCaptionCard: (index) => {
-    const { frames } = get()
-    const nextFrames = frames.map((f, i) => {
-      if (i !== index) return f
-      const caption = f.caption ?? defaultFrameCaption()
-      return { ...f, caption: { ...caption, cards: [...caption.cards, defaultFrameCaptionCard(caption.cards.length)] } }
-    })
-    set({ frames: nextFrames, isDirty: true })
-  },
-
-  updateFrameCaptionCard: (index, cardId, patch) => {
-    const { frames } = get()
-    const nextFrames = frames.map((f, i) => {
-      if (i !== index || !f.caption) return f
-      return {
-        ...f,
-        caption: {
-          ...f.caption,
-          cards: f.caption.cards.map((c) => (c.id === cardId ? { ...c, ...patch } : c)),
-        },
-      }
-    })
-    set({ frames: nextFrames, isDirty: true })
-  },
-
-  removeFrameCaptionCard: (index, cardId) => {
-    const { frames } = get()
-    const nextFrames = frames.map((f, i) => {
-      if (i !== index || !f.caption) return f
-      return { ...f, caption: { ...f.caption, cards: f.caption.cards.filter((c) => c.id !== cardId) } }
     })
     set({ frames: nextFrames, isDirty: true })
   },

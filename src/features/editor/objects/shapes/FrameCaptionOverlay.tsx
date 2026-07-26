@@ -1,9 +1,8 @@
 import { Group, Rect, Text } from 'react-konva'
 import type { KonvaEventObject } from 'konva/lib/Node'
-import type { CaptionBadge, FrameCaption, FrameCaptionCard } from '../../types'
+import type { CaptionBadge, FrameCaption } from '../../types'
 
 const MIN_CARD_WIDTH = 140
-const MIN_CARD_HEIGHT = 44
 const RESIZE_HANDLE_SIZE = 12
 
 function hexToRgbTriplet(hex: string): [number, number, number] {
@@ -76,94 +75,13 @@ function BadgePill({
   )
 }
 
-function TitleCard({
-  card,
-  interactive,
-  onDragEnd,
-  onResize,
-}: {
-  card: FrameCaptionCard
-  interactive: boolean
-  onDragEnd: (x: number, y: number) => void
-  onResize?: (width: number, height: number) => void
-}) {
-  const titleFontSize = card.titleFontSize ?? 20
-  const subtitleFontSize = card.subtitleFontSize ?? 12
-  const titleHeight = card.title ? titleFontSize + 10 : 0
-  const subtitleHeight = card.subtitle ? subtitleFontSize + 8 : 0
-  const cardPadY = 14
-  const autoHeight = cardPadY * 2 + titleHeight + subtitleHeight
-  const cardHeight = card.cardHeight ?? autoHeight
-  const fillProps = card.gradient
-    ? gradientFillProps(card.background, card.background2, card.gradientDirection, card.cardWidth, cardHeight)
-    : { fill: card.background }
-
-  return (
-    <Group
-      x={card.cardX}
-      y={card.cardY}
-      draggable={interactive}
-      onDragEnd={(e: KonvaEventObject<DragEvent>) => onDragEnd(e.target.x(), e.target.y())}
-    >
-      <Rect width={card.cardWidth} height={cardHeight} cornerRadius={8} shadowColor="black" shadowBlur={12} shadowOpacity={0.35} {...fillProps} />
-      {card.title && (
-        <Text
-          text={card.title}
-          x={16}
-          y={cardPadY}
-          width={card.cardWidth - 32}
-          fontSize={titleFontSize}
-          fontStyle="bold"
-          fill={card.titleColor ?? '#0f172a'}
-          wrap="word"
-          listening={false}
-        />
-      )}
-      {card.subtitle && (
-        <Text
-          text={card.subtitle}
-          x={16}
-          y={cardPadY + titleHeight}
-          width={card.cardWidth - 32}
-          fontSize={subtitleFontSize}
-          fill={card.subtitleColor ?? '#475569'}
-          wrap="word"
-          listening={false}
-        />
-      )}
-      {interactive && onResize && (
-        <Rect
-          x={card.cardWidth - RESIZE_HANDLE_SIZE / 2}
-          y={cardHeight - RESIZE_HANDLE_SIZE / 2}
-          width={RESIZE_HANDLE_SIZE}
-          height={RESIZE_HANDLE_SIZE}
-          fill="#3b82f6"
-          cornerRadius={2}
-          draggable
-          onDragStart={(e: KonvaEventObject<DragEvent>) => {
-            e.cancelBubble = true
-          }}
-          onDragMove={(e: KonvaEventObject<DragEvent>) => {
-            e.cancelBubble = true
-            const width = Math.max(MIN_CARD_WIDTH, e.target.x() + RESIZE_HANDLE_SIZE / 2)
-            const height = Math.max(MIN_CARD_HEIGHT, e.target.y() + RESIZE_HANDLE_SIZE / 2)
-            onResize(width, height)
-          }}
-          onDragEnd={(e: KonvaEventObject<DragEvent>) => {
-            e.cancelBubble = true
-          }}
-        />
-      )}
-    </Group>
-  )
-}
-
 /** A short "broadcast graphic" story beat over the current frame — one or
- * more draggable badge pills plus zero or more title cards, styled after the
- * callout cards tactical-analysis explainer reels use to narrate a sequence
- * beat by beat. Rendered in plain stage coordinates (not inside the pitch's
- * crop/orientation transform) so default positions are stable regardless of
- * pitch design or crop, though badges and cards can all be dragged anywhere. */
+ * more draggable badge pills plus a title card, styled after the callout
+ * cards tactical-analysis explainer reels use to narrate a sequence beat by
+ * beat. Rendered in plain stage coordinates (not inside the pitch's crop/
+ * orientation transform) so its default position is stable regardless of
+ * pitch design or crop, though both the badges and the card can be dragged
+ * anywhere. */
 export function FrameCaptionOverlay({
   caption,
   interactive = true,
@@ -174,10 +92,18 @@ export function FrameCaptionOverlay({
   caption: FrameCaption | null | undefined
   interactive?: boolean
   onBadgeDragEnd?: (badgeId: string, x: number, y: number) => void
-  onCardDragEnd?: (cardId: string, x: number, y: number) => void
-  onCardResize?: (cardId: string, width: number, height: number) => void
+  onCardDragEnd?: (x: number, y: number) => void
+  onCardResize?: (width: number) => void
 }) {
-  if (!caption || (caption.badges.length === 0 && caption.cards.length === 0)) return null
+  if (!caption || (caption.badges.length === 0 && !caption.title && !caption.subtitle)) return null
+
+  const titleHeight = caption.title ? 30 : 0
+  const subtitleHeight = caption.subtitle ? 20 : 0
+  const cardPadY = 14
+  const cardHeight = cardPadY * 2 + titleHeight + subtitleHeight
+  const cardFillProps = caption.gradient
+    ? gradientFillProps(caption.background, caption.background2, caption.gradientDirection, caption.cardWidth, cardHeight)
+    : { fill: caption.background }
 
   return (
     <>
@@ -189,15 +115,64 @@ export function FrameCaptionOverlay({
           onDragEnd={(x, y) => onBadgeDragEnd?.(badge.id, x, y)}
         />
       ))}
-      {caption.cards.map((card) => (
-        <TitleCard
-          key={card.id}
-          card={card}
-          interactive={interactive}
-          onDragEnd={(x, y) => onCardDragEnd?.(card.id, x, y)}
-          onResize={onCardResize ? (width, height) => onCardResize(card.id, width, height) : undefined}
-        />
-      ))}
+      {(caption.title || caption.subtitle) && (
+        <Group
+          x={caption.cardX}
+          y={caption.cardY}
+          draggable={interactive}
+          onDragEnd={(e: KonvaEventObject<DragEvent>) => onCardDragEnd?.(e.target.x(), e.target.y())}
+        >
+          <Rect width={caption.cardWidth} height={cardHeight} cornerRadius={8} shadowColor="black" shadowBlur={12} shadowOpacity={0.35} {...cardFillProps} />
+          {caption.title && (
+            <Text
+              text={caption.title}
+              x={16}
+              y={cardPadY}
+              width={caption.cardWidth - 32}
+              fontSize={20}
+              fontStyle="bold"
+              fill="#0f172a"
+              wrap="word"
+              listening={false}
+            />
+          )}
+          {caption.subtitle && (
+            <Text
+              text={caption.subtitle}
+              x={16}
+              y={cardPadY + titleHeight}
+              width={caption.cardWidth - 32}
+              fontSize={12}
+              fill="#475569"
+              wrap="word"
+              listening={false}
+            />
+          )}
+          {interactive && onCardResize && (
+            <Rect
+              x={caption.cardWidth - RESIZE_HANDLE_SIZE / 2}
+              y={cardHeight - RESIZE_HANDLE_SIZE / 2}
+              width={RESIZE_HANDLE_SIZE}
+              height={RESIZE_HANDLE_SIZE}
+              fill="#3b82f6"
+              cornerRadius={2}
+              draggable
+              onDragStart={(e: KonvaEventObject<DragEvent>) => {
+                e.cancelBubble = true
+              }}
+              onDragMove={(e: KonvaEventObject<DragEvent>) => {
+                e.cancelBubble = true
+                const width = Math.max(MIN_CARD_WIDTH, e.target.x() + RESIZE_HANDLE_SIZE / 2)
+                onCardResize(width)
+                e.target.y(cardHeight - RESIZE_HANDLE_SIZE / 2)
+              }}
+              onDragEnd={(e: KonvaEventObject<DragEvent>) => {
+                e.cancelBubble = true
+              }}
+            />
+          )}
+        </Group>
+      )}
     </>
   )
 }
