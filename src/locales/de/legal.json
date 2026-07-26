@@ -1,0 +1,147 @@
+{
+  "backToHome": "Zur Startseite",
+  "unitedKingdom": "Vereinigtes Königreich",
+  "kontakt": {
+    "title": "Kontakt",
+    "intro": "Fragen zu TacticBoard Pro, 9011 Soccer oder Soccer Analytics Pro? Schreib uns — wir melden uns so schnell wie möglich zurück.",
+    "reachDirectlyBefore": "Du erreichst uns auch direkt unter",
+    "sentMessage": "Danke für deine Nachricht! Wir melden uns bald bei dir.",
+    "nameLabel": "Name",
+    "emailLabel": "E-Mail",
+    "messageLabel": "Nachricht",
+    "sendError": "Nachricht konnte nicht gesendet werden.",
+    "submit": "Nachricht senden"
+  },
+  "impressum": {
+    "title": "Impressum",
+    "intro": "Angaben gemäß den anwendbaren gesetzlichen Bestimmungen des Vereinigten Königreichs.",
+    "serviceProviderTitle": "Diensteanbieter",
+    "contactTitle": "Kontakt",
+    "contactLine": "E-Mail: office@9011soccer.com",
+    "representativeTitle": "Vertretungsberechtigt",
+    "companyDetailsTitle": "Unternehmensrechtliche Angaben",
+    "registerNumber": "Registernummer (Companies House): 13808099",
+    "trademarksTitle": "Marken & Domains",
+    "trademarksBefore": "Diese Anwendung sowie die Marken/Domains",
+    "trademarksMiddle": "und",
+    "trademarksAfter": "werden von der oben genannten Person/dem oben genannten Unternehmen betrieben.",
+    "liabilityTitle": "Haftung für Inhalte und Links",
+    "liabilityBody": "Trotz sorgfältiger inhaltlicher Kontrolle übernehmen wir keine Haftung für die Inhalte externer Links. Für den Inhalt der verlinkten Seiten sind ausschließlich deren Betreiber verantwortlich.",
+    "copyrightTitle": "Urheberrecht",
+    "copyrightBody": "Alle Inhalte dieser Website (Texte, Grafiken, Logos, Software) sind urheberrechtlich geschützt. Jede Verwendung außerhalb der Grenzen des Urheberrechts bedarf der vorherigen schriftlichen Zustimmung."
+  },
+  "agb": {
+    "title": "Allgemeine Geschäftsbedingungen",
+    "lastUpdatedLabel": "Stand:",
+    "placeholderEnterDate": "Datum eintragen",
+    "placeholderMonthlyAnytime": "monatlich / jederzeit",
+    "pricing": {
+      "freeLabel": "Free:",
+      "freeBody": "{{maxProjects}} Projekte, {{maxFrames}} Frames pro Projekt, Export bis {{maxExportPixelRatio}}x Auflösung — kostenlos.",
+      "proLabel": "Pro:",
+      "proBody": "unbegrenzte Projekte und Frames, Export bis {{maxExportPixelRatio}}x Auflösung — kostenpflichtig gemäß der zum Zeitpunkt des Abschlusses auf der Website angegebenen Preise.",
+      "paymentNote": "Hinweis: Die Zahlungsabwicklung für den Pro-Tarif befindet sich derzeit im Aufbau. Diesen Abschnitt bitte aktualisieren, sobald ein Zahlungsdienstleister (z.B. Stripe) angebunden ist — inkl. Angaben zu Abrechnungszeitraum, Fälligkeit, Zahlungsmethoden und Preisänderungen."
+    },
+    "sections": {
+      "s1": {
+        "title": "1. Geltungsbereich",
+        "body": "Diese Allgemeinen Geschäftsbedingungen (AGB) gelten für die Nutzung von „TacticBoard Pro\" (nachfolgend „Dienst\"), einem Angebot von 9011 Entertainment Ltd (nachfolgend „Anbieter\"), erreichbar unter 9011soccer.com und socceranalyticspro.com. Mit der Registrierung eines Nutzerkontos erkennt der Nutzer diese AGB an."
+      },
+      "s2": {
+        "title": "2. Leistungsbeschreibung",
+        "body": "Der Dienst ist ein browserbasierter Taktik-Editor für Sportvereine und Trainer:innen zur Erstellung von Aufstellungen, Spielzügen und Trainingsplänen sowie zur Verwaltung von Kaderdaten. Der Anbieter ist bestrebt, den Dienst dauerhaft verfügbar zu halten, übernimmt jedoch keine Gewähr für eine unterbrechungsfreie Verfügbarkeit."
+      },
+      "s3": {
+        "title": "3. Registrierung und Nutzerkonto",
+        "body": "Die Nutzung setzt die Erstellung eines Nutzerkontos mit gültiger E-Mail-Adresse voraus. Der Nutzer ist verpflichtet, seine Zugangsdaten geheim zu halten und wahre Angaben zu machen. Für Aktivitäten unter dem eigenen Konto haftet der Nutzer, soweit er sie zu vertreten hat."
+      },
+      "s4": {
+        "title": "4. Preise und Zahlungsbedingungen",
+        "intro": "Der Dienst wird in folgenden Tarifen angeboten:"
+      },
+      "s5": {
+        "title": "5. Laufzeit und Kündigung",
+        "bodyBefore": "Kostenpflichtige Tarife können",
+        "bodyAfter": "zum Ende des jeweiligen Abrechnungszeitraums gekündigt werden. Der Free-Tarif kann jederzeit durch Löschung des Kontos beendet werden. Der Anbieter kann das Nutzerkonto bei schwerwiegenden Verstößen gegen diese AGB sperren oder kündigen."
+      },
+      "s6": {
+        "title": "6. Inhalte des Nutzers",
+        "body": "Alle vom Nutzer eingegebenen Inhalte (Taktiken, Formationen, Kaderdaten, Fotos, Logos) verbleiben im Eigentum des Nutzers bzw. des jeweils Berechtigten. Der Nutzer räumt dem Anbieter das für die Erbringung des Dienstes notwendige, nicht-exklusive Nutzungsrecht ein (Speicherung, Anzeige, Export). Der Nutzer versichert, zur Nutzung hochgeladener Fotos und Daten (insb. von Spieler:innen) berechtigt zu sein; bei minderjährigen Spieler:innen ist die Einwilligung der Erziehungsberechtigten einzuholen."
+      },
+      "s7": {
+        "title": "7. Pflichten des Nutzers",
+        "body": "Der Nutzer verpflichtet sich, den Dienst nicht missbräuchlich zu nutzen, keine rechtswidrigen Inhalte hochzuladen und geltendes Recht (insb. Datenschutzrecht gegenüber Dritten, deren Daten er einträgt) einzuhalten."
+      },
+      "s8": {
+        "title": "8. Haftungsbeschränkung",
+        "body": "Der Anbieter haftet unbeschränkt für Vorsatz und grobe Fahrlässigkeit sowie für Schäden aus der Verletzung des Lebens, des Körpers oder der Gesundheit. Im Übrigen haftet der Anbieter nur bei Verletzung wesentlicher Vertragspflichten und der Höhe nach begrenzt auf den vorhersehbaren, vertragstypischen Schaden. Eine Haftung für Datenverlust besteht nicht, soweit der Schaden durch zumutbare eigene Datensicherung des Nutzers vermeidbar gewesen wäre."
+      },
+      "s9": {
+        "title": "9. Änderungen der AGB",
+        "body": "Der Anbieter kann diese AGB mit Wirkung für die Zukunft ändern, wenn dies aus triftigem Grund (z.B. Änderung der Rechtslage, des Leistungsumfangs) erforderlich ist. Über Änderungen wird der Nutzer rechtzeitig informiert."
+      },
+      "s10": {
+        "title": "10. Schlussbestimmungen",
+        "body": "Es gilt das Recht von England und Wales unter Ausschluss des UN-Kaufrechts. Gerichtsstand ist, soweit gesetzlich zulässig, der Sitz des Anbieters in Manchester, Vereinigtes Königreich. Sollten einzelne Bestimmungen unwirksam sein, bleibt die Wirksamkeit der übrigen Bestimmungen unberührt."
+      }
+    }
+  },
+  "datenschutz": {
+    "title": "Datenschutzerklärung",
+    "lastUpdatedLabel": "Stand:",
+    "placeholderEnterDate": "Datum eintragen",
+    "sections": {
+      "s1": {
+        "title": "1. Verantwortlicher",
+        "bodyBefore": "Verantwortlicher im Sinne der Datenschutz-Grundverordnung (DSGVO) ist:",
+        "bodyAfter": "9011 Entertainment Ltd, Great Ancoats Street, M4 6DE Manchester, Vereinigtes Königreich, office@9011soccer.com"
+      },
+      "s2": {
+        "title": "2. Welche Daten wir verarbeiten",
+        "accountTitle": "Konto & Anmeldung",
+        "accountBody": "Bei der Registrierung erheben wir E-Mail-Adresse, Passwort (verschlüsselt gespeichert) und optional deinen Namen. Die Authentifizierung erfolgt über unseren technischen Dienstleister Supabase.",
+        "orgTitle": "Organisations-/Vereinsdaten",
+        "orgBody": "Name deiner Organisation/deines Vereins sowie ein optional hochgeladenes Vereinslogo.",
+        "squadTitle": "Kader- und Spielerdaten",
+        "squadBody": "Wenn du einen Kader anlegst, verarbeiten wir die von dir eingegebenen Daten zu Spieler:innen (Name, Rückennummer, Position, optional ein Foto). Diese Daten gibst du als Trainer:in bzw. Verein ein und bist dafür verantwortlich, dass eine Rechtsgrundlage dafür besteht — bei minderjährigen Spieler:innen insbesondere die Einwilligung der Erziehungsberechtigten.",
+        "projectsTitle": "Taktik-Projekte",
+        "projectsBody": "Von dir erstellte Formationen, Spielzüge, Frames und Beschriftungen werden gespeichert, damit du sie später weiter bearbeiten kannst.",
+        "contactFormTitle": "Kontaktformular",
+        "contactFormBody": "Wenn du das Kontaktformular nutzt, verarbeiten wir Name, E-Mail-Adresse und deine Nachricht, um deine Anfrage zu beantworten."
+      },
+      "s3": {
+        "title": "3. Zwecke und Rechtsgrundlagen",
+        "body": "Die Verarbeitung erfolgt zur Erfüllung des Nutzungsvertrags über den Dienst (Art. 6 Abs. 1 lit. b DSGVO) sowie, bei der Bearbeitung von Kontaktanfragen, auf Grundlage unseres berechtigten Interesses an einer effizienten Kommunikation (Art. 6 Abs. 1 lit. f DSGVO)."
+      },
+      "s4": {
+        "title": "4. Hosting und Auftragsverarbeiter",
+        "intro": "Wir setzen folgende Dienstleister ein, die als Auftragsverarbeiter in unserem Auftrag tätig werden bzw. für den technischen Betrieb notwendig sind:",
+        "supabaseBody": "Datenbank, Authentifizierung und Datei-Speicherung (Vereinslogos, Spielerfotos).",
+        "vercelBody": "Hosting der Website/Anwendung.",
+        "locationsBody": "Unsere Datenbank läuft auf Supabase-Servern in der EU (Region Frankfurt, Deutschland). Die Auslieferung der Anwendung selbst erfolgt über das Content-Delivery-Netzwerk von Vercel, das Nutzer aus Europa über europäische Edge-Standorte bedient. Es findet keine Datenübermittlung in Drittländer außerhalb der EU/des EWR statt."
+      },
+      "s5": {
+        "title": "5. Cookies und lokale Speicherung",
+        "body": "Zur Aufrechterhaltung deiner Anmeldung verwenden wir eine technisch notwendige Sitzungsspeicherung im lokalen Speicher (localStorage) deines Browsers. Wir setzen derzeit keine Tracking- oder Marketing-Cookies und keine Analyse-Tools von Drittanbietern ein."
+      },
+      "s6": {
+        "title": "6. Speicherdauer",
+        "body": "Wir speichern deine Daten, solange dein Nutzerkonto besteht. Nach Löschung des Kontos werden die zugehörigen Daten gelöscht, soweit keine gesetzlichen Aufbewahrungspflichten entgegenstehen. Nachrichten über das Kontaktformular werden gelöscht, sobald die Anfrage abschließend bearbeitet ist."
+      },
+      "s7": {
+        "title": "7. Deine Rechte",
+        "body": "Du hast das Recht auf Auskunft, Berichtigung, Löschung, Einschränkung der Verarbeitung, Datenübertragbarkeit sowie Widerspruch gegen die Verarbeitung deiner Daten. Zudem hast du das Recht, dich bei der zuständigen Datenschutz-Aufsichtsbehörde (im Vereinigten Königreich das Information Commissioner's Office, ico.org.uk) zu beschweren."
+      },
+      "s8": {
+        "title": "8. Datensicherheit",
+        "body": "Wir treffen angemessene technische und organisatorische Maßnahmen, um deine Daten vor Verlust, Missbrauch und unbefugtem Zugriff zu schützen (z.B. verschlüsselte Übertragung, Zugriffsbeschränkung je Organisation)."
+      },
+      "s9": {
+        "title": "9. Kontakt",
+        "bodyBefore": "Für Fragen zum Datenschutz erreichst du uns unter",
+        "bodyMiddle": "oder über unser",
+        "contactFormLink": "Kontaktformular"
+      }
+    }
+  }
+}

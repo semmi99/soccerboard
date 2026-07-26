@@ -1,8 +1,11 @@
 import type { ReactNode } from 'react'
 import { Link } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { MarketingFooter } from '../../marketing/components/MarketingFooter'
+import { LanguageSwitcher } from '../../../components/ui/LanguageSwitcher'
 
 export function LegalPageLayout({ title, children }: { title: string; children: ReactNode }) {
+  const { t } = useTranslation('legal')
   return (
     <div className="min-h-full bg-[#0d1420] text-white">
       <header className="sticky top-0 z-10 border-b border-white/10 bg-brand-blue-dark/95 backdrop-blur">
@@ -16,9 +19,12 @@ export function LegalPageLayout({ title, children }: { title: string; children: 
               <p className="text-[11px] text-white/60">by 9011 Soccer</p>
             </div>
           </Link>
-          <Link to="/" className="text-sm font-medium text-white/80 hover:text-white">
-            Zur Startseite
-          </Link>
+          <div className="flex items-center gap-4">
+            <LanguageSwitcher />
+            <Link to="/" className="text-sm font-medium text-white/80 hover:text-white">
+              {t('backToHome')}
+            </Link>
+          </div>
         </div>
       </header>
 

@@ -1,12 +1,14 @@
+import { useTranslation } from 'react-i18next'
 import { LegalPageLayout } from './LegalPageLayout'
 
 export function ImpressumPage() {
+  const { t } = useTranslation('legal')
   return (
-    <LegalPageLayout title="Impressum">
-      <p>Angaben gemäß den anwendbaren gesetzlichen Bestimmungen des Vereinigten Königreichs.</p>
+    <LegalPageLayout title={t('impressum.title')}>
+      <p>{t('impressum.intro')}</p>
 
       <section>
-        <h2 className="mb-2 text-lg font-bold text-white">Diensteanbieter</h2>
+        <h2 className="mb-2 text-lg font-bold text-white">{t('impressum.serviceProviderTitle')}</h2>
         <p>
           9011 Entertainment Ltd
           <br />
@@ -16,50 +18,43 @@ export function ImpressumPage() {
           <br />
           M4 6DE Manchester
           <br />
-          Vereinigtes Königreich
+          {t('unitedKingdom')}
         </p>
       </section>
 
       <section>
-        <h2 className="mb-2 text-lg font-bold text-white">Kontakt</h2>
-        <p>E-Mail: office@9011soccer.com</p>
+        <h2 className="mb-2 text-lg font-bold text-white">{t('impressum.contactTitle')}</h2>
+        <p>{t('impressum.contactLine')}</p>
       </section>
 
       <section>
-        <h2 className="mb-2 text-lg font-bold text-white">Vertretungsberechtigt</h2>
+        <h2 className="mb-2 text-lg font-bold text-white">{t('impressum.representativeTitle')}</h2>
         <p>Friedrich Schanner</p>
       </section>
 
       <section>
-        <h2 className="mb-2 text-lg font-bold text-white">Unternehmensrechtliche Angaben</h2>
-        <p>Registernummer (Companies House): 13808099</p>
+        <h2 className="mb-2 text-lg font-bold text-white">{t('impressum.companyDetailsTitle')}</h2>
+        <p>{t('impressum.registerNumber')}</p>
       </section>
 
       <section>
-        <h2 className="mb-2 text-lg font-bold text-white">Marken &amp; Domains</h2>
+        <h2 className="mb-2 text-lg font-bold text-white">{t('impressum.trademarksTitle')}</h2>
         <p>
-          Diese Anwendung sowie die Marken/Domains <strong>9011 Soccer</strong>{' '}
-          (9011soccer.com) und <strong>Soccer Analytics Pro</strong> (socceranalyticspro.com)
-          werden von der oben genannten Person/dem oben genannten Unternehmen betrieben.
+          {t('impressum.trademarksBefore')} <strong>9011 Soccer</strong>{' '}
+          (9011soccer.com) {t('impressum.trademarksMiddle')}{' '}
+          <strong>Soccer Analytics Pro</strong> (socceranalyticspro.com){' '}
+          {t('impressum.trademarksAfter')}
         </p>
       </section>
 
       <section>
-        <h2 className="mb-2 text-lg font-bold text-white">Haftung für Inhalte und Links</h2>
-        <p>
-          Trotz sorgfältiger inhaltlicher Kontrolle übernehmen wir keine Haftung für die Inhalte
-          externer Links. Für den Inhalt der verlinkten Seiten sind ausschließlich deren
-          Betreiber verantwortlich.
-        </p>
+        <h2 className="mb-2 text-lg font-bold text-white">{t('impressum.liabilityTitle')}</h2>
+        <p>{t('impressum.liabilityBody')}</p>
       </section>
 
       <section>
-        <h2 className="mb-2 text-lg font-bold text-white">Urheberrecht</h2>
-        <p>
-          Alle Inhalte dieser Website (Texte, Grafiken, Logos, Software) sind urheberrechtlich
-          geschützt. Jede Verwendung außerhalb der Grenzen des Urheberrechts bedarf der
-          vorherigen schriftlichen Zustimmung.
-        </p>
+        <h2 className="mb-2 text-lg font-bold text-white">{t('impressum.copyrightTitle')}</h2>
+        <p>{t('impressum.copyrightBody')}</p>
       </section>
     </LegalPageLayout>
   )

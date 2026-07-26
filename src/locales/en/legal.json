@@ -1,0 +1,149 @@
+{
+  "backToHome": "Back to homepage",
+  "unitedKingdom": "United Kingdom",
+  "kontakt": {
+    "title": "Contact",
+    "intro": "Questions about TacticBoard Pro, 9011 Soccer, or Soccer Analytics Pro? Write to us — we'll get back to you as soon as possible.",
+    "reachDirectlyBefore": "You can also reach us directly at",
+    "sentMessage": "Thanks for your message! We'll get back to you soon.",
+    "nameLabel": "Name",
+    "emailLabel": "Email",
+    "messageLabel": "Message",
+    "sendError": "Couldn't send message.",
+    "submit": "Send message"
+  },
+  "impressum": {
+    "title": "Legal notice",
+    "intro": "Details in accordance with the applicable legal requirements of the United Kingdom.",
+    "serviceProviderTitle": "Service provider",
+    "contactTitle": "Contact",
+    "contactLine": "Email: office@9011soccer.com",
+    "representativeTitle": "Authorized representative",
+    "companyDetailsTitle": "Company registration details",
+    "registerNumber": "Registration number (Companies House): 13808099",
+    "trademarksTitle": "Trademarks & domains",
+    "trademarksBefore": "This application, along with the trademarks/domains",
+    "trademarksMiddle": "and",
+    "trademarksAfter": "are operated by the person/company named above.",
+    "liabilityTitle": "Liability for content and links",
+    "liabilityBody": "Despite careful review of content, we assume no liability for the content of external links. The operators of the linked pages are solely responsible for their content.",
+    "copyrightTitle": "Copyright",
+    "copyrightBody": "All content on this website (text, graphics, logos, software) is protected by copyright. Any use beyond the limits of copyright law requires prior written consent."
+  },
+  "agb": {
+    "title": "Terms and Conditions",
+    "lastUpdatedLabel": "Last updated:",
+    "placeholderEnterDate": "Enter date",
+    "placeholderMonthlyAnytime": "monthly / at any time",
+    "translationNote": "This is a convenience translation. The German version is the legally binding one.",
+    "pricing": {
+      "freeLabel": "Free:",
+      "freeBody": "{{maxProjects}} projects, {{maxFrames}} frames per project, export up to {{maxExportPixelRatio}}x resolution — free of charge.",
+      "proLabel": "Pro:",
+      "proBody": "unlimited projects and frames, export up to {{maxExportPixelRatio}}x resolution — chargeable according to the prices stated on the website at the time of purchase.",
+      "paymentNote": "Note: Payment processing for the Pro tier is currently being built out. Please update this section once a payment provider (e.g. Stripe) is connected — including details on billing period, due dates, payment methods, and price changes."
+    },
+    "sections": {
+      "s1": {
+        "title": "1. Scope",
+        "body": "These Terms and Conditions (\"Terms\") govern the use of \"TacticBoard Pro\" (the \"Service\"), an offering by 9011 Entertainment Ltd (the \"Provider\"), available at 9011soccer.com and socceranalyticspro.com. By registering a user account, the user accepts these Terms."
+      },
+      "s2": {
+        "title": "2. Service description",
+        "body": "The Service is a browser-based tactics editor for sports clubs and coaches for creating lineups, plays, and training plans, as well as managing squad data. The Provider strives to keep the Service permanently available but does not guarantee uninterrupted availability."
+      },
+      "s3": {
+        "title": "3. Registration and user account",
+        "body": "Use of the Service requires creating a user account with a valid email address. The user is required to keep their access credentials confidential and to provide accurate information. The user is liable for activity under their own account to the extent they are responsible for it."
+      },
+      "s4": {
+        "title": "4. Pricing and payment terms",
+        "intro": "The Service is offered in the following tiers:"
+      },
+      "s5": {
+        "title": "5. Term and termination",
+        "bodyBefore": "Paid tiers can be cancelled",
+        "bodyAfter": "effective at the end of the respective billing period. The Free tier can be ended at any time by deleting the account. The Provider may suspend or terminate a user account in the event of serious violations of these Terms."
+      },
+      "s6": {
+        "title": "6. User content",
+        "body": "All content entered by the user (tactics, formations, squad data, photos, logos) remains the property of the user or the respective rights holder. The user grants the Provider the non-exclusive right of use necessary to provide the Service (storage, display, export). The user warrants that they are entitled to use uploaded photos and data (in particular of players); for minor players, the consent of their legal guardians must be obtained."
+      },
+      "s7": {
+        "title": "7. User obligations",
+        "body": "The user agrees not to misuse the Service, not to upload unlawful content, and to comply with applicable law (in particular data protection law towards third parties whose data they enter)."
+      },
+      "s8": {
+        "title": "8. Limitation of liability",
+        "body": "The Provider is liable without limitation for intent and gross negligence, as well as for damages arising from injury to life, body, or health. Otherwise, the Provider is liable only for breach of material contractual obligations, and the amount is limited to the foreseeable damage typical for this type of contract. There is no liability for data loss to the extent that the damage could have been avoided by reasonable data backup on the part of the user."
+      },
+      "s9": {
+        "title": "9. Changes to these Terms",
+        "body": "The Provider may amend these Terms with effect for the future where this is necessary for good cause (e.g. a change in the legal situation or the scope of the Service). The user will be notified of any changes in good time."
+      },
+      "s10": {
+        "title": "10. Final provisions",
+        "body": "These Terms are governed by the law of England and Wales, excluding the UN Convention on Contracts for the International Sale of Goods. To the extent permitted by law, the place of jurisdiction is the Provider's registered seat in Manchester, United Kingdom. Should individual provisions be invalid, the validity of the remaining provisions shall remain unaffected."
+      }
+    }
+  },
+  "datenschutz": {
+    "title": "Privacy Policy",
+    "lastUpdatedLabel": "Last updated:",
+    "placeholderEnterDate": "Enter date",
+    "translationNote": "This is a convenience translation. The German version is the legally binding one.",
+    "sections": {
+      "s1": {
+        "title": "1. Data controller",
+        "bodyBefore": "The data controller within the meaning of the General Data Protection Regulation (GDPR) is:",
+        "bodyAfter": "9011 Entertainment Ltd, Great Ancoats Street, M4 6DE Manchester, United Kingdom, office@9011soccer.com"
+      },
+      "s2": {
+        "title": "2. What data we process",
+        "accountTitle": "Account & sign-in",
+        "accountBody": "When you register, we collect your email address, password (stored encrypted), and optionally your name. Authentication is handled through our technical service provider, Supabase.",
+        "orgTitle": "Organization/club data",
+        "orgBody": "The name of your organization/club and an optionally uploaded club crest.",
+        "squadTitle": "Squad and player data",
+        "squadBody": "If you set up a squad, we process the data you enter about players (name, jersey number, position, optionally a photo). You enter this data as a coach or club and are responsible for ensuring there is a legal basis for it — in particular, for minor players, the consent of their legal guardians.",
+        "projectsTitle": "Tactics projects",
+        "projectsBody": "Formations, plays, frames, and captions you create are saved so you can continue editing them later.",
+        "contactFormTitle": "Contact form",
+        "contactFormBody": "If you use the contact form, we process your name, email address, and message in order to answer your inquiry."
+      },
+      "s3": {
+        "title": "3. Purposes and legal bases",
+        "body": "Processing takes place to fulfil the contract for use of the Service (Art. 6(1)(b) GDPR) and, when handling contact inquiries, on the basis of our legitimate interest in efficient communication (Art. 6(1)(f) GDPR)."
+      },
+      "s4": {
+        "title": "4. Hosting and data processors",
+        "intro": "We use the following service providers, who act as data processors on our behalf or are necessary for technical operation:",
+        "supabaseBody": "Database, authentication, and file storage (club crests, player photos).",
+        "vercelBody": "Hosting of the website/application.",
+        "locationsBody": "Our database runs on Supabase servers in the EU (Frankfurt, Germany region). The application itself is delivered via Vercel's content delivery network, which serves users from Europe through European edge locations. No data is transferred to third countries outside the EU/EEA."
+      },
+      "s5": {
+        "title": "5. Cookies and local storage",
+        "body": "To keep you signed in, we use a technically necessary session stored in your browser's local storage (localStorage). We currently do not use any tracking or marketing cookies, nor any third-party analytics tools."
+      },
+      "s6": {
+        "title": "6. Retention period",
+        "body": "We store your data for as long as your user account exists. After the account is deleted, the associated data is deleted, unless statutory retention obligations require otherwise. Messages sent via the contact form are deleted once the inquiry has been fully handled."
+      },
+      "s7": {
+        "title": "7. Your rights",
+        "body": "You have the right to access, rectification, erasure, restriction of processing, data portability, and objection to the processing of your data. You also have the right to lodge a complaint with the competent data protection supervisory authority (in the United Kingdom, the Information Commissioner's Office, ico.org.uk)."
+      },
+      "s8": {
+        "title": "8. Data security",
+        "body": "We take appropriate technical and organizational measures to protect your data against loss, misuse, and unauthorized access (e.g. encrypted transmission, per-organization access restrictions)."
+      },
+      "s9": {
+        "title": "9. Contact",
+        "bodyBefore": "For questions about data protection, you can reach us at",
+        "bodyMiddle": "or via our",
+        "contactFormLink": "contact form"
+      }
+    }
+  }
+}

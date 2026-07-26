@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Button } from '../../../components/ui/Button'
 import { sendContactMessage } from '../../../lib/supabase/contact'
 import { LegalPageLayout } from './LegalPageLayout'
@@ -7,6 +8,7 @@ const inputClass =
   'w-full rounded-md border border-white/15 bg-white/5 px-3 py-2 text-sm text-white outline-none focus:border-violet-accent'
 
 export function KontaktPage() {
+  const { t } = useTranslation('legal')
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [message, setMessage] = useState('')
@@ -25,20 +27,17 @@ export function KontaktPage() {
       setEmail('')
       setMessage('')
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Nachricht konnte nicht gesendet werden.')
+      setError(err instanceof Error ? err.message : t('kontakt.sendError'))
     } finally {
       setIsSending(false)
     }
   }
 
   return (
-    <LegalPageLayout title="Kontakt">
-      <p>
-        Fragen zu TacticBoard Pro, 9011 Soccer oder Soccer Analytics Pro? Schreib uns — wir
-        melden uns so schnell wie möglich zurück.
-      </p>
+    <LegalPageLayout title={t('kontakt.title')}>
+      <p>{t('kontakt.intro')}</p>
       <p className="text-white/60">
-        Du erreichst uns auch direkt unter{' '}
+        {t('kontakt.reachDirectlyBefore')}{' '}
         <a href="mailto:office@9011soccer.com" className="text-brand-gold underline">
           office@9011soccer.com
         </a>
@@ -47,12 +46,12 @@ export function KontaktPage() {
 
       {sent ? (
         <p className="rounded-lg border border-green-500/30 bg-green-500/10 px-4 py-3 text-green-300">
-          Danke für deine Nachricht! Wir melden uns bald bei dir.
+          {t('kontakt.sentMessage')}
         </p>
       ) : (
         <form className="flex flex-col gap-4" onSubmit={(e) => void handleSubmit(e)}>
           <label className="flex flex-col gap-1.5 text-sm">
-            <span className="font-medium text-white/70">Name</span>
+            <span className="font-medium text-white/70">{t('kontakt.nameLabel')}</span>
             <input
               type="text"
               required
@@ -62,7 +61,7 @@ export function KontaktPage() {
             />
           </label>
           <label className="flex flex-col gap-1.5 text-sm">
-            <span className="font-medium text-white/70">E-Mail</span>
+            <span className="font-medium text-white/70">{t('kontakt.emailLabel')}</span>
             <input
               type="email"
               required
@@ -72,7 +71,7 @@ export function KontaktPage() {
             />
           </label>
           <label className="flex flex-col gap-1.5 text-sm">
-            <span className="font-medium text-white/70">Nachricht</span>
+            <span className="font-medium text-white/70">{t('kontakt.messageLabel')}</span>
             <textarea
               required
               rows={5}
@@ -83,7 +82,7 @@ export function KontaktPage() {
           </label>
           {error && <p className="text-sm text-red-400">{error}</p>}
           <Button type="submit" variant="brand" loading={isSending} className="self-start">
-            Nachricht senden
+            {t('kontakt.submit')}
           </Button>
         </form>
       )}
