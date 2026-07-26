@@ -1123,10 +1123,14 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
             // movement near the shape swing it through a huge angle (the
             // handle-to-pivot distance barely grows with the shape's own
             // size, so the same small movement is far more sensitive on a
-            // long thin arrow than on a big chunky shape). Pushing the
-            // handle further out both makes it harder to grab by accident
-            // and makes each drag pixel correspond to a smaller angle.
-            rotateAnchorOffset={150}
+            // long thin arrow than on a big chunky shape). A much larger
+            // offset (150) cut that sensitivity a lot, but visually
+            // stranded the handle far off the shape on a long dangling
+            // line, which read as broken and was still no easier to avoid
+            // grabbing. A moderate bump plus the position/scale clamps in
+            // updateObjectLive (which now contain the worst case even if
+            // the handle is grabbed by accident) is the better trade-off.
+            rotateAnchorOffset={80}
             enabledAnchors={hasBendableArrowSelected ? [] : undefined}
             keepRatio={!allFreelyResizableSelected}
             boundBoxFunc={(oldBox, newBox) =>

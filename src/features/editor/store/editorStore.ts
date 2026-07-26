@@ -550,6 +550,14 @@ export const useEditorStore = create<EditorState>((set, get) => ({
     if (typeof clampedPatch.y === 'number') {
       clampedPatch.y = Math.max(-margin, Math.min(stage.height + margin, clampedPatch.y))
     }
+    // A runaway resize (grabbing a corner anchor instead of the shape body,
+    // the same accidental-transform class of bug as the position drift
+    // above) can collapse an object's scale toward 0 — shrinking it to an
+    // invisible dot with its position unaffected, so the x/y clamp above
+    // does nothing for it. Bounding scale keeps it visible either way.
+    if (typeof clampedPatch.scale === 'number') {
+      clampedPatch.scale = Math.max(0.1, Math.min(10, clampedPatch.scale))
+    }
     const nextFrames = frames.map((f, i) =>
       i === activeFrameIndex
         ? {
