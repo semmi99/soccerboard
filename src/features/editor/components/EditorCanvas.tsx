@@ -334,7 +334,7 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
   const frames = useEditorStore((s) => s.frames)
   const activeFrameIndex = useEditorStore((s) => s.activeFrameIndex)
   const updateFrameCaptionBadge = useEditorStore((s) => s.updateFrameCaptionBadge)
-  const updateFrameCaptionCard = useEditorStore((s) => s.updateFrameCaptionCard)
+  const setFrameCaptionCard = useEditorStore((s) => s.setFrameCaptionCard)
   const tool = useEditorStore((s) => s.tool)
   const selection = useEditorStore((s) => s.selection)
   const setSelection = useEditorStore((s) => s.setSelection)
@@ -1137,8 +1137,8 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
             caption={frame.caption}
             interactive={!isPlaying}
             onBadgeDragEnd={(badgeId, x, y) => updateFrameCaptionBadge(activeFrameIndex, badgeId, { x, y })}
-            onCardDragEnd={(cardId, x, y) => updateFrameCaptionCard(activeFrameIndex, cardId, { cardX: x, cardY: y })}
-            onCardResize={(cardId, width) => updateFrameCaptionCard(activeFrameIndex, cardId, { cardWidth: width })}
+            onCardDragEnd={(x, y) => setFrameCaptionCard(activeFrameIndex, { cardX: x, cardY: y })}
+            onCardResize={(width) => setFrameCaptionCard(activeFrameIndex, { cardWidth: width })}
           />
         </Layer>
         {marqueeRect && (

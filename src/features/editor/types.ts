@@ -243,14 +243,14 @@ export interface CaptionBadge {
   gradientDirection?: 'radial' | 'linear'
 }
 
-/** One title/subtitle callout card. A frame can carry several — most
- * sequences only need one, but a longer explainer beat can stack a headline
- * and a separate follow-up line at different spots on the pitch, matching
- * how tactical-analysis reels sometimes layer more than one callout over a
- * single still. Draggable and resizable, and can take the same solid/
- * gradient background any shape or text object can. */
-export interface FrameCaptionCard {
-  id: string
+/** A short "broadcast graphic" style story beat shown over this frame — one
+ * or more eyebrow badges plus a title card (bold headline + optional
+ * supporting line), matching the callout-card look of tactical-analysis
+ * explainer reels. No badges and no title/subtitle means the whole overlay
+ * is skipped. The title card itself is draggable and resizable and can take
+ * the same solid/gradient background any shape or text object can. */
+export interface FrameCaption {
+  badges: CaptionBadge[]
   title?: string
   subtitle?: string
   cardX: number
@@ -260,15 +260,6 @@ export interface FrameCaptionCard {
   gradient?: boolean
   background2?: string | null
   gradientDirection?: 'radial' | 'linear'
-}
-
-/** A short "broadcast graphic" style story beat shown over this frame — one
- * or more eyebrow badges plus zero or more title cards, matching the
- * callout-card look of tactical-analysis explainer reels. Empty badges and
- * cards means the whole overlay is skipped. */
-export interface FrameCaption {
-  badges: CaptionBadge[]
-  cards: FrameCaptionCard[]
 }
 
 export interface EditorFrame {
