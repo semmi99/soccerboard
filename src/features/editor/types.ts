@@ -152,6 +152,70 @@ export interface TextData {
   shadow?: boolean
 }
 
+export type QuoteFontFamily =
+  | 'system'
+  | 'georgia'
+  | 'times'
+  | 'arial_black'
+  | 'impact'
+  | 'trebuchet'
+  | 'courier'
+
+/** Web-safe font stacks only (no Google Fonts/custom uploads) — a PNG/video
+ * export rasterizes the Konva stage synchronously, so a not-yet-loaded web
+ * font would silently fall back at export time. Shared between the renderer
+ * and the sidebar's font-family selects. */
+export const QUOTE_FONT_STACKS: Record<QuoteFontFamily, string> = {
+  system: 'Inter, system-ui, sans-serif',
+  georgia: 'Georgia, serif',
+  times: '"Times New Roman", Times, serif',
+  arial_black: '"Arial Black", Arial, sans-serif',
+  impact: 'Impact, "Arial Narrow", sans-serif',
+  trebuchet: '"Trebuchet MS", sans-serif',
+  courier: '"Courier New", monospace',
+}
+
+/** A freely-placeable heading + body text card ("MISS IT, AND IT'S 3 v 0"
+ * style callout), matching the look of tactical-analysis explainer reels.
+ * Unlike the old per-frame FrameCaption, this is an ordinary object like any
+ * shape/text/equipment — repeatable, individually draggable/resizable. */
+export interface QuoteCardData {
+  /** Manually resized via the Transformer's free corner-drag, same as
+   * ShapeData — text wraps into the given box instead of auto-growing it. */
+  width: number
+  height: number
+
+  /** undefined/null = no card background (fully transparent). */
+  background?: string | null
+  backgroundGradient?: boolean
+  background2?: string | null
+  backgroundGradientDirection?: 'radial' | 'linear'
+  /** undefined/null = no border. */
+  borderColor?: string | null
+
+  headingText: string
+  headingFontFamily: QuoteFontFamily
+  headingFontSize: number
+  headingColor: string
+  headingGradient?: boolean
+  headingColor2?: string | null
+  headingGradientDirection?: 'radial' | 'linear'
+  /** The heading's own optional box (background/border), independent of the
+   * card's own background/border — matches the "eyebrow" callout look where
+   * the heading sits in its own small bordered pill above the body text. */
+  headingBoxEnabled?: boolean
+  headingBoxBackground?: string
+  headingBoxBorderColor?: string
+
+  bodyText: string
+  bodyFontFamily: QuoteFontFamily
+  bodyFontSize: number
+  bodyColor: string
+  bodyGradient?: boolean
+  bodyColor2?: string | null
+  bodyGradientDirection?: 'radial' | 'linear'
+}
+
 export interface EquipmentData {
   kind: EquipmentKind
   color?: string
@@ -199,6 +263,7 @@ export type ObjectType =
   | 'ball'
   | 'connector'
   | 'image'
+  | 'quote_card'
 
 export interface FrameObjectBase {
   id: string
@@ -218,6 +283,7 @@ export type FrameObject =
   | (FrameObjectBase & { objectType: 'ball'; data: BallData })
   | (FrameObjectBase & { objectType: 'connector'; data: ConnectorData })
   | (FrameObjectBase & { objectType: 'image'; data: ImageData })
+  | (FrameObjectBase & { objectType: 'quote_card'; data: QuoteCardData })
 
 export interface EditorFrame {
   id: string
@@ -265,6 +331,7 @@ export type ToolId =
   | 'text_badge'
   | 'text_title'
   | 'text_subtitle'
+  | 'quote_card'
   | 'ball'
   | 'connector'
   | `equipment_${EquipmentKind}`

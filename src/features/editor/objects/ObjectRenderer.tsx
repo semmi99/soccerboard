@@ -10,9 +10,10 @@ import { TextItem } from './shapes/TextItem'
 import { EquipmentShape } from './shapes/Equipment'
 import { BallShape } from './shapes/Ball'
 import { ImageShape } from './shapes/ImageShape'
+import { QuoteCard } from './shapes/QuoteCard'
 import { straightenInteriorPoints } from './shapes/arrowPoints'
 
-function renderContent(object: FrameObject) {
+function renderContent(object: FrameObject, isEditingText: boolean) {
   switch (object.objectType) {
     case 'player_chip':
       return <PlayerChipShape data={object.data} />
@@ -28,6 +29,8 @@ function renderContent(object: FrameObject) {
       return <BallShape data={object.data} />
     case 'image':
       return <ImageShape data={object.data} />
+    case 'quote_card':
+      return <QuoteCard data={object.data} hideText={isEditingText} />
   }
 }
 
@@ -107,6 +110,7 @@ interface Props {
   registerRef: (id: string, node: Konva.Group | null) => void
   initialOpacity?: number
   initialScaleFactor?: number
+  isEditingText?: boolean
 }
 
 export function ObjectRenderer({
@@ -124,6 +128,7 @@ export function ObjectRenderer({
   registerRef,
   initialOpacity,
   initialScaleFactor,
+  isEditingText,
 }: Props) {
   const groupRef = useRef<Konva.Group>(null)
 
@@ -137,12 +142,12 @@ export function ObjectRenderer({
     const node = groupRef.current
     if (!node) return
 
-    // Shapes support independent width/height instead of a single uniform
-    // scale factor, so a free 4-corner resize can actually stretch them
-    // non-uniformly. The resize is folded into the shape's own data and the
-    // node's scale is reset to 1 so it doesn't get double-applied on the
-    // next render.
-    if (object.objectType === 'shape') {
+    // Shapes (and quote cards) support independent width/height instead of a
+    // single uniform scale factor, so a free 4-corner resize can actually
+    // stretch them non-uniformly. The resize is folded into the object's own
+    // data and the node's scale is reset to 1 so it doesn't get
+    // double-applied on the next render.
+    if (object.objectType === 'shape' || object.objectType === 'quote_card') {
       const scaleX = node.scaleX()
       const scaleY = node.scaleY()
       node.scaleX(1)
@@ -257,7 +262,7 @@ export function ObjectRenderer({
       onDragEnd={(e) => onDragEnd(object.id, e.target.x(), e.target.y())}
       onTransformEnd={handleTransformEnd}
     >
-      {renderContent(object)}
+      {renderContent(object, Boolean(isEditingText))}
       {showArrowHandles && object.objectType === 'arrow' && (
         <ArrowPointHandles
           points={object.data.points}

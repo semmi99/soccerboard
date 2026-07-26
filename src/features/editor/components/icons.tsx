@@ -67,6 +67,16 @@ export function TextToolIcon(props: SVGProps<SVGSVGElement>) {
   )
 }
 
+export function QuoteCardIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <Base {...props}>
+      <rect x="3" y="4" width="18" height="16" rx="2" />
+      <path d="M7 8.5h6" strokeWidth={2.4} />
+      <path d="M7 13h10M7 16h7" />
+    </Base>
+  )
+}
+
 export function BallIcon(props: SVGProps<SVGSVGElement>) {
   return (
     <Base {...props}>

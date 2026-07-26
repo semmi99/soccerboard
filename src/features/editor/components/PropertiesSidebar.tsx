@@ -12,6 +12,8 @@ import type {
   PitchDesign,
   PitchOrientation,
   PlayerChipData,
+  QuoteCardData,
+  QuoteFontFamily,
   ShapeData,
   TextData,
 } from '../types'
@@ -274,6 +276,14 @@ export function PropertiesSidebar() {
               data={selectedObject.data}
               onCheckpoint={beginHistoryCheckpoint}
               onChange={(patch) => updateData<Extract<FrameObject, { objectType: 'text' }>>(patch)}
+            />
+          )}
+
+          {selectedObject.objectType === 'quote_card' && (
+            <QuoteCardFields
+              data={selectedObject.data}
+              onCheckpoint={beginHistoryCheckpoint}
+              onChange={(patch) => updateData<Extract<FrameObject, { objectType: 'quote_card' }>>(patch)}
             />
           )}
 
@@ -965,6 +975,327 @@ function TextFields({
           }}
         />
       </Field>
+    </div>
+  )
+}
+
+const QUOTE_FONT_OPTIONS: { value: QuoteFontFamily; label: string }[] = [
+  { value: 'system', label: 'Standard (Inter)' },
+  { value: 'georgia', label: 'Georgia (Serif)' },
+  { value: 'times', label: 'Times New Roman' },
+  { value: 'arial_black', label: 'Arial Black (Fett)' },
+  { value: 'impact', label: 'Impact' },
+  { value: 'trebuchet', label: 'Trebuchet MS' },
+  { value: 'courier', label: 'Courier (Monospace)' },
+]
+
+function FontFamilySelect({
+  value,
+  onCheckpoint,
+  onChange,
+}: {
+  value: QuoteFontFamily
+  onCheckpoint: () => void
+  onChange: (v: QuoteFontFamily) => void
+}) {
+  return (
+    <select
+      className={selectClass}
+      value={value}
+      onChange={(e) => {
+        onCheckpoint()
+        onChange(e.target.value as QuoteFontFamily)
+      }}
+    >
+      {QUOTE_FONT_OPTIONS.map((opt) => (
+        <option key={opt.value} value={opt.value}>
+          {opt.label}
+        </option>
+      ))}
+    </select>
+  )
+}
+
+function QuoteCardFields({
+  data,
+  onCheckpoint,
+  onChange,
+}: {
+  data: QuoteCardData
+  onCheckpoint: () => void
+  onChange: (patch: Partial<QuoteCardData>) => void
+}) {
+  return (
+    <div className="flex flex-col gap-3">
+      <div className="flex flex-col gap-2 rounded-md border border-pitch-700 p-2">
+        <span className="text-xs font-medium text-white/60">Überschrift</span>
+        <Field label="Text">
+          <input
+            type="text"
+            className={inputClass}
+            value={data.headingText}
+            onFocus={onCheckpoint}
+            onChange={(e) => onChange({ headingText: e.target.value })}
+          />
+        </Field>
+        <Field label="Schriftart">
+          <FontFamilySelect
+            value={data.headingFontFamily}
+            onCheckpoint={onCheckpoint}
+            onChange={(v) => onChange({ headingFontFamily: v })}
+          />
+        </Field>
+        <Field label={`Schriftgröße (${data.headingFontSize}px)`}>
+          <input
+            type="range"
+            min={10}
+            max={40}
+            className="w-full"
+            value={data.headingFontSize}
+            onFocus={onCheckpoint}
+            onChange={(e) => onChange({ headingFontSize: Number(e.target.value) })}
+          />
+        </Field>
+        <Field label="Farbe">
+          <ColorSwatchPicker
+            size="sm"
+            value={data.headingColor}
+            onChange={(c) => {
+              onCheckpoint()
+              onChange({ headingColor: c })
+            }}
+          />
+        </Field>
+        <label className="flex items-center gap-2 text-xs text-white/70">
+          <input
+            type="checkbox"
+            className="accent-violet-accent"
+            checked={Boolean(data.headingGradient)}
+            onChange={(e) => {
+              onCheckpoint()
+              onChange({ headingGradient: e.target.checked })
+            }}
+          />
+          Farbverlauf statt flacher Füllung
+        </label>
+        {data.headingGradient && (
+          <>
+            <select
+              className={selectClass}
+              value={data.headingGradientDirection ?? 'radial'}
+              onChange={(e) => {
+                onCheckpoint()
+                onChange({ headingGradientDirection: e.target.value as 'radial' | 'linear' })
+              }}
+            >
+              <option value="radial">Radial (von der Mitte)</option>
+              <option value="linear">Linear (links nach rechts)</option>
+            </select>
+            <ColorSwatchPicker
+              size="sm"
+              value={data.headingColor2 ?? data.headingColor}
+              onChange={(c) => {
+                onCheckpoint()
+                onChange({ headingColor2: c })
+              }}
+            />
+          </>
+        )}
+        <label className="flex items-center gap-2 text-xs text-white/70">
+          <input
+            type="checkbox"
+            className="accent-violet-accent"
+            checked={Boolean(data.headingBoxEnabled)}
+            onChange={(e) => {
+              onCheckpoint()
+              onChange({ headingBoxEnabled: e.target.checked })
+            }}
+          />
+          Eigene Box um die Überschrift
+        </label>
+        {data.headingBoxEnabled && (
+          <div className="flex flex-col gap-1.5 pl-5">
+            <Field label="Box-Hintergrund">
+              <ColorSwatchPicker
+                size="sm"
+                value={data.headingBoxBackground ?? '#ffffff'}
+                onChange={(c) => {
+                  onCheckpoint()
+                  onChange({ headingBoxBackground: c })
+                }}
+              />
+            </Field>
+            <Field label="Box-Rahmen">
+              <ColorSwatchPicker
+                size="sm"
+                value={data.headingBoxBorderColor ?? '#ef4444'}
+                onChange={(c) => {
+                  onCheckpoint()
+                  onChange({ headingBoxBorderColor: c })
+                }}
+              />
+            </Field>
+          </div>
+        )}
+      </div>
+
+      <div className="flex flex-col gap-2 rounded-md border border-pitch-700 p-2">
+        <span className="text-xs font-medium text-white/60">Text darunter</span>
+        <Field label="Text">
+          <textarea
+            className={`${inputClass} min-h-16`}
+            value={data.bodyText}
+            onFocus={onCheckpoint}
+            onChange={(e) => onChange({ bodyText: e.target.value })}
+          />
+        </Field>
+        <Field label="Schriftart">
+          <FontFamilySelect
+            value={data.bodyFontFamily}
+            onCheckpoint={onCheckpoint}
+            onChange={(v) => onChange({ bodyFontFamily: v })}
+          />
+        </Field>
+        <Field label={`Schriftgröße (${data.bodyFontSize}px)`}>
+          <input
+            type="range"
+            min={12}
+            max={48}
+            className="w-full"
+            value={data.bodyFontSize}
+            onFocus={onCheckpoint}
+            onChange={(e) => onChange({ bodyFontSize: Number(e.target.value) })}
+          />
+        </Field>
+        <Field label="Farbe">
+          <ColorSwatchPicker
+            size="sm"
+            value={data.bodyColor}
+            onChange={(c) => {
+              onCheckpoint()
+              onChange({ bodyColor: c })
+            }}
+          />
+        </Field>
+        <label className="flex items-center gap-2 text-xs text-white/70">
+          <input
+            type="checkbox"
+            className="accent-violet-accent"
+            checked={Boolean(data.bodyGradient)}
+            onChange={(e) => {
+              onCheckpoint()
+              onChange({ bodyGradient: e.target.checked })
+            }}
+          />
+          Farbverlauf statt flacher Füllung
+        </label>
+        {data.bodyGradient && (
+          <>
+            <select
+              className={selectClass}
+              value={data.bodyGradientDirection ?? 'radial'}
+              onChange={(e) => {
+                onCheckpoint()
+                onChange({ bodyGradientDirection: e.target.value as 'radial' | 'linear' })
+              }}
+            >
+              <option value="radial">Radial (von der Mitte)</option>
+              <option value="linear">Linear (links nach rechts)</option>
+            </select>
+            <ColorSwatchPicker
+              size="sm"
+              value={data.bodyColor2 ?? data.bodyColor}
+              onChange={(c) => {
+                onCheckpoint()
+                onChange({ bodyColor2: c })
+              }}
+            />
+          </>
+        )}
+      </div>
+
+      <div className="flex flex-col gap-2 rounded-md border border-pitch-700 p-2">
+        <span className="text-xs font-medium text-white/60">Karte</span>
+        <label className="flex items-center gap-2 text-xs text-white/70">
+          <input
+            type="checkbox"
+            checked={!!data.background}
+            onChange={(e) => {
+              onCheckpoint()
+              onChange({ background: e.target.checked ? (data.background ?? '#ffffff') : null })
+            }}
+          />
+          Hintergrund
+        </label>
+        {data.background && (
+          <>
+            <ColorSwatchPicker
+              size="sm"
+              value={data.background}
+              onChange={(c) => {
+                onCheckpoint()
+                onChange({ background: c })
+              }}
+            />
+            <label className="flex items-center gap-2 text-xs text-white/70">
+              <input
+                type="checkbox"
+                className="accent-violet-accent"
+                checked={Boolean(data.backgroundGradient)}
+                onChange={(e) => {
+                  onCheckpoint()
+                  onChange({ backgroundGradient: e.target.checked })
+                }}
+              />
+              Farbverlauf statt flacher Füllung
+            </label>
+            {data.backgroundGradient && (
+              <>
+                <select
+                  className={selectClass}
+                  value={data.backgroundGradientDirection ?? 'radial'}
+                  onChange={(e) => {
+                    onCheckpoint()
+                    onChange({ backgroundGradientDirection: e.target.value as 'radial' | 'linear' })
+                  }}
+                >
+                  <option value="radial">Radial (von der Mitte)</option>
+                  <option value="linear">Linear (links nach rechts)</option>
+                </select>
+                <ColorSwatchPicker
+                  size="sm"
+                  value={data.background2 ?? data.background}
+                  onChange={(c) => {
+                    onCheckpoint()
+                    onChange({ background2: c })
+                  }}
+                />
+              </>
+            )}
+          </>
+        )}
+        <label className="flex items-center gap-2 text-xs text-white/70">
+          <input
+            type="checkbox"
+            checked={!!data.borderColor}
+            onChange={(e) => {
+              onCheckpoint()
+              onChange({ borderColor: e.target.checked ? (data.borderColor ?? '#0f172a') : null })
+            }}
+          />
+          Rahmen
+        </label>
+        {data.borderColor && (
+          <ColorSwatchPicker
+            size="sm"
+            value={data.borderColor}
+            onChange={(c) => {
+              onCheckpoint()
+              onChange({ borderColor: c })
+            }}
+          />
+        )}
+      </div>
     </div>
   )
 }

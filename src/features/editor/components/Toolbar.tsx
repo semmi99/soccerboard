@@ -17,6 +17,7 @@ import {
   MannequinIcon,
   MiniGoalIcon,
   PlainLineIcon,
+  QuoteCardIcon,
   RectShapeIcon,
   RingIcon,
   SlalomPoleIcon,
@@ -89,6 +90,7 @@ const SECTIONS: ToolDef[][] = [
     { id: 'text_badge', label: 'Badge', swatch: '#ffe100', swatchLabel: 'B' },
     { id: 'text_title', label: 'Titel', swatch: '#f8fafc', swatchLabel: 'T' },
     { id: 'text_subtitle', label: 'Untertitel', swatch: '#94a3b8', swatchLabel: 'U' },
+    { id: 'quote_card', label: 'Zitat-Karte', icon: <QuoteCardIcon /> },
   ],
   (Object.keys(EQUIPMENT_ICONS) as EquipmentKind[]).map((kind) => ({
     id: `equipment_${kind}` as ToolId,

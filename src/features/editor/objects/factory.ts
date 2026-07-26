@@ -201,6 +201,30 @@ export function createObjectForTool(
     }
   }
 
+  if (tool === 'quote_card') {
+    return {
+      ...base,
+      objectType: 'quote_card',
+      data: {
+        width: 280,
+        height: 130,
+        background: '#ffffff',
+        borderColor: '#0f172a',
+        headingText: 'ÜBERSCHRIFT',
+        headingFontFamily: 'system',
+        headingFontSize: 13,
+        headingColor: '#ef4444',
+        headingBoxEnabled: true,
+        headingBoxBackground: '#ffffff',
+        headingBoxBorderColor: '#ef4444',
+        bodyText: 'Text hier eingeben',
+        bodyFontFamily: 'arial_black',
+        bodyFontSize: 22,
+        bodyColor: '#0f172a',
+      },
+    }
+  }
+
   if (tool === 'ball') {
     return { ...base, objectType: 'ball', data: {} }
   }

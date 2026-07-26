@@ -10,6 +10,7 @@ import { ObjectRenderer } from '../objects/ObjectRenderer'
 import { ConnectorShape } from '../objects/shapes/Connector'
 import { ConnectorZoneShape } from '../objects/shapes/PlayerZone'
 import { findConnectorZones } from '../objects/shapes/connectorZones'
+import { QuoteCardEditOverlay } from './QuoteCardEditOverlay'
 import type { FrameObject } from '../types'
 
 function hexToRgba(hex: string, alpha: number): string {
@@ -349,6 +350,15 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
   const [marqueeRect, setMarqueeRect] = useState<{ x: number; y: number; width: number; height: number } | null>(
     null,
   )
+  // Which quote-card object (if any) currently has its heading/body textarea
+  // overlay open for direct in-place editing — see the QuoteCardEditor render
+  // near the bottom of this component.
+  const [editingObjectId, setEditingObjectId] = useState<string | null>(null)
+
+  function handleObjectDoubleClick(id: string) {
+    const object = frame.objects.find((o) => o.id === id)
+    if (object?.objectType === 'quote_card') setEditingObjectId(id)
+  }
 
   // While a frame transition is in flight, objects that only exist in the
   // target frame (entering) or only in the source frame (exiting) are kept
@@ -921,7 +931,9 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
     .filter((o): o is FrameObject => Boolean(o))
   const allFreelyResizableSelected =
     selectedObjects.length > 0 &&
-    selectedObjects.every((o) => o.objectType === 'shape' || o.objectType === 'training_equipment')
+    selectedObjects.every(
+      (o) => o.objectType === 'shape' || o.objectType === 'training_equipment' || o.objectType === 'quote_card',
+    )
 
   // Bendable straight/polyline arrows get their own point-drag handles (see
   // ArrowPointHandles in ObjectRenderer) sitting right at the shape's own
@@ -1021,10 +1033,12 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
                 onDragMove={handleDragMove}
                 onDragEnd={handleDragMove}
                 onTransformEnd={handleTransformEnd}
+                onDoubleClick={handleObjectDoubleClick}
                 onArrowPointsChange={handleArrowPointsChange}
                 registerRef={registerRef}
                 initialOpacity={enteringIds.has(object.id) ? 0 : 1}
                 initialScaleFactor={enteringIds.has(object.id) ? 0.7 : 1}
+                isEditingText={editingObjectId === object.id}
               />
             )
           })}
@@ -1096,6 +1110,29 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
           </Layer>
         )}
       </Stage>
+      {editingObjectId &&
+        (() => {
+          const editingObject = frame.objects.find((o) => o.id === editingObjectId)
+          const editingNode = nodeRefs.current[editingObjectId]
+          if (!editingObject || editingObject.objectType !== 'quote_card' || !editingNode || !stageRef.current) {
+            return null
+          }
+          const abs = editingNode.getAbsolutePosition()
+          const containerRect = stageRef.current.container().getBoundingClientRect()
+          return (
+            <QuoteCardEditOverlay
+              data={editingObject.data}
+              originX={containerRect.left + abs.x * scale}
+              originY={containerRect.top + abs.y * scale}
+              rotationDeg={editingObject.rotation}
+              visualScale={editingObject.scale * scale}
+              onCommit={(patch) =>
+                updateObjectLive(editingObject.id, { data: { ...editingObject.data, ...patch } } as Partial<FrameObject>)
+              }
+              onClose={() => setEditingObjectId(null)}
+            />
+          )
+        })()}
     </div>
   )
 }
