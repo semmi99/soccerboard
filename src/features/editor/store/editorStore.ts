@@ -60,11 +60,6 @@ function defaultFrameCaption(): FrameCaption {
   }
 }
 
-function cloneCaption(caption: FrameCaption | null | undefined): FrameCaption | null {
-  if (!caption) return null
-  return { ...caption, badges: caption.badges.map((b) => ({ ...b, id: crypto.randomUUID() })) }
-}
-
 function defaultCaptionBadge(existingCount: number): CaptionBadge {
   return {
     id: crypto.randomUUID(),
@@ -362,17 +357,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
     pushHistory(get, set)
     const stage = PITCH_STAGE_SIZE[orientation]
     const maxDim = 220
-    // A small source image (an icon or logo well under maxDim) would
-    // otherwise insert at its tiny native pixel size — smaller than the
-    // Transformer's own resize handles, so a plain drag lands on a handle
-    // instead of the image and triggers a runaway resize that flings it far
-    // off the pitch instead of just moving it. Upscaling so the larger side
-    // is at least minDim keeps it comfortably bigger than the handles.
-    const minDim = 90
-    let ratio = Math.min(maxDim / naturalWidth, maxDim / naturalHeight, 1)
-    if (Math.max(naturalWidth, naturalHeight) * ratio < minDim) {
-      ratio = minDim / Math.max(naturalWidth, naturalHeight)
-    }
+    const ratio = Math.min(maxDim / naturalWidth, maxDim / naturalHeight, 1)
     const width = naturalWidth * ratio
     const height = naturalHeight * ratio
     const frame = frames[activeFrameIndex]!
@@ -731,10 +716,10 @@ export const useEditorStore = create<EditorState>((set, get) => ({
       // moving them in the new frame produces a smooth tween during playback
       // instead of an instant swap (matching is done by id, see EditorCanvas).
       objects: source.objects.map(cloneObject),
-      // Carries the caption over instead of dropping it — losing the
-      // title/subtitle card on every duplicate meant retyping it for each
-      // new beat of what's usually the same ongoing sequence.
-      caption: cloneCaption(source.caption),
+      // The story caption is this frame's own beat in the narrative — a
+      // duplicate is a new moment, so it starts without one instead of
+      // silently repeating the source frame's headline.
+      caption: null,
     }
     const nextFrames = [...frames]
     nextFrames.splice(index + 1, 0, copy)

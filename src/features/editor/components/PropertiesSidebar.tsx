@@ -77,6 +77,7 @@ export function PropertiesSidebar() {
   const applyEquipmentStyleToAll = useEditorStore((s) => s.applyEquipmentStyleToAll)
   const removeSelected = useEditorStore((s) => s.removeSelected)
   const duplicateSelected = useEditorStore((s) => s.duplicateSelected)
+  const addRatioBadgeFromSelection = useEditorStore((s) => s.addRatioBadgeFromSelection)
   const bringToFront = useEditorStore((s) => s.bringToFront)
   const sendToBack = useEditorStore((s) => s.sendToBack)
 
@@ -92,12 +93,9 @@ export function PropertiesSidebar() {
   // Selecting an object collapses the Feld/Team & Kader/Frame-Beschriftung
   // sections so its own properties are reachable without scrolling past
   // all three — especially painful on a tablet's shorter viewport.
-  // Deliberately one-way: deselecting does NOT force them back open, since
-  // that fought a manually-collapsed section every time selection emptied
-  // out (e.g. after clicking empty canvas) even though the user never
-  // touched the +/− toggle. Only fires on the none→some transition, so
-  // re-selecting a different object while one is already selected doesn't
-  // re-collapse a section the user just reopened by hand.
+  // Deselecting restores the normal expanded view. Only fires on the
+  // none-⇄-some transition, so a manual re-expand while something stays
+  // selected isn't immediately fought on the next selection change.
   const hadSelectionRef = useRef(false)
   useEffect(() => {
     const hasSelection = selection.length > 0
@@ -105,6 +103,10 @@ export function PropertiesSidebar() {
       setIsFieldPanelOpen(false)
       setIsTeamPanelOpen(false)
       setIsCaptionPanelOpen(false)
+    } else if (!hasSelection && hadSelectionRef.current) {
+      setIsFieldPanelOpen(true)
+      setIsTeamPanelOpen(true)
+      setIsCaptionPanelOpen(true)
     }
     hadSelectionRef.current = hasSelection
   }, [selection.length])
@@ -403,6 +405,12 @@ export function PropertiesSidebar() {
               Löschen
             </Button>
           </div>
+          {(frame?.objects.filter((o) => o.objectType === 'player_chip' && selection.includes(o.id)).length ?? 0) >=
+            2 && (
+            <Button variant="secondary" className="mt-1.5 w-full" onClick={addRatioBadgeFromSelection}>
+              Verhältnis-Badge erstellen (z.B. 3 v 4)
+            </Button>
+          )}
         </div>
       )}
 
@@ -773,60 +781,18 @@ function ArrowFields({
         Dribbellinie (gewellt)
       </label>
       {data.shape !== 'curved' && (
-        <>
-          <label className="flex items-center gap-2 text-xs text-white/70">
-            <input
-              type="checkbox"
-              className="accent-violet-accent"
-              checked={data.spaceBehind ?? false}
-              onChange={(e) => {
-                onCheckpoint()
-                onChange({ spaceBehind: e.target.checked })
-              }}
-            />
-            Als Abwehrlinie markieren (Raum dahinter anzeigen)
-          </label>
-          {data.spaceBehind && (
-            <div className="flex flex-col gap-2 pl-5">
-              <label className="flex items-center gap-2 text-xs text-white/70">
-                <input
-                  type="checkbox"
-                  className="accent-violet-accent"
-                  checked={data.spaceBehindShowLabel ?? true}
-                  onChange={(e) => {
-                    onCheckpoint()
-                    onChange({ spaceBehindShowLabel: e.target.checked })
-                  }}
-                />
-                Meter-Label anzeigen
-              </label>
-              <Field label={`Deckkraft (${Math.round((data.spaceBehindOpacity ?? 0.3) * 100)}%)`}>
-                <input
-                  type="range"
-                  min={0.1}
-                  max={0.7}
-                  step={0.05}
-                  className="w-full"
-                  value={data.spaceBehindOpacity ?? 0.3}
-                  onFocus={onCheckpoint}
-                  onChange={(e) => onChange({ spaceBehindOpacity: Number(e.target.value) })}
-                />
-              </Field>
-              <label className="flex items-center gap-2 text-xs text-white/70">
-                <input
-                  type="checkbox"
-                  className="accent-violet-accent"
-                  checked={data.spaceBehindGradient ?? false}
-                  onChange={(e) => {
-                    onCheckpoint()
-                    onChange({ spaceBehindGradient: e.target.checked })
-                  }}
-                />
-                Farbverlauf (zum Tor hin ausblendend)
-              </label>
-            </div>
-          )}
-        </>
+        <label className="flex items-center gap-2 text-xs text-white/70">
+          <input
+            type="checkbox"
+            className="accent-violet-accent"
+            checked={data.spaceBehind ?? false}
+            onChange={(e) => {
+              onCheckpoint()
+              onChange({ spaceBehind: e.target.checked })
+            }}
+          />
+          Als Abwehrlinie markieren (Raum dahinter anzeigen)
+        </label>
       )}
       {data.shape !== 'curved' && data.bendable !== false && (
         <Button

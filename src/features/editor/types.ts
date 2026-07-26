@@ -98,16 +98,6 @@ export interface ArrowData {
    * area between it and the nearer goal line and labels that gap's real-
    * world depth in meters, recomputed live from the line's own position. */
   spaceBehind?: boolean
-  /** Hides the "Xm" depth label for the space-behind zone while still
-   * shading the area. Unset shows the label (the original behavior). */
-  spaceBehindShowLabel?: boolean
-  /** Fill opacity for the shaded space-behind zone, 0..1. Unset falls back
-   * to a visible default — the original fixed 0.16 was reported as barely
-   * visible against the pitch. */
-  spaceBehindOpacity?: number
-  /** Fades the shaded zone from full `color` at the line itself to
-   * transparent at the goal line, instead of one flat fill throughout. */
-  spaceBehindGradient?: boolean
   /** Renders the line as a wavy "dribble" path (through cones/opponents)
    * instead of a smooth line — works alongside either the straight or
    * curved shape and any bend points already on it. */

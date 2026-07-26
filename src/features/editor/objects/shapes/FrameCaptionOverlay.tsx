@@ -75,8 +75,8 @@ function BadgePill({
   )
 }
 
-/** A short "broadcast graphic" style story beat over the current frame — one
- * or more draggable badge pills plus a title card, styled after the callout
+/** A short "broadcast graphic" story beat over the current frame — one or
+ * more draggable badge pills plus a title card, styled after the callout
  * cards tactical-analysis explainer reels use to narrate a sequence beat by
  * beat. Rendered in plain stage coordinates (not inside the pitch's crop/
  * orientation transform) so its default position is stable regardless of

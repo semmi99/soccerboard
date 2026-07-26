@@ -62,36 +62,14 @@ function EquipmentIcon({ data }: { data: EquipmentData }) {
         </Group>
       )
     }
-    case 'mini_goal': {
-      // A small pop-up goal: front frame (the goal mouth), a receding back
-      // edge for a pseudo-3D box shape, and a light net mesh instead of one
-      // big X — a single diagonal cross read as "broken window", not a net.
-      const left = -16
-      const top = -10
-      const width = 32
-      const height = 20
-      const backLeft = left + 5
-      const backRight = left + width - 5
-      const backTop = top - 6
+    case 'mini_goal':
       return (
         <Group>
-          <Line
-            points={[left, top, backLeft, backTop, backRight, backTop, left + width, top]}
-            stroke={color}
-            strokeWidth={1.5}
-          />
-          <Line points={[left, top, backLeft, backTop]} stroke={color} strokeWidth={1.5} />
-          <Line points={[left + width, top, backRight, backTop]} stroke={color} strokeWidth={1.5} />
-          <Rect x={left} y={top} width={width} height={height} stroke={color} strokeWidth={2} fill="rgba(255,255,255,0.06)" />
-          {[0.25, 0.5, 0.75].map((f) => (
-            <Line key={`v-${f}`} points={[left + width * f, top, left + width * f, top + height]} stroke={color} strokeWidth={0.75} opacity={0.5} />
-          ))}
-          {[0.33, 0.66].map((f) => (
-            <Line key={`h-${f}`} points={[left, top + height * f, left + width, top + height * f]} stroke={color} strokeWidth={0.75} opacity={0.5} />
-          ))}
+          <Rect x={-16} y={-10} width={32} height={20} stroke={color} strokeWidth={2} fill="rgba(255,255,255,0.08)" />
+          <Line points={[-16, -10, 16, 10]} stroke={color} strokeWidth={1} />
+          <Line points={[16, -10, -16, 10]} stroke={color} strokeWidth={1} />
         </Group>
       )
-    }
     case 'mannequin':
       return (
         <Group>
