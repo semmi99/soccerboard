@@ -1,22 +1,22 @@
 import { Link, useLocation } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { useAuthStore } from '../features/auth/store/authStore'
-
-const NAV_ITEMS = [
-  { to: '/dashboard', label: 'Projekte' },
-  { to: '/squad', label: 'Kader' },
-  { to: '/formations', label: 'Formationen' },
-  { to: '/account', label: 'Konto' },
-]
-
-const ADMIN_NAV_ITEM = { to: '/admin', label: 'Team' }
+import { LanguageSwitcher } from '../components/ui/LanguageSwitcher'
 
 export function AppHeader() {
+  const { t } = useTranslation()
   const organization = useAuthStore((s) => s.organization)
   const profile = useAuthStore((s) => s.profile)
   const signOut = useAuthStore((s) => s.signOut)
   const location = useLocation()
 
-  const navItems = profile?.role === 'admin' ? [...NAV_ITEMS, ADMIN_NAV_ITEM] : NAV_ITEMS
+  const navItems = [
+    { to: '/dashboard', label: t('common:nav.projects') },
+    { to: '/squad', label: t('common:nav.squad') },
+    { to: '/formations', label: t('common:nav.formations') },
+    { to: '/account', label: t('common:nav.account') },
+    ...(profile?.role === 'admin' ? [{ to: '/admin', label: t('common:nav.admin') }] : []),
+  ]
 
   return (
     <header className="flex items-center justify-between border-b border-pitch-700 px-8 py-4">
@@ -38,13 +38,16 @@ export function AppHeader() {
           ))}
         </nav>
       </div>
-      <button
-        type="button"
-        onClick={() => void signOut()}
-        className="text-sm text-white/40 hover:text-white/70"
-      >
-        Abmelden
-      </button>
+      <div className="flex items-center gap-4">
+        <LanguageSwitcher />
+        <button
+          type="button"
+          onClick={() => void signOut()}
+          className="text-sm text-white/40 hover:text-white/70"
+        >
+          {t('common:actions.signOut')}
+        </button>
+      </div>
     </header>
   )
 }

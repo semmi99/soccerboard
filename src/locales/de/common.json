@@ -1,0 +1,18 @@
+{
+  "nav": {
+    "projects": "Projekte",
+    "squad": "Kader",
+    "formations": "Formationen",
+    "account": "Konto",
+    "admin": "Team"
+  },
+  "actions": {
+    "signOut": "Abmelden",
+    "save": "Speichern",
+    "cancel": "Abbrechen",
+    "delete": "Löschen",
+    "add": "Hinzufügen",
+    "edit": "Bearbeiten",
+    "duplicate": "Duplizieren"
+  }
+}

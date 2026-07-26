@@ -4,6 +4,7 @@ import type Konva from 'konva'
 import { useEditorStore } from '../store/editorStore'
 import type { useProjectSave } from '../hooks/useProjectSave'
 import { Button } from '../../../components/ui/Button'
+import { LanguageSwitcher } from '../../../components/ui/LanguageSwitcher'
 import { ExportMenu } from './ExportMenu'
 
 export function TopBar({
@@ -59,6 +60,7 @@ export function TopBar({
       )}
 
       <div className="ml-auto flex shrink-0 items-center gap-3">
+        <LanguageSwitcher />
         <ExportMenu stageRef={stageRef} />
 
         <Button

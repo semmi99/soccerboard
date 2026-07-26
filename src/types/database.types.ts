@@ -399,6 +399,7 @@ export type Database = {
           full_name: string | null
           id: string
           is_platform_admin: boolean
+          locale: string | null
           org_id: string
           role: string
         }
@@ -408,6 +409,7 @@ export type Database = {
           full_name?: string | null
           id: string
           is_platform_admin?: boolean
+          locale?: string | null
           org_id: string
           role?: string
         }
@@ -417,6 +419,7 @@ export type Database = {
           full_name?: string | null
           id?: string
           is_platform_admin?: boolean
+          locale?: string | null
           org_id?: string
           role?: string
         }

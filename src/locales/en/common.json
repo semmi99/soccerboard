@@ -1,0 +1,18 @@
+{
+  "nav": {
+    "projects": "Projects",
+    "squad": "Squad",
+    "formations": "Formations",
+    "account": "Account",
+    "admin": "Team"
+  },
+  "actions": {
+    "signOut": "Sign out",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "add": "Add",
+    "edit": "Edit",
+    "duplicate": "Duplicate"
+  }
+}

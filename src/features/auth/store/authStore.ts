@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import type { Session } from '@supabase/supabase-js'
+import i18n from '../../../lib/i18n'
 import { supabase } from '../../../lib/supabase/client'
 import type { Tables } from '../../../types/database.types'
 
@@ -26,6 +27,7 @@ interface AuthState {
   setOrganization: (organization: Organization) => void
   updatePassword: (newPassword: string) => Promise<{ error: string | null }>
   updateProfileName: (fullName: string) => Promise<{ error: string | null }>
+  updateProfileLocale: (locale: 'de' | 'en') => Promise<{ error: string | null }>
 }
 
 async function loadProfileAndOrg(userId: string) {
@@ -95,6 +97,12 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         .then(({ profile, organization }) => {
           clearTimeout(stuckTimeout)
           set({ status: 'signed_in', session, profile, organization })
+          // A locale saved on the account (set via the language switcher on
+          // another device) takes over from whatever localStorage/browser
+          // detection picked before we knew who was signed in.
+          if (profile?.locale && profile.locale !== i18n.language) {
+            void i18n.changeLanguage(profile.locale)
+          }
         })
         .catch(() => {
           clearTimeout(stuckTimeout)
@@ -143,6 +151,20 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     const { data, error } = await supabase
       .from('profiles')
       .update({ full_name: fullName })
+      .eq('id', profile.id)
+      .select('*')
+      .single()
+    if (error) return { error: error.message }
+    set({ profile: data })
+    return { error: null }
+  },
+
+  updateProfileLocale: async (locale) => {
+    const { profile } = get()
+    if (!profile) return { error: 'Kein Profil geladen.' }
+    const { data, error } = await supabase
+      .from('profiles')
+      .update({ locale })
       .eq('id', profile.id)
       .select('*')
       .single()
