@@ -88,19 +88,19 @@ export function PropertiesSidebar() {
 
   // Selecting an object collapses the Feld/Team & Kader sections so its own
   // properties are reachable without scrolling past both — especially
-  // painful on a tablet's shorter viewport. Deselecting restores the normal
-  // expanded view. Only fires on the none-⇄-some transition, so a manual
-  // re-expand while something stays selected isn't immediately fought on
-  // the next selection change.
+  // painful on a tablet's shorter viewport. Deliberately one-way: deselecting
+  // does NOT force them back open, since that fought a manually-collapsed
+  // section every time selection emptied out (e.g. after clicking empty
+  // canvas) even though the user never touched the +/− toggle. Only fires on
+  // the none→some transition, so re-selecting a different object while one
+  // is already selected doesn't re-collapse a section the user just
+  // reopened by hand.
   const hadSelectionRef = useRef(false)
   useEffect(() => {
     const hasSelection = selection.length > 0
     if (hasSelection && !hadSelectionRef.current) {
       setIsFieldPanelOpen(false)
       setIsTeamPanelOpen(false)
-    } else if (!hasSelection && hadSelectionRef.current) {
-      setIsFieldPanelOpen(true)
-      setIsTeamPanelOpen(true)
     }
     hadSelectionRef.current = hasSelection
   }, [selection.length])
@@ -258,8 +258,10 @@ export function PropertiesSidebar() {
           {selectedObject.objectType === 'arrow' && (
             <ArrowFields
               data={selectedObject.data}
+              rotation={selectedObject.rotation}
               onCheckpoint={beginHistoryCheckpoint}
               onChange={(patch) => updateData<Extract<FrameObject, { objectType: 'arrow' }>>(patch)}
+              onChangeRotation={(rotation) => updateObjectLive(selectedObject.id, { rotation } as Partial<FrameObject>)}
             />
           )}
 
@@ -470,17 +472,55 @@ function PlayerChipFields({
   )
 }
 
+const ROTATION_PRESETS = [0, 90, 180, 270, 360]
+
 function ArrowFields({
   data,
+  rotation,
   onCheckpoint,
   onChange,
+  onChangeRotation,
 }: {
   data: ArrowData
+  rotation: number
   onCheckpoint: () => void
   onChange: (patch: Partial<ArrowData>) => void
+  onChangeRotation: (rotation: number) => void
 }) {
   return (
     <div className="flex flex-col gap-2">
+      <Field label={`Winkel (${Math.round(rotation)}°)`}>
+        <div className="flex flex-col gap-1.5">
+          <input
+            type="range"
+            min={0}
+            max={360}
+            className="w-full"
+            value={rotation}
+            onFocus={onCheckpoint}
+            onChange={(e) => onChangeRotation(Number(e.target.value))}
+          />
+          <div className="flex gap-1.5">
+            {ROTATION_PRESETS.map((preset) => (
+              <button
+                key={preset}
+                type="button"
+                onClick={() => {
+                  onCheckpoint()
+                  onChangeRotation(preset)
+                }}
+                className={`flex-1 rounded-md border px-1.5 py-1 text-[11px] transition-colors ${
+                  rotation === preset
+                    ? 'border-violet-accent bg-violet-accent/20 text-white'
+                    : 'border-pitch-600 bg-pitch-800 text-white/60 hover:border-violet-accent/50'
+                }`}
+              >
+                {preset}°
+              </button>
+            ))}
+          </div>
+        </div>
+      </Field>
       <Field label="Farbe">
         <div className="flex flex-col gap-1.5">
           <ColorSwatchPicker
