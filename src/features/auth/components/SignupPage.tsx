@@ -1,11 +1,13 @@
 import { type FormEvent, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { Button } from '../../../components/ui/Button'
 import { Input } from '../../../components/ui/Input'
 import { useAuthStore } from '../store/authStore'
 import { AuthLayout } from './AuthLayout'
 
 export function SignupPage() {
+  const { t } = useTranslation('auth')
   const navigate = useNavigate()
   const signUp = useAuthStore((s) => s.signUp)
   const [fullName, setFullName] = useState('')
@@ -35,26 +37,26 @@ export function SignupPage() {
 
   if (confirmationSent) {
     return (
-      <AuthLayout title="Fast geschafft" subtitle="Bestätige deine Email-Adresse">
+      <AuthLayout title={t('signup.confirmTitle')} subtitle={t('signup.confirmSubtitle')}>
         <p className="text-sm text-white/70">
-          Wir haben dir einen Bestätigungslink an <strong className="text-white">{email}</strong>{' '}
-          geschickt. Klicke auf den Link, um dein Konto zu aktivieren und dich anzumelden.
+          {t('signup.confirmBodyBefore')} <strong className="text-white">{email}</strong>{' '}
+          {t('signup.confirmBodyAfter')}
         </p>
         <Link
           to="/login"
           className="mt-5 inline-block text-sm font-medium text-brand-yellow hover:underline"
         >
-          Zurück zum Login
+          {t('signup.backToLogin')}
         </Link>
       </AuthLayout>
     )
   }
 
   return (
-    <AuthLayout title="Konto erstellen" subtitle="Richte deinen Verein in TacticBoard Pro ein">
+    <AuthLayout title={t('signup.title')} subtitle={t('signup.subtitle')}>
       <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
         <Input
-          label="Dein Name"
+          label={t('signup.nameLabel')}
           type="text"
           autoComplete="name"
           required
@@ -62,14 +64,14 @@ export function SignupPage() {
           onChange={(e) => setFullName(e.target.value)}
         />
         <Input
-          label="Verein / Team (optional)"
+          label={t('signup.orgLabel')}
           type="text"
-          placeholder="z. B. Rapid Kapfenberg U18"
+          placeholder={t('signup.orgPlaceholder')}
           value={orgName}
           onChange={(e) => setOrgName(e.target.value)}
         />
         <Input
-          label="Email"
+          label={t('signup.emailLabel')}
           type="email"
           autoComplete="email"
           required
@@ -77,7 +79,7 @@ export function SignupPage() {
           onChange={(e) => setEmail(e.target.value)}
         />
         <Input
-          label="Passwort"
+          label={t('signup.passwordLabel')}
           type="password"
           autoComplete="new-password"
           minLength={6}
@@ -87,13 +89,13 @@ export function SignupPage() {
         />
         {error && <p className="text-sm text-red-400">{error}</p>}
         <Button type="submit" variant="brand" loading={loading} className="mt-2 w-full">
-          Konto erstellen
+          {t('signup.submit')}
         </Button>
       </form>
       <p className="mt-5 text-center text-sm text-white/60">
-        Schon registriert?{' '}
+        {t('signup.alreadyRegistered')}{' '}
         <Link to="/login" className="font-medium text-brand-yellow hover:underline">
-          Anmelden
+          {t('signup.loginLink')}
         </Link>
       </p>
     </AuthLayout>

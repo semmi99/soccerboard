@@ -1,11 +1,13 @@
 import { type FormEvent, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { Button } from '../../../components/ui/Button'
 import { Input } from '../../../components/ui/Input'
 import { useAuthStore } from '../store/authStore'
 import { AuthLayout } from './AuthLayout'
 
 export function LoginPage() {
+  const { t } = useTranslation('auth')
   const navigate = useNavigate()
   const signIn = useAuthStore((s) => s.signIn)
   const [email, setEmail] = useState('')
@@ -27,10 +29,10 @@ export function LoginPage() {
   }
 
   return (
-    <AuthLayout title="Willkommen zurück" subtitle="Melde dich bei deinem Verein an">
+    <AuthLayout title={t('login.title')} subtitle={t('login.subtitle')}>
       <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
         <Input
-          label="Email"
+          label={t('login.emailLabel')}
           type="email"
           autoComplete="email"
           required
@@ -38,7 +40,7 @@ export function LoginPage() {
           onChange={(e) => setEmail(e.target.value)}
         />
         <Input
-          label="Passwort"
+          label={t('login.passwordLabel')}
           type="password"
           autoComplete="current-password"
           required
@@ -47,13 +49,13 @@ export function LoginPage() {
         />
         {error && <p className="text-sm text-red-400">{error}</p>}
         <Button type="submit" variant="brand" loading={loading} className="mt-2 w-full">
-          Anmelden
+          {t('login.submit')}
         </Button>
       </form>
       <p className="mt-5 text-center text-sm text-white/60">
-        Noch kein Konto?{' '}
+        {t('login.noAccount')}{' '}
         <Link to="/signup" className="font-medium text-brand-yellow hover:underline">
-          Registrieren
+          {t('login.signupLink')}
         </Link>
       </p>
     </AuthLayout>

@@ -3,6 +3,8 @@ import { initReactI18next } from 'react-i18next'
 import LanguageDetector from 'i18next-browser-languagedetector'
 import commonDe from '../locales/de/common.json'
 import commonEn from '../locales/en/common.json'
+import authDe from '../locales/de/auth.json'
+import authEn from '../locales/en/auth.json'
 
 /** Same localStorage key `lib/language.ts` used pre-i18next, so a language
  * choice made on the marketing/auth pages before login survives into the
@@ -14,12 +16,12 @@ void i18n
   .use(initReactI18next)
   .init({
     resources: {
-      de: { common: commonDe },
-      en: { common: commonEn },
+      de: { common: commonDe, auth: authDe },
+      en: { common: commonEn, auth: authEn },
     },
     fallbackLng: 'de',
     supportedLngs: ['de', 'en'],
-    ns: ['common'],
+    ns: ['common', 'auth'],
     defaultNS: 'common',
     detection: {
       order: ['localStorage', 'navigator'],

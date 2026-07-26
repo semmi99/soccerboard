@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import { LanguageSwitcher } from '../../../components/ui/LanguageSwitcher'
 
 export function AuthLayout({
   title,
@@ -19,6 +20,9 @@ export function AuthLayout({
         }}
       />
       <div className="relative w-full max-w-sm">
+        <div className="mb-4 flex justify-center">
+          <LanguageSwitcher />
+        </div>
         <div className="mb-8 text-center">
           <div className="mb-3 inline-flex items-center gap-2">
             <span className="flex h-9 w-9 items-center justify-center rounded-full bg-brand-yellow text-sm font-black text-brand-blue-dark">
