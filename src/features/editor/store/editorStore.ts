@@ -530,13 +530,32 @@ export const useEditorStore = create<EditorState>((set, get) => ({
   beginHistoryCheckpoint: () => pushHistory(get, set),
 
   updateObjectLive: (objectId, patch) => {
-    const { frames, activeFrameIndex } = get()
+    const { frames, activeFrameIndex, orientation } = get()
+    // The Stage's own canvas is sized to exactly match the pitch — there is
+    // no "just past the touchline but still visible" margin, the canvas
+    // simply stops there. Any object whose x/y ends up past that edge is
+    // drawn outside the canvas's pixel bounds and doesn't render at all —
+    // invisible, with no on-screen anchor left to grab and pull it back. A
+    // runaway drag or rotation (a long arrow especially: a small angle
+    // change swings its far end a long way) can push a pivot that far
+    // without any error, so it silently vanishes and even survives a save.
+    // Clamping the pivot to the pitch's own bounds keeps it always visible
+    // regardless of what a stray transform tried to do.
+    const stage = PITCH_STAGE_SIZE[orientation]
+    const margin = 0
+    const clampedPatch = { ...patch }
+    if (typeof clampedPatch.x === 'number') {
+      clampedPatch.x = Math.max(-margin, Math.min(stage.width + margin, clampedPatch.x))
+    }
+    if (typeof clampedPatch.y === 'number') {
+      clampedPatch.y = Math.max(-margin, Math.min(stage.height + margin, clampedPatch.y))
+    }
     const nextFrames = frames.map((f, i) =>
       i === activeFrameIndex
         ? {
             ...f,
             objects: f.objects.map((o) =>
-              o.id === objectId ? ({ ...o, ...patch } as typeof o) : o,
+              o.id === objectId ? ({ ...o, ...clampedPatch } as typeof o) : o,
             ),
           }
         : f,
