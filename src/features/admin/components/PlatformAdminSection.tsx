@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Button } from '../../../components/ui/Button'
 import {
   listAllOrganizations,
@@ -9,12 +10,6 @@ import {
   type PlatformOrg,
   type PlatformProfile,
 } from '../../../lib/supabase/platformAdmin'
-
-const ROLE_LABELS: Record<string, string> = {
-  admin: 'Admin',
-  coach: 'Trainer (zahlend)',
-  viewer: 'Betrachter (Demo)',
-}
 
 const selectClass =
   'rounded-md border border-pitch-600 bg-pitch-800 px-2 py-1.5 text-xs text-white outline-none focus:border-violet-accent'
@@ -30,13 +25,14 @@ function PasswordResetDialog({
   onClose: () => void
   onSet: (newPassword: string) => Promise<void>
 }) {
+  const { t } = useTranslation(['admin', 'common'])
   const [password, setPassword] = useState('')
   const [isSaving, setIsSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   async function handleSubmit() {
     if (password.length < 8) {
-      setError('Mindestens 8 Zeichen.')
+      setError(t('passwordDialog.tooShort'))
       return
     }
     setIsSaving(true)
@@ -45,7 +41,7 @@ function PasswordResetDialog({
       await onSet(password)
       onClose()
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Fehlgeschlagen.')
+      setError(err instanceof Error ? err.message : t('passwordDialog.failed'))
     } finally {
       setIsSaving(false)
     }
@@ -55,23 +51,23 @@ function PasswordResetDialog({
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
       <div className="w-full max-w-sm rounded-xl border border-pitch-700 bg-pitch-900 p-5 shadow-2xl">
         <h2 className="text-sm font-semibold text-white">
-          Neues Passwort für {profile.full_name || profile.email}
+          {t('passwordDialog.title', { name: profile.full_name || profile.email })}
         </h2>
         <input
           type="text"
           className={`${inputClass} mt-3 w-full`}
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          placeholder="Neues Passwort (min. 8 Zeichen)"
+          placeholder={t('passwordDialog.placeholder')}
           autoFocus
         />
         {error && <p className="mt-2 text-xs text-red-400">{error}</p>}
         <div className="mt-4 flex justify-end gap-2">
           <Button variant="secondary" onClick={onClose} disabled={isSaving}>
-            Abbrechen
+            {t('common:actions.cancel')}
           </Button>
           <Button onClick={() => void handleSubmit()} loading={isSaving}>
-            Setzen
+            {t('passwordDialog.submit')}
           </Button>
         </div>
       </div>
@@ -80,6 +76,14 @@ function PasswordResetDialog({
 }
 
 export function PlatformAdminSection() {
+  const { t } = useTranslation('admin')
+
+  const ROLE_LABELS: Record<string, string> = {
+    admin: t('platform.roles.admin'),
+    coach: t('platform.roles.coach'),
+    viewer: t('platform.roles.viewer'),
+  }
+
   const [orgs, setOrgs] = useState<PlatformOrg[]>([])
   const [profiles, setProfiles] = useState<PlatformProfile[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -95,7 +99,7 @@ export function PlatformAdminSection() {
         setProfiles(p)
       })
       .catch((err: unknown) => {
-        if (!cancelled) setError(err instanceof Error ? err.message : 'Laden fehlgeschlagen.')
+        if (!cancelled) setError(err instanceof Error ? err.message : t('loadError'))
       })
       .finally(() => {
         if (!cancelled) setIsLoading(false)
@@ -111,7 +115,7 @@ export function PlatformAdminSection() {
       const updated = await updateOrgFreeOverride(orgId, value)
       setOrgs((os) => os.map((o) => (o.id === updated.id ? updated : o)))
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Konnte nicht geändert werden.')
+      setError(err instanceof Error ? err.message : t('platform.freeOverrideError'))
     }
   }
 
@@ -121,7 +125,7 @@ export function PlatformAdminSection() {
       const updated = await updateAnyProfileRole(profileId, role)
       setProfiles((ps) => ps.map((p) => (p.id === updated.id ? updated : p)))
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Rolle konnte nicht geändert werden.')
+      setError(err instanceof Error ? err.message : t('roleChangeError'))
     }
   }
 
@@ -129,11 +133,8 @@ export function PlatformAdminSection() {
 
   return (
     <div className="mt-10 border-t border-pitch-700 pt-8">
-      <h1 className="text-lg font-semibold text-white">Plattform-Verwaltung</h1>
-      <p className="mt-1 text-sm text-white/40">
-        Voller Zugriff auf alle Organisationen und Benutzer — sichtbar nur für dich als
-        Plattform-Admin.
-      </p>
+      <h1 className="text-lg font-semibold text-white">{t('platform.title')}</h1>
+      <p className="mt-1 text-sm text-white/40">{t('platform.subtitle')}</p>
 
       {error && <p className="mt-4 text-sm text-red-400">{error}</p>}
 
@@ -144,7 +145,7 @@ export function PlatformAdminSection() {
       ) : (
         <>
           <section className="mt-6 rounded-xl border border-pitch-700 bg-pitch-900 p-5">
-            <h2 className="mb-3 text-sm font-semibold text-white">Organisationen</h2>
+            <h2 className="mb-3 text-sm font-semibold text-white">{t('platform.orgsTitle')}</h2>
             <div className="flex flex-col gap-1.5">
               {orgs.map((o) => (
                 <div
@@ -153,7 +154,9 @@ export function PlatformAdminSection() {
                 >
                   <div className="min-w-0">
                     <p className="truncate text-sm text-white">{o.name}</p>
-                    <p className="text-xs text-white/40">Tarif: {o.subscription_tier}</p>
+                    <p className="text-xs text-white/40">
+                      {t('platform.tierLabel', { tier: o.subscription_tier })}
+                    </p>
                   </div>
                   <label className="flex shrink-0 items-center gap-2 text-xs text-white/70">
                     <input
@@ -162,7 +165,7 @@ export function PlatformAdminSection() {
                       checked={o.free_override}
                       onChange={(e) => void handleFreeOverrideToggle(o.id, e.target.checked)}
                     />
-                    Kostenloser, unbegrenzter Zugang
+                    {t('platform.freeOverrideLabel')}
                   </label>
                 </div>
               ))}
@@ -170,7 +173,7 @@ export function PlatformAdminSection() {
           </section>
 
           <section className="mt-6 rounded-xl border border-pitch-700 bg-pitch-900 p-5">
-            <h2 className="mb-3 text-sm font-semibold text-white">Alle Benutzer</h2>
+            <h2 className="mb-3 text-sm font-semibold text-white">{t('platform.usersTitle')}</h2>
             <div className="flex flex-col gap-1.5">
               {profiles.map((p) => (
                 <div
@@ -178,7 +181,9 @@ export function PlatformAdminSection() {
                   className="flex items-center justify-between gap-2 rounded-md bg-pitch-800 px-3 py-2"
                 >
                   <div className="min-w-0">
-                    <p className="truncate text-sm text-white">{p.full_name || p.email || 'Unbenannt'}</p>
+                    <p className="truncate text-sm text-white">
+                      {p.full_name || p.email || t('membersSection.unnamed')}
+                    </p>
                     <p className="truncate text-xs text-white/40">
                       {p.email} · {orgById.get(p.org_id)?.name ?? '–'}
                     </p>
@@ -196,7 +201,7 @@ export function PlatformAdminSection() {
                       ))}
                     </select>
                     <Button variant="secondary" onClick={() => setPasswordTarget(p)}>
-                      Passwort setzen
+                      {t('platform.setPassword')}
                     </Button>
                   </div>
                 </div>

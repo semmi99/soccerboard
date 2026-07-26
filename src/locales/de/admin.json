@@ -1,0 +1,67 @@
+{
+  "roles": {
+    "admin": "Admin",
+    "coach": "Trainer",
+    "viewer": "Betrachter"
+  },
+  "loadError": "Laden fehlgeschlagen.",
+  "roleChangeError": "Rolle konnte nicht geändert werden.",
+  "inviteError": "Einladung fehlgeschlagen.",
+  "createError": "Konto konnte nicht angelegt werden.",
+  "removeConfirm": "„{{name}}\" endgültig entfernen? Das Konto wird komplett gelöscht.",
+  "removeConfirmDefaultName": "Dieses Mitglied",
+  "removeError": "Konnte nicht entfernt werden.",
+  "adminOnlyNotice": "Diese Seite ist nur für Admins deines Teams.",
+  "title": "Benutzerverwaltung",
+  "subtitle": "Lade Kolleg:innen zu „{{orgName}}\" ein und verwalte ihre Rolle. Ein echtes Benutzerkonto entsteht erst, wenn die eingeladene Person sich mit genau dieser E-Mail-Adresse selbst registriert — sie landet dann automatisch in diesem Team statt in einem neuen.",
+  "inviteSection": {
+    "title": "Neu einladen",
+    "emailLabel": "E-Mail",
+    "emailPlaceholder": "trainer@verein.de",
+    "roleLabel": "Rolle",
+    "submit": "Einladen",
+    "pending": "Ausstehend",
+    "withdraw": "Zurückziehen"
+  },
+  "createSection": {
+    "title": "Manuell anlegen",
+    "description": "Erstellt das Konto sofort mit dem hier gesetzten Passwort — ohne auf eine Selbstregistrierung zu warten. Gib der Person das Passwort separat weiter.",
+    "emailLabel": "E-Mail",
+    "nameLabel": "Name",
+    "namePlaceholder": "Max Mustermann",
+    "passwordLabel": "Passwort",
+    "passwordPlaceholder": "Min. 8 Zeichen",
+    "roleLabel": "Rolle",
+    "submit": "Anlegen"
+  },
+  "membersSection": {
+    "title": "Mitglieder",
+    "unnamed": "Unbenannt",
+    "you": "(Du)",
+    "cannotChangeOwnRole": "Du kannst deine eigene Rolle nicht ändern",
+    "removeTitle": "Mitglied endgültig entfernen",
+    "remove": "Entfernen"
+  },
+  "platform": {
+    "title": "Plattform-Verwaltung",
+    "subtitle": "Voller Zugriff auf alle Organisationen und Benutzer — sichtbar nur für dich als Plattform-Admin.",
+    "freeOverrideError": "Konnte nicht geändert werden.",
+    "orgsTitle": "Organisationen",
+    "tierLabel": "Tarif: {{tier}}",
+    "freeOverrideLabel": "Kostenloser, unbegrenzter Zugang",
+    "usersTitle": "Alle Benutzer",
+    "setPassword": "Passwort setzen",
+    "roles": {
+      "admin": "Admin",
+      "coach": "Trainer (zahlend)",
+      "viewer": "Betrachter (Demo)"
+    }
+  },
+  "passwordDialog": {
+    "title": "Neues Passwort für {{name}}",
+    "placeholder": "Neues Passwort (min. 8 Zeichen)",
+    "tooShort": "Mindestens 8 Zeichen.",
+    "failed": "Fehlgeschlagen.",
+    "submit": "Setzen"
+  }
+}

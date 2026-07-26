@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useAuthStore } from '../../auth/store/authStore'
 import { AppHeader } from '../../../app/AppHeader'
 import { Button } from '../../../components/ui/Button'
@@ -16,20 +17,21 @@ import {
 } from '../../../lib/supabase/admin'
 import { PlatformAdminSection } from './PlatformAdminSection'
 
-const ROLE_LABELS: Record<OrgRole, string> = {
-  admin: 'Admin',
-  coach: 'Trainer',
-  viewer: 'Betrachter',
-}
-
 const selectClass =
   'rounded-md border border-pitch-600 bg-pitch-800 px-2 py-1.5 text-xs text-white outline-none focus:border-violet-accent'
 const inputClass =
   'rounded-md border border-pitch-600 bg-pitch-800 px-2 py-1.5 text-sm text-white outline-none focus:border-violet-accent'
 
 export function AdminPage() {
+  const { t } = useTranslation(['admin', 'common'])
   const organization = useAuthStore((s) => s.organization)
   const profile = useAuthStore((s) => s.profile)
+
+  const ROLE_LABELS: Record<OrgRole, string> = {
+    admin: t('roles.admin'),
+    coach: t('roles.coach'),
+    viewer: t('roles.viewer'),
+  }
 
   const [members, setMembers] = useState<OrgMember[]>([])
   const [invites, setInvites] = useState<OrgInvite[]>([])
@@ -58,7 +60,7 @@ export function AdminPage() {
         setInvites(i)
       })
       .catch((err: unknown) => {
-        if (!cancelled) setError(err instanceof Error ? err.message : 'Laden fehlgeschlagen.')
+        if (!cancelled) setError(err instanceof Error ? err.message : t('loadError'))
       })
       .finally(() => {
         if (!cancelled) setIsLoading(false)
@@ -74,7 +76,7 @@ export function AdminPage() {
       const updated = await updateMemberRole(memberId, role)
       setMembers((ms) => ms.map((m) => (m.id === updated.id ? updated : m)))
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Rolle konnte nicht geändert werden.')
+      setError(err instanceof Error ? err.message : t('roleChangeError'))
     }
   }
 
@@ -92,7 +94,7 @@ export function AdminPage() {
       setInvites((is) => [invite, ...is])
       setInviteEmail('')
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Einladung fehlgeschlagen.')
+      setError(err instanceof Error ? err.message : t('inviteError'))
     } finally {
       setIsInviting(false)
     }
@@ -114,7 +116,7 @@ export function AdminPage() {
       setCreateFullName('')
       setCreatePassword('')
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Konto konnte nicht angelegt werden.')
+      setError(err instanceof Error ? err.message : t('createError'))
     } finally {
       setIsCreating(false)
     }
@@ -123,7 +125,9 @@ export function AdminPage() {
   async function handleRemoveMember(member: OrgMember) {
     if (
       !window.confirm(
-        `„${member.full_name || member.email || 'Dieses Mitglied'}" endgültig entfernen? Das Konto wird komplett gelöscht.`,
+        t('removeConfirm', {
+          name: member.full_name || member.email || t('removeConfirmDefaultName'),
+        }),
       )
     )
       return
@@ -133,7 +137,7 @@ export function AdminPage() {
       await removeMember(member.id)
       setMembers((ms) => ms.filter((m) => m.id !== member.id))
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Konnte nicht entfernt werden.')
+      setError(err instanceof Error ? err.message : t('removeError'))
     } finally {
       setRemovingId(null)
     }
@@ -145,7 +149,7 @@ export function AdminPage() {
       await cancelInvite(id)
       setInvites((is) => is.filter((i) => i.id !== id))
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Konnte nicht entfernt werden.')
+      setError(err instanceof Error ? err.message : t('removeError'))
     }
   }
 
@@ -162,7 +166,7 @@ export function AdminPage() {
       <div className="h-full bg-pitch-950">
         <AppHeader />
         <div className="flex flex-col items-center gap-2 py-20 text-white/50">
-          <p>Diese Seite ist nur für Admins deines Teams.</p>
+          <p>{t('adminOnlyNotice')}</p>
         </div>
       </div>
     )
@@ -172,31 +176,26 @@ export function AdminPage() {
     <div className="h-full overflow-y-auto bg-pitch-950">
       <AppHeader />
       <main className="mx-auto max-w-3xl p-8">
-        <h1 className="text-lg font-semibold text-white">Benutzerverwaltung</h1>
-        <p className="mt-1 text-sm text-white/40">
-          Lade Kolleg:innen zu „{organization.name}“ ein und verwalte ihre Rolle. Ein echtes
-          Benutzerkonto entsteht erst, wenn die eingeladene Person sich mit genau dieser E-Mail-
-          Adresse selbst registriert — sie landet dann automatisch in diesem Team statt in einem
-          neuen.
-        </p>
+        <h1 className="text-lg font-semibold text-white">{t('title')}</h1>
+        <p className="mt-1 text-sm text-white/40">{t('subtitle', { orgName: organization.name })}</p>
 
         {error && <p className="mt-4 text-sm text-red-400">{error}</p>}
 
         <section className="mt-6 rounded-xl border border-pitch-700 bg-pitch-900 p-5">
-          <h2 className="mb-3 text-sm font-semibold text-white">Neu einladen</h2>
+          <h2 className="mb-3 text-sm font-semibold text-white">{t('inviteSection.title')}</h2>
           <div className="flex flex-wrap items-end gap-2">
             <label className="flex flex-1 flex-col gap-1 text-xs">
-              <span className="font-medium text-white/60">E-Mail</span>
+              <span className="font-medium text-white/60">{t('inviteSection.emailLabel')}</span>
               <input
                 type="email"
                 className={inputClass}
                 value={inviteEmail}
                 onChange={(e) => setInviteEmail(e.target.value)}
-                placeholder="trainer@verein.de"
+                placeholder={t('inviteSection.emailPlaceholder')}
               />
             </label>
             <label className="flex flex-col gap-1 text-xs">
-              <span className="font-medium text-white/60">Rolle</span>
+              <span className="font-medium text-white/60">{t('inviteSection.roleLabel')}</span>
               <select
                 className={selectClass}
                 value={inviteRole}
@@ -214,13 +213,13 @@ export function AdminPage() {
               loading={isInviting}
               disabled={!inviteEmail.trim()}
             >
-              Einladen
+              {t('inviteSection.submit')}
             </Button>
           </div>
 
           {invites.length > 0 && (
             <div className="mt-4 flex flex-col gap-1.5">
-              <span className="text-xs font-medium text-white/40">Ausstehend</span>
+              <span className="text-xs font-medium text-white/40">{t('inviteSection.pending')}</span>
               {invites.map((inv) => (
                 <div
                   key={inv.id}
@@ -234,7 +233,7 @@ export function AdminPage() {
                     onClick={() => void handleCancelInvite(inv.id)}
                     className="text-xs text-white/40 hover:text-red-400"
                   >
-                    Zurückziehen
+                    {t('inviteSection.withdraw')}
                   </button>
                 </div>
               ))}
@@ -243,44 +242,41 @@ export function AdminPage() {
         </section>
 
         <section className="mt-6 rounded-xl border border-pitch-700 bg-pitch-900 p-5">
-          <h2 className="mb-1 text-sm font-semibold text-white">Manuell anlegen</h2>
-          <p className="mb-3 text-xs text-white/40">
-            Erstellt das Konto sofort mit dem hier gesetzten Passwort — ohne auf eine
-            Selbstregistrierung zu warten. Gib der Person das Passwort separat weiter.
-          </p>
+          <h2 className="mb-1 text-sm font-semibold text-white">{t('createSection.title')}</h2>
+          <p className="mb-3 text-xs text-white/40">{t('createSection.description')}</p>
           <div className="flex flex-wrap items-end gap-2">
             <label className="flex flex-1 flex-col gap-1 text-xs" style={{ minWidth: 140 }}>
-              <span className="font-medium text-white/60">E-Mail</span>
+              <span className="font-medium text-white/60">{t('createSection.emailLabel')}</span>
               <input
                 type="email"
                 className={inputClass}
                 value={createEmail}
                 onChange={(e) => setCreateEmail(e.target.value)}
-                placeholder="trainer@verein.de"
+                placeholder={t('inviteSection.emailPlaceholder')}
               />
             </label>
             <label className="flex flex-1 flex-col gap-1 text-xs" style={{ minWidth: 120 }}>
-              <span className="font-medium text-white/60">Name</span>
+              <span className="font-medium text-white/60">{t('createSection.nameLabel')}</span>
               <input
                 type="text"
                 className={inputClass}
                 value={createFullName}
                 onChange={(e) => setCreateFullName(e.target.value)}
-                placeholder="Max Mustermann"
+                placeholder={t('createSection.namePlaceholder')}
               />
             </label>
             <label className="flex flex-1 flex-col gap-1 text-xs" style={{ minWidth: 140 }}>
-              <span className="font-medium text-white/60">Passwort</span>
+              <span className="font-medium text-white/60">{t('createSection.passwordLabel')}</span>
               <input
                 type="text"
                 className={inputClass}
                 value={createPassword}
                 onChange={(e) => setCreatePassword(e.target.value)}
-                placeholder="Min. 8 Zeichen"
+                placeholder={t('createSection.passwordPlaceholder')}
               />
             </label>
             <label className="flex flex-col gap-1 text-xs">
-              <span className="font-medium text-white/60">Rolle</span>
+              <span className="font-medium text-white/60">{t('createSection.roleLabel')}</span>
               <select
                 className={selectClass}
                 value={createRole}
@@ -298,13 +294,13 @@ export function AdminPage() {
               loading={isCreating}
               disabled={!createEmail.trim() || createPassword.length < 8}
             >
-              Anlegen
+              {t('createSection.submit')}
             </Button>
           </div>
         </section>
 
         <section className="mt-6 rounded-xl border border-pitch-700 bg-pitch-900 p-5">
-          <h2 className="mb-3 text-sm font-semibold text-white">Mitglieder</h2>
+          <h2 className="mb-3 text-sm font-semibold text-white">{t('membersSection.title')}</h2>
           {isLoading ? (
             <div className="flex justify-center py-8">
               <span className="h-6 w-6 animate-spin rounded-full border-2 border-white/20 border-t-violet-accent" />
@@ -318,8 +314,10 @@ export function AdminPage() {
                 >
                   <div className="min-w-0">
                     <p className="truncate text-sm text-white">
-                      {m.full_name || m.email || 'Unbenannt'}
-                      {m.id === profile.id && <span className="ml-2 text-xs text-white/30">(Du)</span>}
+                      {m.full_name || m.email || t('membersSection.unnamed')}
+                      {m.id === profile.id && (
+                        <span className="ml-2 text-xs text-white/30">{t('membersSection.you')}</span>
+                      )}
                     </p>
                     {m.full_name && m.email && (
                       <p className="truncate text-xs text-white/40">{m.email}</p>
@@ -330,7 +328,7 @@ export function AdminPage() {
                       className={selectClass}
                       value={m.role}
                       disabled={m.id === profile.id}
-                      title={m.id === profile.id ? 'Du kannst deine eigene Rolle nicht ändern' : undefined}
+                      title={m.id === profile.id ? t('membersSection.cannotChangeOwnRole') : undefined}
                       onChange={(e) => void handleRoleChange(m.id, e.target.value as OrgRole)}
                     >
                       {(Object.keys(ROLE_LABELS) as OrgRole[]).map((r) => (
@@ -344,9 +342,9 @@ export function AdminPage() {
                         variant="danger"
                         loading={removingId === m.id}
                         onClick={() => void handleRemoveMember(m)}
-                        title="Mitglied endgültig entfernen"
+                        title={t('membersSection.removeTitle')}
                       >
-                        Entfernen
+                        {t('membersSection.remove')}
                       </Button>
                     )}
                   </div>

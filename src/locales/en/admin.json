@@ -1,0 +1,67 @@
+{
+  "roles": {
+    "admin": "Admin",
+    "coach": "Coach",
+    "viewer": "Viewer"
+  },
+  "loadError": "Loading failed.",
+  "roleChangeError": "Couldn't change role.",
+  "inviteError": "Invitation failed.",
+  "createError": "Couldn't create account.",
+  "removeConfirm": "Permanently remove \"{{name}}\"? The account will be completely deleted.",
+  "removeConfirmDefaultName": "This member",
+  "removeError": "Couldn't be removed.",
+  "adminOnlyNotice": "This page is for admins of your team only.",
+  "title": "User management",
+  "subtitle": "Invite colleagues to \"{{orgName}}\" and manage their role. A real user account is only created once the invited person registers themselves with this exact email address — they'll then automatically land in this team instead of a new one.",
+  "inviteSection": {
+    "title": "Invite new",
+    "emailLabel": "Email",
+    "emailPlaceholder": "coach@club.com",
+    "roleLabel": "Role",
+    "submit": "Invite",
+    "pending": "Pending",
+    "withdraw": "Withdraw"
+  },
+  "createSection": {
+    "title": "Create manually",
+    "description": "Creates the account immediately with the password set here — without waiting for self-registration. Share the password with the person separately.",
+    "emailLabel": "Email",
+    "nameLabel": "Name",
+    "namePlaceholder": "Jane Doe",
+    "passwordLabel": "Password",
+    "passwordPlaceholder": "Min. 8 characters",
+    "roleLabel": "Role",
+    "submit": "Create"
+  },
+  "membersSection": {
+    "title": "Members",
+    "unnamed": "Unnamed",
+    "you": "(You)",
+    "cannotChangeOwnRole": "You can't change your own role",
+    "removeTitle": "Permanently remove member",
+    "remove": "Remove"
+  },
+  "platform": {
+    "title": "Platform administration",
+    "subtitle": "Full access to all organizations and users — visible only to you as platform admin.",
+    "freeOverrideError": "Couldn't be changed.",
+    "orgsTitle": "Organizations",
+    "tierLabel": "Tier: {{tier}}",
+    "freeOverrideLabel": "Free, unlimited access",
+    "usersTitle": "All users",
+    "setPassword": "Set password",
+    "roles": {
+      "admin": "Admin",
+      "coach": "Coach (paid)",
+      "viewer": "Viewer (demo)"
+    }
+  },
+  "passwordDialog": {
+    "title": "New password for {{name}}",
+    "placeholder": "New password (min. 8 characters)",
+    "tooShort": "At least 8 characters.",
+    "failed": "Failed.",
+    "submit": "Set"
+  }
+}
