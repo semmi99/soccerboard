@@ -1,0 +1,87 @@
+{
+  "title": "Kader",
+  "newTeam": "+ Neues Team",
+  "crestTitle": "Wappen ersetzt die Trikotfarben auf allen Spieler-Chips dieses Teams im Editor",
+  "crestAlt": "Wappen",
+  "crestUploading": "Lädt hoch…",
+  "crestUpload": "Wappen hochladen",
+  "crestRemove": "Wappen entfernen",
+  "bulkAdd": "Mehrere Spieler auf einmal",
+  "addPlayer": "Spieler hinzufügen",
+  "errors": {
+    "loadTeamsFailed": "Teams konnten nicht geladen werden.",
+    "loadPlayersFailed": "Kader konnte nicht geladen werden.",
+    "crestUploadFailed": "Wappen-Upload fehlgeschlagen.",
+    "crestRemoveFailed": "Konnte nicht entfernt werden.",
+    "deleteFailed": "Löschen fehlgeschlagen.",
+    "saveFailed": "Speichern fehlgeschlagen.",
+    "createFailed": "Anlegen fehlgeschlagen."
+  },
+  "empty": {
+    "noTeam": "Noch kein Team angelegt.",
+    "createFirstTeam": "Erstes Team anlegen",
+    "noPlayers": "Noch keine Spieler in diesem Team.",
+    "addFirstPlayer": "Ersten Spieler hinzufügen"
+  },
+  "table": {
+    "number": "Nr.",
+    "name": "Name",
+    "position": "Position",
+    "secondaryPosition": "Nebenposition",
+    "foot": "Fuß"
+  },
+  "deleteDialog": {
+    "title": "Spieler löschen?",
+    "bodyAfter": "wird aus dem Kader entfernt."
+  },
+  "newTeamDialog": {
+    "title": "Neues Team",
+    "nameLabel": "Name",
+    "namePlaceholder": "z. B. U16",
+    "ageGroupLabel": "Altersklasse (optional)",
+    "create": "Erstellen"
+  },
+  "playerForm": {
+    "titleNew": "Spieler hinzufügen",
+    "titleEdit": "Spieler bearbeiten",
+    "photoPlaceholder": "Foto",
+    "choosePhoto": "Foto/Wappen wählen",
+    "firstName": "Vorname",
+    "lastName": "Nachname",
+    "jerseyNumber": "Rückennummer",
+    "strongFoot": "Starker Fuß",
+    "position": "Position",
+    "secondaryPosition": "Nebenposition",
+    "birthDate": "Geburtsdatum",
+    "nationality": "Nationalität",
+    "phone": "Telefon",
+    "email": "Email",
+    "notes": "Notizen"
+  },
+  "bulkAddDialog": {
+    "title": "Mehrere Spieler auf einmal",
+    "descriptionBefore": "Eine Zeile pro Spieler:",
+    "descriptionCode": "Rückennummer Vorname Nachname",
+    "descriptionAfter": "Die Rückennummer ist optional. Position & Details können danach einzeln ergänzt werden.",
+    "placeholder": "1 Nico Klari\n2 Lionell Stojcevic\nJakob Londer",
+    "noneRecognized": "Noch keine gültigen Zeilen erkannt.",
+    "recognizedCount": "{{count}} Spieler werden erkannt.",
+    "createCount": "{{count}} Spieler anlegen",
+    "createDefault": "Spieler anlegen"
+  },
+  "positions": {
+    "Torwart": "Torwart",
+    "Innenverteidigung": "Innenverteidigung",
+    "Außenverteidigung": "Außenverteidigung",
+    "Defensives Mittelfeld": "Defensives Mittelfeld",
+    "Zentrales Mittelfeld": "Zentrales Mittelfeld",
+    "Offensives Mittelfeld": "Offensives Mittelfeld",
+    "Flügel": "Flügel",
+    "Stürmer": "Stürmer"
+  },
+  "feet": {
+    "Rechts": "Rechts",
+    "Links": "Links",
+    "Beidfüßig": "Beidfüßig"
+  }
+}

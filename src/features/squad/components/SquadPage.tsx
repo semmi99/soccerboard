@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useAuthStore } from '../../auth/store/authStore'
 import { AppHeader } from '../../../app/AppHeader'
 import { Button } from '../../../components/ui/Button'
@@ -30,19 +31,20 @@ function DeleteConfirmDialog({
   onConfirm: () => void
   isDeleting: boolean
 }) {
+  const { t } = useTranslation(['squad', 'common'])
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
       <div className="w-full max-w-sm rounded-xl border border-pitch-700 bg-pitch-900 p-5 shadow-2xl">
-        <h2 className="text-sm font-semibold text-white">Spieler löschen?</h2>
+        <h2 className="text-sm font-semibold text-white">{t('deleteDialog.title')}</h2>
         <p className="mt-2 text-sm text-white/60">
-          <span className="text-white">{name}</span> wird aus dem Kader entfernt.
+          <span className="text-white">{name}</span> {t('deleteDialog.bodyAfter')}
         </p>
         <div className="mt-5 flex justify-end gap-2">
           <Button variant="secondary" onClick={onCancel} disabled={isDeleting}>
-            Abbrechen
+            {t('common:actions.cancel')}
           </Button>
           <Button variant="danger" onClick={onConfirm} loading={isDeleting}>
-            Löschen
+            {t('common:actions.delete')}
           </Button>
         </div>
       </div>
@@ -57,6 +59,7 @@ function NewTeamDialog({
   onCancel: () => void
   onCreate: (name: string, ageGroup: string) => Promise<void>
 }) {
+  const { t } = useTranslation(['squad', 'common'])
   const [name, setName] = useState('')
   const [ageGroup, setAgeGroup] = useState('')
   const [isSaving, setIsSaving] = useState(false)
@@ -69,7 +72,7 @@ function NewTeamDialog({
     try {
       await onCreate(name, ageGroup)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erstellen fehlgeschlagen.')
+      setError(err instanceof Error ? err.message : t('errors.createFailed'))
       setIsSaving(false)
     }
   }
@@ -80,21 +83,21 @@ function NewTeamDialog({
         onSubmit={(e) => void handleSubmit(e)}
         className="w-full max-w-sm rounded-xl border border-pitch-700 bg-pitch-900 p-5 shadow-2xl"
       >
-        <h2 className="mb-3 text-sm font-semibold text-white">Neues Team</h2>
+        <h2 className="mb-3 text-sm font-semibold text-white">{t('newTeamDialog.title')}</h2>
         <div className="flex flex-col gap-3">
           <label className="flex flex-col gap-1.5 text-sm">
-            <span className="font-medium text-white/70">Name</span>
+            <span className="font-medium text-white/70">{t('newTeamDialog.nameLabel')}</span>
             <input
               required
               autoFocus
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="z. B. U16"
+              placeholder={t('newTeamDialog.namePlaceholder')}
               className="rounded-lg border border-pitch-600 bg-pitch-800 px-3.5 py-2.5 text-sm text-white outline-none focus:border-violet-accent"
             />
           </label>
           <label className="flex flex-col gap-1.5 text-sm">
-            <span className="font-medium text-white/70">Altersklasse (optional)</span>
+            <span className="font-medium text-white/70">{t('newTeamDialog.ageGroupLabel')}</span>
             <input
               value={ageGroup}
               onChange={(e) => setAgeGroup(e.target.value)}
@@ -105,10 +108,10 @@ function NewTeamDialog({
         {error && <p className="mt-2 text-sm text-red-400">{error}</p>}
         <div className="mt-4 flex justify-end gap-2">
           <Button type="button" variant="secondary" onClick={onCancel} disabled={isSaving}>
-            Abbrechen
+            {t('common:actions.cancel')}
           </Button>
           <Button type="submit" loading={isSaving}>
-            Erstellen
+            {t('newTeamDialog.create')}
           </Button>
         </div>
       </form>
@@ -117,6 +120,7 @@ function NewTeamDialog({
 }
 
 export function SquadPage() {
+  const { t } = useTranslation(['squad', 'common'])
   const organization = useAuthStore((s) => s.organization)
 
   const [teams, setTeams] = useState<Team[]>([])
@@ -143,7 +147,7 @@ export function SquadPage() {
         setActiveTeamId((current) => current ?? data[0]?.id ?? null)
       })
       .catch((err: unknown) => {
-        if (!cancelled) setError(err instanceof Error ? err.message : 'Teams konnten nicht geladen werden.')
+        if (!cancelled) setError(err instanceof Error ? err.message : t('errors.loadTeamsFailed'))
       })
       .finally(() => {
         if (!cancelled) setIsLoadingTeams(false)
@@ -165,7 +169,7 @@ export function SquadPage() {
         if (!cancelled) setPlayers(data)
       })
       .catch((err: unknown) => {
-        if (!cancelled) setError(err instanceof Error ? err.message : 'Kader konnte nicht geladen werden.')
+        if (!cancelled) setError(err instanceof Error ? err.message : t('errors.loadPlayersFailed'))
       })
       .finally(() => {
         if (!cancelled) setIsLoadingPlayers(false)
@@ -182,7 +186,7 @@ export function SquadPage() {
       const crestUrl = await uploadTeamCrest(organization.id, activeTeamId, file)
       setTeams((ts) => ts.map((t) => (t.id === activeTeamId ? { ...t, crest_url: crestUrl } : t)))
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Wappen-Upload fehlgeschlagen.')
+      setError(err instanceof Error ? err.message : t('errors.crestUploadFailed'))
     } finally {
       setIsUploadingCrest(false)
     }
@@ -192,9 +196,9 @@ export function SquadPage() {
     if (!activeTeamId) return
     try {
       await removeTeamCrest(activeTeamId)
-      setTeams((ts) => ts.map((t) => (t.id === activeTeamId ? { ...t, crest_url: null } : t)))
+      setTeams((ts) => ts.map((team) => (team.id === activeTeamId ? { ...team, crest_url: null } : team)))
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Konnte nicht entfernt werden.')
+      setError(err instanceof Error ? err.message : t('errors.crestRemoveFailed'))
     }
   }
 
@@ -261,7 +265,7 @@ export function SquadPage() {
       setPlayers((prev) => prev.filter((p) => p.id !== pendingDelete.id))
       setPendingDelete(null)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Löschen fehlgeschlagen.')
+      setError(err instanceof Error ? err.message : t('errors.deleteFailed'))
     } finally {
       setDeletingId(null)
     }
@@ -275,16 +279,16 @@ export function SquadPage() {
 
       <div className="flex items-center justify-between border-b border-pitch-700 px-8 py-5">
         <div className="flex items-center gap-3">
-          <h1 className="text-lg font-semibold text-white">Kader</h1>
+          <h1 className="text-lg font-semibold text-white">{t('title')}</h1>
           {!isLoadingTeams && teams.length > 0 && (
             <select
               value={activeTeamId ?? ''}
               onChange={(e) => setActiveTeamId(e.target.value)}
               className="rounded-lg border border-pitch-600 bg-pitch-800 px-3 py-1.5 text-sm text-white outline-none focus:border-violet-accent"
             >
-              {teams.map((t) => (
-                <option key={t.id} value={t.id}>
-                  {t.name}
+              {teams.map((team) => (
+                <option key={team.id} value={team.id}>
+                  {team.name}
                 </option>
               ))}
             </select>
@@ -294,24 +298,24 @@ export function SquadPage() {
             onClick={() => setShowNewTeam(true)}
             className="text-sm text-white/40 hover:text-white/70"
           >
-            + Neues Team
+            {t('newTeam')}
           </button>
           {activeTeam && (
             <div
               className="flex items-center gap-2 rounded-lg border border-pitch-700 px-2 py-1"
-              title="Wappen ersetzt die Trikotfarben auf allen Spieler-Chips dieses Teams im Editor"
+              title={t('crestTitle')}
             >
               {activeTeam.crest_url ? (
                 <img
                   src={activeTeam.crest_url}
-                  alt="Wappen"
+                  alt={t('crestAlt')}
                   className="h-7 w-7 shrink-0 rounded-full bg-pitch-800 object-contain"
                 />
               ) : (
                 <div className="h-7 w-7 shrink-0 rounded-full bg-pitch-800" />
               )}
               <label className="cursor-pointer text-xs text-white/50 hover:text-white/80">
-                {isUploadingCrest ? 'Lädt hoch…' : 'Wappen hochladen'}
+                {isUploadingCrest ? t('crestUploading') : t('crestUpload')}
                 <input
                   type="file"
                   accept="image/*"
@@ -328,7 +332,7 @@ export function SquadPage() {
                 <button
                   type="button"
                   onClick={() => void handleRemoveCrest()}
-                  title="Wappen entfernen"
+                  title={t('crestRemove')}
                   className="text-xs text-white/40 hover:text-red-400"
                 >
                   ×
@@ -340,9 +344,9 @@ export function SquadPage() {
         {activeTeam && (
           <div className="flex gap-2">
             <Button variant="secondary" onClick={() => setShowBulkAdd(true)}>
-              Mehrere Spieler auf einmal
+              {t('bulkAdd')}
             </Button>
-            <Button onClick={() => setEditingPlayer('new')}>Spieler hinzufügen</Button>
+            <Button onClick={() => setEditingPlayer('new')}>{t('addPlayer')}</Button>
           </div>
         )}
       </div>
@@ -356,13 +360,13 @@ export function SquadPage() {
           </div>
         ) : teams.length === 0 ? (
           <div className="flex flex-col items-center gap-3 py-20 text-white/40">
-            <p>Noch kein Team angelegt.</p>
+            <p>{t('empty.noTeam')}</p>
             <button
               type="button"
               onClick={() => setShowNewTeam(true)}
               className="text-violet-accent-bright underline"
             >
-              Erstes Team anlegen
+              {t('empty.createFirstTeam')}
             </button>
           </div>
         ) : isLoadingPlayers ? (
@@ -371,13 +375,13 @@ export function SquadPage() {
           </div>
         ) : players.length === 0 ? (
           <div className="flex flex-col items-center gap-3 py-20 text-white/40">
-            <p>Noch keine Spieler in diesem Team.</p>
+            <p>{t('empty.noPlayers')}</p>
             <button
               type="button"
               onClick={() => setEditingPlayer('new')}
               className="text-violet-accent-bright underline"
             >
-              Ersten Spieler hinzufügen
+              {t('empty.addFirstPlayer')}
             </button>
           </div>
         ) : (
@@ -385,11 +389,11 @@ export function SquadPage() {
             <table className="w-full text-left text-sm">
               <thead className="bg-pitch-900 text-xs uppercase tracking-wide text-white/40">
                 <tr>
-                  <th className="px-4 py-3 font-medium">Nr.</th>
-                  <th className="px-4 py-3 font-medium">Name</th>
-                  <th className="px-4 py-3 font-medium">Position</th>
-                  <th className="px-4 py-3 font-medium">Nebenposition</th>
-                  <th className="px-4 py-3 font-medium">Fuß</th>
+                  <th className="px-4 py-3 font-medium">{t('table.number')}</th>
+                  <th className="px-4 py-3 font-medium">{t('table.name')}</th>
+                  <th className="px-4 py-3 font-medium">{t('table.position')}</th>
+                  <th className="px-4 py-3 font-medium">{t('table.secondaryPosition')}</th>
+                  <th className="px-4 py-3 font-medium">{t('table.foot')}</th>
                   <th className="px-4 py-3 font-medium" />
                 </tr>
               </thead>
@@ -402,23 +406,31 @@ export function SquadPage() {
                     <td className="px-4 py-2.5 text-white">
                       {p.first_name} {p.last_name}
                     </td>
-                    <td className="px-4 py-2.5 text-white/60">{p.position ?? '–'}</td>
-                    <td className="px-4 py-2.5 text-white/60">{p.secondary_position ?? '–'}</td>
-                    <td className="px-4 py-2.5 text-white/60">{p.strong_foot ?? '–'}</td>
+                    <td className="px-4 py-2.5 text-white/60">
+                      {p.position ? t(`positions.${p.position}`, { defaultValue: p.position }) : '–'}
+                    </td>
+                    <td className="px-4 py-2.5 text-white/60">
+                      {p.secondary_position
+                        ? t(`positions.${p.secondary_position}`, { defaultValue: p.secondary_position })
+                        : '–'}
+                    </td>
+                    <td className="px-4 py-2.5 text-white/60">
+                      {p.strong_foot ? t(`feet.${p.strong_foot}`, { defaultValue: p.strong_foot }) : '–'}
+                    </td>
                     <td className="px-4 py-2.5 text-right">
                       <button
                         type="button"
                         onClick={() => setEditingPlayer(p)}
                         className="mr-2 text-xs text-white/40 hover:text-violet-accent-bright"
                       >
-                        Bearbeiten
+                        {t('common:actions.edit')}
                       </button>
                       <button
                         type="button"
                         onClick={() => setPendingDelete(p)}
                         className="text-xs text-white/40 hover:text-red-400"
                       >
-                        Löschen
+                        {t('common:actions.delete')}
                       </button>
                     </td>
                   </tr>

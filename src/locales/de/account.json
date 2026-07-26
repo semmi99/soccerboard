@@ -1,0 +1,46 @@
+{
+  "title": "Konto",
+  "profile": {
+    "title": "Profil",
+    "email": "Email",
+    "organization": "Organisation",
+    "nameLabel": "Dein Name",
+    "saveName": "Namen speichern",
+    "saved": "Gespeichert."
+  },
+  "subscription": {
+    "title": "Abo",
+    "currentPlan": "Aktueller Plan",
+    "tierPaid": "Trainer",
+    "tierFree": "Beobachter (Demo)",
+    "paidUntil": "Bezahlt bis",
+    "manage": "Abo verwalten",
+    "becomeCoach": "Trainer werden",
+    "checkoutFailed": "Checkout fehlgeschlagen.",
+    "openFailed": "Öffnen fehlgeschlagen.",
+    "status": {
+      "active": "Aktiv",
+      "trialing": "Testphase",
+      "past_due": "Zahlung fehlgeschlagen",
+      "canceled": "Gekündigt",
+      "incomplete": "Unvollständig",
+      "incomplete_expired": "Abgelaufen",
+      "unpaid": "Unbezahlt"
+    }
+  },
+  "appearance": {
+    "title": "Darstellung",
+    "brand": "9011 Blau",
+    "dark": "Dunkel",
+    "note": "Gilt für diesen Browser, nicht für die öffentliche Startseite."
+  },
+  "password": {
+    "title": "Passwort ändern",
+    "newLabel": "Neues Passwort",
+    "confirmLabel": "Neues Passwort bestätigen",
+    "submit": "Passwort ändern",
+    "tooShort": "Mindestens 6 Zeichen.",
+    "mismatch": "Passwörter stimmen nicht überein.",
+    "changed": "Passwort geändert."
+  }
+}

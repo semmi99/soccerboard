@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useAuthStore } from '../../auth/store/authStore'
 import { AppHeader } from '../../../app/AppHeader'
 import { Button } from '../../../components/ui/Button'
@@ -23,6 +24,7 @@ interface EditorState {
 }
 
 export function FormationsPage() {
+  const { t } = useTranslation('formations')
   const organization = useAuthStore((s) => s.organization)
   const [customFormations, setCustomFormations] = useState<Formation[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -39,7 +41,7 @@ export function FormationsPage() {
       })
       .catch((err: unknown) => {
         if (!cancelled) {
-          setError(err instanceof Error ? err.message : 'Formationen konnten nicht geladen werden.')
+          setError(err instanceof Error ? err.message : t('loadError'))
         }
       })
       .finally(() => {
@@ -76,7 +78,7 @@ export function FormationsPage() {
       await deleteFormation(id)
       setCustomFormations((prev) => prev.filter((f) => f.id !== id))
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Löschen fehlgeschlagen.')
+      setError(err instanceof Error ? err.message : t('deleteError'))
     } finally {
       setDeletingId(null)
     }
@@ -91,7 +93,7 @@ export function FormationsPage() {
 
         <section>
           <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-white/40">
-            Vorlagen
+            {t('presetsTitle')}
           </h2>
           <div className="grid grid-cols-2 gap-5 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
             {PRESET_FORMATIONS.map((preset) => (
@@ -109,15 +111,15 @@ export function FormationsPage() {
                     onClick={() =>
                       setEditorState({
                         mode: 'create',
-                        title: `"${preset.name}" als eigene Formation`,
-                        defaultName: `${preset.name} (eigen)`,
+                        title: t('saveAsTitle', { name: preset.name }),
+                        defaultName: t('savedAsDefaultName', { name: preset.name }),
                         formationType: preset.type,
                         positions: preset.positions,
                       })
                     }
                     className="text-xs text-white/40 hover:text-violet-accent-bright"
                   >
-                    Speichern als…
+                    {t('saveAsTemplate')}
                   </button>
                 </div>
               </div>
@@ -128,21 +130,21 @@ export function FormationsPage() {
         <section className="mt-10">
           <div className="mb-3 flex items-center justify-between gap-3">
             <h2 className="text-sm font-semibold uppercase tracking-wide text-white/40">
-              Eigene Formationen
+              {t('customTitle')}
             </h2>
             <Button
               variant="secondary"
               onClick={() =>
                 setEditorState({
                   mode: 'create',
-                  title: 'Neue Formation erstellen',
-                  defaultName: 'Neue Formation',
+                  title: t('newFormationTitle'),
+                  defaultName: t('newFormationDefaultName'),
                   formationType: 'custom',
                   positions: [],
                 })
               }
             >
-              + Neue Formation erstellen
+              {t('createNew')}
             </Button>
           </div>
           {isLoading ? (
@@ -150,10 +152,7 @@ export function FormationsPage() {
               <span className="h-8 w-8 animate-spin rounded-full border-2 border-white/20 border-t-violet-accent" />
             </div>
           ) : customFormations.length === 0 ? (
-            <p className="text-sm text-white/40">
-              Noch keine eigenen Formationen. Erstelle eine neue oder speichere eine Vorlage oben als eigene
-              Formation.
-            </p>
+            <p className="text-sm text-white/40">{t('emptyCustom')}</p>
           ) : (
             <div className="grid grid-cols-2 gap-5 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
               {customFormations.map((f) => (
@@ -173,7 +172,7 @@ export function FormationsPage() {
                           setEditorState({
                             mode: 'edit',
                             id: f.id,
-                            title: `"${f.name}" bearbeiten`,
+                            title: t('editTitle', { name: f.name }),
                             defaultName: f.name,
                             formationType: f.formationType,
                             positions: f.positions,
@@ -181,7 +180,7 @@ export function FormationsPage() {
                         }
                         className="text-xs text-white/40 hover:text-violet-accent-bright"
                       >
-                        Bearbeiten
+                        {t('common:actions.edit')}
                       </button>
                       <button
                         type="button"
@@ -189,7 +188,7 @@ export function FormationsPage() {
                         onClick={() => void handleDelete(f.id)}
                         className="text-xs text-white/40 hover:text-red-400 disabled:opacity-50"
                       >
-                        Löschen
+                        {t('common:actions.delete')}
                       </button>
                     </div>
                   </div>

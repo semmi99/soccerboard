@@ -1,0 +1,87 @@
+{
+  "title": "Squad",
+  "newTeam": "+ New team",
+  "crestTitle": "The crest replaces the kit colors on all of this team's player chips in the editor",
+  "crestAlt": "Crest",
+  "crestUploading": "Uploading…",
+  "crestUpload": "Upload crest",
+  "crestRemove": "Remove crest",
+  "bulkAdd": "Add several players at once",
+  "addPlayer": "Add player",
+  "errors": {
+    "loadTeamsFailed": "Couldn't load teams.",
+    "loadPlayersFailed": "Couldn't load squad.",
+    "crestUploadFailed": "Crest upload failed.",
+    "crestRemoveFailed": "Couldn't remove it.",
+    "deleteFailed": "Delete failed.",
+    "saveFailed": "Save failed.",
+    "createFailed": "Creation failed."
+  },
+  "empty": {
+    "noTeam": "No team set up yet.",
+    "createFirstTeam": "Create your first team",
+    "noPlayers": "No players on this team yet.",
+    "addFirstPlayer": "Add your first player"
+  },
+  "table": {
+    "number": "No.",
+    "name": "Name",
+    "position": "Position",
+    "secondaryPosition": "Secondary position",
+    "foot": "Foot"
+  },
+  "deleteDialog": {
+    "title": "Delete player?",
+    "bodyAfter": "will be removed from the squad."
+  },
+  "newTeamDialog": {
+    "title": "New team",
+    "nameLabel": "Name",
+    "namePlaceholder": "e.g. U16",
+    "ageGroupLabel": "Age group (optional)",
+    "create": "Create"
+  },
+  "playerForm": {
+    "titleNew": "Add player",
+    "titleEdit": "Edit player",
+    "photoPlaceholder": "Photo",
+    "choosePhoto": "Choose photo/crest",
+    "firstName": "First name",
+    "lastName": "Last name",
+    "jerseyNumber": "Jersey number",
+    "strongFoot": "Strong foot",
+    "position": "Position",
+    "secondaryPosition": "Secondary position",
+    "birthDate": "Date of birth",
+    "nationality": "Nationality",
+    "phone": "Phone",
+    "email": "Email",
+    "notes": "Notes"
+  },
+  "bulkAddDialog": {
+    "title": "Add several players at once",
+    "descriptionBefore": "One line per player:",
+    "descriptionCode": "jersey number first-name last-name",
+    "descriptionAfter": "The jersey number is optional. Position & details can be filled in individually afterwards.",
+    "placeholder": "1 Nico Klari\n2 Lionell Stojcevic\nJakob Londer",
+    "noneRecognized": "No valid lines recognized yet.",
+    "recognizedCount": "{{count}} players recognized.",
+    "createCount": "Create {{count}} players",
+    "createDefault": "Create players"
+  },
+  "positions": {
+    "Torwart": "Goalkeeper",
+    "Innenverteidigung": "Centre-back",
+    "Außenverteidigung": "Full-back",
+    "Defensives Mittelfeld": "Defensive midfield",
+    "Zentrales Mittelfeld": "Central midfield",
+    "Offensives Mittelfeld": "Attacking midfield",
+    "Flügel": "Winger",
+    "Stürmer": "Striker"
+  },
+  "feet": {
+    "Rechts": "Right",
+    "Links": "Left",
+    "Beidfüßig": "Both"
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "title": "Projects",
+  "countLabel": "{{count}} / {{max}} projects",
+  "countLabelUnlimited": "{{count}} / ∞ projects",
+  "tierFree": "Viewer (demo)",
+  "tierPaid": "Coach",
+  "newProject": "New project",
+  "limitReachedTitle": "Free-tier limit of {{max}} projects reached",
+  "loadError": "Couldn't load projects.",
+  "deleteError": "Delete failed.",
+  "empty": {
+    "noProjects": "No projects yet.",
+    "createFirst": "Create your first project"
+  },
+  "deleteTooltip": "Delete project",
+  "deleteDialog": {
+    "title": "Delete project?",
+    "bodyAfter": "will be permanently deleted, including all frames."
+  },
+  "orgLogo": {
+    "uploadTitle": "Upload club logo (appears on home player chips)",
+    "alt": "Club logo",
+    "placeholder": "Logo",
+    "uploadError": "Upload failed."
+  }
+}

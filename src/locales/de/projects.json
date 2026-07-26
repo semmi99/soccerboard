@@ -1,0 +1,26 @@
+{
+  "title": "Projekte",
+  "countLabel": "{{count}} / {{max}} Projekte",
+  "countLabelUnlimited": "{{count}} / ∞ Projekte",
+  "tierFree": "Beobachter (Demo)",
+  "tierPaid": "Trainer",
+  "newProject": "Neues Projekt",
+  "limitReachedTitle": "Free-Limit von {{max}} Projekten erreicht",
+  "loadError": "Projekte konnten nicht geladen werden.",
+  "deleteError": "Löschen fehlgeschlagen.",
+  "empty": {
+    "noProjects": "Noch keine Projekte.",
+    "createFirst": "Erstes Projekt anlegen"
+  },
+  "deleteTooltip": "Projekt löschen",
+  "deleteDialog": {
+    "title": "Projekt löschen?",
+    "bodyAfter": "wird unwiderruflich gelöscht, inklusive aller Frames."
+  },
+  "orgLogo": {
+    "uploadTitle": "Vereinslogo hochladen (erscheint auf Heim-Spieler-Chips)",
+    "alt": "Vereinslogo",
+    "placeholder": "Logo",
+    "uploadError": "Upload fehlgeschlagen."
+  }
+}

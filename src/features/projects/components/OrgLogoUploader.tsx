@@ -1,8 +1,10 @@
 import { useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useAuthStore } from '../../auth/store/authStore'
 import { uploadOrgLogo } from '../../../lib/supabase/branding'
 
 export function OrgLogoUploader() {
+  const { t } = useTranslation('projects')
   const organization = useAuthStore((s) => s.organization)
   const setOrganization = useAuthStore((s) => s.setOrganization)
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -20,7 +22,7 @@ export function OrgLogoUploader() {
       const logoUrl = await uploadOrgLogo(organization.id, file)
       setOrganization({ ...organization, logo_url: logoUrl })
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Upload fehlgeschlagen.')
+      setError(err instanceof Error ? err.message : t('orgLogo.uploadError'))
     } finally {
       setIsUploading(false)
     }
@@ -34,15 +36,15 @@ export function OrgLogoUploader() {
         type="button"
         onClick={() => fileInputRef.current?.click()}
         disabled={isUploading}
-        title="Vereinslogo hochladen (erscheint auf Heim-Spieler-Chips)"
+        title={t('orgLogo.uploadTitle')}
         className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-pitch-600 bg-pitch-800 hover:border-violet-accent disabled:opacity-50"
       >
         {isUploading ? (
           <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/20 border-t-violet-accent" />
         ) : organization.logo_url ? (
-          <img src={organization.logo_url} alt="Vereinslogo" className="h-full w-full object-cover" />
+          <img src={organization.logo_url} alt={t('orgLogo.alt')} className="h-full w-full object-cover" />
         ) : (
-          <span className="text-[10px] text-white/40">Logo</span>
+          <span className="text-[10px] text-white/40">{t('orgLogo.placeholder')}</span>
         )}
       </button>
       <input

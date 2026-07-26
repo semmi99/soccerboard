@@ -1,4 +1,5 @@
 import { type FormEvent, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { AppHeader } from '../../../app/AppHeader'
 import { Button } from '../../../components/ui/Button'
 import { Input } from '../../../components/ui/Input'
@@ -6,22 +7,14 @@ import { useAuthStore } from '../../auth/store/authStore'
 import { applyTheme, getStoredTheme, type AppTheme } from '../../../lib/theme'
 import { openBillingPortal, startCheckout } from '../../../lib/supabase/billing'
 
-const STATUS_LABELS: Record<string, string> = {
-  active: 'Aktiv',
-  trialing: 'Testphase',
-  past_due: 'Zahlung fehlgeschlagen',
-  canceled: 'Gekündigt',
-  incomplete: 'Unvollständig',
-  incomplete_expired: 'Abgelaufen',
-  unpaid: 'Unbezahlt',
-}
-
-const THEME_OPTIONS: { value: AppTheme; label: string; swatch: string }[] = [
-  { value: 'brand', label: '9011 Blau', swatch: '#0f3d59' },
-  { value: 'dark', label: 'Dunkel', swatch: '#121212' },
-]
-
 export function AccountPage() {
+  const { t, i18n } = useTranslation('account')
+
+  const THEME_OPTIONS: { value: AppTheme; label: string; swatch: string }[] = [
+    { value: 'brand', label: t('appearance.brand'), swatch: '#0f3d59' },
+    { value: 'dark', label: t('appearance.dark'), swatch: '#121212' },
+  ]
+
   const session = useAuthStore((s) => s.session)
   const profile = useAuthStore((s) => s.profile)
   const organization = useAuthStore((s) => s.organization)
@@ -56,7 +49,7 @@ export function AccountPage() {
       const url = await startCheckout()
       window.location.href = url
     } catch (err) {
-      setBillingError(err instanceof Error ? err.message : 'Checkout fehlgeschlagen.')
+      setBillingError(err instanceof Error ? err.message : t('subscription.checkoutFailed'))
       setBillingLoading(false)
     }
   }
@@ -68,7 +61,7 @@ export function AccountPage() {
       const url = await openBillingPortal()
       window.location.href = url
     } catch (err) {
-      setBillingError(err instanceof Error ? err.message : 'Öffnen fehlgeschlagen.')
+      setBillingError(err instanceof Error ? err.message : t('subscription.openFailed'))
       setBillingLoading(false)
     }
   }
@@ -84,7 +77,7 @@ export function AccountPage() {
       setNameError(error)
       return
     }
-    setNameMessage('Gespeichert.')
+    setNameMessage(t('profile.saved'))
   }
 
   async function handlePasswordSubmit(e: FormEvent) {
@@ -92,11 +85,11 @@ export function AccountPage() {
     setPasswordError(null)
     setPasswordMessage(null)
     if (newPassword.length < 6) {
-      setPasswordError('Mindestens 6 Zeichen.')
+      setPasswordError(t('password.tooShort'))
       return
     }
     if (newPassword !== confirmPassword) {
-      setPasswordError('Passwörter stimmen nicht überein.')
+      setPasswordError(t('password.mismatch'))
       return
     }
     setPasswordSaving(true)
@@ -108,7 +101,7 @@ export function AccountPage() {
     }
     setNewPassword('')
     setConfirmPassword('')
-    setPasswordMessage('Passwort geändert.')
+    setPasswordMessage(t('password.changed'))
   }
 
   return (
@@ -116,23 +109,23 @@ export function AccountPage() {
       <AppHeader />
 
       <main className="mx-auto max-w-lg p-8">
-        <h1 className="mb-6 text-lg font-semibold text-white">Konto</h1>
+        <h1 className="mb-6 text-lg font-semibold text-white">{t('title')}</h1>
 
         <section className="mb-8 rounded-xl border border-pitch-700 bg-pitch-900 p-5">
           <h2 className="mb-4 text-[11px] font-semibold uppercase tracking-wide text-white/40">
-            Profil
+            {t('profile.title')}
           </h2>
           <div className="mb-4 flex flex-col gap-1 text-sm">
-            <span className="font-medium text-white/60">Email</span>
+            <span className="font-medium text-white/60">{t('profile.email')}</span>
             <span className="text-white">{session?.user.email}</span>
           </div>
           <div className="mb-4 flex flex-col gap-1 text-sm">
-            <span className="font-medium text-white/60">Organisation</span>
+            <span className="font-medium text-white/60">{t('profile.organization')}</span>
             <span className="text-white">{organization?.name}</span>
           </div>
           <form className="flex flex-col gap-3" onSubmit={handleNameSubmit}>
             <Input
-              label="Dein Name"
+              label={t('profile.nameLabel')}
               type="text"
               value={fullName}
               onChange={(e) => setFullName(e.target.value)}
@@ -140,49 +133,53 @@ export function AccountPage() {
             {nameError && <p className="text-sm text-red-400">{nameError}</p>}
             {nameMessage && <p className="text-sm text-green-400">{nameMessage}</p>}
             <Button type="submit" variant="secondary" loading={nameSaving} className="self-start">
-              Namen speichern
+              {t('profile.saveName')}
             </Button>
           </form>
         </section>
 
         <section className="mb-8 rounded-xl border border-pitch-700 bg-pitch-900 p-5">
           <h2 className="mb-4 text-[11px] font-semibold uppercase tracking-wide text-white/40">
-            Abo
+            {t('subscription.title')}
           </h2>
           <div className="mb-4 flex flex-col gap-1 text-sm">
-            <span className="font-medium text-white/60">Aktueller Plan</span>
+            <span className="font-medium text-white/60">{t('subscription.currentPlan')}</span>
             <span className="text-white">
-              {organization?.subscription_tier === 'pro' ? 'Trainer' : 'Beobachter (Demo)'}
+              {organization?.subscription_tier === 'pro' ? t('subscription.tierPaid') : t('subscription.tierFree')}
               {organization?.subscription_status && (
                 <span className="ml-2 text-xs text-white/40">
-                  ({STATUS_LABELS[organization.subscription_status] ?? organization.subscription_status})
+                  (
+                  {t(`subscription.status.${organization.subscription_status}`, {
+                    defaultValue: organization.subscription_status,
+                  })}
+                  )
                 </span>
               )}
             </span>
           </div>
           {organization?.subscription_valid_until && (
             <div className="mb-4 flex flex-col gap-1 text-sm">
-              <span className="font-medium text-white/60">Bezahlt bis</span>
+              <span className="font-medium text-white/60">{t('subscription.paidUntil')}</span>
               <span className="text-white">
-                {new Date(organization.subscription_valid_until).toLocaleDateString('de-DE')}
+                {new Date(organization.subscription_valid_until).toLocaleDateString(i18n.language)}
               </span>
             </div>
           )}
           {billingError && <p className="mb-3 text-sm text-red-400">{billingError}</p>}
           {organization?.stripe_customer_id ? (
             <Button variant="secondary" loading={billingLoading} onClick={() => void handleManageBilling()}>
-              Abo verwalten
+              {t('subscription.manage')}
             </Button>
           ) : (
             <Button loading={billingLoading} onClick={() => void handleUpgrade()}>
-              Trainer werden
+              {t('subscription.becomeCoach')}
             </Button>
           )}
         </section>
 
         <section className="mb-8 rounded-xl border border-pitch-700 bg-pitch-900 p-5">
           <h2 className="mb-4 text-[11px] font-semibold uppercase tracking-wide text-white/40">
-            Darstellung
+            {t('appearance.title')}
           </h2>
           <div className="flex gap-3">
             {THEME_OPTIONS.map((opt) => (
@@ -204,18 +201,16 @@ export function AccountPage() {
               </button>
             ))}
           </div>
-          <p className="mt-3 text-[11px] text-white/40">
-            Gilt für diesen Browser, nicht für die öffentliche Startseite.
-          </p>
+          <p className="mt-3 text-[11px] text-white/40">{t('appearance.note')}</p>
         </section>
 
         <section className="rounded-xl border border-pitch-700 bg-pitch-900 p-5">
           <h2 className="mb-4 text-[11px] font-semibold uppercase tracking-wide text-white/40">
-            Passwort ändern
+            {t('password.title')}
           </h2>
           <form className="flex flex-col gap-3" onSubmit={handlePasswordSubmit}>
             <Input
-              label="Neues Passwort"
+              label={t('password.newLabel')}
               type="password"
               autoComplete="new-password"
               minLength={6}
@@ -223,7 +218,7 @@ export function AccountPage() {
               onChange={(e) => setNewPassword(e.target.value)}
             />
             <Input
-              label="Neues Passwort bestätigen"
+              label={t('password.confirmLabel')}
               type="password"
               autoComplete="new-password"
               minLength={6}
@@ -233,7 +228,7 @@ export function AccountPage() {
             {passwordError && <p className="text-sm text-red-400">{passwordError}</p>}
             {passwordMessage && <p className="text-sm text-green-400">{passwordMessage}</p>}
             <Button type="submit" loading={passwordSaving} className="self-start">
-              Passwort ändern
+              {t('password.submit')}
             </Button>
           </form>
         </section>

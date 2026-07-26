@@ -5,6 +5,14 @@ import commonDe from '../locales/de/common.json'
 import commonEn from '../locales/en/common.json'
 import authDe from '../locales/de/auth.json'
 import authEn from '../locales/en/auth.json'
+import projectsDe from '../locales/de/projects.json'
+import projectsEn from '../locales/en/projects.json'
+import squadDe from '../locales/de/squad.json'
+import squadEn from '../locales/en/squad.json'
+import formationsDe from '../locales/de/formations.json'
+import formationsEn from '../locales/en/formations.json'
+import accountDe from '../locales/de/account.json'
+import accountEn from '../locales/en/account.json'
 
 /** Same localStorage key `lib/language.ts` used pre-i18next, so a language
  * choice made on the marketing/auth pages before login survives into the
@@ -16,12 +24,26 @@ void i18n
   .use(initReactI18next)
   .init({
     resources: {
-      de: { common: commonDe, auth: authDe },
-      en: { common: commonEn, auth: authEn },
+      de: {
+        common: commonDe,
+        auth: authDe,
+        projects: projectsDe,
+        squad: squadDe,
+        formations: formationsDe,
+        account: accountDe,
+      },
+      en: {
+        common: commonEn,
+        auth: authEn,
+        projects: projectsEn,
+        squad: squadEn,
+        formations: formationsEn,
+        account: accountEn,
+      },
     },
     fallbackLng: 'de',
     supportedLngs: ['de', 'en'],
-    ns: ['common', 'auth'],
+    ns: ['common', 'auth', 'projects', 'squad', 'formations', 'account'],
     defaultNS: 'common',
     detection: {
       order: ['localStorage', 'navigator'],

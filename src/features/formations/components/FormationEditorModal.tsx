@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react'
 import type { PointerEvent as ReactPointerEvent } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Button } from '../../../components/ui/Button'
 import type { FormationPosition } from '../presets'
 
@@ -26,6 +27,7 @@ export function FormationEditorModal({
   onCancel: () => void
   onSave: (input: { name: string; formationType: string; positions: FormationPosition[] }) => Promise<void>
 }) {
+  const { t } = useTranslation(['formations', 'common'])
   const [name, setName] = useState(defaultName)
   const [positions, setPositions] = useState<FormationPosition[]>(initialPositions)
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null)
@@ -109,7 +111,7 @@ export function FormationEditorModal({
     try {
       await onSave({ name, formationType: defaultFormationType, positions })
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Speichern fehlgeschlagen.')
+      setError(err instanceof Error ? err.message : t('modal.saveFailed'))
       setIsSaving(false)
     }
   }
@@ -121,11 +123,11 @@ export function FormationEditorModal({
       <div className="flex w-full max-w-2xl flex-col gap-4 rounded-xl border border-pitch-700 bg-pitch-900 p-5 shadow-2xl">
         <div className="flex items-center justify-between gap-3">
           <h2 className="text-sm font-semibold text-white">{title}</h2>
-          <span className="text-xs text-white/40">{positions.length} Positionen</span>
+          <span className="text-xs text-white/40">{t('modal.positionsCount', { count: positions.length })}</span>
         </div>
 
         <label className="flex flex-col gap-1.5 text-sm">
-          <span className="font-medium text-white/70">Name</span>
+          <span className="font-medium text-white/70">{t('modal.nameLabel')}</span>
           <input
             autoFocus
             required
@@ -176,14 +178,11 @@ export function FormationEditorModal({
           </div>
 
           <div className="flex flex-1 flex-col gap-3">
-            <p className="text-xs text-white/40">
-              Auf das Feld klicken fügt eine neue Position hinzu. Marker ziehen zum Verschieben, anklicken zum
-              Auswählen.
-            </p>
+            <p className="text-xs text-white/40">{t('modal.instructions')}</p>
             {selected ? (
               <div className="flex flex-col gap-2 rounded-lg border border-pitch-600 bg-pitch-800 p-3">
                 <label className="flex flex-col gap-1.5 text-xs">
-                  <span className="font-medium text-white/60">Rolle / Kürzel</span>
+                  <span className="font-medium text-white/60">{t('modal.roleLabel')}</span>
                   <input
                     value={selected.role}
                     onChange={(e) => updateSelectedRole(e.target.value)}
@@ -191,11 +190,11 @@ export function FormationEditorModal({
                   />
                 </label>
                 <Button variant="danger" className="self-start" onClick={removeSelected}>
-                  Position löschen
+                  {t('modal.deletePosition')}
                 </Button>
               </div>
             ) : (
-              <p className="text-xs text-white/30">Keine Position ausgewählt.</p>
+              <p className="text-xs text-white/30">{t('modal.noPositionSelected')}</p>
             )}
           </div>
         </div>
@@ -204,7 +203,7 @@ export function FormationEditorModal({
 
         <div className="flex justify-end gap-2 border-t border-pitch-700 pt-3">
           <Button type="button" variant="secondary" onClick={onCancel} disabled={isSaving}>
-            Abbrechen
+            {t('common:actions.cancel')}
           </Button>
           <Button
             type="button"
@@ -212,7 +211,7 @@ export function FormationEditorModal({
             disabled={!name.trim() || positions.length === 0}
             onClick={() => void handleSubmit()}
           >
-            Speichern
+            {t('common:actions.save')}
           </Button>
         </div>
       </div>

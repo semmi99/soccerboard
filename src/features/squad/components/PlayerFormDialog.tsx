@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Button } from '../../../components/ui/Button'
 import { Input } from '../../../components/ui/Input'
 import { POSITIONS, STRONG_FOOT_OPTIONS } from '../constants'
@@ -35,6 +36,7 @@ export function PlayerFormDialog({
   onCancel: () => void
   onSubmit: (values: PlayerFormValues, photoFile: File | null) => Promise<void>
 }) {
+  const { t } = useTranslation(['squad', 'common'])
   const [values, setValues] = useState<PlayerFormValues>(toFormValues(teamId, player))
   const [photoFile, setPhotoFile] = useState<File | null>(null)
   const [isSaving, setIsSaving] = useState(false)
@@ -56,7 +58,7 @@ export function PlayerFormDialog({
     try {
       await onSubmit(values, photoFile)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Speichern fehlgeschlagen.')
+      setError(err instanceof Error ? err.message : t('errors.saveFailed'))
     } finally {
       setIsSaving(false)
     }
@@ -69,7 +71,7 @@ export function PlayerFormDialog({
         className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-xl border border-pitch-700 bg-pitch-900 p-6 shadow-2xl"
       >
         <h2 className="mb-4 text-sm font-semibold text-white">
-          {player ? 'Spieler bearbeiten' : 'Spieler hinzufügen'}
+          {player ? t('playerForm.titleEdit') : t('playerForm.titleNew')}
         </h2>
 
         <div className="mb-4 flex items-center gap-3">
@@ -81,12 +83,12 @@ export function PlayerFormDialog({
             />
           ) : (
             <div className="flex h-14 w-14 items-center justify-center rounded-full border border-pitch-600 bg-pitch-800 text-xs text-white/40">
-              Foto
+              {t('playerForm.photoPlaceholder')}
             </div>
           )}
           <label className="text-sm">
             <span className="cursor-pointer rounded-lg border border-pitch-600 bg-pitch-800 px-3 py-2 text-white/70 hover:text-white">
-              Foto/Wappen wählen
+              {t('playerForm.choosePhoto')}
             </span>
             <input
               type="file"
@@ -99,19 +101,19 @@ export function PlayerFormDialog({
 
         <div className="grid grid-cols-2 gap-3">
           <Input
-            label="Vorname"
+            label={t('playerForm.firstName')}
             required
             value={values.firstName}
             onChange={(e) => set('firstName', e.target.value)}
           />
           <Input
-            label="Nachname"
+            label={t('playerForm.lastName')}
             required
             value={values.lastName}
             onChange={(e) => set('lastName', e.target.value)}
           />
           <Input
-            label="Rückennummer"
+            label={t('playerForm.jerseyNumber')}
             type="number"
             min={1}
             max={99}
@@ -119,7 +121,7 @@ export function PlayerFormDialog({
             onChange={(e) => set('jerseyNumber', e.target.value ? Number(e.target.value) : null)}
           />
           <label className="flex flex-col gap-1.5 text-sm">
-            <span className="font-medium text-white/70">Starker Fuß</span>
+            <span className="font-medium text-white/70">{t('playerForm.strongFoot')}</span>
             <select
               className={selectClass}
               value={values.strongFoot}
@@ -128,13 +130,13 @@ export function PlayerFormDialog({
               <option value="">–</option>
               {STRONG_FOOT_OPTIONS.map((f) => (
                 <option key={f} value={f}>
-                  {f}
+                  {t(`feet.${f}`, { defaultValue: f })}
                 </option>
               ))}
             </select>
           </label>
           <label className="flex flex-col gap-1.5 text-sm">
-            <span className="font-medium text-white/70">Position</span>
+            <span className="font-medium text-white/70">{t('playerForm.position')}</span>
             <select
               className={selectClass}
               value={values.position}
@@ -143,13 +145,13 @@ export function PlayerFormDialog({
               <option value="">–</option>
               {POSITIONS.map((p) => (
                 <option key={p} value={p}>
-                  {p}
+                  {t(`positions.${p}`, { defaultValue: p })}
                 </option>
               ))}
             </select>
           </label>
           <label className="flex flex-col gap-1.5 text-sm">
-            <span className="font-medium text-white/70">Nebenposition</span>
+            <span className="font-medium text-white/70">{t('playerForm.secondaryPosition')}</span>
             <select
               className={selectClass}
               value={values.secondaryPosition}
@@ -158,29 +160,29 @@ export function PlayerFormDialog({
               <option value="">–</option>
               {POSITIONS.map((p) => (
                 <option key={p} value={p}>
-                  {p}
+                  {t(`positions.${p}`, { defaultValue: p })}
                 </option>
               ))}
             </select>
           </label>
           <Input
-            label="Geburtsdatum"
+            label={t('playerForm.birthDate')}
             type="date"
             value={values.birthDate}
             onChange={(e) => set('birthDate', e.target.value)}
           />
           <Input
-            label="Nationalität"
+            label={t('playerForm.nationality')}
             value={values.nationality}
             onChange={(e) => set('nationality', e.target.value)}
           />
           <Input
-            label="Telefon"
+            label={t('playerForm.phone')}
             value={values.phone}
             onChange={(e) => set('phone', e.target.value)}
           />
           <Input
-            label="Email"
+            label={t('playerForm.email')}
             type="email"
             value={values.email}
             onChange={(e) => set('email', e.target.value)}
@@ -188,7 +190,7 @@ export function PlayerFormDialog({
         </div>
 
         <label className="mt-3 flex flex-col gap-1.5 text-sm">
-          <span className="font-medium text-white/70">Notizen</span>
+          <span className="font-medium text-white/70">{t('playerForm.notes')}</span>
           <textarea
             rows={2}
             className="rounded-lg border border-pitch-600 bg-pitch-800 px-3.5 py-2.5 text-sm text-white outline-none focus:border-violet-accent"
@@ -201,10 +203,10 @@ export function PlayerFormDialog({
 
         <div className="mt-5 flex justify-end gap-2">
           <Button type="button" variant="secondary" onClick={onCancel} disabled={isSaving}>
-            Abbrechen
+            {t('common:actions.cancel')}
           </Button>
           <Button type="submit" loading={isSaving}>
-            Speichern
+            {t('common:actions.save')}
           </Button>
         </div>
       </form>

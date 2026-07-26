@@ -1,0 +1,23 @@
+{
+  "presetsTitle": "Vorlagen",
+  "saveAsTemplate": "Speichern als…",
+  "customTitle": "Eigene Formationen",
+  "createNew": "+ Neue Formation erstellen",
+  "loadError": "Formationen konnten nicht geladen werden.",
+  "deleteError": "Löschen fehlgeschlagen.",
+  "emptyCustom": "Noch keine eigenen Formationen. Erstelle eine neue oder speichere eine Vorlage oben als eigene Formation.",
+  "saveAsTitle": "\"{{name}}\" als eigene Formation",
+  "savedAsDefaultName": "{{name}} (eigen)",
+  "editTitle": "\"{{name}}\" bearbeiten",
+  "newFormationTitle": "Neue Formation erstellen",
+  "newFormationDefaultName": "Neue Formation",
+  "modal": {
+    "positionsCount": "{{count}} Positionen",
+    "nameLabel": "Name",
+    "instructions": "Auf das Feld klicken fügt eine neue Position hinzu. Marker ziehen zum Verschieben, anklicken zum Auswählen.",
+    "roleLabel": "Rolle / Kürzel",
+    "deletePosition": "Position löschen",
+    "noPositionSelected": "Keine Position ausgewählt.",
+    "saveFailed": "Speichern fehlgeschlagen."
+  }
+}

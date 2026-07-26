@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { useAuthStore } from '../../auth/store/authStore'
 import { limitsForTier } from '../../../lib/limits'
 import { deleteProject, listProjects, type ProjectSummary } from '../../../lib/supabase/projects'
@@ -19,8 +20,8 @@ function PitchThumbnail() {
   )
 }
 
-function formatDate(iso: string) {
-  return new Date(iso).toLocaleDateString('de-AT', {
+function formatDate(iso: string, locale: string) {
+  return new Date(iso).toLocaleDateString(locale, {
     day: '2-digit',
     month: '2-digit',
     year: 'numeric',
@@ -38,20 +39,20 @@ function DeleteConfirmDialog({
   onConfirm: () => void
   isDeleting: boolean
 }) {
+  const { t } = useTranslation(['projects', 'common'])
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
       <div className="w-full max-w-sm rounded-xl border border-pitch-700 bg-pitch-900 p-5 shadow-2xl">
-        <h2 className="text-sm font-semibold text-white">Projekt löschen?</h2>
+        <h2 className="text-sm font-semibold text-white">{t('projects:deleteDialog.title')}</h2>
         <p className="mt-2 text-sm text-white/60">
-          <span className="text-white">„{title}“</span> wird unwiderruflich gelöscht, inklusive
-          aller Frames.
+          <span className="text-white">„{title}“</span> {t('projects:deleteDialog.bodyAfter')}
         </p>
         <div className="mt-5 flex justify-end gap-2">
           <Button variant="secondary" onClick={onCancel} disabled={isDeleting}>
-            Abbrechen
+            {t('common:actions.cancel')}
           </Button>
           <Button variant="danger" onClick={onConfirm} loading={isDeleting}>
-            Löschen
+            {t('common:actions.delete')}
           </Button>
         </div>
       </div>
@@ -60,6 +61,7 @@ function DeleteConfirmDialog({
 }
 
 export function DashboardPage() {
+  const { t, i18n } = useTranslation(['projects', 'common'])
   const navigate = useNavigate()
   const organization = useAuthStore((s) => s.organization)
 
@@ -79,7 +81,7 @@ export function DashboardPage() {
       })
       .catch((err: unknown) => {
         if (!cancelled) {
-          setError(err instanceof Error ? err.message : 'Projekte konnten nicht geladen werden.')
+          setError(err instanceof Error ? err.message : t('loadError'))
         }
       })
       .finally(() => {
@@ -99,7 +101,7 @@ export function DashboardPage() {
       setProjects((prev) => prev.filter((p) => p.id !== id))
       setPendingDelete(null)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Löschen fehlgeschlagen.')
+      setError(err instanceof Error ? err.message : t('deleteError'))
     } finally {
       setDeletingId(null)
     }
@@ -123,19 +125,21 @@ export function DashboardPage() {
         <div className="flex items-center gap-4">
           <OrgLogoUploader />
           <div>
-            <h1 className="text-lg font-semibold text-white">Projekte</h1>
+            <h1 className="text-lg font-semibold text-white">{t('title')}</h1>
             <p className="text-sm text-white/40">
-              {projects.length} / {Number.isFinite(maxProjects) ? maxProjects : '∞'} Projekte ·{' '}
-              {organization.subscription_tier === 'free' ? 'Beobachter (Demo)' : 'Trainer'}
+              {Number.isFinite(maxProjects)
+                ? t('countLabel', { count: projects.length, max: maxProjects })
+                : t('countLabelUnlimited', { count: projects.length })}{' '}
+              · {organization.subscription_tier === 'free' ? t('tierFree') : t('tierPaid')}
             </p>
           </div>
         </div>
         <Button
           disabled={limitReached}
-          title={limitReached ? `Free-Limit von ${maxProjects} Projekten erreicht` : undefined}
+          title={limitReached ? t('limitReachedTitle', { max: maxProjects }) : undefined}
           onClick={() => navigate('/editor/new')}
         >
-          Neues Projekt
+          {t('newProject')}
         </Button>
       </div>
 
@@ -148,9 +152,9 @@ export function DashboardPage() {
           </div>
         ) : projects.length === 0 ? (
           <div className="flex flex-col items-center gap-3 py-20 text-white/40">
-            <p>Noch keine Projekte.</p>
+            <p>{t('empty.noProjects')}</p>
             <Link to="/editor/new" className="text-violet-accent-bright underline">
-              Erstes Projekt anlegen
+              {t('empty.createFirst')}
             </Link>
           </div>
         ) : (
@@ -171,15 +175,15 @@ export function DashboardPage() {
                     >
                       {project.title}
                     </Link>
-                    <p className="text-xs text-white/40">{formatDate(project.updatedAt)}</p>
+                    <p className="text-xs text-white/40">{formatDate(project.updatedAt, i18n.language)}</p>
                   </div>
                   <button
                     type="button"
                     onClick={() => setPendingDelete(project)}
-                    title="Projekt löschen"
+                    title={t('deleteTooltip')}
                     className="shrink-0 rounded-md px-1.5 py-1 text-xs text-white/40 hover:bg-red-600/20 hover:text-red-400"
                   >
-                    Löschen
+                    {t('common:actions.delete')}
                   </button>
                 </div>
               </div>

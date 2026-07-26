@@ -1,0 +1,23 @@
+{
+  "presetsTitle": "Templates",
+  "saveAsTemplate": "Save as…",
+  "customTitle": "Custom formations",
+  "createNew": "+ Create new formation",
+  "loadError": "Couldn't load formations.",
+  "deleteError": "Delete failed.",
+  "emptyCustom": "No custom formations yet. Create a new one or save a template above as your own.",
+  "saveAsTitle": "Save \"{{name}}\" as custom formation",
+  "savedAsDefaultName": "{{name}} (custom)",
+  "editTitle": "Edit \"{{name}}\"",
+  "newFormationTitle": "Create new formation",
+  "newFormationDefaultName": "New formation",
+  "modal": {
+    "positionsCount": "{{count}} positions",
+    "nameLabel": "Name",
+    "instructions": "Click the pitch to add a new position. Drag markers to move them, click to select.",
+    "roleLabel": "Role / abbreviation",
+    "deletePosition": "Delete position",
+    "noPositionSelected": "No position selected.",
+    "saveFailed": "Save failed."
+  }
+}

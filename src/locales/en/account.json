@@ -1,0 +1,46 @@
+{
+  "title": "Account",
+  "profile": {
+    "title": "Profile",
+    "email": "Email",
+    "organization": "Organization",
+    "nameLabel": "Your name",
+    "saveName": "Save name",
+    "saved": "Saved."
+  },
+  "subscription": {
+    "title": "Subscription",
+    "currentPlan": "Current plan",
+    "tierPaid": "Coach",
+    "tierFree": "Viewer (demo)",
+    "paidUntil": "Paid until",
+    "manage": "Manage subscription",
+    "becomeCoach": "Become a coach",
+    "checkoutFailed": "Checkout failed.",
+    "openFailed": "Opening failed.",
+    "status": {
+      "active": "Active",
+      "trialing": "Trial",
+      "past_due": "Payment failed",
+      "canceled": "Canceled",
+      "incomplete": "Incomplete",
+      "incomplete_expired": "Expired",
+      "unpaid": "Unpaid"
+    }
+  },
+  "appearance": {
+    "title": "Appearance",
+    "brand": "9011 Blue",
+    "dark": "Dark",
+    "note": "Applies to this browser only, not the public landing page."
+  },
+  "password": {
+    "title": "Change password",
+    "newLabel": "New password",
+    "confirmLabel": "Confirm new password",
+    "submit": "Change password",
+    "tooShort": "At least 6 characters.",
+    "mismatch": "Passwords don't match.",
+    "changed": "Password changed."
+  }
+}
