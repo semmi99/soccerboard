@@ -10,7 +10,6 @@ import { ObjectRenderer } from '../objects/ObjectRenderer'
 import { ConnectorShape } from '../objects/shapes/Connector'
 import { ConnectorZoneShape } from '../objects/shapes/PlayerZone'
 import { findConnectorZones } from '../objects/shapes/connectorZones'
-import { FrameCaptionOverlay } from '../objects/shapes/FrameCaptionOverlay'
 import type { FrameObject } from '../types'
 
 function hexToRgba(hex: string, alpha: number): string {
@@ -333,8 +332,6 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
   const pitchLengthM = useEditorStore((s) => s.pitchLengthM)
   const frames = useEditorStore((s) => s.frames)
   const activeFrameIndex = useEditorStore((s) => s.activeFrameIndex)
-  const updateFrameCaptionBadge = useEditorStore((s) => s.updateFrameCaptionBadge)
-  const setFrameCaptionCard = useEditorStore((s) => s.setFrameCaptionCard)
   const tool = useEditorStore((s) => s.tool)
   const selection = useEditorStore((s) => s.selection)
   const setSelection = useEditorStore((s) => s.setSelection)
@@ -1083,15 +1080,6 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
             }
           />
         </Group>
-        </Layer>
-        <Layer>
-          <FrameCaptionOverlay
-            caption={frame.caption}
-            interactive={!isPlaying}
-            onBadgeDragEnd={(badgeId, x, y) => updateFrameCaptionBadge(activeFrameIndex, badgeId, { x, y })}
-            onCardDragEnd={(x, y) => setFrameCaptionCard(activeFrameIndex, { cardX: x, cardY: y })}
-            onCardResize={(width) => setFrameCaptionCard(activeFrameIndex, { cardWidth: width })}
-          />
         </Layer>
         {marqueeRect && (
           <Layer listening={false}>

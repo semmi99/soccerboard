@@ -3,7 +3,6 @@ import type { Json, Tables, TablesInsert } from '../../types/database.types'
 import type {
   EditorFrame,
   FieldCrop,
-  FrameCaption,
   FrameObject,
   ObjectType,
   PitchDesign,
@@ -33,38 +32,6 @@ function rowToFrameObject(row: Tables<'frame_objects'>): FrameObject {
     // trusted to match the shape implied by `object_type`.
     data: row.data as FrameObject['data'],
   } as FrameObject
-}
-
-/** Reconstructs a FrameCaption from the older flat caption_* columns, for
- * rows saved before caption_data existed. */
-function legacyCaptionRowToFrameCaption(row: {
-  caption_badge: string | null
-  caption_title: string | null
-  caption_subtitle: string | null
-  caption_badge_color: string | null
-  caption_x: number | null
-  caption_y: number | null
-}): FrameCaption | null {
-  if (!row.caption_badge && !row.caption_title && !row.caption_subtitle) return null
-  return {
-    badges: row.caption_badge
-      ? [
-          {
-            id: crypto.randomUUID(),
-            text: row.caption_badge,
-            x: row.caption_x ?? 24,
-            y: row.caption_y ?? 28,
-            color: row.caption_badge_color ?? '#ef4444',
-          },
-        ]
-      : [],
-    title: row.caption_title ?? undefined,
-    subtitle: row.caption_subtitle ?? undefined,
-    cardX: 24,
-    cardY: 58,
-    cardWidth: 300,
-    background: 'rgba(255,255,255,0.97)',
-  }
 }
 
 export async function listProjects(orgId: string): Promise<ProjectSummary[]> {
@@ -127,9 +94,7 @@ export async function loadProject(id: string): Promise<LoadedProject> {
 
   const { data: frameRows, error: framesError } = await supabase
     .from('frames')
-    .select(
-      'id, duration_ms, order_index, caption_data, caption_badge, caption_title, caption_subtitle, caption_badge_color, caption_x, caption_y',
-    )
+    .select('id, duration_ms, order_index')
     .eq('project_id', id)
     .order('order_index', { ascending: true })
   if (framesError) throw framesError
@@ -145,9 +110,6 @@ export async function loadProject(id: string): Promise<LoadedProject> {
     id: f.id,
     durationMs: f.duration_ms,
     objects: objectRows.filter((o) => o.frame_id === f.id).map(rowToFrameObject),
-    caption: f.caption_data
-      ? (f.caption_data as unknown as FrameCaption)
-      : legacyCaptionRowToFrameCaption(f),
   }))
 
   return {
@@ -256,7 +218,6 @@ async function insertFramesAndObjects(projectId: string, frames: EditorFrame[]) 
     project_id: projectId,
     order_index: index,
     duration_ms: f.durationMs,
-    caption_data: f.caption ? (f.caption as unknown as Json) : null,
   }))
   const { error: framesError } = await supabase.from('frames').insert(frameInserts)
   if (framesError) throw framesError

@@ -64,11 +64,6 @@ export function PropertiesSidebar() {
   const setPitchLengthM = useEditorStore((s) => s.setPitchLengthM)
   const setPitchWidthM = useEditorStore((s) => s.setPitchWidthM)
   const setLastConnectorColor = useEditorStore((s) => s.setLastConnectorColor)
-  const setFrameCaptionText = useEditorStore((s) => s.setFrameCaptionText)
-  const setFrameCaptionCard = useEditorStore((s) => s.setFrameCaptionCard)
-  const addFrameCaptionBadge = useEditorStore((s) => s.addFrameCaptionBadge)
-  const updateFrameCaptionBadge = useEditorStore((s) => s.updateFrameCaptionBadge)
-  const removeFrameCaptionBadge = useEditorStore((s) => s.removeFrameCaptionBadge)
   const selection = useEditorStore((s) => s.selection)
   const activeFrameIndex = useEditorStore((s) => s.activeFrameIndex)
   const frames = useEditorStore((s) => s.frames)
@@ -88,25 +83,22 @@ export function PropertiesSidebar() {
 
   const [isTeamPanelOpen, setIsTeamPanelOpen] = useState(true)
   const [isFieldPanelOpen, setIsFieldPanelOpen] = useState(true)
-  const [isCaptionPanelOpen, setIsCaptionPanelOpen] = useState(true)
 
-  // Selecting an object collapses the Feld/Team & Kader/Frame-Beschriftung
-  // sections so its own properties are reachable without scrolling past
-  // all three — especially painful on a tablet's shorter viewport.
-  // Deselecting restores the normal expanded view. Only fires on the
-  // none-⇄-some transition, so a manual re-expand while something stays
-  // selected isn't immediately fought on the next selection change.
+  // Selecting an object collapses the Feld/Team & Kader sections so its own
+  // properties are reachable without scrolling past both — especially
+  // painful on a tablet's shorter viewport. Deselecting restores the normal
+  // expanded view. Only fires on the none-⇄-some transition, so a manual
+  // re-expand while something stays selected isn't immediately fought on
+  // the next selection change.
   const hadSelectionRef = useRef(false)
   useEffect(() => {
     const hasSelection = selection.length > 0
     if (hasSelection && !hadSelectionRef.current) {
       setIsFieldPanelOpen(false)
       setIsTeamPanelOpen(false)
-      setIsCaptionPanelOpen(false)
     } else if (!hasSelection && hadSelectionRef.current) {
       setIsFieldPanelOpen(true)
       setIsTeamPanelOpen(true)
-      setIsCaptionPanelOpen(true)
     }
     hadSelectionRef.current = hasSelection
   }, [selection.length])
@@ -224,173 +216,6 @@ export function PropertiesSidebar() {
         {isTeamPanelOpen && <TeamSquadPanel />}
       </div>
 
-      {frame && (
-        <div>
-          <button
-            type="button"
-            onClick={() => setIsCaptionPanelOpen((v) => !v)}
-            className="mb-2 flex w-full items-center justify-between text-[11px] font-semibold uppercase tracking-wide text-white/40 hover:text-white/70"
-          >
-            Frame-Beschriftung
-            <span className="flex h-5 w-5 shrink-0 items-center justify-center text-base font-bold text-white/70">
-              {isCaptionPanelOpen ? '−' : '+'}
-            </span>
-          </button>
-          {isCaptionPanelOpen && (
-            <div className="flex flex-col gap-3">
-              <div className="flex flex-col gap-2">
-                {(frame.caption?.badges ?? []).map((badge) => (
-                  <div key={badge.id} className="flex flex-col gap-1.5 rounded-md border border-pitch-700 p-2">
-                    <div className="flex items-center gap-1.5">
-                      <input
-                        type="text"
-                        className={`${inputClass} flex-1`}
-                        value={badge.text}
-                        onChange={(e) => updateFrameCaptionBadge(activeFrameIndex, badge.id, { text: e.target.value })}
-                      />
-                      <button
-                        type="button"
-                        className="shrink-0 rounded-md border border-pitch-600 px-2 py-1.5 text-xs text-white/60 hover:text-white"
-                        onClick={() => removeFrameCaptionBadge(activeFrameIndex, badge.id)}
-                      >
-                        ✕
-                      </button>
-                    </div>
-                    <ColorSwatchPicker
-                      size="sm"
-                      value={badge.color}
-                      onChange={(c) => updateFrameCaptionBadge(activeFrameIndex, badge.id, { color: c })}
-                    />
-                    <label className="flex items-center gap-2 text-xs text-white/70">
-                      <input
-                        type="checkbox"
-                        className="accent-violet-accent"
-                        checked={Boolean(badge.gradient)}
-                        onChange={(e) => updateFrameCaptionBadge(activeFrameIndex, badge.id, { gradient: e.target.checked })}
-                      />
-                      Farbverlauf statt flacher Füllung
-                    </label>
-                    {badge.gradient && (
-                      <>
-                        <select
-                          className={selectClass}
-                          value={badge.gradientDirection ?? 'radial'}
-                          onChange={(e) =>
-                            updateFrameCaptionBadge(activeFrameIndex, badge.id, {
-                              gradientDirection: e.target.value as 'radial' | 'linear',
-                            })
-                          }
-                        >
-                          <option value="radial">Radial (von der Mitte)</option>
-                          <option value="linear">Linear (links nach rechts)</option>
-                        </select>
-                        <label className="flex items-center gap-2 text-xs text-white/70">
-                          <input
-                            type="checkbox"
-                            className="accent-violet-accent"
-                            checked={Boolean(badge.color2)}
-                            onChange={(e) =>
-                              updateFrameCaptionBadge(activeFrameIndex, badge.id, {
-                                color2: e.target.checked ? badge.color : null,
-                              })
-                            }
-                          />
-                          Zweifarbiger Verlauf
-                        </label>
-                        {badge.color2 && (
-                          <ColorSwatchPicker
-                            size="sm"
-                            value={badge.color2}
-                            onChange={(color) => updateFrameCaptionBadge(activeFrameIndex, badge.id, { color2: color })}
-                          />
-                        )}
-                      </>
-                    )}
-                  </div>
-                ))}
-                <Button variant="secondary" onClick={() => addFrameCaptionBadge(activeFrameIndex)}>
-                  + Label hinzufügen
-                </Button>
-              </div>
-
-              <Field label="Titel">
-                <input
-                  type="text"
-                  className={inputClass}
-                  value={frame.caption?.title ?? ''}
-                  onChange={(e) => setFrameCaptionText(activeFrameIndex, { title: e.target.value })}
-                />
-              </Field>
-              <Field label="Untertitel">
-                <input
-                  type="text"
-                  className={inputClass}
-                  value={frame.caption?.subtitle ?? ''}
-                  onChange={(e) => setFrameCaptionText(activeFrameIndex, { subtitle: e.target.value })}
-                />
-              </Field>
-              {(frame.caption?.title || frame.caption?.subtitle) && (
-                <div className="flex flex-col gap-1.5 rounded-md border border-pitch-700 p-2">
-                  <span className="text-xs font-medium text-white/60">Karten-Hintergrund</span>
-                  <ColorSwatchPicker
-                    size="sm"
-                    value={frame.caption?.background ?? 'rgba(255,255,255,0.97)'}
-                    onChange={(c) => setFrameCaptionCard(activeFrameIndex, { background: c })}
-                  />
-                  <label className="flex items-center gap-2 text-xs text-white/70">
-                    <input
-                      type="checkbox"
-                      className="accent-violet-accent"
-                      checked={Boolean(frame.caption?.gradient)}
-                      onChange={(e) => setFrameCaptionCard(activeFrameIndex, { gradient: e.target.checked })}
-                    />
-                    Farbverlauf statt flacher Füllung
-                  </label>
-                  {frame.caption?.gradient && (
-                    <>
-                      <select
-                        className={selectClass}
-                        value={frame.caption?.gradientDirection ?? 'radial'}
-                        onChange={(e) =>
-                          setFrameCaptionCard(activeFrameIndex, { gradientDirection: e.target.value as 'radial' | 'linear' })
-                        }
-                      >
-                        <option value="radial">Radial (von der Mitte)</option>
-                        <option value="linear">Linear (links nach rechts)</option>
-                      </select>
-                      <label className="flex items-center gap-2 text-xs text-white/70">
-                        <input
-                          type="checkbox"
-                          className="accent-violet-accent"
-                          checked={Boolean(frame.caption?.background2)}
-                          onChange={(e) =>
-                            setFrameCaptionCard(activeFrameIndex, {
-                              background2: e.target.checked ? (frame.caption?.background ?? '#ffffff') : null,
-                            })
-                          }
-                        />
-                        Zweifarbiger Verlauf
-                      </label>
-                      {frame.caption?.background2 && (
-                        <ColorSwatchPicker
-                          size="sm"
-                          value={frame.caption.background2}
-                          onChange={(color) => setFrameCaptionCard(activeFrameIndex, { background2: color })}
-                        />
-                      )}
-                    </>
-                  )}
-                </div>
-              )}
-              <p className="text-[11px] text-white/40">
-                Erscheint als Story-Karte über diesem Frame — leer lassen für keine Beschriftung. Labels und
-                die Karte lassen sich direkt auf dem Feld verschieben, die Karte am blauen Punkt in der Ecke
-                in der Breite anpassen.
-              </p>
-            </div>
-          )}
-        </div>
-      )}
 
       {selection.length > 1 && (
         <div>

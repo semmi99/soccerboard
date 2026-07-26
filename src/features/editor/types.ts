@@ -219,44 +219,10 @@ export type FrameObject =
   | (FrameObjectBase & { objectType: 'connector'; data: ConnectorData })
   | (FrameObjectBase & { objectType: 'image'; data: ImageData })
 
-/** One small draggable pill label (e.g. "THE PROBLEM") — a frame can carry
- * several, each pointed at a different spot on the pitch, matching how
- * tactical-analysis reels drop more than one callout onto the same still. */
-export interface CaptionBadge {
-  id: string
-  text: string
-  x: number
-  y: number
-  color: string
-  gradient?: boolean
-  color2?: string | null
-  gradientDirection?: 'radial' | 'linear'
-}
-
-/** A short "broadcast graphic" style story beat shown over this frame — one
- * or more eyebrow badges plus a title card (bold headline + optional
- * supporting line), matching the callout-card look of tactical-analysis
- * explainer reels. No badges and no title/subtitle means the whole overlay
- * is skipped. The title card itself is draggable and resizable and can take
- * the same solid/gradient background any shape or text object can. */
-export interface FrameCaption {
-  badges: CaptionBadge[]
-  title?: string
-  subtitle?: string
-  cardX: number
-  cardY: number
-  cardWidth: number
-  background: string
-  gradient?: boolean
-  background2?: string | null
-  gradientDirection?: 'radial' | 'linear'
-}
-
 export interface EditorFrame {
   id: string
   durationMs: number
   objects: FrameObject[]
-  caption?: FrameCaption | null
 }
 
 export type PitchDesign =
