@@ -331,56 +331,16 @@ export function PropertiesSidebar() {
                         className={inputClass}
                         value={card.title ?? ''}
                         onChange={(e) => updateFrameCaptionCard(activeFrameIndex, card.id, { title: e.target.value })}
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter') e.currentTarget.blur()
-                        }}
                       />
                     </Field>
-                    <Field label={`Titelgröße (${card.titleFontSize ?? 20}px)`}>
-                      <input
-                        type="range"
-                        min={12}
-                        max={40}
-                        className="w-full"
-                        value={card.titleFontSize ?? 20}
-                        onChange={(e) =>
-                          updateFrameCaptionCard(activeFrameIndex, card.id, { titleFontSize: Number(e.target.value) })
-                        }
-                      />
-                    </Field>
-                    <ColorSwatchPicker
-                      size="sm"
-                      value={card.titleColor ?? '#0f172a'}
-                      onChange={(c) => updateFrameCaptionCard(activeFrameIndex, card.id, { titleColor: c })}
-                    />
                     <Field label="Untertitel">
                       <input
                         type="text"
                         className={inputClass}
                         value={card.subtitle ?? ''}
                         onChange={(e) => updateFrameCaptionCard(activeFrameIndex, card.id, { subtitle: e.target.value })}
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter') e.currentTarget.blur()
-                        }}
                       />
                     </Field>
-                    <Field label={`Untertitelgröße (${card.subtitleFontSize ?? 12}px)`}>
-                      <input
-                        type="range"
-                        min={8}
-                        max={28}
-                        className="w-full"
-                        value={card.subtitleFontSize ?? 12}
-                        onChange={(e) =>
-                          updateFrameCaptionCard(activeFrameIndex, card.id, { subtitleFontSize: Number(e.target.value) })
-                        }
-                      />
-                    </Field>
-                    <ColorSwatchPicker
-                      size="sm"
-                      value={card.subtitleColor ?? '#475569'}
-                      onChange={(c) => updateFrameCaptionCard(activeFrameIndex, card.id, { subtitleColor: c })}
-                    />
                     <div className="flex flex-col gap-1.5">
                       <span className="text-xs font-medium text-white/60">Karten-Hintergrund</span>
                       <ColorSwatchPicker

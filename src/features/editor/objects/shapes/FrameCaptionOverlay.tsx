@@ -3,7 +3,6 @@ import type { KonvaEventObject } from 'konva/lib/Node'
 import type { CaptionBadge, FrameCaption, FrameCaptionCard } from '../../types'
 
 const MIN_CARD_WIDTH = 140
-const MIN_CARD_HEIGHT = 44
 const RESIZE_HANDLE_SIZE = 12
 
 function hexToRgbTriplet(hex: string): [number, number, number] {
@@ -85,15 +84,12 @@ function TitleCard({
   card: FrameCaptionCard
   interactive: boolean
   onDragEnd: (x: number, y: number) => void
-  onResize?: (width: number, height: number) => void
+  onResize?: (width: number) => void
 }) {
-  const titleFontSize = card.titleFontSize ?? 20
-  const subtitleFontSize = card.subtitleFontSize ?? 12
-  const titleHeight = card.title ? titleFontSize + 10 : 0
-  const subtitleHeight = card.subtitle ? subtitleFontSize + 8 : 0
+  const titleHeight = card.title ? 30 : 0
+  const subtitleHeight = card.subtitle ? 20 : 0
   const cardPadY = 14
-  const autoHeight = cardPadY * 2 + titleHeight + subtitleHeight
-  const cardHeight = card.cardHeight ?? autoHeight
+  const cardHeight = cardPadY * 2 + titleHeight + subtitleHeight
   const fillProps = card.gradient
     ? gradientFillProps(card.background, card.background2, card.gradientDirection, card.cardWidth, cardHeight)
     : { fill: card.background }
@@ -112,9 +108,9 @@ function TitleCard({
           x={16}
           y={cardPadY}
           width={card.cardWidth - 32}
-          fontSize={titleFontSize}
+          fontSize={20}
           fontStyle="bold"
-          fill={card.titleColor ?? '#0f172a'}
+          fill="#0f172a"
           wrap="word"
           listening={false}
         />
@@ -125,8 +121,8 @@ function TitleCard({
           x={16}
           y={cardPadY + titleHeight}
           width={card.cardWidth - 32}
-          fontSize={subtitleFontSize}
-          fill={card.subtitleColor ?? '#475569'}
+          fontSize={12}
+          fill="#475569"
           wrap="word"
           listening={false}
         />
@@ -146,8 +142,8 @@ function TitleCard({
           onDragMove={(e: KonvaEventObject<DragEvent>) => {
             e.cancelBubble = true
             const width = Math.max(MIN_CARD_WIDTH, e.target.x() + RESIZE_HANDLE_SIZE / 2)
-            const height = Math.max(MIN_CARD_HEIGHT, e.target.y() + RESIZE_HANDLE_SIZE / 2)
-            onResize(width, height)
+            onResize(width)
+            e.target.y(cardHeight - RESIZE_HANDLE_SIZE / 2)
           }}
           onDragEnd={(e: KonvaEventObject<DragEvent>) => {
             e.cancelBubble = true
@@ -175,7 +171,7 @@ export function FrameCaptionOverlay({
   interactive?: boolean
   onBadgeDragEnd?: (badgeId: string, x: number, y: number) => void
   onCardDragEnd?: (cardId: string, x: number, y: number) => void
-  onCardResize?: (cardId: string, width: number, height: number) => void
+  onCardResize?: (cardId: string, width: number) => void
 }) {
   if (!caption || (caption.badges.length === 0 && caption.cards.length === 0)) return null
 
@@ -195,7 +191,7 @@ export function FrameCaptionOverlay({
           card={card}
           interactive={interactive}
           onDragEnd={(x, y) => onCardDragEnd?.(card.id, x, y)}
-          onResize={onCardResize ? (width, height) => onCardResize(card.id, width, height) : undefined}
+          onResize={onCardResize ? (width) => onCardResize(card.id, width) : undefined}
         />
       ))}
     </>

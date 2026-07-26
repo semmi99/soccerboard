@@ -253,23 +253,9 @@ export interface FrameCaptionCard {
   id: string
   title?: string
   subtitle?: string
-  /** Overrides the title text color. Unset falls back to a dark slate,
-   * the original look. */
-  titleColor?: string
-  /** Overrides the title font size in px. Unset falls back to 20. */
-  titleFontSize?: number
-  /** Overrides the subtitle text color. Unset falls back to a muted
-   * slate, the original look. */
-  subtitleColor?: string
-  /** Overrides the subtitle font size in px. Unset falls back to 12. */
-  subtitleFontSize?: number
   cardX: number
   cardY: number
   cardWidth: number
-  /** Overrides the card's height (drag-resizable independently from width).
-   * Unset falls back to auto-sizing from title/subtitle content — the
-   * original behavior. */
-  cardHeight?: number
   background: string
   gradient?: boolean
   background2?: string | null

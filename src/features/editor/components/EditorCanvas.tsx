@@ -1138,9 +1138,7 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
             interactive={!isPlaying}
             onBadgeDragEnd={(badgeId, x, y) => updateFrameCaptionBadge(activeFrameIndex, badgeId, { x, y })}
             onCardDragEnd={(cardId, x, y) => updateFrameCaptionCard(activeFrameIndex, cardId, { cardX: x, cardY: y })}
-            onCardResize={(cardId, width, height) =>
-              updateFrameCaptionCard(activeFrameIndex, cardId, { cardWidth: width, cardHeight: height })
-            }
+            onCardResize={(cardId, width) => updateFrameCaptionCard(activeFrameIndex, cardId, { cardWidth: width })}
           />
         </Layer>
         {marqueeRect && (
