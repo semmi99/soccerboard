@@ -128,11 +128,11 @@ export function MiniGoalIcon(props: SVGProps<SVGSVGElement>) {
 export function MannequinIcon(props: SVGProps<SVGSVGElement>) {
   return (
     <Base {...props}>
-      <circle cx="12" cy="4.3" r="1.6" />
-      <path d="M12 5.9v1.3" />
-      <path d="M9.7 7.2c-1.7.9-2.7 2.2-2.7 4v3.2c0 1.2.4 2.3 1.1 3.2l.5.6h4.8l.5-.6c.7-.9 1.1-2 1.1-3.2v-3.2c0-1.8-1-3.1-2.7-4" />
-      <path d="M8.3 11.5l6.2 6.4M15.7 11.5l-6.2 6.4" />
-      <path d="M9 18.4v2.3M12 18.6v2.3M15 18.4v2.3" />
+      <circle cx="12" cy="3.3" r="1.3" />
+      <path d="M12 4.6v0.9" />
+      <path d="M9.7 5.5c-1.2.8-1.7 1.8-1.7 3v6.5c0 1.4.4 2.5 1 3.4l.3.4h5.4l.3-.4c.6-.9 1-2 1-3.4V8.5c0-1.2-.5-2.2-1.7-3" />
+      <path d="M8.3 9l6.4 7.2M15.7 9l-6.4 7.2" />
+      <path d="M9.5 19v2M12 19.2v2.1M14.5 19v2" />
     </Base>
   )
 }

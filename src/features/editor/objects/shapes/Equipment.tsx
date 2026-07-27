@@ -36,18 +36,18 @@ function smoothstep(t: number) {
  * sampled from a few (y, half-width) keyframes eased into each other, then
  * mirrored — used for both the mannequin's stroke outline and its mesh
  * clip region, so the two always agree exactly. Computed once at module
- * load since it doesn't depend on any prop. Ends at a narrow rounded
- * bottom (y=10) rather than tapering to a point — the tripod legs (drawn
- * separately, see MANNEQUIN_LEGS) continue on from there. */
+ * load since it doesn't depend on any prop. A tall, straight-sided basket
+ * (gentle taper only, no big round bulge — a lampshade, not a balloon)
+ * ending at a narrow bottom edge; the tripod legs (see MANNEQUIN_LEGS)
+ * continue on from there. */
 const MANNEQUIN_OUTLINE: number[] = (() => {
   const keyframes: [number, number][] = [
-    [-18, 3],
-    [-14, 4.5],
-    [-9, 9.5],
-    [-3, 10.5],
-    [3, 9.5],
-    [7, 6.5],
-    [10, 4],
+    [-14, 5],
+    [-10, 6.5],
+    [-2, 7.5],
+    [6, 7],
+    [10, 5.5],
+    [13, 4],
   ]
   const STEPS = 8
   const right: { x: number; y: number }[] = []
@@ -72,9 +72,9 @@ const MANNEQUIN_OUTLINE: number[] = (() => {
  * basket's bottom edge, matching how the real free-kick mannequins are
  * propped up. */
 const MANNEQUIN_LEGS: [number, number, number, number][] = [
-  [-3, 10, -4.5, 18],
-  [0, 10.5, 0, 18.5],
-  [3, 10, 4.5, 18],
+  [-2.5, 13, -4, 20],
+  [0, 13.5, 0, 20.5],
+  [2.5, 13, 4, 20],
 ]
 
 export function EquipmentShape({ data }: { data: EquipmentData }) {
@@ -150,11 +150,10 @@ function EquipmentIcon({ data }: { data: EquipmentData }) {
       // Fine woven-basket crosshatch — dense diagonal lines every ~3px
       // (not a sparse handful) so it reads as a mesh texture, not a kite.
       const hatchOffsets: number[] = []
-      for (let c = -32; c <= 30; c += 3.2) hatchOffsets.push(c)
+      for (let c = -24; c <= 24; c += 3) hatchOffsets.push(c)
       return (
         <Group>
-          <Circle y={-21} radius={2.6} stroke={color} strokeWidth={1.4} />
-          <Line points={[0, -18.4, 0, -18]} stroke={color} strokeWidth={1.4} />
+          <Circle y={-16.5} radius={2} stroke={color} strokeWidth={1.3} />
           <Group
             clipFunc={(ctx) => {
               ctx.moveTo(outline[0]!, outline[1]!)
@@ -162,12 +161,12 @@ function EquipmentIcon({ data }: { data: EquipmentData }) {
               ctx.closePath()
             }}
           >
-            <Rect x={-16} y={-18} width={32} height={30} fill={`${color}26`} />
+            <Rect x={-9} y={-14} width={18} height={27} fill={`${color}26`} />
             {hatchOffsets.map((c) => (
-              <Line key={`h1-${c}`} points={[-16, c - 16, 16, c + 16]} stroke={color} strokeWidth={0.5} opacity={0.7} />
+              <Line key={`h1-${c}`} points={[-9, c - 9, 9, c + 9]} stroke={color} strokeWidth={0.5} opacity={0.7} />
             ))}
             {hatchOffsets.map((c) => (
-              <Line key={`h2-${c}`} points={[-16, c + 16, 16, c - 16]} stroke={color} strokeWidth={0.5} opacity={0.7} />
+              <Line key={`h2-${c}`} points={[-9, c + 9, 9, c - 9]} stroke={color} strokeWidth={0.5} opacity={0.7} />
             ))}
           </Group>
           <Line points={outline} closed stroke={color} strokeWidth={1.4} lineJoin="round" />
