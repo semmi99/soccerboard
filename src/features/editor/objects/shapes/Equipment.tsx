@@ -32,20 +32,22 @@ function smoothstep(t: number) {
   return t * t * (3 - 2 * t)
 }
 
-/** A closed, smoothly-rounded vase/basket silhouette (no sharp corners) —
+/** A closed, smoothly-rounded basket silhouette (no sharp corners) —
  * sampled from a few (y, half-width) keyframes eased into each other, then
  * mirrored — used for both the mannequin's stroke outline and its mesh
  * clip region, so the two always agree exactly. Computed once at module
- * load since it doesn't depend on any prop. */
+ * load since it doesn't depend on any prop. Ends at a narrow rounded
+ * bottom (y=10) rather than tapering to a point — the tripod legs (drawn
+ * separately, see MANNEQUIN_LEGS) continue on from there. */
 const MANNEQUIN_OUTLINE: number[] = (() => {
   const keyframes: [number, number][] = [
     [-18, 3],
     [-13, 4],
     [-8, 9],
     [-2, 10],
-    [5, 8.5],
-    [11, 6],
-    [16, 4],
+    [4, 9],
+    [7, 7],
+    [10, 4],
   ]
   const STEPS = 6
   const right: { x: number; y: number }[] = []
@@ -65,6 +67,15 @@ const MANNEQUIN_OUTLINE: number[] = (() => {
     .map((p) => ({ x: -p.x, y: p.y }))
   return [...right, ...left].flatMap((p) => [p.x, p.y])
 })()
+
+/** The dummy's tripod stand — three straight legs splaying out from the
+ * basket's bottom edge, matching how the real free-kick mannequins are
+ * propped up. */
+const MANNEQUIN_LEGS: [number, number, number, number][] = [
+  [-4, 10, -6, 21],
+  [0, 10, 0, 21],
+  [4, 10, 6, 21],
+]
 
 export function EquipmentShape({ data }: { data: EquipmentData }) {
   return (
@@ -157,6 +168,9 @@ function EquipmentIcon({ data }: { data: EquipmentData }) {
             ))}
           </Group>
           <Line points={outline} closed stroke={color} strokeWidth={1.5} lineJoin="round" />
+          {MANNEQUIN_LEGS.map(([x1, y1, x2, y2], i) => (
+            <Line key={`leg-${i}`} points={[x1, y1, x2, y2]} stroke={color} strokeWidth={1.5} lineCap="round" />
+          ))}
         </Group>
       )
     }
