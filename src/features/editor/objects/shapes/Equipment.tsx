@@ -28,6 +28,44 @@ function lighten(hex: string, amount = 0.4) {
   return `rgb(${r}, ${g}, ${b})`
 }
 
+function smoothstep(t: number) {
+  return t * t * (3 - 2 * t)
+}
+
+/** A closed, smoothly-rounded vase/basket silhouette (no sharp corners) —
+ * sampled from a few (y, half-width) keyframes eased into each other, then
+ * mirrored — used for both the mannequin's stroke outline and its mesh
+ * clip region, so the two always agree exactly. Computed once at module
+ * load since it doesn't depend on any prop. */
+const MANNEQUIN_OUTLINE: number[] = (() => {
+  const keyframes: [number, number][] = [
+    [-18, 3],
+    [-13, 4],
+    [-8, 9],
+    [-2, 10],
+    [5, 8.5],
+    [11, 6],
+    [16, 4],
+  ]
+  const STEPS = 6
+  const right: { x: number; y: number }[] = []
+  for (let i = 0; i < keyframes.length - 1; i++) {
+    const [y0, w0] = keyframes[i]!
+    const [y1, w1] = keyframes[i + 1]!
+    for (let s = 0; s < STEPS; s++) {
+      const t = s / STEPS
+      right.push({ x: w0 + (w1 - w0) * smoothstep(t), y: y0 + (y1 - y0) * t })
+    }
+  }
+  const [lastY, lastW] = keyframes[keyframes.length - 1]!
+  right.push({ x: lastW, y: lastY })
+  const left = right
+    .slice()
+    .reverse()
+    .map((p) => ({ x: -p.x, y: p.y }))
+  return [...right, ...left].flatMap((p) => [p.x, p.y])
+})()
+
 export function EquipmentShape({ data }: { data: EquipmentData }) {
   return (
     <Group scaleX={data.scaleX ?? 1} scaleY={data.scaleY ?? 1}>
@@ -93,16 +131,16 @@ function EquipmentIcon({ data }: { data: EquipmentData }) {
       )
     }
     case 'mannequin': {
-      // A woven free-kick "wall" dummy — a tapered basket body with a small
-      // carry-handle loop on top, drawn as an outlined mesh (stroke +
-      // diagonal crosshatch) rather than a solid silhouette, matching how
-      // the real training dummies look.
-      const outline = [-4, -16, -10, -10, -10, 4, -6, 16, 6, 16, 10, 4, 10, -10, 4, -16]
+      // A woven free-kick "wall" dummy — a smoothly-rounded basket body
+      // with a small carry-handle loop on top, drawn as an outlined mesh
+      // (stroke + diagonal crosshatch) rather than a solid silhouette,
+      // matching how the real training dummies look.
+      const outline = MANNEQUIN_OUTLINE
       const hatchOffsets = [-30, -22, -14, -6, 2, 10, 18, 26]
       return (
         <Group>
-          <Circle y={-21} radius={3} stroke={color} strokeWidth={1.5} />
-          <Line points={[0, -18, 0, -16]} stroke={color} strokeWidth={1.5} />
+          <Circle y={-23} radius={3} stroke={color} strokeWidth={1.5} />
+          <Line points={[0, -20, 0, -18]} stroke={color} strokeWidth={1.5} />
           <Group
             clipFunc={(ctx) => {
               ctx.moveTo(outline[0]!, outline[1]!)
@@ -118,7 +156,7 @@ function EquipmentIcon({ data }: { data: EquipmentData }) {
               <Line key={`h2-${c}`} points={[-16, c + 16, 16, c - 16]} stroke={color} strokeWidth={0.75} opacity={0.55} />
             ))}
           </Group>
-          <Line points={outline} closed stroke={color} strokeWidth={1.5} />
+          <Line points={outline} closed stroke={color} strokeWidth={1.5} lineJoin="round" />
         </Group>
       )
     }

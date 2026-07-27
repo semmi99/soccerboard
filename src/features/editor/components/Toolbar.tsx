@@ -6,18 +6,15 @@ import { uploadBoardImage, readImageDimensions } from '../../../lib/supabase/ima
 import type { EquipmentKind, ToolId } from '../types'
 import {
   BallIcon,
-  BlockedPassIcon,
   ConeIcon,
   ConnectorIcon,
   CircleShapeIcon,
   CurvedArrowIcon,
   CursorIcon,
-  DribbleLineIcon,
   ImageInsertIcon,
   LadderIcon,
   MannequinIcon,
   MiniGoalIcon,
-  PlainLineIcon,
   QuoteCardIcon,
   RectShapeIcon,
   RingIcon,
@@ -81,9 +78,6 @@ export function Toolbar() {
     [
       { id: 'arrow_straight', label: t('toolbar.arrowCurved'), icon: <CurvedArrowIcon /> },
       { id: 'arrow_rigid', label: t('toolbar.arrowRigid'), icon: <StraightArrowIcon /> },
-      { id: 'arrow_blocked', label: t('toolbar.arrowBlocked'), icon: <BlockedPassIcon /> },
-      { id: 'arrow_dribble', label: t('toolbar.dribbleLine'), icon: <DribbleLineIcon /> },
-      { id: 'line_straight', label: t('toolbar.plainLine'), icon: <PlainLineIcon /> },
       { id: 'connector', label: t('toolbar.connector'), icon: <ConnectorIcon /> },
     ],
     [

@@ -85,52 +85,6 @@ export function createObjectForTool(
     }
   }
 
-  if (tool === 'arrow_blocked') {
-    return {
-      ...base,
-      objectType: 'arrow',
-      data: {
-        shape: 'straight',
-        points: [-60, 0, 60, 0],
-        lineStyle: 'dashed',
-        color: '#ef4444',
-        strokeWidth: 3,
-        showArrowhead: false,
-        blocked: true,
-        bendable: false,
-      },
-    }
-  }
-
-  if (tool === 'arrow_dribble') {
-    return {
-      ...base,
-      objectType: 'arrow',
-      data: {
-        shape: 'straight',
-        points: [-70, 10, -20, -10, 30, 10, 80, -10],
-        lineStyle: 'solid',
-        color: '#22c55e',
-        strokeWidth: 2.5,
-        dribble: true,
-      },
-    }
-  }
-
-  if (tool === 'line_straight') {
-    return {
-      ...base,
-      objectType: 'arrow',
-      data: {
-        shape: 'straight',
-        points: [-70, 0, 70, 0],
-        lineStyle: 'dashed',
-        color: '#38bdf8',
-        strokeWidth: 2.5,
-        showArrowhead: false,
-      },
-    }
-  }
 
   if (tool === 'shape_circle') {
     return {

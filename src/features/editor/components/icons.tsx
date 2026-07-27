@@ -96,33 +96,6 @@ export function ConnectorIcon(props: SVGProps<SVGSVGElement>) {
   )
 }
 
-export function BlockedPassIcon(props: SVGProps<SVGSVGElement>) {
-  return (
-    <Base {...props}>
-      <path d="M4 15L15 8" strokeDasharray="3 3" />
-      <path d="M13 5l5 5" />
-      <path d="M13 10l5 -5" />
-    </Base>
-  )
-}
-
-export function PlainLineIcon(props: SVGProps<SVGSVGElement>) {
-  return (
-    <Base {...props}>
-      <path d="M4 18L20 6" strokeDasharray="3 3" />
-    </Base>
-  )
-}
-
-export function DribbleLineIcon(props: SVGProps<SVGSVGElement>) {
-  return (
-    <Base {...props}>
-      <path d="M3 18c2 0 2-4 4-4s2 4 4 4 2-4 4-4 2 4 4 4" />
-      <path d="M17 16l3 2-1-3" />
-    </Base>
-  )
-}
-
 export function ImageInsertIcon(props: SVGProps<SVGSVGElement>) {
   return (
     <Base {...props}>
@@ -155,10 +128,10 @@ export function MiniGoalIcon(props: SVGProps<SVGSVGElement>) {
 export function MannequinIcon(props: SVGProps<SVGSVGElement>) {
   return (
     <Base {...props}>
-      <circle cx="12" cy="4.5" r="1.6" />
-      <path d="M12 6.1v1.2" />
-      <path d="M10 7l-3 3v6l2 4h6l2-4v-6l-3-3z" />
-      <path d="M8 10l8 7M16 10l-8 7" />
+      <circle cx="12" cy="4.3" r="1.6" />
+      <path d="M12 5.9v1.3" />
+      <path d="M9.7 7.2c-1.7.9-2.7 2.2-2.7 4v3.6c0 1.3.5 2.5 1.3 3.5l.9 1.1h6l.9-1.1c.8-1 1.3-2.2 1.3-3.5v-3.6c0-1.8-1-3.1-2.7-4" />
+      <path d="M8.3 11l7 8M15.7 11l-7 8" />
     </Base>
   )
 }
