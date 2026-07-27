@@ -54,12 +54,14 @@ export function PropertiesSidebar() {
   const pitchDesign = useEditorStore((s) => s.pitchDesign)
   const orientation = useEditorStore((s) => s.orientation)
   const showPitchMarkings = useEditorStore((s) => s.showPitchMarkings)
+  const showMovementTrails = useEditorStore((s) => s.showMovementTrails)
   const fieldCrop = useEditorStore((s) => s.fieldCrop)
   const pitchLengthM = useEditorStore((s) => s.pitchLengthM)
   const pitchWidthM = useEditorStore((s) => s.pitchWidthM)
   const setPitchDesign = useEditorStore((s) => s.setPitchDesign)
   const setOrientation = useEditorStore((s) => s.setOrientation)
   const setShowPitchMarkings = useEditorStore((s) => s.setShowPitchMarkings)
+  const setShowMovementTrails = useEditorStore((s) => s.setShowMovementTrails)
   const setFieldCrop = useEditorStore((s) => s.setFieldCrop)
   const setPitchLengthM = useEditorStore((s) => s.setPitchLengthM)
   const setPitchWidthM = useEditorStore((s) => s.setPitchWidthM)
@@ -170,6 +172,15 @@ export function PropertiesSidebar() {
               onChange={(e) => setShowPitchMarkings(e.target.checked)}
             />
             {t('properties.field.showMarkings')}
+          </label>
+          <label className="flex items-center gap-2 text-xs text-white/70">
+            <input
+              type="checkbox"
+              className="accent-violet-accent"
+              checked={showMovementTrails}
+              onChange={(e) => setShowMovementTrails(e.target.checked)}
+            />
+            {t('properties.field.showMovementTrails')}
           </label>
           <div className="flex gap-2">
             <div className="min-w-0 flex-1">
@@ -462,6 +473,18 @@ function PlayerChipFields({
           }}
         />
         {t('properties.playerChip.offsideReference')}
+      </label>
+      <label className="flex items-center gap-2 text-xs text-white/70">
+        <input
+          type="checkbox"
+          className="accent-violet-accent"
+          checked={data.offsideTarget ?? false}
+          onChange={(e) => {
+            onCheckpoint()
+            onChange({ offsideTarget: e.target.checked })
+          }}
+        />
+        {t('properties.playerChip.offsideTarget')}
       </label>
     </div>
   )

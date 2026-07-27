@@ -322,6 +322,40 @@ function MotionGuide({
   )
 }
 
+/** Always-on (when toggled), non-interactive counterpart to `MotionGuide` —
+ * a plain light line from a player/ball's previous-frame position to its
+ * current one, for every mover at once rather than just the selection, and
+ * shown during playback too. No drag handle: purely a visual aid. */
+function MovementTrail({
+  fromX,
+  fromY,
+  toX,
+  toY,
+  bend,
+}: {
+  fromX: number
+  fromY: number
+  toX: number
+  toY: number
+  bend: [number, number] | null
+}) {
+  const cx = bend ? bend[0] : (fromX + toX) / 2
+  const cy = bend ? bend[1] : (fromY + toY) / 2
+  const SEGMENTS = 24
+  const points: number[] = []
+  for (let i = 0; i <= SEGMENTS; i++) {
+    const p = pointOnMotionPath(i / SEGMENTS, fromX, fromY, toX, toY, cx, cy)
+    points.push(p.x, p.y)
+  }
+
+  return (
+    <Group listening={false}>
+      <Line points={points} stroke="rgba(255,255,255,0.65)" strokeWidth={2} opacity={0.8} />
+      <Circle x={fromX} y={fromY} radius={3} fill="rgba(255,255,255,0.65)" />
+    </Group>
+  )
+}
+
 export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | null> }) {
   const { ref: containerRef, size } = useElementSize<HTMLDivElement>()
   const pitchDesign = useEditorStore((s) => s.pitchDesign)
@@ -329,6 +363,7 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
   const zoneGridStyle = useEditorStore((s) => s.zoneGridStyle)
   const zoneGridCustomLines = useEditorStore((s) => s.zoneGridCustomLines)
   const showPitchMarkings = useEditorStore((s) => s.showPitchMarkings)
+  const showMovementTrails = useEditorStore((s) => s.showMovementTrails)
   const fieldCrop = useEditorStore((s) => s.fieldCrop)
   const pitchLengthM = useEditorStore((s) => s.pitchLengthM)
   const frames = useEditorStore((s) => s.frames)
@@ -502,10 +537,15 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
   )
   const offsideLabels = (() => {
     if (!offsideRef) return []
-    const attackers = visibleObjects.filter(
+    const opposingChips = visibleObjects.filter(
       (o): o is Extract<FrameObject, { objectType: 'player_chip' }> =>
         o.objectType === 'player_chip' && o.data.team !== offsideRef.data.team,
     )
+    // If any opposing chip is marked as the offside target, only that one
+    // (or those) gets the label — otherwise every opposing chip does, same
+    // as before this was introduced.
+    const targeted = opposingChips.filter((o) => o.data.offsideTarget)
+    const attackers = targeted.length > 0 ? targeted : opposingChips
     if (attackers.length === 0) return []
     const refPos = lengthAxis === 'y' ? offsideRef.y : offsideRef.x
     const ownGoalEdge = refPos < lengthSize / 2 ? 0 : lengthSize
@@ -929,6 +969,32 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
           .filter((g): g is NonNullable<typeof g> => Boolean(g))
       : []
 
+  // Optional, always-on version of the guide above: a light line from every
+  // player/ball's previous-frame position to its current one (not just the
+  // selection), toggled globally via `showMovementTrails` — including while
+  // playing back, unlike the selection-only editing guide.
+  const movementTrails =
+    showMovementTrails && prevFrame
+      ? visibleObjects
+          .filter(
+            (o): o is Extract<FrameObject, { objectType: 'player_chip' | 'ball' }> =>
+              o.objectType === 'player_chip' || o.objectType === 'ball',
+          )
+          .map((o) => {
+            const prevObj = prevFrame.objects.find((p) => p.id === o.id)
+            if (!prevObj || (prevObj.x === o.x && prevObj.y === o.y)) return null
+            return {
+              id: o.id,
+              fromX: prevObj.x,
+              fromY: prevObj.y,
+              toX: o.x,
+              toY: o.y,
+              bend: o.data.motionBend ?? null,
+            }
+          })
+          .filter((g): g is NonNullable<typeof g> => Boolean(g))
+      : []
+
   // Shapes (zones/circles/rects/polygons) and training equipment get free
   // non-uniform corner resizing (independent width/height); other object
   // kinds (chips, text, ball) keep proportional scaling since they don't
@@ -1093,6 +1159,16 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
               </Group>
             )
           })}
+          {movementTrails.map((g) => (
+            <MovementTrail
+              key={`trail-${g.id}`}
+              fromX={g.fromX}
+              fromY={g.fromY}
+              toX={g.toX}
+              toY={g.toY}
+              bend={g.bend}
+            />
+          ))}
           {motionGuides.map((g) => (
             <MotionGuide
               key={`motion-${g.id}`}

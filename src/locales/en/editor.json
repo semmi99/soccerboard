@@ -70,6 +70,7 @@
         "third": "Final third (corner)"
       },
       "showMarkings": "Show pitch markings",
+      "showMovementTrails": "Show movement trail (frame to frame)",
       "lengthM": "Length (m)",
       "widthM": "Width (m)",
       "dimensionsNote": "Real-world field dimensions — used to display pass/run distances in meters."
@@ -126,7 +127,8 @@
       "labelOptional": "Label (optional)",
       "labelColor": "Label color",
       "highlight": "Highlight (blinks in this frame)",
-      "offsideReference": "Mark as offside reference (last defender)"
+      "offsideReference": "Mark as offside reference (last defender)",
+      "offsideTarget": "Mark as offside target (only marked players show the label)"
     },
     "arrow": {
       "angle": "Angle ({{deg}}°)",
@@ -254,7 +256,7 @@
     "uploadCrest": "Upload crest",
     "uploadCrestHome": "Upload home crest",
     "uploadCrestAway": "Upload away crest",
-    "crestHintTeam": "The crest replaces the kit colors on all of this team's player chips.",
+    "crestHintTeam": "The crest replaces the kit colors on this team's home chips (away stays crest-free, since that's the opponent).",
     "crestHintHome": "The crest replaces the kit colors on all home chips (this project only).",
     "crestHintAway": "The crest replaces the kit colors on all away chips (this project only).",
     "kitDesignTitle": "Kit design: {{name}}",

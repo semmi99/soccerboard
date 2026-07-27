@@ -53,6 +53,11 @@ interface EditorState {
    * org's saved zone grids (mirrors how `teamKit` is resolved from `teamId`). */
   zoneGridCustomLines: ZoneGridLine[]
   showPitchMarkings: boolean
+  /** Draws a light line from each player/ball's previous-frame position to
+   * its current one — a persistent, always-on version of the editor-only
+   * motion guide, visible for every mover at once (not just the selection),
+   * including during playback. */
+  showMovementTrails: boolean
   fieldCrop: FieldCrop
   pitchLengthM: number
   pitchWidthM: number
@@ -84,6 +89,7 @@ interface EditorState {
     zoneGridStyle: ZoneGridStyle
     zoneGridCustomId: string | null
     showPitchMarkings: boolean
+    showMovementTrails: boolean
     fieldCrop: FieldCrop
     pitchLengthM: number
     pitchWidthM: number
@@ -100,6 +106,7 @@ interface EditorState {
   setZoneGridCustomId: (id: string | null) => void
   setZoneGridCustomLines: (lines: ZoneGridLine[]) => void
   setShowPitchMarkings: (show: boolean) => void
+  setShowMovementTrails: (show: boolean) => void
   setFieldCrop: (crop: FieldCrop) => void
   setPitchLengthM: (m: number) => void
   setPitchWidthM: (m: number) => void
@@ -159,6 +166,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
   zoneGridCustomId: null,
   zoneGridCustomLines: [],
   showPitchMarkings: true,
+  showMovementTrails: false,
   fieldCrop: 'full',
   pitchLengthM: 105,
   pitchWidthM: 68,
@@ -188,6 +196,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
     zoneGridStyle,
     zoneGridCustomId,
     showPitchMarkings,
+    showMovementTrails,
     fieldCrop,
     pitchLengthM,
     pitchWidthM,
@@ -203,6 +212,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
       zoneGridCustomId,
       zoneGridCustomLines: [],
       showPitchMarkings,
+      showMovementTrails,
       fieldCrop,
       pitchLengthM,
       pitchWidthM,
@@ -234,6 +244,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
       zoneGridCustomId: null,
       zoneGridCustomLines: [],
       showPitchMarkings: true,
+      showMovementTrails: false,
       fieldCrop: 'full',
       pitchLengthM: 105,
       pitchWidthM: 68,
@@ -262,6 +273,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
   setZoneGridCustomId: (id) => set({ zoneGridCustomId: id, isDirty: true }),
   setZoneGridCustomLines: (lines) => set({ zoneGridCustomLines: lines }),
   setShowPitchMarkings: (show) => set({ showPitchMarkings: show, isDirty: true }),
+  setShowMovementTrails: (show) => set({ showMovementTrails: show, isDirty: true }),
   setFieldCrop: (crop) => set({ fieldCrop: crop, isDirty: true }),
   setPitchLengthM: (m) => set({ pitchLengthM: m, isDirty: true }),
   setPitchWidthM: (m) => set({ pitchWidthM: m, isDirty: true }),

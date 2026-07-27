@@ -75,6 +75,7 @@ export interface LoadedProject {
   zoneGridStyle: ZoneGridStyle
   zoneGridCustomId: string | null
   showPitchMarkings: boolean
+  showMovementTrails: boolean
   fieldCrop: FieldCrop
   pitchLengthM: number
   pitchWidthM: number
@@ -86,7 +87,7 @@ export async function loadProject(id: string): Promise<LoadedProject> {
   const { data: project, error: projectError } = await supabase
     .from('projects')
     .select(
-      'id, title, pitch_design, orientation, team_id, zone_grid_style, zone_grid_custom_id, show_pitch_markings, field_crop, pitch_length_m, pitch_width_m, kit_override',
+      'id, title, pitch_design, orientation, team_id, zone_grid_style, zone_grid_custom_id, show_pitch_markings, show_movement_trails, field_crop, pitch_length_m, pitch_width_m, kit_override',
     )
     .eq('id', id)
     .single()
@@ -121,6 +122,7 @@ export async function loadProject(id: string): Promise<LoadedProject> {
     zoneGridStyle: project.zone_grid_style as ZoneGridStyle,
     zoneGridCustomId: project.zone_grid_custom_id,
     showPitchMarkings: project.show_pitch_markings,
+    showMovementTrails: project.show_movement_trails,
     fieldCrop: project.field_crop as FieldCrop,
     pitchLengthM: project.pitch_length_m,
     pitchWidthM: project.pitch_width_m,
@@ -140,6 +142,7 @@ export interface SaveProjectInput {
   zoneGridStyle: ZoneGridStyle
   zoneGridCustomId: string | null
   showPitchMarkings: boolean
+  showMovementTrails: boolean
   fieldCrop: FieldCrop
   pitchLengthM: number
   pitchWidthM: number
@@ -161,6 +164,7 @@ export async function saveProject(input: SaveProjectInput): Promise<string> {
         zone_grid_style: input.zoneGridStyle,
         zone_grid_custom_id: input.zoneGridCustomId,
         show_pitch_markings: input.showPitchMarkings,
+        show_movement_trails: input.showMovementTrails,
         field_crop: input.fieldCrop,
         pitch_length_m: input.pitchLengthM,
         pitch_width_m: input.pitchWidthM,
@@ -196,6 +200,7 @@ async function insertProjectRow(
     zone_grid_style: input.zoneGridStyle,
     zone_grid_custom_id: input.zoneGridCustomId,
     show_pitch_markings: input.showPitchMarkings,
+    show_movement_trails: input.showMovementTrails,
     field_crop: input.fieldCrop,
     pitch_length_m: input.pitchLengthM,
     pitch_width_m: input.pitchWidthM,

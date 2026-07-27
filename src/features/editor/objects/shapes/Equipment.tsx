@@ -92,13 +92,36 @@ function EquipmentIcon({ data }: { data: EquipmentData }) {
         </Group>
       )
     }
-    case 'mannequin':
+    case 'mannequin': {
+      // A woven free-kick "wall" dummy — a tapered basket body with a small
+      // carry-handle loop on top, drawn as an outlined mesh (stroke +
+      // diagonal crosshatch) rather than a solid silhouette, matching how
+      // the real training dummies look.
+      const outline = [-4, -16, -10, -10, -10, 4, -6, 16, 6, 16, 10, 4, 10, -10, 4, -16]
+      const hatchOffsets = [-30, -22, -14, -6, 2, 10, 18, 26]
       return (
         <Group>
-          <Circle y={-14} radius={6} fill={color} />
-          <Rect x={-7} y={-8} width={14} height={22} cornerRadius={4} fill={color} />
+          <Circle y={-21} radius={3} stroke={color} strokeWidth={1.5} />
+          <Line points={[0, -18, 0, -16]} stroke={color} strokeWidth={1.5} />
+          <Group
+            clipFunc={(ctx) => {
+              ctx.moveTo(outline[0]!, outline[1]!)
+              for (let i = 2; i < outline.length; i += 2) ctx.lineTo(outline[i]!, outline[i + 1]!)
+              ctx.closePath()
+            }}
+          >
+            <Rect x={-16} y={-20} width={32} height={40} fill={`${color}26`} />
+            {hatchOffsets.map((c) => (
+              <Line key={`h1-${c}`} points={[-16, c - 16, 16, c + 16]} stroke={color} strokeWidth={0.75} opacity={0.55} />
+            ))}
+            {hatchOffsets.map((c) => (
+              <Line key={`h2-${c}`} points={[-16, c + 16, 16, c - 16]} stroke={color} strokeWidth={0.75} opacity={0.55} />
+            ))}
+          </Group>
+          <Line points={outline} closed stroke={color} strokeWidth={1.5} />
         </Group>
       )
+    }
     case 'slalom_pole':
       return <Line points={[0, -22, 0, 10]} stroke={color} strokeWidth={3} />
     case 'ladder':

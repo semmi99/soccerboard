@@ -49,6 +49,7 @@ export function EditorPage() {
           zoneGridStyle: project.zoneGridStyle,
           zoneGridCustomId: project.zoneGridCustomId,
           showPitchMarkings: project.showPitchMarkings,
+          showMovementTrails: project.showMovementTrails,
           fieldCrop: project.fieldCrop,
           pitchLengthM: project.pitchLengthM,
           pitchWidthM: project.pitchWidthM,

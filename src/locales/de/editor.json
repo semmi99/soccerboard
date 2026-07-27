@@ -70,6 +70,7 @@
         "third": "Letztes Drittel (Eckball)"
       },
       "showMarkings": "Spielfeldmarkierungen anzeigen",
+      "showMovementTrails": "Laufweg-Linie anzeigen (Frame zu Frame)",
       "lengthM": "Länge (m)",
       "widthM": "Breite (m)",
       "dimensionsNote": "Echte Feldmaße — wird genutzt, um Pass-/Laufdistanzen in Metern anzuzeigen."
@@ -126,7 +127,8 @@
       "labelOptional": "Label (optional)",
       "labelColor": "Farbe des Labels",
       "highlight": "Hervorheben (blinkt in diesem Frame)",
-      "offsideReference": "Als Abseits-Referenz markieren (letzter Verteidiger)"
+      "offsideReference": "Als Abseits-Referenz markieren (letzter Verteidiger)",
+      "offsideTarget": "Als Abseits-Ziel markieren (nur markierte Spieler zeigen das Label)"
     },
     "arrow": {
       "angle": "Winkel ({{deg}}°)",
@@ -254,7 +256,7 @@
     "uploadCrest": "Wappen hochladen",
     "uploadCrestHome": "Wappen Heim hochladen",
     "uploadCrestAway": "Wappen Auswärts hochladen",
-    "crestHintTeam": "Wappen ersetzt die Trikotfarben auf allen Spieler-Chips dieses Teams.",
+    "crestHintTeam": "Wappen ersetzt die Trikotfarben auf den Heim-Chips dieses Teams (Auswärts bleibt ohne Wappen, da das der Gegner ist).",
     "crestHintHome": "Wappen ersetzt die Trikotfarben auf allen Heim-Chips (nur in diesem Projekt).",
     "crestHintAway": "Wappen ersetzt die Trikotfarben auf allen Auswärts-Chips (nur in diesem Projekt).",
     "kitDesignTitle": "Kit-Design: {{name}}",

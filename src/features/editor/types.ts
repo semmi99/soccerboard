@@ -30,10 +30,16 @@ export interface PlayerChipData {
   motionBend?: [number, number] | null
   /** Marks this chip as the offside-line reference (the last outfield
    * defender) — every opposing-team chip then gets an automatic "Onside/
-   * Abseits by X.Xm" label relative to this player's position. At most one
-   * chip should carry this per frame; if several do, the first one found
-   * wins. */
+   * Abseits by X.Xm" label relative to this player's position, UNLESS one
+   * or more opposing chips are marked with `offsideTarget` (see below), in
+   * which case only those get the label. At most one chip should carry
+   * this per frame; if several do, the first one found wins. */
   offsideReference?: boolean
+  /** Narrows the offside check (see `offsideReference` above) to just this
+   * chip instead of every opposing-team player — for when only one
+   * attacker's run actually matters. Ignored if no chip on the frame has
+   * this set (falls back to labeling the whole opposing team). */
+  offsideTarget?: boolean
   /** Overrides the number/custom-text color inside the chip circle.
    * Unset falls back to white — the original look. */
   numberColor?: string

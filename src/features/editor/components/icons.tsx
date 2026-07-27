@@ -155,8 +155,10 @@ export function MiniGoalIcon(props: SVGProps<SVGSVGElement>) {
 export function MannequinIcon(props: SVGProps<SVGSVGElement>) {
   return (
     <Base {...props}>
-      <circle cx="12" cy="6" r="2.5" />
-      <path d="M8 20l1.5-9h5L16 20" />
+      <circle cx="12" cy="4.5" r="1.6" />
+      <path d="M12 6.1v1.2" />
+      <path d="M10 7l-3 3v6l2 4h6l2-4v-6l-3-3z" />
+      <path d="M8 10l8 7M16 10l-8 7" />
     </Base>
   )
 }

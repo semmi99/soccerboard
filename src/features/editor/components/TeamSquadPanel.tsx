@@ -161,11 +161,12 @@ export function TeamSquadPanel() {
         color2: activeTeam.gk_kit_color2,
       },
       chipScale: activeTeam.chip_scale,
-      // A linked team is one club with one badge — its crest applies to
-      // both sides here on purpose (unlike the no-team case below, where
-      // home/away are two distinct sides and must never share a crest).
+      // A linked team's crest only replaces the HOME chips' colors — the
+      // away side represents the opponent, who isn't this club, so it must
+      // never inherit the linked team's badge (previously mirrored to both
+      // sides, which incorrectly badged the opposing chips too).
       homeCrestUrl: activeTeam.crest_url,
-      awayCrestUrl: activeTeam.crest_url,
+      awayCrestUrl: null,
     })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTeam, setTeamKit])
