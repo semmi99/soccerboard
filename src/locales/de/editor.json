@@ -1,0 +1,340 @@
+{
+  "toolbar": {
+    "select": "Zeiger",
+    "playerHome": "Spieler Heim",
+    "playerAway": "Spieler Auswärts",
+    "goalkeeperHome": "Torwart Heim",
+    "goalkeeperAway": "Torwart Auswärts",
+    "ball": "Ball",
+    "arrowCurved": "Pfeil (Ziehpunkte zum Biegen)",
+    "arrowRigid": "Gerader Pfeil (nicht biegbar)",
+    "arrowBlocked": "Blockierte Option (X am Ende)",
+    "dribbleLine": "Dribbellinie (Ziehpunkte zum Biegen)",
+    "plainLine": "Linie (Zone einzeichnen)",
+    "connector": "Spieler verbinden",
+    "circle": "Kreis",
+    "rect": "Rechteck",
+    "text": "Text",
+    "textBadge": "Badge",
+    "textTitle": "Titel",
+    "textSubtitle": "Untertitel",
+    "quoteCard": "Zitat-Karte",
+    "insertImage": "Bild einfügen",
+    "equipment": {
+      "cone": "Hütchen",
+      "miniGoal": "Minitor",
+      "mannequin": "Dummy",
+      "slalomPole": "Slalomstange",
+      "ladder": "Leiter",
+      "ring": "Ring"
+    }
+  },
+  "topBar": {
+    "dashboard": "Dashboard",
+    "projectNamePlaceholder": "Projektname",
+    "projectNameTitle": "Projektname (klicken zum Umbenennen)",
+    "undo": "Rückgängig",
+    "undoTitle": "Rückgängig (Strg+Z)",
+    "redo": "Wiederholen",
+    "redoTitle": "Wiederholen (Strg+Shift+Z)",
+    "saving": "Speichert …",
+    "unsavedChanges": "Ungespeicherte Änderungen",
+    "saved": "Gespeichert",
+    "save": "Speichern",
+    "saveTitle": "Speichern (Strg+S) — wird auch automatisch gespeichert"
+  },
+  "properties": {
+    "field": {
+      "title": "Feld",
+      "design": "Design",
+      "designOptions": {
+        "classic_green": "Klassisch Grün",
+        "night_navy": "Stadion bei Nacht",
+        "dark_orange": "Dunkel (Orange)",
+        "turquoise": "Türkis",
+        "royal_blue": "Königsblau",
+        "maroon": "Bordeaux",
+        "light_gray": "Hellgrau (Druck)",
+        "brand_blue": "9011 Soccer Blau"
+      },
+      "orientation": "Ausrichtung",
+      "orientationOptions": {
+        "vertical": "Hochformat",
+        "horizontal": "Querformat"
+      },
+      "crop": "Feldausschnitt",
+      "cropOptions": {
+        "full": "Ganzes Feld",
+        "half": "Hälfte",
+        "three_quarter": "Dreiviertel",
+        "third": "Letztes Drittel (Eckball)"
+      },
+      "showMarkings": "Spielfeldmarkierungen anzeigen",
+      "lengthM": "Länge (m)",
+      "widthM": "Breite (m)",
+      "dimensionsNote": "Echte Feldmaße — wird genutzt, um Pass-/Laufdistanzen in Metern anzuzeigen."
+    },
+    "team": {
+      "title": "Team & Kader"
+    },
+    "multiSelect": {
+      "title": "{{count}} Objekte ausgewählt",
+      "createRatioBadge": "Verhältnis-Badge erstellen (z.B. 3 v 4)"
+    },
+    "singleSelect": {
+      "title": "Eigenschaften",
+      "bringToFront": "Nach vorne",
+      "sendToBack": "Nach hinten"
+    },
+    "emptyState": "Wähle ein Objekt auf dem Feld aus, um seine Eigenschaften zu bearbeiten.",
+    "lineStyles": {
+      "solid": "Durchgezogen",
+      "dashed": "Gestrichelt",
+      "dotted": "Gepunktet"
+    },
+    "fontSizePresets": {
+      "small": "Klein",
+      "medium": "Mittel",
+      "large": "Groß",
+      "huge": "Riesig"
+    },
+    "shared": {
+      "color": "Farbe",
+      "fontFamily": "Schriftart",
+      "fontSize": "Schriftgröße ({{px}}px)",
+      "lineStyle": "Linienstil",
+      "strokeWidth": "Strichstärke ({{px}}px)",
+      "gradientRadial": "Radial (von der Mitte)",
+      "gradientLinear": "Linear (links nach rechts)",
+      "gradientInsteadOfFlat": "Farbverlauf statt flacher Füllung",
+      "twoColorGradient": "Zweifarbiger Verlauf (statt Verblassen ins Transparente)",
+      "background": "Hintergrund",
+      "border": "Rahmen",
+      "showDistance": "Distanz anzeigen (m)",
+      "glow": "Leuchteffekt (weicher Farbkanal entlang der Linie)"
+    },
+    "playerChip": {
+      "linked": "Verknüpft mit Kaderspieler",
+      "team": "Team",
+      "teamHome": "Heim",
+      "teamAway": "Auswärts",
+      "jerseyNumber": "Rückennummer",
+      "chipDisplay": "Anzeige im Chip",
+      "useCustomText": "Statt Rückennummer eigenen Text zeigen",
+      "customTextPlaceholder": "z.B. A, leer lassen für nichts",
+      "numberColor": "Farbe der Nummer/des Texts im Chip",
+      "labelOptional": "Label (optional)",
+      "labelColor": "Farbe des Labels",
+      "highlight": "Hervorheben (blinkt in diesem Frame)",
+      "offsideReference": "Als Abseits-Referenz markieren (letzter Verteidiger)"
+    },
+    "arrow": {
+      "angle": "Winkel ({{deg}}°)",
+      "curveRadius": "Kurvenradius ({{px}}px)",
+      "showArrowhead": "Pfeilspitze anzeigen",
+      "arrowheadBothEnds": "Auch am Start (beide Enden)",
+      "blocked": "Blockierte Option (X am Ende)",
+      "dribble": "Dribbellinie (gewellt)",
+      "spaceBehind": "Als Abwehrlinie markieren (Raum dahinter anzeigen)",
+      "spaceBehindShowLabel": "Meter-Anzeige einblenden",
+      "addDragPoint": "Ziehpunkt hinzufügen"
+    },
+    "shape": {
+      "fillColor": "Füllfarbe",
+      "gradientHeading": "Farbverlauf (z.B. Heatmap)",
+      "showBorder": "Rahmen anzeigen",
+      "width": "Breite ({{px}}px)",
+      "height": "Höhe ({{px}}px)",
+      "opacity": "Deckkraft ({{percent}}%)"
+    },
+    "text": {
+      "textLabel": "Text",
+      "styleLabel": "Stil",
+      "styleNormal": "Normal",
+      "styleBold": "Fett",
+      "styleItalic": "Kursiv",
+      "backgroundBadge": "Hintergrund (Badge-Stil)",
+      "shadow": "Schatten (Lesbarkeit auf dem Feld)"
+    },
+    "quoteCard": {
+      "headingSection": "Überschrift",
+      "textLabel": "Text",
+      "boxAroundHeading": "Eigene Box um die Überschrift",
+      "boxBackground": "Box-Hintergrund",
+      "boxBorder": "Box-Rahmen",
+      "bodySection": "Text darunter",
+      "cardSection": "Karte",
+      "fontOptions": {
+        "system": "Standard (Inter)",
+        "georgia": "Georgia (Serif)",
+        "times": "Times New Roman",
+        "arial_black": "Arial Black (Fett)",
+        "impact": "Impact",
+        "trebuchet": "Trebuchet MS",
+        "courier": "Courier (Monospace)"
+      }
+    },
+    "equipment": {
+      "size": "Größe ({{percent}}%)",
+      "angle": "Winkel ({{deg}}°)",
+      "applyToAll": "Auf alle dieser Art anwenden"
+    }
+  },
+  "timeline": {
+    "playTitle": "Sequenz abspielen",
+    "playDisabledTitle": "Mindestens 2 Frames für Wiedergabe nötig",
+    "stop": "Stop",
+    "play": "Abspielen",
+    "frameNumber": "Frame {{n}}",
+    "deleteFrameTitle": "Frame löschen",
+    "addFrameTitle": "Frame hinzufügen",
+    "limitReachedTitle": "Limit von {{max}} Frames erreicht",
+    "duration": "Dauer",
+    "duplicateFrame": "Frame duplizieren",
+    "clearBoardConfirm": "Alle Objekte in diesem Frame löschen?",
+    "clearBoardTitle": "Alle Objekte in diesem Frame entfernen",
+    "clearBoard": "Board leeren"
+  },
+  "exportMenu": {
+    "resolutions": {
+      "standard": "Standard (1x)",
+      "high": "Hoch (2x, ~1080p)",
+      "veryHigh": "Sehr hoch (3x)",
+      "max": "Maximal (4x, ~4K)"
+    },
+    "recordingFailed": "Aufnahme fehlgeschlagen.",
+    "button": "Exportieren",
+    "formatLabel": "Format",
+    "formatPng": "PNG (verlustfrei, transparent)",
+    "formatJpg": "JPG (kleinere Datei)",
+    "formatVideo": "Video (MP4/WebM, Sequenz)",
+    "socialFormat": "Social Story (9:16, Hochformat + Logo)",
+    "videoDescription": "Spielt alle Frames einmal ab und nimmt die Wiedergabe als Video auf. Mindestens 2 Frames nötig. Je nach Browser wird MP4 oder WebM erzeugt.",
+    "appendRecap": "Zusammenfassungs-Karte am Ende anhängen",
+    "minTwoFramesVideo": "Mindestens 2 Frames für ein Video nötig.",
+    "recordingInProgress": "Aufnahme läuft…",
+    "recordDownload": "Video aufnehmen & herunterladen",
+    "socialExportDescription": "Exportiert als 1080×1920 PNG mit 9011-Hintergrund und Vereinslogo, fertig für Instagram/TikTok.",
+    "resolutionLabel": "Auflösung",
+    "viewerModeNote": "Beobachter-Modus: Export bis {{max}}x. Für 4K auf Trainer upgraden.",
+    "download": "Herunterladen"
+  },
+  "exercisesModal": {
+    "title": "Übungsbibliothek",
+    "loadError": "Laden fehlgeschlagen.",
+    "saveError": "Speichern fehlgeschlagen.",
+    "frameLimitError": "Frame-Limit erreicht: maximal {{max}} Frames pro Projekt.",
+    "deleteError": "Löschen fehlgeschlagen.",
+    "saveCurrentBoard": "+ Aktuelles Board als Übung speichern",
+    "nameLabel": "Name",
+    "categoryLabel": "Kategorie",
+    "descriptionLabel": "Beschreibung (optional)",
+    "loading": "Lädt …",
+    "empty": "Noch keine gespeicherten Übungen.",
+    "frameCount_one": "{{count}} Frame",
+    "frameCount_other": "{{count}} Frames",
+    "insert": "Einfügen",
+    "categories": {
+      "Aufwärmen": "Aufwärmen",
+      "Passen": "Passen",
+      "Abschluss": "Abschluss",
+      "Kondition": "Kondition",
+      "Taktik": "Taktik",
+      "Standardsituationen": "Standardsituationen",
+      "Sonstiges": "Sonstiges"
+    }
+  },
+  "teamSquadPanel": {
+    "team": "Team",
+    "noTeam": "– kein Team –",
+    "editKitDesign": "Kit-Design bearbeiten",
+    "customizeColors": "Farben anpassen",
+    "uploadingCrest": "Lädt hoch…",
+    "crestAlt": "Wappen",
+    "uploadCrest": "Wappen hochladen",
+    "uploadCrestHome": "Wappen Heim hochladen",
+    "uploadCrestAway": "Wappen Auswärts hochladen",
+    "crestHintTeam": "Wappen ersetzt die Trikotfarben auf allen Spieler-Chips dieses Teams.",
+    "crestHintHome": "Wappen ersetzt die Trikotfarben auf allen Heim-Chips (nur in diesem Projekt).",
+    "crestHintAway": "Wappen ersetzt die Trikotfarben auf allen Auswärts-Chips (nur in diesem Projekt).",
+    "kitDesignTitle": "Kit-Design: {{name}}",
+    "noTeamLinkedNote": "Kein Team verknüpft — diese Farben gelten nur für dieses Projekt.",
+    "formation": "Formation",
+    "templatesGroup": "Vorlagen",
+    "customGroup": "Eigene",
+    "apply": "Anwenden",
+    "squad": "Kader",
+    "playerSelectedHint": "(Spieler ausgewählt – aufs Feld klicken)",
+    "playersSelectedHint": "({{count}} Spieler ausgewählt – einmal aufs Feld klicken)",
+    "selectHint": "– Checkbox für mehrere, Klick auf Zeile für einen",
+    "noPlayers": "Keine Spieler in diesem Team.",
+    "selectedCount": "{{count}} ausgewählt:",
+    "placeHome": "Heim platzieren",
+    "placeAway": "Auswärts"
+  },
+  "kitDesignerModal": {
+    "patterns": {
+      "solid": "Einfarbig",
+      "stripes": "Streifen",
+      "hoops": "Ringel",
+      "sash": "Schrägband",
+      "split": "Geteilt",
+      "collar": "Kragen"
+    },
+    "color": "Farbe",
+    "color1": "Farbe 1",
+    "color2": "Farbe 2",
+    "defaultDescription": "Farbe & Muster für Heim-, Auswärts- und Torwart-Spieler-Chips.",
+    "home": "Heim",
+    "away": "Auswärts",
+    "goalkeeper": "Torwart",
+    "chipSize": "Chip-Größe",
+    "saveFailed": "Speichern fehlgeschlagen."
+  },
+  "zoneGridPicker": {
+    "label": "Zonenraster",
+    "none": "Kein Raster",
+    "thirdsChannels": "Drittel & Kanäle",
+    "guardiola": "Guardiola (Positionsspiel)",
+    "customGroup": "Eigene",
+    "addCustom": "+ Eigenes Raster",
+    "deleteConfirm": "Dieses eigene Zonenraster löschen?",
+    "editorTitle": "Eigenes Zonenraster",
+    "editorDescription": "Linien hinzufügen und positionieren, dann benennen und speichern.",
+    "nameLabel": "Name",
+    "namePlaceholder": "z.B. Mein 3er-Raster",
+    "vertical": "Vertikal",
+    "horizontal": "Horizontal",
+    "removeLineTitle": "Linie entfernen",
+    "noLines": "Noch keine Linien — füge unten welche hinzu.",
+    "addVerticalLine": "+ Vertikale Linie",
+    "addHorizontalLine": "+ Horizontale Linie",
+    "saveFailed": "Speichern fehlgeschlagen."
+  },
+  "editorPage": {
+    "loadError": "Projekt konnte nicht geladen werden.",
+    "backToDashboard": "Zurück zum Dashboard"
+  },
+  "factoryDefaults": {
+    "text": "Text",
+    "badge": "BADGE",
+    "title": "Titel",
+    "subtitle": "Untertitel",
+    "quoteHeading": "ÜBERSCHRIFT",
+    "quoteBody": "Text hier eingeben"
+  },
+  "exportInternal": {
+    "minTwoFramesError": "Mindestens 2 Frames für ein Video nötig.",
+    "playbackAlreadyRunning": "Wiedergabe läuft bereits.",
+    "canvasNotSupported": "Canvas wird nicht unterstützt.",
+    "recap": {
+      "frames": "FRAMES",
+      "passesRuns": "PÄSSE / LÄUFE EINGEZEICHNET",
+      "totalDistance": "GESAMTDISTANZ"
+    }
+  },
+  "projectSave": {
+    "limitReachedError": "Free-Limit erreicht: maximal {{max}} Projekte. Upgrade für mehr.",
+    "saveFailed": "Speichern fehlgeschlagen."
+  }
+}

@@ -1,4 +1,5 @@
 import type Konva from 'konva'
+import i18n from '../../../lib/i18n'
 import {
   SOCIAL_HEIGHT,
   SOCIAL_WIDTH,
@@ -43,7 +44,7 @@ export async function exportStageAsSocialImage(
   output.width = SOCIAL_WIDTH
   output.height = SOCIAL_HEIGHT
   const ctx = output.getContext('2d')
-  if (!ctx) throw new Error('Canvas wird nicht unterstützt.')
+  if (!ctx) throw new Error(i18n.t('editor:exportInternal.canvasNotSupported'))
 
   paintSocialBackground(ctx)
 

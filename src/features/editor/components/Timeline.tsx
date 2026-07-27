@@ -1,10 +1,12 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useEditorStore } from '../store/editorStore'
 import { useAuthStore } from '../../auth/store/authStore'
 import { limitsForTier } from '../../../lib/limits'
 import { Button } from '../../../components/ui/Button'
 
 export function Timeline() {
+  const { t } = useTranslation('editor')
   const frames = useEditorStore((s) => s.frames)
   const activeFrameIndex = useEditorStore((s) => s.activeFrameIndex)
   const setActiveFrameIndex = useEditorStore((s) => s.setActiveFrameIndex)
@@ -48,10 +50,10 @@ export function Timeline() {
           variant={isPlaying ? 'danger' : 'primary'}
           disabled={!canPlay}
           onClick={handlePlayToggle}
-          title={canPlay ? 'Sequenz abspielen' : 'Mindestens 2 Frames für Wiedergabe nötig'}
+          title={canPlay ? t('timeline.playTitle') : t('timeline.playDisabledTitle')}
           className="shrink-0"
         >
-          {isPlaying ? 'Stop' : 'Abspielen'}
+          {isPlaying ? t('timeline.stop') : t('timeline.play')}
         </Button>
 
         <div className="flex flex-1 items-center gap-2 overflow-x-auto py-2">
@@ -86,12 +88,12 @@ export function Timeline() {
               } ${isPlaying ? 'pointer-events-none opacity-60' : ''}`}
               onClick={() => setActiveFrameIndex(index)}
             >
-              <span className="font-semibold">Frame {index + 1}</span>
+              <span className="font-semibold">{t('timeline.frameNumber', { n: index + 1 })}</span>
               <span className="text-[10px] text-white/40">{frame.durationMs}ms</span>
               {frames.length > 1 && (
                 <button
                   type="button"
-                  title="Frame löschen"
+                  title={t('timeline.deleteFrameTitle')}
                   onClick={(e) => {
                     e.stopPropagation()
                     removeFrame(index)
@@ -108,7 +110,11 @@ export function Timeline() {
             disabled={frames.length >= maxFrames || isPlaying}
             onClick={() => addFrame(maxFrames)}
             className="flex h-14 w-14 shrink-0 items-center justify-center rounded-md border border-dashed border-pitch-600 text-lg text-white/40 hover:border-violet-accent hover:text-violet-accent-bright disabled:cursor-not-allowed disabled:opacity-40"
-            title={frames.length >= maxFrames ? `Limit von ${maxFrames} Frames erreicht` : 'Frame hinzufügen'}
+            title={
+              frames.length >= maxFrames
+                ? t('timeline.limitReachedTitle', { max: maxFrames })
+                : t('timeline.addFrameTitle')
+            }
           >
             +
           </button>
@@ -117,7 +123,7 @@ export function Timeline() {
         {activeFrame && (
           <div className="flex shrink-0 items-center gap-2 border-l border-pitch-700 pl-3">
             <label className="flex items-center gap-1.5 text-xs text-white/60">
-              Dauer
+              {t('timeline.duration')}
               <input
                 type="number"
                 min={100}
@@ -137,17 +143,17 @@ export function Timeline() {
               disabled={frames.length >= maxFrames || isPlaying}
               onClick={() => duplicateFrame(activeFrameIndex, maxFrames)}
             >
-              Frame duplizieren
+              {t('timeline.duplicateFrame')}
             </Button>
             <Button
               variant="danger"
               disabled={isPlaying || activeFrame.objects.length === 0}
               onClick={() => {
-                if (window.confirm('Alle Objekte in diesem Frame löschen?')) clearActiveFrame()
+                if (window.confirm(t('timeline.clearBoardConfirm'))) clearActiveFrame()
               }}
-              title="Alle Objekte in diesem Frame entfernen"
+              title={t('timeline.clearBoardTitle')}
             >
-              Board leeren
+              {t('timeline.clearBoard')}
             </Button>
           </div>
         )}

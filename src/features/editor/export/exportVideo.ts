@@ -1,4 +1,5 @@
 import Konva from 'konva'
+import i18n from '../../../lib/i18n'
 import { useEditorStore } from '../store/editorStore'
 import {
   SOCIAL_HEIGHT,
@@ -43,9 +44,9 @@ function buildRecapLayer(stage: Konva.Stage): Konva.Layer {
   const cardX = (w - cardW) / 2
   const rowH = 46
   const rows: { label: string; value: string }[] = [
-    { label: 'FRAMES', value: String(stats.frameCount) },
-    { label: 'PÄSSE / LÄUFE EINGEZEICHNET', value: String(stats.passCount) },
-    { label: 'GESAMTDISTANZ', value: `${Math.round(stats.totalDistanceM)} m` },
+    { label: i18n.t('editor:exportInternal.recap.frames'), value: String(stats.frameCount) },
+    { label: i18n.t('editor:exportInternal.recap.passesRuns'), value: String(stats.passCount) },
+    { label: i18n.t('editor:exportInternal.recap.totalDistance'), value: `${Math.round(stats.totalDistanceM)} m` },
   ]
   // A before/after comparison — same idea as a broadcast graphic's payoff
   // card comparing two outcomes side by side — only earns its place when
@@ -186,10 +187,10 @@ export async function recordFramesAsVideo(
   const { fps = 30, social = false, logoUrl = null, recap = false } = options
   const { frames } = useEditorStore.getState()
   if (frames.length < 2) {
-    throw new Error('Mindestens 2 Frames für ein Video nötig.')
+    throw new Error(i18n.t('editor:exportInternal.minTwoFramesError'))
   }
   if (useEditorStore.getState().isPlaying) {
-    throw new Error('Wiedergabe läuft bereits.')
+    throw new Error(i18n.t('editor:exportInternal.playbackAlreadyRunning'))
   }
 
   const stageWidth = stage.width()
@@ -213,7 +214,7 @@ export async function recordFramesAsVideo(
   mergeCanvas.width = width
   mergeCanvas.height = height
   const ctx = mergeCanvas.getContext('2d')
-  if (!ctx) throw new Error('Canvas wird nicht unterstützt.')
+  if (!ctx) throw new Error(i18n.t('editor:exportInternal.canvasNotSupported'))
 
   function compositeOnce() {
     if (social && fitRect) {

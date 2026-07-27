@@ -1,0 +1,340 @@
+{
+  "toolbar": {
+    "select": "Pointer",
+    "playerHome": "Home player",
+    "playerAway": "Away player",
+    "goalkeeperHome": "Home goalkeeper",
+    "goalkeeperAway": "Away goalkeeper",
+    "ball": "Ball",
+    "arrowCurved": "Arrow (drag points to curve)",
+    "arrowRigid": "Straight arrow (not bendable)",
+    "arrowBlocked": "Blocked option (X at the end)",
+    "dribbleLine": "Dribble line (drag points to curve)",
+    "plainLine": "Line (draw a zone)",
+    "connector": "Connect players",
+    "circle": "Circle",
+    "rect": "Rectangle",
+    "text": "Text",
+    "textBadge": "Badge",
+    "textTitle": "Title",
+    "textSubtitle": "Subtitle",
+    "quoteCard": "Quote card",
+    "insertImage": "Insert image",
+    "equipment": {
+      "cone": "Cone",
+      "miniGoal": "Mini goal",
+      "mannequin": "Mannequin",
+      "slalomPole": "Slalom pole",
+      "ladder": "Ladder",
+      "ring": "Ring"
+    }
+  },
+  "topBar": {
+    "dashboard": "Dashboard",
+    "projectNamePlaceholder": "Project name",
+    "projectNameTitle": "Project name (click to rename)",
+    "undo": "Undo",
+    "undoTitle": "Undo (Ctrl+Z)",
+    "redo": "Redo",
+    "redoTitle": "Redo (Ctrl+Shift+Z)",
+    "saving": "Saving …",
+    "unsavedChanges": "Unsaved changes",
+    "saved": "Saved",
+    "save": "Save",
+    "saveTitle": "Save (Ctrl+S) — also saves automatically"
+  },
+  "properties": {
+    "field": {
+      "title": "Field",
+      "design": "Design",
+      "designOptions": {
+        "classic_green": "Classic green",
+        "night_navy": "Stadium at night",
+        "dark_orange": "Dark (orange)",
+        "turquoise": "Turquoise",
+        "royal_blue": "Royal blue",
+        "maroon": "Maroon",
+        "light_gray": "Light gray (print)",
+        "brand_blue": "9011 Soccer blue"
+      },
+      "orientation": "Orientation",
+      "orientationOptions": {
+        "vertical": "Portrait",
+        "horizontal": "Landscape"
+      },
+      "crop": "Field crop",
+      "cropOptions": {
+        "full": "Full field",
+        "half": "Half",
+        "three_quarter": "Three-quarter",
+        "third": "Final third (corner)"
+      },
+      "showMarkings": "Show pitch markings",
+      "lengthM": "Length (m)",
+      "widthM": "Width (m)",
+      "dimensionsNote": "Real-world field dimensions — used to display pass/run distances in meters."
+    },
+    "team": {
+      "title": "Team & Squad"
+    },
+    "multiSelect": {
+      "title": "{{count}} objects selected",
+      "createRatioBadge": "Create ratio badge (e.g. 3 v 4)"
+    },
+    "singleSelect": {
+      "title": "Properties",
+      "bringToFront": "Bring to front",
+      "sendToBack": "Send to back"
+    },
+    "emptyState": "Select an object on the pitch to edit its properties.",
+    "lineStyles": {
+      "solid": "Solid",
+      "dashed": "Dashed",
+      "dotted": "Dotted"
+    },
+    "fontSizePresets": {
+      "small": "Small",
+      "medium": "Medium",
+      "large": "Large",
+      "huge": "Huge"
+    },
+    "shared": {
+      "color": "Color",
+      "fontFamily": "Font",
+      "fontSize": "Font size ({{px}}px)",
+      "lineStyle": "Line style",
+      "strokeWidth": "Stroke width ({{px}}px)",
+      "gradientRadial": "Radial (from the center)",
+      "gradientLinear": "Linear (left to right)",
+      "gradientInsteadOfFlat": "Gradient instead of flat fill",
+      "twoColorGradient": "Two-color gradient (instead of fading to transparent)",
+      "background": "Background",
+      "border": "Border",
+      "showDistance": "Show distance (m)",
+      "glow": "Glow effect (soft color channel along the line)"
+    },
+    "playerChip": {
+      "linked": "Linked to squad player",
+      "team": "Team",
+      "teamHome": "Home",
+      "teamAway": "Away",
+      "jerseyNumber": "Jersey number",
+      "chipDisplay": "Chip display",
+      "useCustomText": "Show custom text instead of jersey number",
+      "customTextPlaceholder": "e.g. A, leave empty for nothing",
+      "numberColor": "Color of the number/text in the chip",
+      "labelOptional": "Label (optional)",
+      "labelColor": "Label color",
+      "highlight": "Highlight (blinks in this frame)",
+      "offsideReference": "Mark as offside reference (last defender)"
+    },
+    "arrow": {
+      "angle": "Angle ({{deg}}°)",
+      "curveRadius": "Curve radius ({{px}}px)",
+      "showArrowhead": "Show arrowhead",
+      "arrowheadBothEnds": "Also at the start (both ends)",
+      "blocked": "Blocked option (X at the end)",
+      "dribble": "Dribble line (wavy)",
+      "spaceBehind": "Mark as defensive line (show space behind)",
+      "spaceBehindShowLabel": "Show meter label",
+      "addDragPoint": "Add drag point"
+    },
+    "shape": {
+      "fillColor": "Fill color",
+      "gradientHeading": "Gradient (e.g. heatmap)",
+      "showBorder": "Show border",
+      "width": "Width ({{px}}px)",
+      "height": "Height ({{px}}px)",
+      "opacity": "Opacity ({{percent}}%)"
+    },
+    "text": {
+      "textLabel": "Text",
+      "styleLabel": "Style",
+      "styleNormal": "Normal",
+      "styleBold": "Bold",
+      "styleItalic": "Italic",
+      "backgroundBadge": "Background (badge style)",
+      "shadow": "Shadow (readability on the pitch)"
+    },
+    "quoteCard": {
+      "headingSection": "Heading",
+      "textLabel": "Text",
+      "boxAroundHeading": "Own box around the heading",
+      "boxBackground": "Box background",
+      "boxBorder": "Box border",
+      "bodySection": "Text below",
+      "cardSection": "Card",
+      "fontOptions": {
+        "system": "Default (Inter)",
+        "georgia": "Georgia (Serif)",
+        "times": "Times New Roman",
+        "arial_black": "Arial Black (Bold)",
+        "impact": "Impact",
+        "trebuchet": "Trebuchet MS",
+        "courier": "Courier (Monospace)"
+      }
+    },
+    "equipment": {
+      "size": "Size ({{percent}}%)",
+      "angle": "Angle ({{deg}}°)",
+      "applyToAll": "Apply to all of this kind"
+    }
+  },
+  "timeline": {
+    "playTitle": "Play sequence",
+    "playDisabledTitle": "At least 2 frames needed for playback",
+    "stop": "Stop",
+    "play": "Play",
+    "frameNumber": "Frame {{n}}",
+    "deleteFrameTitle": "Delete frame",
+    "addFrameTitle": "Add frame",
+    "limitReachedTitle": "Limit of {{max}} frames reached",
+    "duration": "Duration",
+    "duplicateFrame": "Duplicate frame",
+    "clearBoardConfirm": "Delete all objects in this frame?",
+    "clearBoardTitle": "Remove all objects in this frame",
+    "clearBoard": "Clear board"
+  },
+  "exportMenu": {
+    "resolutions": {
+      "standard": "Standard (1x)",
+      "high": "High (2x, ~1080p)",
+      "veryHigh": "Very high (3x)",
+      "max": "Maximum (4x, ~4K)"
+    },
+    "recordingFailed": "Recording failed.",
+    "button": "Export",
+    "formatLabel": "Format",
+    "formatPng": "PNG (lossless, transparent)",
+    "formatJpg": "JPG (smaller file)",
+    "formatVideo": "Video (MP4/WebM, sequence)",
+    "socialFormat": "Social story (9:16, portrait + logo)",
+    "videoDescription": "Plays through all frames once and records the playback as a video. At least 2 frames needed. Depending on the browser, MP4 or WebM is produced.",
+    "appendRecap": "Append a recap card at the end",
+    "minTwoFramesVideo": "At least 2 frames needed for a video.",
+    "recordingInProgress": "Recording…",
+    "recordDownload": "Record & download video",
+    "socialExportDescription": "Exports as a 1080×1920 PNG with 9011 background and club crest, ready for Instagram/TikTok.",
+    "resolutionLabel": "Resolution",
+    "viewerModeNote": "Viewer mode: export up to {{max}}x. Upgrade to Coach for 4K.",
+    "download": "Download"
+  },
+  "exercisesModal": {
+    "title": "Exercise library",
+    "loadError": "Loading failed.",
+    "saveError": "Save failed.",
+    "frameLimitError": "Frame limit reached: maximum {{max}} frames per project.",
+    "deleteError": "Delete failed.",
+    "saveCurrentBoard": "+ Save current board as exercise",
+    "nameLabel": "Name",
+    "categoryLabel": "Category",
+    "descriptionLabel": "Description (optional)",
+    "loading": "Loading …",
+    "empty": "No saved exercises yet.",
+    "frameCount_one": "{{count}} frame",
+    "frameCount_other": "{{count}} frames",
+    "insert": "Insert",
+    "categories": {
+      "Aufwärmen": "Warm-up",
+      "Passen": "Passing",
+      "Abschluss": "Finishing",
+      "Kondition": "Fitness",
+      "Taktik": "Tactics",
+      "Standardsituationen": "Set pieces",
+      "Sonstiges": "Other"
+    }
+  },
+  "teamSquadPanel": {
+    "team": "Team",
+    "noTeam": "– no team –",
+    "editKitDesign": "Edit kit design",
+    "customizeColors": "Customize colors",
+    "uploadingCrest": "Uploading…",
+    "crestAlt": "Crest",
+    "uploadCrest": "Upload crest",
+    "uploadCrestHome": "Upload home crest",
+    "uploadCrestAway": "Upload away crest",
+    "crestHintTeam": "The crest replaces the kit colors on all of this team's player chips.",
+    "crestHintHome": "The crest replaces the kit colors on all home chips (this project only).",
+    "crestHintAway": "The crest replaces the kit colors on all away chips (this project only).",
+    "kitDesignTitle": "Kit design: {{name}}",
+    "noTeamLinkedNote": "No team linked — these colors apply to this project only.",
+    "formation": "Formation",
+    "templatesGroup": "Templates",
+    "customGroup": "Custom",
+    "apply": "Apply",
+    "squad": "Squad",
+    "playerSelectedHint": "(Player selected – click the pitch)",
+    "playersSelectedHint": "({{count}} players selected – click the pitch once)",
+    "selectHint": "– checkbox for multiple, click a row for one",
+    "noPlayers": "No players on this team.",
+    "selectedCount": "{{count}} selected:",
+    "placeHome": "Place home",
+    "placeAway": "Away"
+  },
+  "kitDesignerModal": {
+    "patterns": {
+      "solid": "Solid",
+      "stripes": "Stripes",
+      "hoops": "Hoops",
+      "sash": "Sash",
+      "split": "Split",
+      "collar": "Collar"
+    },
+    "color": "Color",
+    "color1": "Color 1",
+    "color2": "Color 2",
+    "defaultDescription": "Color & pattern for home, away, and goalkeeper player chips.",
+    "home": "Home",
+    "away": "Away",
+    "goalkeeper": "Goalkeeper",
+    "chipSize": "Chip size",
+    "saveFailed": "Save failed."
+  },
+  "zoneGridPicker": {
+    "label": "Zone grid",
+    "none": "No grid",
+    "thirdsChannels": "Thirds & channels",
+    "guardiola": "Guardiola (positional play)",
+    "customGroup": "Custom",
+    "addCustom": "+ Custom grid",
+    "deleteConfirm": "Delete this custom zone grid?",
+    "editorTitle": "Custom zone grid",
+    "editorDescription": "Add and position lines, then name and save.",
+    "nameLabel": "Name",
+    "namePlaceholder": "e.g. My 3-zone grid",
+    "vertical": "Vertical",
+    "horizontal": "Horizontal",
+    "removeLineTitle": "Remove line",
+    "noLines": "No lines yet — add some below.",
+    "addVerticalLine": "+ Vertical line",
+    "addHorizontalLine": "+ Horizontal line",
+    "saveFailed": "Save failed."
+  },
+  "editorPage": {
+    "loadError": "Couldn't load project.",
+    "backToDashboard": "Back to dashboard"
+  },
+  "factoryDefaults": {
+    "text": "Text",
+    "badge": "BADGE",
+    "title": "Title",
+    "subtitle": "Subtitle",
+    "quoteHeading": "HEADING",
+    "quoteBody": "Enter text here"
+  },
+  "exportInternal": {
+    "minTwoFramesError": "At least 2 frames needed for a video.",
+    "playbackAlreadyRunning": "Playback is already running.",
+    "canvasNotSupported": "Canvas isn't supported.",
+    "recap": {
+      "frames": "FRAMES",
+      "passesRuns": "PASSES / RUNS DRAWN",
+      "totalDistance": "TOTAL DISTANCE"
+    }
+  },
+  "projectSave": {
+    "limitReachedError": "Free-tier limit reached: maximum {{max}} projects. Upgrade for more.",
+    "saveFailed": "Save failed."
+  }
+}

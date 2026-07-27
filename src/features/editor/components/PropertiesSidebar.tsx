@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type ChangeEvent, type ReactNode } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useEditorStore } from '../store/editorStore'
 import type {
   ArrowData,
@@ -25,18 +26,14 @@ import { ColorSwatchPicker } from '../../../components/ui/ColorSwatchPicker'
 import { getCurveOffset } from '../objects/shapes/arrowCurve'
 import { addArrowMidpoint } from '../objects/shapes/arrowPoints'
 
-const LINE_STYLES: { value: LineStyle; label: string }[] = [
-  { value: 'solid', label: 'Durchgezogen' },
-  { value: 'dashed', label: 'Gestrichelt' },
-  { value: 'dotted', label: 'Gepunktet' },
-]
+const LINE_STYLE_VALUES: LineStyle[] = ['solid', 'dashed', 'dotted']
 
-const FONT_SIZE_PRESETS = [
-  { label: 'Klein', size: 14 },
-  { label: 'Mittel', size: 22 },
-  { label: 'Groß', size: 34 },
-  { label: 'Riesig', size: 52 },
-]
+const FONT_SIZE_PRESET_VALUES = [
+  { key: 'small', size: 14 },
+  { key: 'medium', size: 22 },
+  { key: 'large', size: 34 },
+  { key: 'huge', size: 52 },
+] as const
 
 function Field({ label, children }: { label: string; children: ReactNode }) {
   return (
@@ -53,6 +50,7 @@ const inputClass =
   'rounded-md border border-pitch-600 bg-pitch-800 px-2 py-1.5 text-xs text-white outline-none focus:border-violet-accent'
 
 export function PropertiesSidebar() {
+  const { t } = useTranslation('editor')
   const pitchDesign = useEditorStore((s) => s.pitchDesign)
   const orientation = useEditorStore((s) => s.orientation)
   const showPitchMarkings = useEditorStore((s) => s.showPitchMarkings)
@@ -118,49 +116,49 @@ export function PropertiesSidebar() {
           onClick={() => setIsFieldPanelOpen((v) => !v)}
           className="mb-2 flex w-full items-center justify-between text-[11px] font-semibold uppercase tracking-wide text-white/40 hover:text-white/70"
         >
-          Feld
+          {t('properties.field.title')}
           <span className="flex h-5 w-5 shrink-0 items-center justify-center text-base font-bold text-white/70">
             {isFieldPanelOpen ? '−' : '+'}
           </span>
         </button>
         {isFieldPanelOpen && (
         <div className="flex flex-col gap-2">
-          <Field label="Design">
+          <Field label={t('properties.field.design')}>
             <select
               className={selectClass}
               value={pitchDesign}
               onChange={(e) => setPitchDesign(e.target.value as PitchDesign)}
             >
-              <option value="classic_green">Klassisch Grün</option>
-              <option value="night_navy">Stadion bei Nacht</option>
-              <option value="dark_orange">Dunkel (Orange)</option>
-              <option value="turquoise">Türkis</option>
-              <option value="royal_blue">Königsblau</option>
-              <option value="maroon">Bordeaux</option>
-              <option value="light_gray">Hellgrau (Druck)</option>
-              <option value="brand_blue">9011 Soccer Blau</option>
+              <option value="classic_green">{t('properties.field.designOptions.classic_green')}</option>
+              <option value="night_navy">{t('properties.field.designOptions.night_navy')}</option>
+              <option value="dark_orange">{t('properties.field.designOptions.dark_orange')}</option>
+              <option value="turquoise">{t('properties.field.designOptions.turquoise')}</option>
+              <option value="royal_blue">{t('properties.field.designOptions.royal_blue')}</option>
+              <option value="maroon">{t('properties.field.designOptions.maroon')}</option>
+              <option value="light_gray">{t('properties.field.designOptions.light_gray')}</option>
+              <option value="brand_blue">{t('properties.field.designOptions.brand_blue')}</option>
             </select>
           </Field>
-          <Field label="Ausrichtung">
+          <Field label={t('properties.field.orientation')}>
             <select
               className={selectClass}
               value={orientation}
               onChange={(e) => setOrientation(e.target.value as PitchOrientation)}
             >
-              <option value="vertical">Hochformat</option>
-              <option value="horizontal">Querformat</option>
+              <option value="vertical">{t('properties.field.orientationOptions.vertical')}</option>
+              <option value="horizontal">{t('properties.field.orientationOptions.horizontal')}</option>
             </select>
           </Field>
-          <Field label="Feldausschnitt">
+          <Field label={t('properties.field.crop')}>
             <select
               className={selectClass}
               value={fieldCrop}
               onChange={(e) => setFieldCrop(e.target.value as FieldCrop)}
             >
-              <option value="full">Ganzes Feld</option>
-              <option value="half">Hälfte</option>
-              <option value="three_quarter">Dreiviertel</option>
-              <option value="third">Letztes Drittel (Eckball)</option>
+              <option value="full">{t('properties.field.cropOptions.full')}</option>
+              <option value="half">{t('properties.field.cropOptions.half')}</option>
+              <option value="three_quarter">{t('properties.field.cropOptions.three_quarter')}</option>
+              <option value="third">{t('properties.field.cropOptions.third')}</option>
             </select>
           </Field>
           <ZoneGridPicker />
@@ -171,11 +169,11 @@ export function PropertiesSidebar() {
               checked={showPitchMarkings}
               onChange={(e) => setShowPitchMarkings(e.target.checked)}
             />
-            Spielfeldmarkierungen anzeigen
+            {t('properties.field.showMarkings')}
           </label>
           <div className="flex gap-2">
             <div className="min-w-0 flex-1">
-              <Field label="Länge (m)">
+              <Field label={t('properties.field.lengthM')}>
                 <input
                   type="number"
                   min={1}
@@ -186,7 +184,7 @@ export function PropertiesSidebar() {
               </Field>
             </div>
             <div className="min-w-0 flex-1">
-              <Field label="Breite (m)">
+              <Field label={t('properties.field.widthM')}>
                 <input
                   type="number"
                   min={1}
@@ -197,9 +195,7 @@ export function PropertiesSidebar() {
               </Field>
             </div>
           </div>
-          <p className="text-[11px] text-white/40">
-            Echte Feldmaße — wird genutzt, um Pass-/Laufdistanzen in Metern anzuzeigen.
-          </p>
+          <p className="text-[11px] text-white/40">{t('properties.field.dimensionsNote')}</p>
         </div>
         )}
       </div>
@@ -210,7 +206,7 @@ export function PropertiesSidebar() {
           onClick={() => setIsTeamPanelOpen((v) => !v)}
           className="mb-2 flex w-full items-center justify-between text-[11px] font-semibold uppercase tracking-wide text-white/40 hover:text-white/70"
         >
-          Team &amp; Kader
+          {t('properties.team.title')}
           <span className="flex h-5 w-5 shrink-0 items-center justify-center text-base font-bold text-white/70">
             {isTeamPanelOpen ? '−' : '+'}
           </span>
@@ -222,20 +218,20 @@ export function PropertiesSidebar() {
       {selection.length > 1 && (
         <div>
           <h3 className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-white/40">
-            {selection.length} Objekte ausgewählt
+            {t('properties.multiSelect.title', { count: selection.length })}
           </h3>
           <div className="flex flex-wrap gap-1.5">
             <Button variant="secondary" onClick={duplicateSelected}>
-              Duplizieren
+              {t('common:actions.duplicate')}
             </Button>
             <Button variant="danger" onClick={removeSelected}>
-              Löschen
+              {t('common:actions.delete')}
             </Button>
           </div>
           {(frame?.objects.filter((o) => o.objectType === 'player_chip' && selection.includes(o.id)).length ?? 0) >=
             2 && (
             <Button variant="secondary" className="mt-1.5 w-full" onClick={addRatioBadgeFromSelection}>
-              Verhältnis-Badge erstellen (z.B. 3 v 4)
+              {t('properties.multiSelect.createRatioBadge')}
             </Button>
           )}
         </div>
@@ -244,7 +240,7 @@ export function PropertiesSidebar() {
       {selection.length === 1 && selectedObject && (
         <div className="flex flex-col gap-4">
           <h3 className="text-[11px] font-semibold uppercase tracking-wide text-white/40">
-            Eigenschaften
+            {t('properties.singleSelect.title')}
           </h3>
 
           {selectedObject.objectType === 'player_chip' && (
@@ -322,25 +318,23 @@ export function PropertiesSidebar() {
 
           <div className="flex flex-wrap gap-1.5 border-t border-pitch-700 pt-3">
             <Button variant="secondary" onClick={() => bringToFront(selectedObject.id)}>
-              Nach vorne
+              {t('properties.singleSelect.bringToFront')}
             </Button>
             <Button variant="secondary" onClick={() => sendToBack(selectedObject.id)}>
-              Nach hinten
+              {t('properties.singleSelect.sendToBack')}
             </Button>
             <Button variant="secondary" onClick={duplicateSelected}>
-              Duplizieren
+              {t('common:actions.duplicate')}
             </Button>
             <Button variant="danger" onClick={removeSelected}>
-              Löschen
+              {t('common:actions.delete')}
             </Button>
           </div>
         </div>
       )}
 
       {selection.length === 0 && (
-        <p className="text-xs text-white/40">
-          Wähle ein Objekt auf dem Feld aus, um seine Eigenschaften zu bearbeiten.
-        </p>
+        <p className="text-xs text-white/40">{t('properties.emptyState')}</p>
       )}
     </aside>
   )
@@ -355,14 +349,15 @@ function PlayerChipFields({
   onCheckpoint: () => void
   onChange: (patch: Partial<PlayerChipData>) => void
 }) {
+  const { t } = useTranslation('editor')
   return (
     <div className="flex flex-col gap-2">
       {data.playerId && (
         <p className="rounded-md bg-violet-accent/10 px-2 py-1.5 text-xs text-violet-accent-bright">
-          Verknüpft mit Kaderspieler
+          {t('properties.playerChip.linked')}
         </p>
       )}
-      <Field label="Team">
+      <Field label={t('properties.playerChip.team')}>
         <select
           className={selectClass}
           value={data.team}
@@ -371,11 +366,11 @@ function PlayerChipFields({
             onChange({ team: e.target.value as 'home' | 'away' })
           }}
         >
-          <option value="home">Heim</option>
-          <option value="away">Auswärts</option>
+          <option value="home">{t('properties.playerChip.teamHome')}</option>
+          <option value="away">{t('properties.playerChip.teamAway')}</option>
         </select>
       </Field>
-      <Field label="Rückennummer">
+      <Field label={t('properties.playerChip.jerseyNumber')}>
         <input
           type="number"
           className={inputClass}
@@ -386,7 +381,7 @@ function PlayerChipFields({
           }
         />
       </Field>
-      <Field label="Anzeige im Chip">
+      <Field label={t('properties.playerChip.chipDisplay')}>
         <div className="flex flex-col gap-1.5">
           <label className="flex items-center gap-2 text-xs text-white/70">
             <input
@@ -398,13 +393,13 @@ function PlayerChipFields({
                 onChange({ displayText: e.target.checked ? '' : undefined })
               }}
             />
-            Statt Rückennummer eigenen Text zeigen
+            {t('properties.playerChip.useCustomText')}
           </label>
           {data.displayText !== undefined && (
             <input
               type="text"
               maxLength={4}
-              placeholder="z.B. A, leer lassen für nichts"
+              placeholder={t('properties.playerChip.customTextPlaceholder')}
               className={inputClass}
               value={data.displayText}
               onFocus={onCheckpoint}
@@ -413,7 +408,7 @@ function PlayerChipFields({
           )}
         </div>
       </Field>
-      <Field label="Farbe der Nummer/des Texts im Chip">
+      <Field label={t('properties.playerChip.numberColor')}>
         <ColorSwatchPicker
           size="sm"
           value={data.numberColor ?? '#ffffff'}
@@ -423,7 +418,7 @@ function PlayerChipFields({
           }}
         />
       </Field>
-      <Field label="Label (optional)">
+      <Field label={t('properties.playerChip.labelOptional')}>
         <input
           type="text"
           className={inputClass}
@@ -433,7 +428,7 @@ function PlayerChipFields({
         />
       </Field>
       {data.label && (
-        <Field label="Farbe des Labels">
+        <Field label={t('properties.playerChip.labelColor')}>
           <ColorSwatchPicker
             size="sm"
             value={data.labelColor ?? '#ffffff'}
@@ -454,7 +449,7 @@ function PlayerChipFields({
             onChange({ highlighted: e.target.checked })
           }}
         />
-        Hervorheben (blinkt in diesem Frame)
+        {t('properties.playerChip.highlight')}
       </label>
       <label className="flex items-center gap-2 text-xs text-white/70">
         <input
@@ -466,7 +461,7 @@ function PlayerChipFields({
             onChange({ offsideReference: e.target.checked })
           }}
         />
-        Als Abseits-Referenz markieren (letzter Verteidiger)
+        {t('properties.playerChip.offsideReference')}
       </label>
     </div>
   )
@@ -487,9 +482,10 @@ function ArrowFields({
   onChange: (patch: Partial<ArrowData>) => void
   onChangeRotation: (rotation: number) => void
 }) {
+  const { t } = useTranslation('editor')
   return (
     <div className="flex flex-col gap-2">
-      <Field label={`Winkel (${Math.round(rotation)}°)`}>
+      <Field label={t('properties.arrow.angle', { deg: Math.round(rotation) })}>
         <div className="flex flex-col gap-1.5">
           <input
             type="range"
@@ -521,7 +517,7 @@ function ArrowFields({
           </div>
         </div>
       </Field>
-      <Field label="Farbe">
+      <Field label={t('properties.shared.color')}>
         <div className="flex flex-col gap-1.5">
           <ColorSwatchPicker
             size="sm"
@@ -540,7 +536,7 @@ function ArrowFields({
           />
         </div>
       </Field>
-      <Field label="Linienstil">
+      <Field label={t('properties.shared.lineStyle')}>
         <select
           className={selectClass}
           value={data.lineStyle}
@@ -549,14 +545,14 @@ function ArrowFields({
             onChange({ lineStyle: e.target.value as LineStyle })
           }}
         >
-          {LINE_STYLES.map((s) => (
-            <option key={s.value} value={s.value}>
-              {s.label}
+          {LINE_STYLE_VALUES.map((v) => (
+            <option key={v} value={v}>
+              {t(`properties.lineStyles.${v}`)}
             </option>
           ))}
         </select>
       </Field>
-      <Field label={`Strichstärke (${data.strokeWidth}px)`}>
+      <Field label={t('properties.shared.strokeWidth', { px: data.strokeWidth })}>
         <input
           type="range"
           min={1}
@@ -568,7 +564,7 @@ function ArrowFields({
         />
       </Field>
       {data.shape === 'curved' && (
-        <Field label={`Kurvenradius (${getCurveOffset(data)}px)`}>
+        <Field label={t('properties.arrow.curveRadius', { px: getCurveOffset(data) })}>
           <input
             type="range"
             min={-150}
@@ -591,7 +587,7 @@ function ArrowFields({
             onChange({ showArrowhead: e.target.checked })
           }}
         />
-        Pfeilspitze anzeigen
+        {t('properties.arrow.showArrowhead')}
       </label>
       {(data.showArrowhead ?? true) && (
         <label className="flex items-center gap-2 pl-5 text-xs text-white/70">
@@ -604,7 +600,7 @@ function ArrowFields({
               onChange({ arrowheadStart: e.target.checked })
             }}
           />
-          Auch am Start (beide Enden)
+          {t('properties.arrow.arrowheadBothEnds')}
         </label>
       )}
       <label className="flex items-center gap-2 text-xs text-white/70">
@@ -617,7 +613,7 @@ function ArrowFields({
             onChange({ showDistance: e.target.checked })
           }}
         />
-        Distanz anzeigen (m)
+        {t('properties.shared.showDistance')}
       </label>
       <label className="flex items-center gap-2 text-xs text-white/70">
         <input
@@ -629,7 +625,7 @@ function ArrowFields({
             onChange({ glow: e.target.checked })
           }}
         />
-        Leuchteffekt (weicher Farbkanal entlang der Linie)
+        {t('properties.shared.glow')}
       </label>
       <label className="flex items-center gap-2 text-xs text-white/70">
         <input
@@ -641,7 +637,7 @@ function ArrowFields({
             onChange({ blocked: e.target.checked })
           }}
         />
-        Blockierte Option (X am Ende)
+        {t('properties.arrow.blocked')}
       </label>
       <label className="flex items-center gap-2 text-xs text-white/70">
         <input
@@ -653,7 +649,7 @@ function ArrowFields({
             onChange({ dribble: e.target.checked })
           }}
         />
-        Dribbellinie (gewellt)
+        {t('properties.arrow.dribble')}
       </label>
       {data.shape !== 'curved' && (
         <>
@@ -667,7 +663,7 @@ function ArrowFields({
                 onChange({ spaceBehind: e.target.checked })
               }}
             />
-            Als Abwehrlinie markieren (Raum dahinter anzeigen)
+            {t('properties.arrow.spaceBehind')}
           </label>
           {data.spaceBehind && (
             <label className="flex items-center gap-2 pl-5 text-xs text-white/70">
@@ -680,7 +676,7 @@ function ArrowFields({
                   onChange({ spaceBehindShowLabel: e.target.checked })
                 }}
               />
-              Meter-Anzeige einblenden
+              {t('properties.arrow.spaceBehindShowLabel')}
             </label>
           )}
         </>
@@ -693,7 +689,7 @@ function ArrowFields({
             onChange({ points: addArrowMidpoint(data) })
           }}
         >
-          Ziehpunkt hinzufügen
+          {t('properties.arrow.addDragPoint')}
         </Button>
       )}
     </div>
@@ -709,9 +705,10 @@ function ShapeFields({
   onCheckpoint: () => void
   onChange: (patch: Partial<ShapeData>) => void
 }) {
+  const { t } = useTranslation('editor')
   return (
     <div className="flex flex-col gap-2">
-      <Field label="Füllfarbe">
+      <Field label={t('properties.shape.fillColor')}>
         <ColorSwatchPicker
           value={rgbaToHex(data.fill)}
           onChange={(color) => {
@@ -720,7 +717,7 @@ function ShapeFields({
           }}
         />
       </Field>
-      <Field label="Farbverlauf (z.B. Heatmap)">
+      <Field label={t('properties.shape.gradientHeading')}>
         <div className="flex flex-col gap-1.5">
           <label className="flex items-center gap-2 text-xs text-white/70">
             <input
@@ -732,7 +729,7 @@ function ShapeFields({
                 onChange({ gradientColor: e.target.checked ? rgbaToHex(data.fill) : null })
               }}
             />
-            Statt flacher Füllfarbe ein Farbverlauf von der Mitte nach außen
+            {t('properties.shared.gradientInsteadOfFlat')}
           </label>
           {data.gradientColor && (
             <>
@@ -751,8 +748,8 @@ function ShapeFields({
                   onChange({ gradientDirection: e.target.value as 'radial' | 'linear' })
                 }}
               >
-                <option value="radial">Radial (von der Mitte)</option>
-                <option value="linear">Linear (links nach rechts)</option>
+                <option value="radial">{t('properties.shared.gradientRadial')}</option>
+                <option value="linear">{t('properties.shared.gradientLinear')}</option>
               </select>
               <label className="flex items-center gap-2 text-xs text-white/70">
                 <input
@@ -764,7 +761,7 @@ function ShapeFields({
                     onChange({ gradientColor2: e.target.checked ? data.stroke : null })
                   }}
                 />
-                Zweifarbiger Verlauf (statt Verblassen ins Transparente)
+                {t('properties.shared.twoColorGradient')}
               </label>
               {data.gradientColor2 && (
                 <ColorSwatchPicker
@@ -779,7 +776,7 @@ function ShapeFields({
           )}
         </div>
       </Field>
-      <Field label="Rahmen">
+      <Field label={t('properties.shared.border')}>
         <div className="flex flex-col gap-1.5">
           <label className="flex items-center gap-2 text-xs text-white/70">
             <input
@@ -791,7 +788,7 @@ function ShapeFields({
                 onChange({ noBorder: !e.target.checked })
               }}
             />
-            Rahmen anzeigen
+            {t('properties.shape.showBorder')}
           </label>
           {!data.noBorder && (
             <>
@@ -810,9 +807,9 @@ function ShapeFields({
                   onChange({ lineStyle: e.target.value as LineStyle })
                 }}
               >
-                {LINE_STYLES.map((s) => (
-                  <option key={s.value} value={s.value}>
-                    {s.label}
+                {LINE_STYLE_VALUES.map((v) => (
+                  <option key={v} value={v}>
+                    {t(`properties.lineStyles.${v}`)}
                   </option>
                 ))}
               </select>
@@ -820,7 +817,7 @@ function ShapeFields({
           )}
         </div>
       </Field>
-      <Field label={`Breite (${data.width}px)`}>
+      <Field label={t('properties.shape.width', { px: data.width })}>
         <input
           type="range"
           min={20}
@@ -831,7 +828,7 @@ function ShapeFields({
           onChange={(e) => onChange({ width: Number(e.target.value) })}
         />
       </Field>
-      <Field label={`Höhe (${data.height}px)`}>
+      <Field label={t('properties.shape.height', { px: data.height })}>
         <input
           type="range"
           min={20}
@@ -842,7 +839,7 @@ function ShapeFields({
           onChange={(e) => onChange({ height: Number(e.target.value) })}
         />
       </Field>
-      <Field label={`Deckkraft (${Math.round(data.opacity * 100)}%)`}>
+      <Field label={t('properties.shape.opacity', { percent: Math.round(data.opacity * 100) })}>
         <input
           type="range"
           min={0.1}
@@ -867,9 +864,10 @@ function TextFields({
   onCheckpoint: () => void
   onChange: (patch: Partial<TextData>) => void
 }) {
+  const { t } = useTranslation('editor')
   return (
     <div className="flex flex-col gap-2">
-      <Field label="Text">
+      <Field label={t('properties.text.textLabel')}>
         <input
           type="text"
           className={inputClass}
@@ -878,7 +876,7 @@ function TextFields({
           onChange={(e) => onChange({ text: e.target.value })}
         />
       </Field>
-      <Field label={`Schriftgröße (${data.fontSize}px)`}>
+      <Field label={t('properties.shared.fontSize', { px: data.fontSize })}>
         <input
           type="range"
           min={10}
@@ -890,9 +888,9 @@ function TextFields({
         />
       </Field>
       <div className="flex gap-1.5">
-        {FONT_SIZE_PRESETS.map((preset) => (
+        {FONT_SIZE_PRESET_VALUES.map((preset) => (
           <button
-            key={preset.label}
+            key={preset.key}
             type="button"
             onClick={() => {
               onCheckpoint()
@@ -904,11 +902,11 @@ function TextFields({
                 : 'border-pitch-600 bg-pitch-800 text-white/60 hover:border-violet-accent/50'
             }`}
           >
-            {preset.label}
+            {t(`properties.fontSizePresets.${preset.key}`)}
           </button>
         ))}
       </div>
-      <Field label="Farbe">
+      <Field label={t('properties.shared.color')}>
         <div className="flex flex-col gap-1.5">
           <ColorSwatchPicker
             size="sm"
@@ -927,7 +925,7 @@ function TextFields({
           />
         </div>
       </Field>
-      <Field label="Stil">
+      <Field label={t('properties.text.styleLabel')}>
         <select
           className={selectClass}
           value={data.fontStyle}
@@ -936,12 +934,12 @@ function TextFields({
             onChange({ fontStyle: e.target.value as TextData['fontStyle'] })
           }}
         >
-          <option value="normal">Normal</option>
-          <option value="bold">Fett</option>
-          <option value="italic">Kursiv</option>
+          <option value="normal">{t('properties.text.styleNormal')}</option>
+          <option value="bold">{t('properties.text.styleBold')}</option>
+          <option value="italic">{t('properties.text.styleItalic')}</option>
         </select>
       </Field>
-      <Field label="Hintergrund (Badge-Stil)">
+      <Field label={t('properties.text.backgroundBadge')}>
         <div className="flex items-center gap-2">
           <input
             type="checkbox"
@@ -978,7 +976,7 @@ function TextFields({
                     onChange({ backgroundGradient: e.target.checked })
                   }}
                 />
-                Farbverlauf statt flacher Füllung
+                {t('properties.shared.gradientInsteadOfFlat')}
               </label>
               {data.backgroundGradient && (
                 <>
@@ -990,8 +988,8 @@ function TextFields({
                       onChange({ backgroundGradientDirection: e.target.value as 'radial' | 'linear' })
                     }}
                   >
-                    <option value="radial">Radial (von der Mitte)</option>
-                    <option value="linear">Linear (links nach rechts)</option>
+                    <option value="radial">{t('properties.shared.gradientRadial')}</option>
+                    <option value="linear">{t('properties.shared.gradientLinear')}</option>
                   </select>
                   <label className="flex items-center gap-2 text-xs text-white/70">
                     <input
@@ -1003,7 +1001,7 @@ function TextFields({
                         onChange({ backgroundGradientColor2: e.target.checked ? data.color : null })
                       }}
                     />
-                    Zweifarbiger Verlauf (statt Verblassen ins Transparente)
+                    {t('properties.shared.twoColorGradient')}
                   </label>
                   {data.backgroundGradientColor2 && (
                     <ColorSwatchPicker
@@ -1021,7 +1019,7 @@ function TextFields({
           )}
         </div>
       </Field>
-      <Field label="Schatten (Lesbarkeit auf dem Feld)">
+      <Field label={t('properties.text.shadow')}>
         <input
           type="checkbox"
           checked={!!data.shadow}
@@ -1035,14 +1033,14 @@ function TextFields({
   )
 }
 
-const QUOTE_FONT_OPTIONS: { value: QuoteFontFamily; label: string }[] = [
-  { value: 'system', label: 'Standard (Inter)' },
-  { value: 'georgia', label: 'Georgia (Serif)' },
-  { value: 'times', label: 'Times New Roman' },
-  { value: 'arial_black', label: 'Arial Black (Fett)' },
-  { value: 'impact', label: 'Impact' },
-  { value: 'trebuchet', label: 'Trebuchet MS' },
-  { value: 'courier', label: 'Courier (Monospace)' },
+const QUOTE_FONT_VALUES: QuoteFontFamily[] = [
+  'system',
+  'georgia',
+  'times',
+  'arial_black',
+  'impact',
+  'trebuchet',
+  'courier',
 ]
 
 function FontFamilySelect({
@@ -1054,6 +1052,7 @@ function FontFamilySelect({
   onCheckpoint: () => void
   onChange: (v: QuoteFontFamily) => void
 }) {
+  const { t } = useTranslation('editor')
   return (
     <select
       className={selectClass}
@@ -1063,9 +1062,9 @@ function FontFamilySelect({
         onChange(e.target.value as QuoteFontFamily)
       }}
     >
-      {QUOTE_FONT_OPTIONS.map((opt) => (
-        <option key={opt.value} value={opt.value}>
-          {opt.label}
+      {QUOTE_FONT_VALUES.map((v) => (
+        <option key={v} value={v}>
+          {t(`properties.quoteCard.fontOptions.${v}`)}
         </option>
       ))}
     </select>
@@ -1081,11 +1080,12 @@ function QuoteCardFields({
   onCheckpoint: () => void
   onChange: (patch: Partial<QuoteCardData>) => void
 }) {
+  const { t } = useTranslation('editor')
   return (
     <div className="flex flex-col gap-3">
       <div className="flex flex-col gap-2 rounded-md border border-pitch-700 p-2">
-        <span className="text-xs font-medium text-white/60">Überschrift</span>
-        <Field label="Text">
+        <span className="text-xs font-medium text-white/60">{t('properties.quoteCard.headingSection')}</span>
+        <Field label={t('properties.quoteCard.textLabel')}>
           <input
             type="text"
             className={inputClass}
@@ -1094,14 +1094,14 @@ function QuoteCardFields({
             onChange={(e) => onChange({ headingText: e.target.value })}
           />
         </Field>
-        <Field label="Schriftart">
+        <Field label={t('properties.shared.fontFamily')}>
           <FontFamilySelect
             value={data.headingFontFamily}
             onCheckpoint={onCheckpoint}
             onChange={(v) => onChange({ headingFontFamily: v })}
           />
         </Field>
-        <Field label={`Schriftgröße (${data.headingFontSize}px)`}>
+        <Field label={t('properties.shared.fontSize', { px: data.headingFontSize })}>
           <input
             type="range"
             min={10}
@@ -1112,7 +1112,7 @@ function QuoteCardFields({
             onChange={(e) => onChange({ headingFontSize: Number(e.target.value) })}
           />
         </Field>
-        <Field label="Farbe">
+        <Field label={t('properties.shared.color')}>
           <ColorSwatchPicker
             size="sm"
             value={data.headingColor}
@@ -1132,7 +1132,7 @@ function QuoteCardFields({
               onChange({ headingGradient: e.target.checked })
             }}
           />
-          Farbverlauf statt flacher Füllung
+          {t('properties.shared.gradientInsteadOfFlat')}
         </label>
         {data.headingGradient && (
           <>
@@ -1144,8 +1144,8 @@ function QuoteCardFields({
                 onChange({ headingGradientDirection: e.target.value as 'radial' | 'linear' })
               }}
             >
-              <option value="radial">Radial (von der Mitte)</option>
-              <option value="linear">Linear (links nach rechts)</option>
+              <option value="radial">{t('properties.shared.gradientRadial')}</option>
+              <option value="linear">{t('properties.shared.gradientLinear')}</option>
             </select>
             <ColorSwatchPicker
               size="sm"
@@ -1167,11 +1167,11 @@ function QuoteCardFields({
               onChange({ headingBoxEnabled: e.target.checked })
             }}
           />
-          Eigene Box um die Überschrift
+          {t('properties.quoteCard.boxAroundHeading')}
         </label>
         {data.headingBoxEnabled && (
           <div className="flex flex-col gap-1.5 pl-5">
-            <Field label="Box-Hintergrund">
+            <Field label={t('properties.quoteCard.boxBackground')}>
               <ColorSwatchPicker
                 size="sm"
                 value={data.headingBoxBackground ?? '#ffffff'}
@@ -1181,7 +1181,7 @@ function QuoteCardFields({
                 }}
               />
             </Field>
-            <Field label="Box-Rahmen">
+            <Field label={t('properties.quoteCard.boxBorder')}>
               <ColorSwatchPicker
                 size="sm"
                 value={data.headingBoxBorderColor ?? '#ef4444'}
@@ -1196,8 +1196,8 @@ function QuoteCardFields({
       </div>
 
       <div className="flex flex-col gap-2 rounded-md border border-pitch-700 p-2">
-        <span className="text-xs font-medium text-white/60">Text darunter</span>
-        <Field label="Text">
+        <span className="text-xs font-medium text-white/60">{t('properties.quoteCard.bodySection')}</span>
+        <Field label={t('properties.quoteCard.textLabel')}>
           <textarea
             className={`${inputClass} min-h-16`}
             value={data.bodyText}
@@ -1205,14 +1205,14 @@ function QuoteCardFields({
             onChange={(e) => onChange({ bodyText: e.target.value })}
           />
         </Field>
-        <Field label="Schriftart">
+        <Field label={t('properties.shared.fontFamily')}>
           <FontFamilySelect
             value={data.bodyFontFamily}
             onCheckpoint={onCheckpoint}
             onChange={(v) => onChange({ bodyFontFamily: v })}
           />
         </Field>
-        <Field label={`Schriftgröße (${data.bodyFontSize}px)`}>
+        <Field label={t('properties.shared.fontSize', { px: data.bodyFontSize })}>
           <input
             type="range"
             min={12}
@@ -1223,7 +1223,7 @@ function QuoteCardFields({
             onChange={(e) => onChange({ bodyFontSize: Number(e.target.value) })}
           />
         </Field>
-        <Field label="Farbe">
+        <Field label={t('properties.shared.color')}>
           <ColorSwatchPicker
             size="sm"
             value={data.bodyColor}
@@ -1243,7 +1243,7 @@ function QuoteCardFields({
               onChange({ bodyGradient: e.target.checked })
             }}
           />
-          Farbverlauf statt flacher Füllung
+          {t('properties.shared.gradientInsteadOfFlat')}
         </label>
         {data.bodyGradient && (
           <>
@@ -1255,8 +1255,8 @@ function QuoteCardFields({
                 onChange({ bodyGradientDirection: e.target.value as 'radial' | 'linear' })
               }}
             >
-              <option value="radial">Radial (von der Mitte)</option>
-              <option value="linear">Linear (links nach rechts)</option>
+              <option value="radial">{t('properties.shared.gradientRadial')}</option>
+              <option value="linear">{t('properties.shared.gradientLinear')}</option>
             </select>
             <ColorSwatchPicker
               size="sm"
@@ -1271,7 +1271,7 @@ function QuoteCardFields({
       </div>
 
       <div className="flex flex-col gap-2 rounded-md border border-pitch-700 p-2">
-        <span className="text-xs font-medium text-white/60">Karte</span>
+        <span className="text-xs font-medium text-white/60">{t('properties.quoteCard.cardSection')}</span>
         <label className="flex items-center gap-2 text-xs text-white/70">
           <input
             type="checkbox"
@@ -1281,7 +1281,7 @@ function QuoteCardFields({
               onChange({ background: e.target.checked ? (data.background ?? '#ffffff') : null })
             }}
           />
-          Hintergrund
+          {t('properties.shared.background')}
         </label>
         {data.background && (
           <>
@@ -1303,7 +1303,7 @@ function QuoteCardFields({
                   onChange({ backgroundGradient: e.target.checked })
                 }}
               />
-              Farbverlauf statt flacher Füllung
+              {t('properties.shared.gradientInsteadOfFlat')}
             </label>
             {data.backgroundGradient && (
               <>
@@ -1315,8 +1315,8 @@ function QuoteCardFields({
                     onChange({ backgroundGradientDirection: e.target.value as 'radial' | 'linear' })
                   }}
                 >
-                  <option value="radial">Radial (von der Mitte)</option>
-                  <option value="linear">Linear (links nach rechts)</option>
+                  <option value="radial">{t('properties.shared.gradientRadial')}</option>
+                  <option value="linear">{t('properties.shared.gradientLinear')}</option>
                 </select>
                 <ColorSwatchPicker
                   size="sm"
@@ -1339,7 +1339,7 @@ function QuoteCardFields({
               onChange({ borderColor: e.target.checked ? (data.borderColor ?? '#0f172a') : null })
             }}
           />
-          Rahmen
+          {t('properties.shared.border')}
         </label>
         {data.borderColor && (
           <ColorSwatchPicker
@@ -1365,9 +1365,10 @@ function ConnectorFields({
   onCheckpoint: () => void
   onChange: (patch: Partial<ConnectorData>) => void
 }) {
+  const { t } = useTranslation('editor')
   return (
     <div className="flex flex-col gap-2">
-      <Field label="Farbe">
+      <Field label={t('properties.shared.color')}>
         <div className="flex flex-col gap-1.5">
           <ColorSwatchPicker
             size="sm"
@@ -1386,7 +1387,7 @@ function ConnectorFields({
           />
         </div>
       </Field>
-      <Field label="Linienstil">
+      <Field label={t('properties.shared.lineStyle')}>
         <select
           className={selectClass}
           value={data.lineStyle}
@@ -1395,14 +1396,14 @@ function ConnectorFields({
             onChange({ lineStyle: e.target.value as LineStyle })
           }}
         >
-          {LINE_STYLES.map((s) => (
-            <option key={s.value} value={s.value}>
-              {s.label}
+          {LINE_STYLE_VALUES.map((v) => (
+            <option key={v} value={v}>
+              {t(`properties.lineStyles.${v}`)}
             </option>
           ))}
         </select>
       </Field>
-      <Field label={`Strichstärke (${data.strokeWidth}px)`}>
+      <Field label={t('properties.shared.strokeWidth', { px: data.strokeWidth })}>
         <input
           type="range"
           min={1}
@@ -1424,7 +1425,7 @@ function ConnectorFields({
             onChange({ showDistance: e.target.checked })
           }}
         />
-        Distanz anzeigen (m)
+        {t('properties.shared.showDistance')}
       </label>
       <label className="flex items-center gap-2 text-xs text-white/70">
         <input
@@ -1436,7 +1437,7 @@ function ConnectorFields({
             onChange({ glow: e.target.checked })
           }}
         />
-        Leuchteffekt (weicher Farbkanal entlang der Linie)
+        {t('properties.shared.glow')}
       </label>
     </div>
   )
@@ -1461,10 +1462,11 @@ function EquipmentFields({
   onChangeTop: (patch: { scale?: number; rotation?: number }) => void
   onApplyToAll: (patch: { color?: string; scale?: number; rotation?: number }) => void
 }) {
+  const { t } = useTranslation('editor')
   const color = data.color ?? EQUIPMENT_DEFAULT_COLORS[data.kind as EquipmentKind]
   return (
     <div className="flex flex-col gap-2">
-      <Field label="Farbe">
+      <Field label={t('properties.shared.color')}>
         <ColorSwatchPicker
           value={color}
           colors={EQUIPMENT_COLOR_CHOICES}
@@ -1474,7 +1476,7 @@ function EquipmentFields({
           }}
         />
       </Field>
-      <Field label={`Größe (${Math.round(scale * 100)}%)`}>
+      <Field label={t('properties.equipment.size', { percent: Math.round(scale * 100) })}>
         <input
           type="range"
           min={0.4}
@@ -1486,7 +1488,7 @@ function EquipmentFields({
           onChange={(e) => onChangeTop({ scale: Number(e.target.value) })}
         />
       </Field>
-      <Field label={`Winkel (${Math.round(rotation)}°)`}>
+      <Field label={t('properties.equipment.angle', { deg: Math.round(rotation) })}>
         <input
           type="range"
           min={0}
@@ -1504,7 +1506,7 @@ function EquipmentFields({
           onApplyToAll({ color, scale, rotation })
         }}
       >
-        Auf alle dieser Art anwenden
+        {t('properties.equipment.applyToAll')}
       </Button>
     </div>
   )
@@ -1519,9 +1521,10 @@ function BallFields({
   onCheckpoint: () => void
   onChange: (patch: Partial<BallData>) => void
 }) {
+  const { t } = useTranslation('editor')
   return (
     <div className="flex flex-col gap-2">
-      <Field label="Farbe">
+      <Field label={t('properties.shared.color')}>
         <ColorSwatchPicker
           value={data.color ?? '#f5f5f0'}
           colors={['#f5f5f0', '#ef4444', '#facc15', '#22c55e', '#3b82f6', '#111827']}

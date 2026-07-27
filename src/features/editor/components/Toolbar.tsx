@@ -1,4 +1,5 @@
 import { useState, type ReactNode } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useEditorStore } from '../store/editorStore'
 import { useAuthStore } from '../../auth/store/authStore'
 import { uploadBoardImage, readImageDimensions } from '../../../lib/supabase/images'
@@ -43,64 +44,66 @@ const EQUIPMENT_ICONS: Record<EquipmentKind, ReactNode> = {
   ring: <RingIcon />,
 }
 
-const EQUIPMENT_LABELS: Record<EquipmentKind, string> = {
-  cone: 'Hütchen',
-  mini_goal: 'Minitor',
-  mannequin: 'Dummy',
-  slalom_pole: 'Slalomstange',
-  ladder: 'Leiter',
-  ring: 'Ring',
-}
-
-const SECTIONS: ToolDef[][] = [
-  [{ id: 'select', label: 'Zeiger', icon: <CursorIcon /> }],
-  [
-    { id: 'player_home', label: 'Spieler Heim', swatch: '#3b82f6' },
-    { id: 'player_away', label: 'Spieler Auswärts', swatch: '#ef4444' },
-    {
-      id: 'player_home_gk',
-      label: 'Torwart Heim',
-      swatch: '#eab308',
-      swatchLabel: 'TW',
-      swatchRing: '#3b82f6',
-    },
-    {
-      id: 'player_away_gk',
-      label: 'Torwart Auswärts',
-      swatch: '#eab308',
-      swatchLabel: 'TW',
-      swatchRing: '#ef4444',
-    },
-    { id: 'ball', label: 'Ball', icon: <BallIcon /> },
-  ],
-  [
-    { id: 'arrow_straight', label: 'Pfeil (Ziehpunkte zum Biegen)', icon: <CurvedArrowIcon /> },
-    { id: 'arrow_rigid', label: 'Gerader Pfeil (nicht biegbar)', icon: <StraightArrowIcon /> },
-    { id: 'arrow_blocked', label: 'Blockierte Option (X am Ende)', icon: <BlockedPassIcon /> },
-    { id: 'arrow_dribble', label: 'Dribbellinie (Ziehpunkte zum Biegen)', icon: <DribbleLineIcon /> },
-    { id: 'line_straight', label: 'Linie (Zone einzeichnen)', icon: <PlainLineIcon /> },
-    { id: 'connector', label: 'Spieler verbinden', icon: <ConnectorIcon /> },
-  ],
-  [
-    { id: 'shape_circle', label: 'Kreis', icon: <CircleShapeIcon /> },
-    { id: 'shape_rect', label: 'Rechteck', icon: <RectShapeIcon /> },
-  ],
-  [
-    { id: 'text', label: 'Text', icon: <TextToolIcon /> },
-    { id: 'text_badge', label: 'Badge', swatch: '#ffe100', swatchLabel: 'B' },
-    { id: 'text_title', label: 'Titel', swatch: '#f8fafc', swatchLabel: 'T' },
-    { id: 'text_subtitle', label: 'Untertitel', swatch: '#94a3b8', swatchLabel: 'U' },
-    { id: 'quote_card', label: 'Zitat-Karte', icon: <QuoteCardIcon /> },
-  ],
-  (Object.keys(EQUIPMENT_ICONS) as EquipmentKind[]).map((kind) => ({
-    id: `equipment_${kind}` as ToolId,
-    label: EQUIPMENT_LABELS[kind],
-    icon: EQUIPMENT_ICONS[kind],
-  })),
-]
-
 export function Toolbar() {
+  const { t } = useTranslation('editor')
   const tool = useEditorStore((s) => s.tool)
+
+  const EQUIPMENT_LABELS: Record<EquipmentKind, string> = {
+    cone: t('toolbar.equipment.cone'),
+    mini_goal: t('toolbar.equipment.miniGoal'),
+    mannequin: t('toolbar.equipment.mannequin'),
+    slalom_pole: t('toolbar.equipment.slalomPole'),
+    ladder: t('toolbar.equipment.ladder'),
+    ring: t('toolbar.equipment.ring'),
+  }
+
+  const SECTIONS: ToolDef[][] = [
+    [{ id: 'select', label: t('toolbar.select'), icon: <CursorIcon /> }],
+    [
+      { id: 'player_home', label: t('toolbar.playerHome'), swatch: '#3b82f6' },
+      { id: 'player_away', label: t('toolbar.playerAway'), swatch: '#ef4444' },
+      {
+        id: 'player_home_gk',
+        label: t('toolbar.goalkeeperHome'),
+        swatch: '#eab308',
+        swatchLabel: 'TW',
+        swatchRing: '#3b82f6',
+      },
+      {
+        id: 'player_away_gk',
+        label: t('toolbar.goalkeeperAway'),
+        swatch: '#eab308',
+        swatchLabel: 'TW',
+        swatchRing: '#ef4444',
+      },
+      { id: 'ball', label: t('toolbar.ball'), icon: <BallIcon /> },
+    ],
+    [
+      { id: 'arrow_straight', label: t('toolbar.arrowCurved'), icon: <CurvedArrowIcon /> },
+      { id: 'arrow_rigid', label: t('toolbar.arrowRigid'), icon: <StraightArrowIcon /> },
+      { id: 'arrow_blocked', label: t('toolbar.arrowBlocked'), icon: <BlockedPassIcon /> },
+      { id: 'arrow_dribble', label: t('toolbar.dribbleLine'), icon: <DribbleLineIcon /> },
+      { id: 'line_straight', label: t('toolbar.plainLine'), icon: <PlainLineIcon /> },
+      { id: 'connector', label: t('toolbar.connector'), icon: <ConnectorIcon /> },
+    ],
+    [
+      { id: 'shape_circle', label: t('toolbar.circle'), icon: <CircleShapeIcon /> },
+      { id: 'shape_rect', label: t('toolbar.rect'), icon: <RectShapeIcon /> },
+    ],
+    [
+      { id: 'text', label: t('toolbar.text'), icon: <TextToolIcon /> },
+      { id: 'text_badge', label: t('toolbar.textBadge'), swatch: '#ffe100', swatchLabel: 'B' },
+      { id: 'text_title', label: t('toolbar.textTitle'), swatch: '#f8fafc', swatchLabel: 'T' },
+      { id: 'text_subtitle', label: t('toolbar.textSubtitle'), swatch: '#94a3b8', swatchLabel: 'U' },
+      { id: 'quote_card', label: t('toolbar.quoteCard'), icon: <QuoteCardIcon /> },
+    ],
+    (Object.keys(EQUIPMENT_ICONS) as EquipmentKind[]).map((kind) => ({
+      id: `equipment_${kind}` as ToolId,
+      label: EQUIPMENT_LABELS[kind],
+      icon: EQUIPMENT_ICONS[kind],
+    })),
+  ]
+
   const setTool = useEditorStore((s) => s.setTool)
   const addImageObject = useEditorStore((s) => s.addImageObject)
   const organization = useAuthStore((s) => s.organization)
@@ -163,8 +166,8 @@ export function Toolbar() {
       ))}
       <div className="my-1 h-px w-full bg-gold-accent/20" />
       <label
-        title="Bild einfügen"
-        aria-label="Bild einfügen"
+        title={t('toolbar.insertImage')}
+        aria-label={t('toolbar.insertImage')}
         className={`flex h-11 w-11 cursor-pointer items-center justify-center rounded-lg border border-gold-accent/10 bg-[#0d1e35] text-gold-accent/70 transition-colors hover:border-gold-accent/40 hover:text-gold-accent-bright ${
           isUploadingImage ? 'pointer-events-none opacity-50' : ''
         }`}

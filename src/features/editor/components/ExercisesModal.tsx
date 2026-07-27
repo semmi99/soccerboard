@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useAuthStore } from '../../auth/store/authStore'
 import { useEditorStore } from '../store/editorStore'
 import { limitsForTier } from '../../../lib/limits'
@@ -25,6 +26,7 @@ function sortExercises(list: Exercise[]): Exercise[] {
 }
 
 export function ExercisesModal({ onClose }: { onClose: () => void }) {
+  const { t } = useTranslation('editor')
   const organization = useAuthStore((s) => s.organization)
   const frames = useEditorStore((s) => s.frames)
   const appendFrames = useEditorStore((s) => s.appendFrames)
@@ -49,7 +51,7 @@ export function ExercisesModal({ onClose }: { onClose: () => void }) {
         if (!cancelled) setExercises(rows)
       })
       .catch((err: unknown) => {
-        if (!cancelled) setLoadError(err instanceof Error ? err.message : 'Laden fehlgeschlagen.')
+        if (!cancelled) setLoadError(err instanceof Error ? err.message : t('exercisesModal.loadError'))
       })
       .finally(() => {
         if (!cancelled) setIsLoading(false)
@@ -76,7 +78,7 @@ export function ExercisesModal({ onClose }: { onClose: () => void }) {
       setDescription('')
       setShowSaveForm(false)
     } catch (err) {
-      setActionError(err instanceof Error ? err.message : 'Speichern fehlgeschlagen.')
+      setActionError(err instanceof Error ? err.message : t('exercisesModal.saveError'))
     } finally {
       setIsSaving(false)
     }
@@ -87,7 +89,7 @@ export function ExercisesModal({ onClose }: { onClose: () => void }) {
     const maxFrames = limitsForTier(organization).maxFrames
     const ok = appendFrames(exercise.frames, maxFrames)
     if (!ok) {
-      setActionError(`Frame-Limit erreicht: maximal ${maxFrames} Frames pro Projekt.`)
+      setActionError(t('exercisesModal.frameLimitError', { max: maxFrames }))
       return
     }
     onClose()
@@ -99,7 +101,7 @@ export function ExercisesModal({ onClose }: { onClose: () => void }) {
       await deleteExercise(id)
       setExercises((prev) => prev.filter((e) => e.id !== id))
     } catch (err) {
-      setActionError(err instanceof Error ? err.message : 'Löschen fehlgeschlagen.')
+      setActionError(err instanceof Error ? err.message : t('exercisesModal.deleteError'))
     }
   }
 
@@ -107,7 +109,7 @@ export function ExercisesModal({ onClose }: { onClose: () => void }) {
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
       <div className="flex max-h-[85vh] w-full max-w-lg flex-col gap-4 rounded-xl border border-pitch-700 bg-pitch-900 p-5 shadow-2xl">
         <div className="flex items-center justify-between gap-3">
-          <h2 className="text-sm font-semibold text-white">Übungsbibliothek</h2>
+          <h2 className="text-sm font-semibold text-white">{t('exercisesModal.title')}</h2>
           <button type="button" onClick={onClose} className="text-white/50 hover:text-white">
             ✕
           </button>
@@ -117,26 +119,26 @@ export function ExercisesModal({ onClose }: { onClose: () => void }) {
 
         {!showSaveForm ? (
           <Button variant="secondary" onClick={() => setShowSaveForm(true)}>
-            + Aktuelles Board als Übung speichern
+            {t('exercisesModal.saveCurrentBoard')}
           </Button>
         ) : (
           <div className="flex flex-col gap-3 rounded-lg border border-pitch-700 bg-pitch-800/50 p-3">
             <label className="flex flex-col gap-1 text-xs">
-              <span className="font-medium text-white/70">Name</span>
+              <span className="font-medium text-white/70">{t('exercisesModal.nameLabel')}</span>
               <input autoFocus value={name} onChange={(e) => setName(e.target.value)} className={inputClass} />
             </label>
             <label className="flex flex-col gap-1 text-xs">
-              <span className="font-medium text-white/70">Kategorie</span>
+              <span className="font-medium text-white/70">{t('exercisesModal.categoryLabel')}</span>
               <select value={category} onChange={(e) => setCategory(e.target.value)} className={inputClass}>
                 {CATEGORIES.map((c) => (
                   <option key={c} value={c}>
-                    {c}
+                    {t(`exercisesModal.categories.${c}`, { defaultValue: c })}
                   </option>
                 ))}
               </select>
             </label>
             <label className="flex flex-col gap-1 text-xs">
-              <span className="font-medium text-white/70">Beschreibung (optional)</span>
+              <span className="font-medium text-white/70">{t('exercisesModal.descriptionLabel')}</span>
               <textarea
                 rows={2}
                 value={description}
@@ -146,20 +148,20 @@ export function ExercisesModal({ onClose }: { onClose: () => void }) {
             </label>
             <div className="flex gap-2">
               <Button onClick={() => void handleSaveCurrent()} loading={isSaving} disabled={!name.trim()}>
-                Speichern
+                {t('common:actions.save')}
               </Button>
               <Button variant="ghost" onClick={() => setShowSaveForm(false)}>
-                Abbrechen
+                {t('common:actions.cancel')}
               </Button>
             </div>
           </div>
         )}
 
         <div className="flex flex-col gap-2 overflow-y-auto">
-          {isLoading && <p className="text-sm text-white/40">Lädt …</p>}
+          {isLoading && <p className="text-sm text-white/40">{t('exercisesModal.loading')}</p>}
           {loadError && <p className="text-sm text-red-400">{loadError}</p>}
           {!isLoading && !loadError && exercises.length === 0 && (
-            <p className="text-sm text-white/40">Noch keine gespeicherten Übungen.</p>
+            <p className="text-sm text-white/40">{t('exercisesModal.empty')}</p>
           )}
           {exercises.map((ex) => (
             <div
@@ -169,16 +171,17 @@ export function ExercisesModal({ onClose }: { onClose: () => void }) {
               <div className="min-w-0">
                 <p className="truncate text-sm font-medium text-white">{ex.name}</p>
                 <p className="text-xs text-white/40">
-                  {ex.category} · {ex.frames.length} Frame{ex.frames.length === 1 ? '' : 's'}
+                  {t(`exercisesModal.categories.${ex.category}`, { defaultValue: ex.category })} ·{' '}
+                  {t('exercisesModal.frameCount', { count: ex.frames.length })}
                 </p>
                 {ex.description && <p className="mt-1 truncate text-xs text-white/50">{ex.description}</p>}
               </div>
               <div className="flex shrink-0 gap-1.5">
                 <Button variant="secondary" onClick={() => handleInsert(ex)}>
-                  Einfügen
+                  {t('exercisesModal.insert')}
                 </Button>
                 <Button variant="danger" onClick={() => void handleDelete(ex.id)}>
-                  Löschen
+                  {t('common:actions.delete')}
                 </Button>
               </div>
             </div>

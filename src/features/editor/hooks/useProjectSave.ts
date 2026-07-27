@@ -1,11 +1,13 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { useEditorStore } from '../store/editorStore'
 import { useAuthStore } from '../../auth/store/authStore'
 import { limitsForTier } from '../../../lib/limits'
 import { countProjects, saveProject } from '../../../lib/supabase/projects'
 
 export function useProjectSave() {
+  const { t } = useTranslation('editor')
   const navigate = useNavigate()
   const projectId = useEditorStore((s) => s.projectId)
   const projectTitle = useEditorStore((s) => s.projectTitle)
@@ -49,7 +51,7 @@ export function useProjectSave() {
         const maxProjects = limitsForTier(organization).maxProjects
         const existing = await countProjects(organization.id)
         if (existing >= maxProjects) {
-          setSaveError(`Free-Limit erreicht: maximal ${maxProjects} Projekte. Upgrade für mehr.`)
+          setSaveError(t('projectSave.limitReachedError', { max: maxProjects }))
           return
         }
       }
@@ -78,7 +80,7 @@ export function useProjectSave() {
       }
       markSaved()
     } catch (err) {
-      setSaveError(err instanceof Error ? err.message : 'Speichern fehlgeschlagen.')
+      setSaveError(err instanceof Error ? err.message : t('projectSave.saveFailed'))
     } finally {
       isSavingRef.current = false
       setIsSaving(false)

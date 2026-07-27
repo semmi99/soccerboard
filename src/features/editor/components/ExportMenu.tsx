@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type RefObject } from 'react'
 import { createPortal } from 'react-dom'
+import { useTranslation } from 'react-i18next'
 import type Konva from 'konva'
 import { useEditorStore } from '../store/editorStore'
 import { useAuthStore } from '../../auth/store/authStore'
@@ -8,16 +9,18 @@ import { exportStageAsImage, exportStageAsSocialImage, type ExportFormat } from 
 import { downloadVideo, recordFramesAsVideo } from '../export/exportVideo'
 import { Button } from '../../../components/ui/Button'
 
-const RESOLUTION_OPTIONS = [
-  { pixelRatio: 1, label: 'Standard (1x)' },
-  { pixelRatio: 2, label: 'Hoch (2x, ~1080p)' },
-  { pixelRatio: 3, label: 'Sehr hoch (3x)' },
-  { pixelRatio: 4, label: 'Maximal (4x, ~4K)' },
-]
-
 type ExportKind = ExportFormat | 'video'
 
 export function ExportMenu({ stageRef }: { stageRef: RefObject<Konva.Stage | null> }) {
+  const { t } = useTranslation('editor')
+
+  const RESOLUTION_OPTIONS = [
+    { pixelRatio: 1, label: t('exportMenu.resolutions.standard') },
+    { pixelRatio: 2, label: t('exportMenu.resolutions.high') },
+    { pixelRatio: 3, label: t('exportMenu.resolutions.veryHigh') },
+    { pixelRatio: 4, label: t('exportMenu.resolutions.max') },
+  ]
+
   const [isOpen, setIsOpen] = useState(false)
   const [format, setFormat] = useState<ExportKind>('png')
   const [pixelRatio, setPixelRatio] = useState(2)
@@ -94,7 +97,7 @@ export function ExportMenu({ stageRef }: { stageRef: RefObject<Konva.Stage | nul
       downloadVideo(result, fileName)
       setIsOpen(false)
     } catch (err) {
-      setVideoError(err instanceof Error ? err.message : 'Aufnahme fehlgeschlagen.')
+      setVideoError(err instanceof Error ? err.message : t('exportMenu.recordingFailed'))
     } finally {
       setIsRecording(false)
     }
@@ -103,7 +106,7 @@ export function ExportMenu({ stageRef }: { stageRef: RefObject<Konva.Stage | nul
   return (
     <div ref={containerRef} className="relative">
       <Button variant="secondary" onClick={() => setIsOpen((v) => !v)}>
-        Exportieren
+        {t('exportMenu.button')}
       </Button>
 
       {isOpen && menuPos && createPortal(
@@ -113,7 +116,7 @@ export function ExportMenu({ stageRef }: { stageRef: RefObject<Konva.Stage | nul
         >
           <div className="flex flex-col gap-3">
             <label className="flex flex-col gap-1 text-xs">
-              <span className="font-medium text-white/60">Format</span>
+              <span className="font-medium text-white/60">{t('exportMenu.formatLabel')}</span>
               <select
                 className="rounded-md border border-pitch-600 bg-pitch-800 px-2 py-1.5 text-xs text-white outline-none focus:border-violet-accent"
                 value={format}
@@ -122,9 +125,9 @@ export function ExportMenu({ stageRef }: { stageRef: RefObject<Konva.Stage | nul
                   setVideoError(null)
                 }}
               >
-                <option value="png">PNG (verlustfrei, transparent)</option>
-                <option value="jpg">JPG (kleinere Datei)</option>
-                <option value="video">Video (MP4/WebM, Sequenz)</option>
+                <option value="png">{t('exportMenu.formatPng')}</option>
+                <option value="jpg">{t('exportMenu.formatJpg')}</option>
+                <option value="video">{t('exportMenu.formatVideo')}</option>
               </select>
             </label>
 
@@ -135,15 +138,12 @@ export function ExportMenu({ stageRef }: { stageRef: RefObject<Konva.Stage | nul
                 checked={socialFormat}
                 onChange={(e) => setSocialFormat(e.target.checked)}
               />
-              Social Story (9:16, Hochformat + Logo)
+              {t('exportMenu.socialFormat')}
             </label>
 
             {format === 'video' ? (
               <>
-                <p className="text-[11px] text-white/40">
-                  Spielt alle Frames einmal ab und nimmt die Wiedergabe als Video auf. Mindestens 2 Frames
-                  nötig. Je nach Browser wird MP4 oder WebM erzeugt.
-                </p>
+                <p className="text-[11px] text-white/40">{t('exportMenu.videoDescription')}</p>
                 <label className="flex items-center gap-2 text-xs text-white/70">
                   <input
                     type="checkbox"
@@ -151,10 +151,10 @@ export function ExportMenu({ stageRef }: { stageRef: RefObject<Konva.Stage | nul
                     checked={appendRecap}
                     onChange={(e) => setAppendRecap(e.target.checked)}
                   />
-                  Zusammenfassungs-Karte am Ende anhängen
+                  {t('exportMenu.appendRecap')}
                 </label>
                 {frames.length < 2 && (
-                  <p className="text-[11px] text-amber-400">Mindestens 2 Frames für ein Video nötig.</p>
+                  <p className="text-[11px] text-amber-400">{t('exportMenu.minTwoFramesVideo')}</p>
                 )}
                 {videoError && <p className="text-[11px] text-red-400">{videoError}</p>}
                 <Button
@@ -163,20 +163,17 @@ export function ExportMenu({ stageRef }: { stageRef: RefObject<Konva.Stage | nul
                   disabled={frames.length < 2}
                   className="w-full"
                 >
-                  {isRecording ? 'Aufnahme läuft…' : 'Video aufnehmen & herunterladen'}
+                  {isRecording ? t('exportMenu.recordingInProgress') : t('exportMenu.recordDownload')}
                 </Button>
               </>
             ) : (
               <>
                 {socialFormat ? (
-                  <p className="text-[11px] text-white/40">
-                    Exportiert als 1080×1920 PNG mit 9011-Hintergrund und Vereinslogo, fertig für
-                    Instagram/TikTok.
-                  </p>
+                  <p className="text-[11px] text-white/40">{t('exportMenu.socialExportDescription')}</p>
                 ) : (
                   <>
                     <label className="flex flex-col gap-1 text-xs">
-                      <span className="font-medium text-white/60">Auflösung</span>
+                      <span className="font-medium text-white/60">{t('exportMenu.resolutionLabel')}</span>
                       <select
                         className="rounded-md border border-pitch-600 bg-pitch-800 px-2 py-1.5 text-xs text-white outline-none focus:border-violet-accent"
                         value={pixelRatio}
@@ -192,14 +189,14 @@ export function ExportMenu({ stageRef }: { stageRef: RefObject<Konva.Stage | nul
 
                     {maxPixelRatio < 4 && (
                       <p className="text-[11px] text-white/40">
-                        Beobachter-Modus: Export bis {maxPixelRatio}x. Für 4K auf Trainer upgraden.
+                        {t('exportMenu.viewerModeNote', { max: maxPixelRatio })}
                       </p>
                     )}
                   </>
                 )}
 
                 <Button onClick={handleExport} className="w-full">
-                  Herunterladen
+                  {t('exportMenu.download')}
                 </Button>
               </>
             )}

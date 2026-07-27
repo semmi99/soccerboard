@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useEditorStore } from '../store/editorStore'
 import { useAuthStore } from '../../auth/store/authStore'
 import {
@@ -43,20 +44,21 @@ function CrestSlot({
   onFile: (file: File) => void
   onRemove: () => void
 }) {
+  const { t } = useTranslation('editor')
   return (
     <div className="flex flex-col gap-1">
       <div className="flex items-center gap-2 rounded-md border border-pitch-700 p-2">
         {crestUrl ? (
           <img
             src={crestUrl}
-            alt="Wappen"
+            alt={t('teamSquadPanel.crestAlt')}
             className="h-8 w-8 shrink-0 rounded-full bg-pitch-800 object-contain"
           />
         ) : (
           <div className="h-8 w-8 shrink-0 rounded-full bg-pitch-800" />
         )}
         <label className="flex-1 cursor-pointer text-center text-xs text-white/70 hover:text-white">
-          {isUploading ? 'Lädt hoch…' : label}
+          {isUploading ? t('teamSquadPanel.uploadingCrest') : label}
           <input
             type="file"
             accept="image/*"
@@ -81,6 +83,7 @@ function CrestSlot({
 }
 
 export function TeamSquadPanel() {
+  const { t } = useTranslation('editor')
   const organization = useAuthStore((s) => s.organization)
   const teamId = useEditorStore((s) => s.teamId)
   const setTeamId = useEditorStore((s) => s.setTeamId)
@@ -104,7 +107,7 @@ export function TeamSquadPanel() {
   const [groupSelectIds, setGroupSelectIds] = useState<Set<string>>(new Set())
   const [isUploadingCrest, setIsUploadingCrest] = useState(false)
 
-  const activeTeam = teams.find((t) => t.id === teamId) ?? null
+  const activeTeam = teams.find((team) => team.id === teamId) ?? null
 
   useEffect(() => {
     if (!organization) return
@@ -253,29 +256,29 @@ export function TeamSquadPanel() {
   return (
     <div className="flex flex-col gap-3">
       <label className="flex flex-col gap-1 text-xs">
-        <span className="font-medium text-white/60">Team</span>
+        <span className="font-medium text-white/60">{t('teamSquadPanel.team')}</span>
         <select
           className={selectClass}
           value={teamId ?? ''}
           onChange={(e) => setTeamId(e.target.value || null)}
         >
-          <option value="">– kein Team –</option>
-          {teams.map((t) => (
-            <option key={t.id} value={t.id}>
-              {t.name}
+          <option value="">{t('teamSquadPanel.noTeam')}</option>
+          {teams.map((team) => (
+            <option key={team.id} value={team.id}>
+              {team.name}
             </option>
           ))}
         </select>
       </label>
 
       <Button variant="secondary" className="w-full" onClick={() => setShowKitDesigner(true)}>
-        {activeTeam ? 'Kit-Design bearbeiten' : 'Farben anpassen'}
+        {activeTeam ? t('teamSquadPanel.editKitDesign') : t('teamSquadPanel.customizeColors')}
       </Button>
 
       {activeTeam ? (
         <CrestSlot
-          label="Wappen hochladen"
-          hint="Wappen ersetzt die Trikotfarben auf allen Spieler-Chips dieses Teams."
+          label={t('teamSquadPanel.uploadCrest')}
+          hint={t('teamSquadPanel.crestHintTeam')}
           crestUrl={activeTeam.crest_url}
           isUploading={isUploadingCrest}
           onFile={(file) => void handleCrestFile(file, 'home')}
@@ -284,16 +287,16 @@ export function TeamSquadPanel() {
       ) : (
         <>
           <CrestSlot
-            label="Wappen Heim hochladen"
-            hint="Wappen ersetzt die Trikotfarben auf allen Heim-Chips (nur in diesem Projekt)."
+            label={t('teamSquadPanel.uploadCrestHome')}
+            hint={t('teamSquadPanel.crestHintHome')}
             crestUrl={customKit?.homeCrestUrl ?? null}
             isUploading={isUploadingCrest}
             onFile={(file) => void handleCrestFile(file, 'home')}
             onRemove={() => void handleRemoveCrest('home')}
           />
           <CrestSlot
-            label="Wappen Auswärts hochladen"
-            hint="Wappen ersetzt die Trikotfarben auf allen Auswärts-Chips (nur in diesem Projekt)."
+            label={t('teamSquadPanel.uploadCrestAway')}
+            hint={t('teamSquadPanel.crestHintAway')}
             crestUrl={customKit?.awayCrestUrl ?? null}
             isUploading={isUploadingCrest}
             onFile={(file) => void handleCrestFile(file, 'away')}
@@ -304,12 +307,12 @@ export function TeamSquadPanel() {
 
       {showKitDesigner && (
         <KitDesignerModal
-          title={activeTeam ? `Kit-Design: ${activeTeam.name}` : 'Farben anpassen'}
-          description={
+          title={
             activeTeam
-              ? undefined
-              : 'Kein Team verknüpft — diese Farben gelten nur für dieses Projekt.'
+              ? t('teamSquadPanel.kitDesignTitle', { name: activeTeam.name })
+              : t('teamSquadPanel.customizeColors')
           }
+          description={activeTeam ? undefined : t('teamSquadPanel.noTeamLinkedNote')}
           initial={{
             homeKitPattern: (activeTeam?.home_kit_pattern ?? customKit?.home.pattern ?? DEFAULT_CUSTOM_KIT.home.pattern) as KitPattern,
             homeKitColor1: activeTeam?.home_kit_color1 ?? customKit?.home.color1 ?? DEFAULT_CUSTOM_KIT.home.color1,
@@ -342,7 +345,7 @@ export function TeamSquadPanel() {
       {teamId && (
         <>
           <label className="flex flex-col gap-1 text-xs">
-            <span className="font-medium text-white/60">Formation</span>
+            <span className="font-medium text-white/60">{t('teamSquadPanel.formation')}</span>
             <div className="flex gap-1.5">
               <select
                 className={`${selectClass} flex-1`}
@@ -350,7 +353,7 @@ export function TeamSquadPanel() {
                 onChange={(e) => setSelectedFormationKey(e.target.value)}
               >
                 <option value="">–</option>
-                <optgroup label="Vorlagen">
+                <optgroup label={t('teamSquadPanel.templatesGroup')}>
                   {PRESET_FORMATIONS.map((p) => (
                     <option key={p.type} value={p.type}>
                       {p.name}
@@ -358,7 +361,7 @@ export function TeamSquadPanel() {
                   ))}
                 </optgroup>
                 {customFormations.length > 0 && (
-                  <optgroup label="Eigene">
+                  <optgroup label={t('teamSquadPanel.customGroup')}>
                     {customFormations.map((f) => (
                       <option key={f.id} value={f.id}>
                         {f.name}
@@ -372,23 +375,23 @@ export function TeamSquadPanel() {
                 disabled={!selectedFormationKey}
                 onClick={handleApplyFormation}
               >
-                Anwenden
+                {t('teamSquadPanel.apply')}
               </Button>
             </div>
           </label>
 
           <div>
             <span className="mb-1 block text-xs font-medium text-white/60">
-              Kader{' '}
+              {t('teamSquadPanel.squad')}{' '}
               {pendingPlayer
-                ? '(Spieler ausgewählt – aufs Feld klicken)'
+                ? t('teamSquadPanel.playerSelectedHint')
                 : pendingPlayers.length > 0
-                  ? `(${pendingPlayers.length} Spieler ausgewählt – einmal aufs Feld klicken)`
-                  : '– Checkbox für mehrere, Klick auf Zeile für einen'}
+                  ? t('teamSquadPanel.playersSelectedHint', { count: pendingPlayers.length })
+                  : t('teamSquadPanel.selectHint')}
             </span>
             <div className="flex max-h-48 flex-col gap-1 overflow-y-auto">
               {players.length === 0 ? (
-                <p className="text-xs text-white/40">Keine Spieler in diesem Team.</p>
+                <p className="text-xs text-white/40">{t('teamSquadPanel.noPlayers')}</p>
               ) : (
                 players
                   .slice()
@@ -426,12 +429,14 @@ export function TeamSquadPanel() {
             </div>
             {groupSelectIds.size > 0 && (
               <div className="mt-2 flex items-center gap-1.5">
-                <span className="text-xs text-white/50">{groupSelectIds.size} ausgewählt:</span>
+                <span className="text-xs text-white/50">
+                  {t('teamSquadPanel.selectedCount', { count: groupSelectIds.size })}
+                </span>
                 <Button variant="secondary" onClick={() => handlePlaceGroup('home')}>
-                  Heim platzieren
+                  {t('teamSquadPanel.placeHome')}
                 </Button>
                 <Button variant="secondary" onClick={() => handlePlaceGroup('away')}>
-                  Auswärts
+                  {t('teamSquadPanel.placeAway')}
                 </Button>
               </div>
             )}

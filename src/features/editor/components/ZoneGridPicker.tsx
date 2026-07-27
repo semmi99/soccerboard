@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useEditorStore } from '../store/editorStore'
 import { useAuthStore } from '../../auth/store/authStore'
 import {
@@ -16,6 +17,7 @@ const inputClass =
   'rounded-md border border-pitch-600 bg-pitch-800 px-2 py-1.5 text-xs text-white outline-none focus:border-violet-accent'
 
 export function ZoneGridPicker() {
+  const { t } = useTranslation('editor')
   const organization = useAuthStore((s) => s.organization)
   const zoneGridStyle = useEditorStore((s) => s.zoneGridStyle)
   const zoneGridCustomId = useEditorStore((s) => s.zoneGridCustomId)
@@ -57,7 +59,7 @@ export function ZoneGridPicker() {
 
   async function handleDelete() {
     if (!zoneGridCustomId) return
-    if (!window.confirm('Dieses eigene Zonenraster löschen?')) return
+    if (!window.confirm(t('zoneGridPicker.deleteConfirm'))) return
     await deleteZoneGrid(zoneGridCustomId)
     setGrids((gs) => gs.filter((g) => g.id !== zoneGridCustomId))
     setZoneGridStyle('none')
@@ -70,17 +72,17 @@ export function ZoneGridPicker() {
   return (
     <div className="flex flex-col gap-1.5">
       <label className="flex flex-col gap-1 text-xs">
-        <span className="font-medium text-white/60">Zonenraster</span>
+        <span className="font-medium text-white/60">{t('zoneGridPicker.label')}</span>
         <select
           className={selectClass}
           value={selectedValue}
           onChange={(e) => handleSelectChange(e.target.value)}
         >
-          <option value="none">Kein Raster</option>
-          <option value="thirds_channels">Drittel &amp; Kanäle</option>
-          <option value="guardiola">Guardiola (Positionsspiel)</option>
+          <option value="none">{t('zoneGridPicker.none')}</option>
+          <option value="thirds_channels">{t('zoneGridPicker.thirdsChannels')}</option>
+          <option value="guardiola">{t('zoneGridPicker.guardiola')}</option>
           {grids.length > 0 && (
-            <optgroup label="Eigene">
+            <optgroup label={t('zoneGridPicker.customGroup')}>
               {grids.map((g) => (
                 <option key={g.id} value={`custom:${g.id}`}>
                   {g.name}
@@ -92,11 +94,11 @@ export function ZoneGridPicker() {
       </label>
       <div className="flex gap-1.5">
         <Button variant="secondary" className="flex-1" onClick={() => setShowEditor(true)}>
-          + Eigenes Raster
+          {t('zoneGridPicker.addCustom')}
         </Button>
         {zoneGridStyle === 'custom' && zoneGridCustomId && (
           <Button variant="danger" onClick={() => void handleDelete()}>
-            Löschen
+            {t('common:actions.delete')}
           </Button>
         )}
       </div>
@@ -125,6 +127,7 @@ function ZoneGridEditorModal({
   onClose: () => void
   onCreated: (grid: ZoneGrid) => void
 }) {
+  const { t } = useTranslation('editor')
   const [name, setName] = useState('')
   const [lines, setLines] = useState<ZoneGridLine[]>([])
   const [isSaving, setIsSaving] = useState(false)
@@ -151,7 +154,7 @@ function ZoneGridEditorModal({
       onCreated(grid)
       onClose()
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Speichern fehlgeschlagen.')
+      setError(err instanceof Error ? err.message : t('zoneGridPicker.saveFailed'))
     } finally {
       setIsSaving(false)
     }
@@ -160,19 +163,17 @@ function ZoneGridEditorModal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
       <div className="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-xl border border-pitch-700 bg-pitch-900 p-6 shadow-2xl">
-        <h2 className="mb-1 text-sm font-semibold text-white">Eigenes Zonenraster</h2>
-        <p className="mb-4 text-xs text-white/50">
-          Linien hinzufügen und positionieren, dann benennen und speichern.
-        </p>
+        <h2 className="mb-1 text-sm font-semibold text-white">{t('zoneGridPicker.editorTitle')}</h2>
+        <p className="mb-4 text-xs text-white/50">{t('zoneGridPicker.editorDescription')}</p>
 
         <label className="mb-3 flex flex-col gap-1 text-xs">
-          <span className="font-medium text-white/60">Name</span>
+          <span className="font-medium text-white/60">{t('zoneGridPicker.nameLabel')}</span>
           <input
             type="text"
             className={inputClass}
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholder="z.B. Mein 3er-Raster"
+            placeholder={t('zoneGridPicker.namePlaceholder')}
           />
         </label>
 
@@ -180,7 +181,7 @@ function ZoneGridEditorModal({
           {lines.map((l, i) => (
             <div key={i} className="flex items-center gap-2 rounded-md border border-pitch-700 p-2">
               <span className="w-16 shrink-0 text-xs text-white/60">
-                {l.orientation === 'vertical' ? 'Vertikal' : 'Horizontal'}
+                {l.orientation === 'vertical' ? t('zoneGridPicker.vertical') : t('zoneGridPicker.horizontal')}
               </span>
               <input
                 type="range"
@@ -197,23 +198,23 @@ function ZoneGridEditorModal({
                 type="button"
                 onClick={() => removeLine(i)}
                 className="shrink-0 text-red-400 hover:text-red-300"
-                title="Linie entfernen"
+                title={t('zoneGridPicker.removeLineTitle')}
               >
                 ×
               </button>
             </div>
           ))}
           {lines.length === 0 && (
-            <p className="text-xs text-white/40">Noch keine Linien — füge unten welche hinzu.</p>
+            <p className="text-xs text-white/40">{t('zoneGridPicker.noLines')}</p>
           )}
         </div>
 
         <div className="mt-3 flex gap-2">
           <Button variant="secondary" onClick={() => addLine('vertical')}>
-            + Vertikale Linie
+            {t('zoneGridPicker.addVerticalLine')}
           </Button>
           <Button variant="secondary" onClick={() => addLine('horizontal')}>
-            + Horizontale Linie
+            {t('zoneGridPicker.addHorizontalLine')}
           </Button>
         </div>
 
@@ -221,7 +222,7 @@ function ZoneGridEditorModal({
 
         <div className="mt-5 flex justify-end gap-2">
           <Button type="button" variant="secondary" onClick={onClose} disabled={isSaving}>
-            Abbrechen
+            {t('common:actions.cancel')}
           </Button>
           <Button
             type="button"
@@ -229,7 +230,7 @@ function ZoneGridEditorModal({
             disabled={!name.trim() || lines.length === 0}
             onClick={() => void handleSave()}
           >
-            Speichern
+            {t('common:actions.save')}
           </Button>
         </div>
       </div>

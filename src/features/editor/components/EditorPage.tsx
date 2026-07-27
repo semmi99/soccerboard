@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import type Konva from 'konva'
 import { useEditorStore } from '../store/editorStore'
 import { loadProject } from '../../../lib/supabase/projects'
@@ -12,6 +13,7 @@ import { EditorCanvas } from './EditorCanvas'
 import { Timeline } from './Timeline'
 
 export function EditorPage() {
+  const { t } = useTranslation('editor')
   const { projectId } = useParams<{ projectId: string }>()
   const navigate = useNavigate()
   const stageRef = useRef<Konva.Stage>(null)
@@ -56,7 +58,7 @@ export function EditorPage() {
       })
       .catch((err: unknown) => {
         if (cancelled) return
-        setLoadError(err instanceof Error ? err.message : 'Projekt konnte nicht geladen werden.')
+        setLoadError(err instanceof Error ? err.message : t('editorPage.loadError'))
       })
       .finally(() => {
         if (!cancelled) setIsLoading(false)
@@ -84,7 +86,7 @@ export function EditorPage() {
           onClick={() => navigate('/dashboard')}
           className="text-sm text-violet-accent-bright underline"
         >
-          Zurück zum Dashboard
+          {t('editorPage.backToDashboard')}
         </button>
       </div>
     )

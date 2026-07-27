@@ -1,3 +1,4 @@
+import i18n from '../../../lib/i18n'
 import type { EquipmentKind, FrameObject, ToolId } from '../types'
 
 let homePlayerCount = 0
@@ -169,7 +170,7 @@ export function createObjectForTool(
     return {
       ...base,
       objectType: 'text',
-      data: { text: 'Text', fontSize: 20, color: '#ffffff', fontStyle: 'normal' },
+      data: { text: i18n.t('editor:factoryDefaults.text'), fontSize: 20, color: '#ffffff', fontStyle: 'normal' },
     }
   }
 
@@ -181,7 +182,13 @@ export function createObjectForTool(
     return {
       ...base,
       objectType: 'text',
-      data: { text: 'BADGE', fontSize: 15, color: '#0f3d59', fontStyle: 'bold', background: '#ffe100' },
+      data: {
+        text: i18n.t('editor:factoryDefaults.badge'),
+        fontSize: 15,
+        color: '#0f3d59',
+        fontStyle: 'bold',
+        background: '#ffe100',
+      },
     }
   }
 
@@ -189,7 +196,13 @@ export function createObjectForTool(
     return {
       ...base,
       objectType: 'text',
-      data: { text: 'Titel', fontSize: 28, color: '#ffffff', fontStyle: 'bold', shadow: true },
+      data: {
+        text: i18n.t('editor:factoryDefaults.title'),
+        fontSize: 28,
+        color: '#ffffff',
+        fontStyle: 'bold',
+        shadow: true,
+      },
     }
   }
 
@@ -197,7 +210,13 @@ export function createObjectForTool(
     return {
       ...base,
       objectType: 'text',
-      data: { text: 'Untertitel', fontSize: 16, color: 'rgba(255,255,255,0.8)', fontStyle: 'normal', shadow: true },
+      data: {
+        text: i18n.t('editor:factoryDefaults.subtitle'),
+        fontSize: 16,
+        color: 'rgba(255,255,255,0.8)',
+        fontStyle: 'normal',
+        shadow: true,
+      },
     }
   }
 
@@ -210,14 +229,14 @@ export function createObjectForTool(
         height: 130,
         background: '#ffffff',
         borderColor: '#0f172a',
-        headingText: 'ÜBERSCHRIFT',
+        headingText: i18n.t('editor:factoryDefaults.quoteHeading'),
         headingFontFamily: 'system',
         headingFontSize: 13,
         headingColor: '#ef4444',
         headingBoxEnabled: true,
         headingBoxBackground: '#ffffff',
         headingBoxBorderColor: '#ef4444',
-        bodyText: 'Text hier eingeben',
+        bodyText: i18n.t('editor:factoryDefaults.quoteBody'),
         bodyFontFamily: 'arial_black',
         bodyFontSize: 22,
         bodyColor: '#0f172a',

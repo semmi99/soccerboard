@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Button } from '../../../components/ui/Button'
 import { ColorSwatchPicker } from '../../../components/ui/ColorSwatchPicker'
 import type { TeamKitPatch } from '../../../lib/supabase/squad'
@@ -6,14 +7,7 @@ import type { KitPattern } from '../../editor/types'
 
 type Side = 'home' | 'away' | 'gk'
 
-const PATTERNS: { id: KitPattern; label: string }[] = [
-  { id: 'solid', label: 'Einfarbig' },
-  { id: 'stripes', label: 'Streifen' },
-  { id: 'hoops', label: 'Ringel' },
-  { id: 'sash', label: 'Schrägband' },
-  { id: 'split', label: 'Geteilt' },
-  { id: 'collar', label: 'Kragen' },
-]
+const PATTERN_VALUES: KitPattern[] = ['solid', 'stripes', 'hoops', 'sash', 'split', 'collar']
 
 function kitPreviewStyle(pattern: KitPattern, color1: string, color2: string): React.CSSProperties {
   switch (pattern) {
@@ -53,6 +47,7 @@ function SideEditor({
   onColor1: (c: string) => void
   onColor2: (c: string) => void
 }) {
+  const { t } = useTranslation('editor')
   return (
     <div className="flex flex-col gap-3 rounded-lg border border-pitch-700 bg-pitch-800/60 p-3.5">
       <div className="flex items-center gap-3">
@@ -64,32 +59,32 @@ function SideEditor({
       </div>
 
       <div className="flex flex-wrap gap-1.5">
-        {PATTERNS.map((p) => (
+        {PATTERN_VALUES.map((v) => (
           <button
-            key={p.id}
+            key={v}
             type="button"
-            onClick={() => onPattern(p.id)}
+            onClick={() => onPattern(v)}
             className={`flex-1 basis-[calc(33.333%-0.25rem)] rounded-md border px-2 py-1.5 text-xs transition-colors ${
-              pattern === p.id
+              pattern === v
                 ? 'border-violet-accent bg-violet-accent/20 text-white'
                 : 'border-pitch-600 text-white/60 hover:text-white'
             }`}
           >
-            {p.label}
+            {t(`kitDesignerModal.patterns.${v}`)}
           </button>
         ))}
       </div>
 
       <div>
         <span className="mb-1 block text-xs font-medium text-white/50">
-          {pattern === 'solid' ? 'Farbe' : 'Farbe 1'}
+          {pattern === 'solid' ? t('kitDesignerModal.color') : t('kitDesignerModal.color1')}
         </span>
         <ColorSwatchPicker value={color1} onChange={onColor1} />
       </div>
 
       {pattern !== 'solid' && (
         <div>
-          <span className="mb-1 block text-xs font-medium text-white/50">Farbe 2</span>
+          <span className="mb-1 block text-xs font-medium text-white/50">{t('kitDesignerModal.color2')}</span>
           <ColorSwatchPicker value={color2} onChange={onColor2} />
         </div>
       )}
@@ -110,6 +105,7 @@ export function KitDesignerModal({
   onClose: () => void
   onSave: (patch: TeamKitPatch) => Promise<void> | void
 }) {
+  const { t } = useTranslation(['editor', 'common'])
   const [homePattern, setHomePattern] = useState(initial.homeKitPattern)
   const [homeColor1, setHomeColor1] = useState(initial.homeKitColor1)
   const [homeColor2, setHomeColor2] = useState(initial.homeKitColor2)
@@ -141,7 +137,7 @@ export function KitDesignerModal({
       })
       onClose()
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Speichern fehlgeschlagen.')
+      setError(err instanceof Error ? err.message : t('kitDesignerModal.saveFailed'))
     } finally {
       setIsSaving(false)
     }
@@ -158,12 +154,12 @@ export function KitDesignerModal({
       <div className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-xl border border-pitch-700 bg-pitch-900 p-6 shadow-2xl">
         <h2 className="mb-1 text-sm font-semibold text-white">{title}</h2>
         <p className="mb-4 text-xs text-white/50">
-          {description ?? 'Farbe & Muster für Heim-, Auswärts- und Torwart-Spieler-Chips.'}
+          {description ?? t('kitDesignerModal.defaultDescription')}
         </p>
 
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <SideEditor
-            title="Heim"
+            title={t('kitDesignerModal.home')}
             pattern={side.home.pattern}
             color1={side.home.color1}
             color2={side.home.color2}
@@ -172,7 +168,7 @@ export function KitDesignerModal({
             onColor2={setHomeColor2}
           />
           <SideEditor
-            title="Auswärts"
+            title={t('kitDesignerModal.away')}
             pattern={side.away.pattern}
             color1={side.away.color1}
             color2={side.away.color2}
@@ -181,7 +177,7 @@ export function KitDesignerModal({
             onColor2={setAwayColor2}
           />
           <SideEditor
-            title="Torwart"
+            title={t('kitDesignerModal.goalkeeper')}
             pattern={side.gk.pattern}
             color1={side.gk.color1}
             color2={side.gk.color2}
@@ -193,7 +189,7 @@ export function KitDesignerModal({
 
         <label className="mt-4 flex flex-col gap-1.5 text-sm">
           <span className="flex justify-between font-medium text-white/70">
-            <span>Chip-Größe</span>
+            <span>{t('kitDesignerModal.chipSize')}</span>
             <span className="text-white/50">{chipScale.toFixed(2)}×</span>
           </span>
           <input
@@ -211,10 +207,10 @@ export function KitDesignerModal({
 
         <div className="mt-5 flex justify-end gap-2">
           <Button type="button" variant="secondary" onClick={onClose} disabled={isSaving}>
-            Abbrechen
+            {t('common:actions.cancel')}
           </Button>
           <Button type="button" loading={isSaving} onClick={() => void handleSave()}>
-            Speichern
+            {t('common:actions.save')}
           </Button>
         </div>
       </div>
