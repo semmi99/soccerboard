@@ -314,6 +314,7 @@ export function TeamSquadPanel() {
               : t('teamSquadPanel.customizeColors')
           }
           description={activeTeam ? undefined : t('teamSquadPanel.noTeamLinkedNote')}
+          allowTemplates={!activeTeam}
           initial={{
             homeKitPattern: (activeTeam?.home_kit_pattern ?? customKit?.home.pattern ?? DEFAULT_CUSTOM_KIT.home.pattern) as KitPattern,
             homeKitColor1: activeTeam?.home_kit_color1 ?? customKit?.home.color1 ?? DEFAULT_CUSTOM_KIT.home.color1,
@@ -325,6 +326,8 @@ export function TeamSquadPanel() {
             gkKitColor1: activeTeam?.gk_kit_color1 ?? customKit?.gk.color1 ?? DEFAULT_CUSTOM_KIT.gk.color1,
             gkKitColor2: activeTeam?.gk_kit_color2 ?? customKit?.gk.color2 ?? DEFAULT_CUSTOM_KIT.gk.color2,
             chipScale: activeTeam?.chip_scale ?? customKit?.chipScale ?? DEFAULT_CUSTOM_KIT.chipScale,
+            homeCrestUrl: activeTeam ? undefined : (customKit?.homeCrestUrl ?? null),
+            awayCrestUrl: activeTeam ? undefined : (customKit?.awayCrestUrl ?? null),
           }}
           onClose={() => setShowKitDesigner(false)}
           onSave={async (patch) => {
@@ -337,6 +340,8 @@ export function TeamSquadPanel() {
                 away: { pattern: patch.awayKitPattern, color1: patch.awayKitColor1, color2: patch.awayKitColor2 },
                 gk: { pattern: patch.gkKitPattern, color1: patch.gkKitColor1, color2: patch.gkKitColor2 },
                 chipScale: patch.chipScale,
+                homeCrestUrl: patch.homeCrestUrl ?? customKit?.homeCrestUrl ?? null,
+                awayCrestUrl: patch.awayCrestUrl ?? customKit?.awayCrestUrl ?? null,
               })
             }
           }}

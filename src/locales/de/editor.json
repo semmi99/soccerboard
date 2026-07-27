@@ -288,7 +288,12 @@
     "away": "Auswärts",
     "goalkeeper": "Torwart",
     "chipSize": "Chip-Größe",
-    "saveFailed": "Speichern fehlgeschlagen."
+    "saveFailed": "Speichern fehlgeschlagen.",
+    "templatesLabel": "Vorlagen",
+    "templates": {
+      "blue": "9011 Blau",
+      "red": "9011 Rot"
+    }
   },
   "zoneGridPicker": {
     "label": "Zonenraster",

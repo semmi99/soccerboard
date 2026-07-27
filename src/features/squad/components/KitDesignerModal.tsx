@@ -9,6 +9,36 @@ type Side = 'home' | 'away' | 'gk'
 
 const PATTERN_VALUES: KitPattern[] = ['solid', 'stripes', 'hoops', 'sash', 'split', 'collar']
 
+/** Built-in generic kit templates — an original "9011 Soccer" badge (not a
+ * real club's crest) sets the home look with one click; away stays a plain
+ * complementary color with no crest, same convention as a linked real
+ * team (crest only ever badges the home side, never the opponent). */
+const KIT_TEMPLATES: {
+  id: string
+  nameKey: string
+  swatch: string
+  home: { pattern: KitPattern; color1: string; color2: string; crestUrl: string }
+  away: { pattern: KitPattern; color1: string; color2: string }
+  gk: { pattern: KitPattern; color1: string; color2: string }
+}[] = [
+  {
+    id: '9011-blue',
+    nameKey: 'kitDesignerModal.templates.blue',
+    swatch: '/kit-templates/9011-blue.svg',
+    home: { pattern: 'solid', color1: '#0f3d59', color2: '#0f3d59', crestUrl: '/kit-templates/9011-blue.svg' },
+    away: { pattern: 'solid', color1: '#f5f5f5', color2: '#f5f5f5' },
+    gk: { pattern: 'solid', color1: '#eab308', color2: '#111827' },
+  },
+  {
+    id: '9011-red',
+    nameKey: 'kitDesignerModal.templates.red',
+    swatch: '/kit-templates/9011-red.svg',
+    home: { pattern: 'solid', color1: '#b91c1c', color2: '#b91c1c', crestUrl: '/kit-templates/9011-red.svg' },
+    away: { pattern: 'solid', color1: '#f5f5f5', color2: '#f5f5f5' },
+    gk: { pattern: 'solid', color1: '#eab308', color2: '#111827' },
+  },
+]
+
 function kitPreviewStyle(pattern: KitPattern, color1: string, color2: string): React.CSSProperties {
   switch (pattern) {
     case 'solid':
@@ -96,12 +126,17 @@ export function KitDesignerModal({
   title,
   description,
   initial,
+  allowTemplates,
   onClose,
   onSave,
 }: {
   title: string
   description?: string
   initial: TeamKitPatch
+  /** Show the built-in "9011 Soccer" template quick-picks — only for a
+   * project's own custom kit, never for a real linked team (which has its
+   * own separate identity/crest via the Squad page). */
+  allowTemplates?: boolean
   onClose: () => void
   onSave: (patch: TeamKitPatch) => Promise<void> | void
 }) {
@@ -116,8 +151,24 @@ export function KitDesignerModal({
   const [gkColor1, setGkColor1] = useState(initial.gkKitColor1)
   const [gkColor2, setGkColor2] = useState(initial.gkKitColor2)
   const [chipScale, setChipScale] = useState(initial.chipScale)
+  const [homeCrestUrl, setHomeCrestUrl] = useState(initial.homeCrestUrl ?? null)
+  const [awayCrestUrl, setAwayCrestUrl] = useState(initial.awayCrestUrl ?? null)
   const [isSaving, setIsSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
+  function applyTemplate(tpl: (typeof KIT_TEMPLATES)[number]) {
+    setHomePattern(tpl.home.pattern)
+    setHomeColor1(tpl.home.color1)
+    setHomeColor2(tpl.home.color2)
+    setAwayPattern(tpl.away.pattern)
+    setAwayColor1(tpl.away.color1)
+    setAwayColor2(tpl.away.color2)
+    setGkPattern(tpl.gk.pattern)
+    setGkColor1(tpl.gk.color1)
+    setGkColor2(tpl.gk.color2)
+    setHomeCrestUrl(tpl.home.crestUrl)
+    setAwayCrestUrl(null)
+  }
 
   async function handleSave() {
     setIsSaving(true)
@@ -134,6 +185,8 @@ export function KitDesignerModal({
         gkKitColor1: gkColor1,
         gkKitColor2: gkColor2,
         chipScale,
+        homeCrestUrl,
+        awayCrestUrl,
       })
       onClose()
     } catch (err) {
@@ -156,6 +209,27 @@ export function KitDesignerModal({
         <p className="mb-4 text-xs text-white/50">
           {description ?? t('kitDesignerModal.defaultDescription')}
         </p>
+
+        {allowTemplates && (
+          <div className="mb-4">
+            <span className="mb-1.5 block text-xs font-medium text-white/50">
+              {t('kitDesignerModal.templatesLabel')}
+            </span>
+            <div className="flex gap-2">
+              {KIT_TEMPLATES.map((tpl) => (
+                <button
+                  key={tpl.id}
+                  type="button"
+                  onClick={() => applyTemplate(tpl)}
+                  className="flex flex-1 items-center gap-2 rounded-lg border border-pitch-600 bg-pitch-800/60 p-2 text-left text-xs text-white/70 transition-colors hover:border-violet-accent hover:text-white"
+                >
+                  <img src={tpl.swatch} alt="" className="h-8 w-8 shrink-0 rounded-full" />
+                  {t(tpl.nameKey)}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
 
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <SideEditor

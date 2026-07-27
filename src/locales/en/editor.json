@@ -288,7 +288,12 @@
     "away": "Away",
     "goalkeeper": "Goalkeeper",
     "chipSize": "Chip size",
-    "saveFailed": "Save failed."
+    "saveFailed": "Save failed.",
+    "templatesLabel": "Templates",
+    "templates": {
+      "blue": "9011 Blue",
+      "red": "9011 Red"
+    }
   },
   "zoneGridPicker": {
     "label": "Zone grid",

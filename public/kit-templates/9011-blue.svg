@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <circle cx="50" cy="50" r="48" fill="#0f3d59" stroke="#f2a73b" stroke-width="3"/>
+  <circle cx="50" cy="50" r="41" fill="none" stroke="#ffe100" stroke-width="1" opacity="0.5"/>
+  <g transform="translate(50,34)" fill="#ffffff" stroke="#0f3d59" stroke-width="0.8">
+    <circle r="11" fill="#ffffff"/>
+    <polygon points="0,-5.5 5.2,-1.7 3.2,4.4 -3.2,4.4 -5.2,-1.7" fill="#0f3d59"/>
+  </g>
+  <text x="50" y="66" text-anchor="middle" font-family="Arial, sans-serif" font-weight="800" font-size="21" fill="#ffe100">9011</text>
+  <text x="50" y="80" text-anchor="middle" font-family="Arial, sans-serif" font-weight="700" font-size="9" letter-spacing="2" fill="#ffffff">SOCCER</text>
+</svg>

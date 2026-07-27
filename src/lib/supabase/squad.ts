@@ -43,6 +43,11 @@ export interface TeamKitPatch {
   gkKitColor1: string
   gkKitColor2: string
   chipScale: number
+  /** Only meaningful for a project's custom (no-team) kit — a linked real
+   * team's crest lives on the `teams` row instead and isn't touched by this
+   * patch. Lets a kit template set the crest alongside pattern/colors. */
+  homeCrestUrl?: string | null
+  awayCrestUrl?: string | null
 }
 
 export async function updateTeamKit(teamId: string, patch: TeamKitPatch): Promise<Team> {
