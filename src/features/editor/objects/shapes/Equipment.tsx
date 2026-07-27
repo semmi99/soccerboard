@@ -1,10 +1,10 @@
-import { Circle, Group, Line, Rect } from 'react-konva'
+import { Circle, Group, Line, Rect, Shape } from 'react-konva'
 import type { EquipmentData, EquipmentKind } from '../../types'
 
 export const EQUIPMENT_DEFAULT_COLORS: Record<EquipmentKind, string> = {
   cone: '#f97316',
   mini_goal: '#e5e7eb',
-  mannequin: '#94a3b8',
+  mannequin: '#ceff00',
   slalom_pole: '#facc15',
   ladder: '#e5e7eb',
   ring: '#ef4444',
@@ -68,14 +68,24 @@ const MANNEQUIN_OUTLINE: number[] = (() => {
   return [...right, ...left].flatMap((p) => [p.x, p.y])
 })()
 
-/** The dummy's tripod stand — three straight legs splaying out from the
- * basket's bottom edge, matching how the real free-kick mannequins are
- * propped up. */
-const MANNEQUIN_LEGS: [number, number, number, number][] = [
-  [-2.5, 13, -4, 20],
-  [0, 13.5, 0, 20.5],
-  [2.5, 13, 4, 20],
-]
+/** The dummy's 4-leg stand: each leg attaches along the basket's bottom
+ * edge, bows outward at mid-length, then converges onto the narrow base
+ * plate — drawn as a single quadratic curve per leg (a tensioned Line
+ * spline overshoots badly with only 3 points, crossing neighboring legs)
+ * so the bow stays clean and predictable. */
+const MANNEQUIN_LEG_TOP_X = [-6, -2, 2, 6]
+const MANNEQUIN_LEG_BOTTOM_X = [-3, -1, 1, 3]
+const MANNEQUIN_LEG_TOP_Y = 13
+const MANNEQUIN_LEG_CONTROL_Y = 24
+const MANNEQUIN_LEG_BOTTOM_Y = 33
+const MANNEQUIN_LEGS: [number, number, number][] = MANNEQUIN_LEG_TOP_X.map((top, i) => {
+  const bottom = MANNEQUIN_LEG_BOTTOM_X[i]!
+  // Control point: the straight-line midpoint pulled slightly further out,
+  // for a subtle bow — pulling it out much further makes neighboring legs'
+  // curves cross over each other into a woven-basket look instead of 4
+  // distinct legs.
+  return [top, ((top + bottom) / 2) * 1.15, bottom]
+})
 
 export function EquipmentShape({ data }: { data: EquipmentData }) {
   return (
@@ -142,18 +152,20 @@ function EquipmentIcon({ data }: { data: EquipmentData }) {
       )
     }
     case 'mannequin': {
-      // A woven free-kick "wall" dummy — a smoothly-rounded basket body
-      // with a small carry-handle loop on top, drawn as an outlined mesh
-      // (stroke + diagonal crosshatch) rather than a solid silhouette,
-      // matching how the real training dummies look.
+      // A solid molded free-kick dummy (SELECT-style): an opaque colored
+      // basket body with a fine punched-dot texture (not a wire mesh), a
+      // tall oval carry-handle loop on top, 4 bowed legs, and a black
+      // ground plate with holes — no spikes below it (kept for a flat
+      // pitch-diagram look, not a literal 3D ground stake).
       const outline = MANNEQUIN_OUTLINE
-      // Fine woven-basket crosshatch — dense diagonal lines every ~3px
-      // (not a sparse handful) so it reads as a mesh texture, not a kite.
-      const hatchOffsets: number[] = []
-      for (let c = -24; c <= 24; c += 3) hatchOffsets.push(c)
+      const dotSpacing = 2.6
+      const dots: { x: number; y: number }[] = []
+      for (let dy = -13; dy <= 12; dy += dotSpacing) {
+        for (let dx = -8; dx <= 8; dx += dotSpacing) dots.push({ x: dx, y: dy })
+      }
       return (
         <Group>
-          <Circle y={-16.5} radius={2} stroke={color} strokeWidth={1.3} />
+          <Circle y={-19} radius={5} scaleY={1.5} stroke={color} strokeWidth={2.2} />
           <Group
             clipFunc={(ctx) => {
               ctx.moveTo(outline[0]!, outline[1]!)
@@ -161,17 +173,29 @@ function EquipmentIcon({ data }: { data: EquipmentData }) {
               ctx.closePath()
             }}
           >
-            <Rect x={-9} y={-14} width={18} height={27} fill={`${color}26`} />
-            {hatchOffsets.map((c) => (
-              <Line key={`h1-${c}`} points={[-9, c - 9, 9, c + 9]} stroke={color} strokeWidth={0.5} opacity={0.7} />
-            ))}
-            {hatchOffsets.map((c) => (
-              <Line key={`h2-${c}`} points={[-9, c + 9, 9, c - 9]} stroke={color} strokeWidth={0.5} opacity={0.7} />
+            <Rect x={-9} y={-14} width={18} height={27} fill={color} />
+            {dots.map((d, i) => (
+              <Circle key={i} x={d.x} y={d.y} radius={0.6} fill="rgba(255,255,255,0.45)" />
             ))}
           </Group>
-          <Line points={outline} closed stroke={color} strokeWidth={1.4} lineJoin="round" />
-          {MANNEQUIN_LEGS.map(([x1, y1, x2, y2], i) => (
-            <Line key={`leg-${i}`} points={[x1, y1, x2, y2]} stroke={color} strokeWidth={1.4} lineCap="round" />
+          <Line points={outline} closed stroke={darken(color, 0.15)} strokeWidth={1.2} lineJoin="round" />
+          {MANNEQUIN_LEGS.map(([topX, ctrlX, botX], i) => (
+            <Shape
+              key={`leg-${i}`}
+              stroke={color}
+              strokeWidth={1.6}
+              lineCap="round"
+              sceneFunc={(ctx, shape) => {
+                ctx.beginPath()
+                ctx.moveTo(topX, MANNEQUIN_LEG_TOP_Y)
+                ctx.quadraticCurveTo(ctrlX, MANNEQUIN_LEG_CONTROL_Y, botX, MANNEQUIN_LEG_BOTTOM_Y)
+                ctx.strokeShape(shape)
+              }}
+            />
+          ))}
+          <Rect x={-5} y={MANNEQUIN_LEG_BOTTOM_Y - 0.7} width={10} height={3} cornerRadius={1} fill="#1c1c1c" />
+          {MANNEQUIN_LEG_BOTTOM_X.map((hx, i) => (
+            <Circle key={`hole-${i}`} x={hx} y={MANNEQUIN_LEG_BOTTOM_Y + 0.8} radius={0.9} fill="#cfcfcf" />
           ))}
         </Group>
       )
