@@ -78,10 +78,13 @@
     },
     "multiSelect": {
       "title": "{{count}} objects selected",
-      "createRatioBadge": "Create ratio badge (e.g. 3 v 4)"
+      "createRatioBadge": "Create ratio badge (e.g. 3 v 4)",
+      "lock": "Lock",
+      "unlock": "Unlock"
     },
     "singleSelect": {
       "title": "Properties",
+      "locked": "Locked (can't be moved)",
       "bringToFront": "Bring to front",
       "sendToBack": "Send to back"
     },

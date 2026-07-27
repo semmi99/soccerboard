@@ -74,6 +74,7 @@ export function PropertiesSidebar() {
   const beginHistoryCheckpoint = useEditorStore((s) => s.beginHistoryCheckpoint)
   const updateObjectLive = useEditorStore((s) => s.updateObjectLive)
   const applyEquipmentStyleToAll = useEditorStore((s) => s.applyEquipmentStyleToAll)
+  const setSelectedLocked = useEditorStore((s) => s.setSelectedLocked)
   const removeSelected = useEditorStore((s) => s.removeSelected)
   const duplicateSelected = useEditorStore((s) => s.duplicateSelected)
   const addRatioBadgeFromSelection = useEditorStore((s) => s.addRatioBadgeFromSelection)
@@ -248,6 +249,12 @@ export function PropertiesSidebar() {
             {t('properties.multiSelect.title', { count: selection.length })}
           </h3>
           <div className="flex flex-wrap gap-1.5">
+            <Button variant="secondary" onClick={() => setSelectedLocked(true)}>
+              {t('properties.multiSelect.lock')}
+            </Button>
+            <Button variant="secondary" onClick={() => setSelectedLocked(false)}>
+              {t('properties.multiSelect.unlock')}
+            </Button>
             <Button variant="secondary" onClick={duplicateSelected}>
               {t('common:actions.duplicate')}
             </Button>
@@ -269,6 +276,18 @@ export function PropertiesSidebar() {
           <h3 className="text-[11px] font-semibold uppercase tracking-wide text-white/40">
             {t('properties.singleSelect.title')}
           </h3>
+
+          <label className="flex items-center gap-2 text-xs text-white/70">
+            <input
+              type="checkbox"
+              className="accent-violet-accent"
+              checked={selectedObject.locked ?? false}
+              onChange={(e) =>
+                updateObjectLive(selectedObject.id, { locked: e.target.checked } as Partial<FrameObject>)
+              }
+            />
+            {t('properties.singleSelect.locked')}
+          </label>
 
           {selectedObject.objectType === 'player_chip' && (
             <PlayerChipFields

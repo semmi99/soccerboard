@@ -282,6 +282,12 @@ export interface FrameObjectBase {
   rotation: number
   scale: number
   zIndex: number
+  /** Freezes the object in place — dragging (and, for arrows, the bend-point
+   * handles) is disabled, but it can still be selected, restyled, or
+   * deleted. Toggled from the properties sidebar, not tied to any one
+   * object type since accidental drags happen on lines just as much as any
+   * other object. */
+  locked?: boolean
 }
 
 export type FrameObject =

@@ -28,6 +28,7 @@ function rowToFrameObject(row: Tables<'frame_objects'>): FrameObject {
     rotation: row.rotation,
     scale: row.scale,
     zIndex: row.z_index,
+    locked: row.locked,
     // The jsonb `data` column was written by this same client, so it is
     // trusted to match the shape implied by `object_type`.
     data: row.data as FrameObject['data'],
@@ -244,6 +245,7 @@ async function insertFramesAndObjects(projectId: string, frames: EditorFrame[]) 
       rotation: o.rotation,
       scale: o.scale,
       z_index: o.zIndex,
+      locked: o.locked ?? false,
     })),
   )
   if (objectInserts.length === 0) return

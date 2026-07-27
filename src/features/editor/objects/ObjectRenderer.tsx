@@ -207,7 +207,11 @@ export function ObjectRenderer({
   // their drag handles here regardless, so it can be repositioned/resized
   // by its tips even though it can never grow a third, interior point.
   const showArrowHandles =
-    object.objectType === 'arrow' && object.data.shape !== 'curved' && isSelected && interactive
+    object.objectType === 'arrow' &&
+    object.data.shape !== 'curved' &&
+    isSelected &&
+    interactive &&
+    !object.locked
 
   function handleArrowPointDragMove(pairIndex: number, x: number, y: number) {
     if (object.objectType !== 'arrow' || !onArrowPointsChange) return
@@ -242,6 +246,13 @@ export function ObjectRenderer({
       scaleX={object.scale * (initialScaleFactor ?? 1)}
       scaleY={object.scale * (initialScaleFactor ?? 1)}
       opacity={initialOpacity ?? 1}
+      // Deliberately NOT gated on `object.locked` here — toggling this prop
+      // false→true was observed to leave the underlying Konva node's own
+      // drag-enabled state stuck at false in some later re-render (a
+      // react-konva prop-diffing quirk with this specific transition), which
+      // would permanently strand a line as undraggable after one lock/unlock
+      // cycle. Locking is instead enforced by aborting the drag the instant
+      // it starts (see onDragStart below), so this flag never needs to flip.
       draggable={interactive}
       onClick={(e: KonvaEventObject<MouseEvent>) => {
         if (!interactive) return
@@ -254,7 +265,18 @@ export function ObjectRenderer({
         onSelect(object.id, false)
       }}
       onDblClick={() => onDoubleClick?.(object.id)}
-      onDragStart={() => {
+      onDragStart={(e: KonvaEventObject<DragEvent>) => {
+        // Belt-and-suspenders on top of the `draggable` prop above: Konva's
+        // own draggable flag doesn't always get reliably re-applied by
+        // react-konva's prop diffing after being toggled off and back on
+        // (observed directly — the prop recomputes correctly every render,
+        // but the node can still start a drag), so a locked object's drag
+        // is also cancelled the instant it starts, regardless of what the
+        // node's own draggable flag currently reports.
+        if (object.locked) {
+          e.target.stopDrag()
+          return
+        }
         onDragStart()
         onObjectDragStart?.(object.id)
       }}

@@ -117,6 +117,7 @@ export type Database = {
           data: Json
           frame_id: string
           id: string
+          locked: boolean
           object_type: string
           player_id: string | null
           rotation: number
@@ -130,6 +131,7 @@ export type Database = {
           data?: Json
           frame_id: string
           id?: string
+          locked?: boolean
           object_type: string
           player_id?: string | null
           rotation?: number
@@ -143,6 +145,7 @@ export type Database = {
           data?: Json
           frame_id?: string
           id?: string
+          locked?: boolean
           object_type?: string
           player_id?: string | null
           rotation?: number

@@ -78,10 +78,13 @@
     },
     "multiSelect": {
       "title": "{{count}} Objekte ausgewählt",
-      "createRatioBadge": "Verhältnis-Badge erstellen (z.B. 3 v 4)"
+      "createRatioBadge": "Verhältnis-Badge erstellen (z.B. 3 v 4)",
+      "lock": "Fixieren",
+      "unlock": "Lösen"
     },
     "singleSelect": {
       "title": "Eigenschaften",
+      "locked": "Fixiert (nicht verschiebbar)",
       "bringToFront": "Nach vorne",
       "sendToBack": "Nach hinten"
     },

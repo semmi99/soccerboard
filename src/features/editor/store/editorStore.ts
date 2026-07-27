@@ -140,6 +140,7 @@ interface EditorState {
     kind: EquipmentKind,
     patch: { color?: string; scale?: number; rotation?: number },
   ) => void
+  setSelectedLocked: (locked: boolean) => void
   removeSelected: () => void
   clearActiveFrame: () => void
   duplicateSelected: () => void
@@ -527,6 +528,17 @@ export const useEditorStore = create<EditorState>((set, get) => ({
                 : o,
             ),
           }
+        : f,
+    )
+    set({ frames: nextFrames, isDirty: true })
+  },
+
+  setSelectedLocked: (locked) => {
+    const { selection, frames, activeFrameIndex } = get()
+    if (!selection.length) return
+    const nextFrames = frames.map((f, i) =>
+      i === activeFrameIndex
+        ? { ...f, objects: f.objects.map((o) => (selection.includes(o.id) ? { ...o, locked } : o)) }
         : f,
     )
     set({ frames: nextFrames, isDirty: true })
