@@ -68,6 +68,7 @@
       },
       "showMarkings": "Show pitch markings",
       "showMovementTrails": "Show movement trail (frame to frame)",
+      "mirrorField": "Mirror field (other side)",
       "lengthM": "Length (m)",
       "widthM": "Width (m)",
       "dimensionsNote": "Real-world field dimensions — used to display pass/run distances in meters."

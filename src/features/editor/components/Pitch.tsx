@@ -210,6 +210,7 @@ export function Pitch({
   customGridLines = [],
   showPitchMarkings = true,
   fieldCrop = 'full',
+  fieldMirrored = false,
 }: {
   design: PitchDesign
   orientation: PitchOrientation
@@ -217,6 +218,7 @@ export function Pitch({
   customGridLines?: ZoneGridLine[]
   showPitchMarkings?: boolean
   fieldCrop?: FieldCrop
+  fieldMirrored?: boolean
 }) {
   const theme = THEMES[design]
   const stage = getCroppedStageSize(orientation, fieldCrop)
@@ -227,7 +229,7 @@ export function Pitch({
   // anchor, so only that slice ends up inside the (now smaller) stage —
   // everything else is naturally clipped by the stage bounds like normal.
   const cropLength = getCropLength(fieldCrop)
-  const cropOriginX = getCropOriginX(fieldCrop)
+  const cropOriginX = getCropOriginX(fieldCrop, fieldMirrored)
   const anchorX = cropOriginX + cropLength / 2
 
   return (

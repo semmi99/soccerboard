@@ -68,6 +68,7 @@
       },
       "showMarkings": "Spielfeldmarkierungen anzeigen",
       "showMovementTrails": "Laufweg-Linie anzeigen (Frame zu Frame)",
+      "mirrorField": "Feld spiegeln (andere Seite)",
       "lengthM": "Länge (m)",
       "widthM": "Breite (m)",
       "dimensionsNote": "Echte Feldmaße — wird genutzt, um Pass-/Laufdistanzen in Metern anzuzeigen."

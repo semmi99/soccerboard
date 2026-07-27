@@ -18,6 +18,7 @@ export function useProjectSave() {
   const showPitchMarkings = useEditorStore((s) => s.showPitchMarkings)
   const showMovementTrails = useEditorStore((s) => s.showMovementTrails)
   const fieldCrop = useEditorStore((s) => s.fieldCrop)
+  const fieldMirrored = useEditorStore((s) => s.fieldMirrored)
   const pitchLengthM = useEditorStore((s) => s.pitchLengthM)
   const pitchWidthM = useEditorStore((s) => s.pitchWidthM)
   const teamId = useEditorStore((s) => s.teamId)
@@ -70,6 +71,7 @@ export function useProjectSave() {
         showPitchMarkings,
         showMovementTrails,
         fieldCrop,
+        fieldMirrored,
         pitchLengthM,
         pitchWidthM,
         customKit,
@@ -101,6 +103,7 @@ export function useProjectSave() {
     showPitchMarkings,
     showMovementTrails,
     fieldCrop,
+    fieldMirrored,
     pitchLengthM,
     pitchWidthM,
     frames,

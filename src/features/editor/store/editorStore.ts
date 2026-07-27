@@ -59,6 +59,9 @@ interface EditorState {
    * including during playback. */
   showMovementTrails: boolean
   fieldCrop: FieldCrop
+  /** Flips a non-full field crop to show the other end of the pitch (the
+   * other goal) — a no-op for the full crop, which already shows both. */
+  fieldMirrored: boolean
   pitchLengthM: number
   pitchWidthM: number
   teamId: string | null
@@ -91,6 +94,7 @@ interface EditorState {
     showPitchMarkings: boolean
     showMovementTrails: boolean
     fieldCrop: FieldCrop
+    fieldMirrored: boolean
     pitchLengthM: number
     pitchWidthM: number
     customKit: TeamKit | null
@@ -108,6 +112,7 @@ interface EditorState {
   setShowPitchMarkings: (show: boolean) => void
   setShowMovementTrails: (show: boolean) => void
   setFieldCrop: (crop: FieldCrop) => void
+  setFieldMirrored: (mirrored: boolean) => void
   setPitchLengthM: (m: number) => void
   setPitchWidthM: (m: number) => void
   setProjectTitle: (title: string) => void
@@ -168,6 +173,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
   showPitchMarkings: true,
   showMovementTrails: false,
   fieldCrop: 'full',
+  fieldMirrored: false,
   pitchLengthM: 105,
   pitchWidthM: 68,
   teamId: null,
@@ -198,6 +204,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
     showPitchMarkings,
     showMovementTrails,
     fieldCrop,
+    fieldMirrored,
     pitchLengthM,
     pitchWidthM,
     customKit,
@@ -214,6 +221,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
       showPitchMarkings,
       showMovementTrails,
       fieldCrop,
+      fieldMirrored,
       pitchLengthM,
       pitchWidthM,
       teamId,
@@ -246,6 +254,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
       showPitchMarkings: true,
       showMovementTrails: false,
       fieldCrop: 'full',
+      fieldMirrored: false,
       pitchLengthM: 105,
       pitchWidthM: 68,
       teamId: null,
@@ -275,6 +284,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
   setShowPitchMarkings: (show) => set({ showPitchMarkings: show, isDirty: true }),
   setShowMovementTrails: (show) => set({ showMovementTrails: show, isDirty: true }),
   setFieldCrop: (crop) => set({ fieldCrop: crop, isDirty: true }),
+  setFieldMirrored: (mirrored) => set({ fieldMirrored: mirrored, isDirty: true }),
   setPitchLengthM: (m) => set({ pitchLengthM: m, isDirty: true }),
   setPitchWidthM: (m) => set({ pitchWidthM: m, isDirty: true }),
   setProjectTitle: (title) => set({ projectTitle: title, isDirty: true }),

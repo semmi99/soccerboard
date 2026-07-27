@@ -365,6 +365,7 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
   const showPitchMarkings = useEditorStore((s) => s.showPitchMarkings)
   const showMovementTrails = useEditorStore((s) => s.showMovementTrails)
   const fieldCrop = useEditorStore((s) => s.fieldCrop)
+  const fieldMirrored = useEditorStore((s) => s.fieldMirrored)
   const pitchLengthM = useEditorStore((s) => s.pitchLengthM)
   const frames = useEditorStore((s) => s.frames)
   const activeFrameIndex = useEditorStore((s) => s.activeFrameIndex)
@@ -582,7 +583,7 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
   // so the whole objects layer is shifted by the same amount the Pitch's
   // own rendering is (see Pitch.tsx) to keep them aligned — and the shift
   // is added back when translating a click into a stored position.
-  const cropShift = getCropOriginX(fieldCrop)
+  const cropShift = getCropOriginX(fieldCrop, fieldMirrored)
 
   const registerRef = useCallback((id: string, node: Konva.Group | null) => {
     if (node) nodeRefs.current[id] = node
@@ -1044,6 +1045,7 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
             customGridLines={zoneGridCustomLines}
             showPitchMarkings={showPitchMarkings}
             fieldCrop={fieldCrop}
+            fieldMirrored={fieldMirrored}
           />
         </Layer>
         <Layer ref={objectsLayerRef}>

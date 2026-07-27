@@ -25,13 +25,14 @@ export function getCropLength(crop: FieldCrop): number {
   return PITCH_LOGICAL.width * CROP_FRACTIONS[crop]
 }
 
-/** Where the visible slice starts along the length axis — crops always
- * show the last portion (the "attacking end"), so the origin is the
- * remainder of the pitch that's cropped away. This is also the shift
+/** Where the visible slice starts along the length axis — crops show the
+ * last portion (the "attacking end") by default, so the origin is the
+ * remainder of the pitch that's cropped away; `mirrored` flips that to the
+ * first portion instead, i.e. the other goal. This is also the shift
  * needed to translate between the cropped stage's local coordinates and
  * the full-pitch coordinate space object positions are stored in. */
-export function getCropOriginX(crop: FieldCrop): number {
-  return PITCH_LOGICAL.width - getCropLength(crop)
+export function getCropOriginX(crop: FieldCrop, mirrored = false): number {
+  return mirrored ? 0 : PITCH_LOGICAL.width - getCropLength(crop)
 }
 
 /** The stage size for a cropped view: the length axis (width for

@@ -56,6 +56,7 @@ export function PropertiesSidebar() {
   const showPitchMarkings = useEditorStore((s) => s.showPitchMarkings)
   const showMovementTrails = useEditorStore((s) => s.showMovementTrails)
   const fieldCrop = useEditorStore((s) => s.fieldCrop)
+  const fieldMirrored = useEditorStore((s) => s.fieldMirrored)
   const pitchLengthM = useEditorStore((s) => s.pitchLengthM)
   const pitchWidthM = useEditorStore((s) => s.pitchWidthM)
   const setPitchDesign = useEditorStore((s) => s.setPitchDesign)
@@ -63,6 +64,7 @@ export function PropertiesSidebar() {
   const setShowPitchMarkings = useEditorStore((s) => s.setShowPitchMarkings)
   const setShowMovementTrails = useEditorStore((s) => s.setShowMovementTrails)
   const setFieldCrop = useEditorStore((s) => s.setFieldCrop)
+  const setFieldMirrored = useEditorStore((s) => s.setFieldMirrored)
   const setPitchLengthM = useEditorStore((s) => s.setPitchLengthM)
   const setPitchWidthM = useEditorStore((s) => s.setPitchWidthM)
   const setLastConnectorColor = useEditorStore((s) => s.setLastConnectorColor)
@@ -163,6 +165,20 @@ export function PropertiesSidebar() {
               <option value="third">{t('properties.field.cropOptions.third')}</option>
             </select>
           </Field>
+          <label
+            className={`flex items-center gap-2 text-xs ${
+              fieldCrop === 'full' ? 'text-white/30' : 'text-white/70'
+            }`}
+          >
+            <input
+              type="checkbox"
+              className="accent-violet-accent"
+              checked={fieldMirrored}
+              disabled={fieldCrop === 'full'}
+              onChange={(e) => setFieldMirrored(e.target.checked)}
+            />
+            {t('properties.field.mirrorField')}
+          </label>
           <ZoneGridPicker />
           <label className="flex items-center gap-2 text-xs text-white/70">
             <input

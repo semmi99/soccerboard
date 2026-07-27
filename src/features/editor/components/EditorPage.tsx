@@ -51,6 +51,7 @@ export function EditorPage() {
           showPitchMarkings: project.showPitchMarkings,
           showMovementTrails: project.showMovementTrails,
           fieldCrop: project.fieldCrop,
+          fieldMirrored: project.fieldMirrored,
           pitchLengthM: project.pitchLengthM,
           pitchWidthM: project.pitchWidthM,
           customKit: project.customKit,

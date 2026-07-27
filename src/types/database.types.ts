@@ -438,6 +438,7 @@ export type Database = {
           created_at: string
           created_by: string | null
           field_crop: string
+          field_mirrored: boolean
           id: string
           kit_override: Json | null
           org_id: string
@@ -459,6 +460,7 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           field_crop?: string
+          field_mirrored?: boolean
           id?: string
           kit_override?: Json | null
           org_id: string
@@ -480,6 +482,7 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           field_crop?: string
+          field_mirrored?: boolean
           id?: string
           kit_override?: Json | null
           org_id?: string

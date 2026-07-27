@@ -77,6 +77,7 @@ export interface LoadedProject {
   showPitchMarkings: boolean
   showMovementTrails: boolean
   fieldCrop: FieldCrop
+  fieldMirrored: boolean
   pitchLengthM: number
   pitchWidthM: number
   customKit: TeamKit | null
@@ -87,7 +88,7 @@ export async function loadProject(id: string): Promise<LoadedProject> {
   const { data: project, error: projectError } = await supabase
     .from('projects')
     .select(
-      'id, title, pitch_design, orientation, team_id, zone_grid_style, zone_grid_custom_id, show_pitch_markings, show_movement_trails, field_crop, pitch_length_m, pitch_width_m, kit_override',
+      'id, title, pitch_design, orientation, team_id, zone_grid_style, zone_grid_custom_id, show_pitch_markings, show_movement_trails, field_crop, field_mirrored, pitch_length_m, pitch_width_m, kit_override',
     )
     .eq('id', id)
     .single()
@@ -124,6 +125,7 @@ export async function loadProject(id: string): Promise<LoadedProject> {
     showPitchMarkings: project.show_pitch_markings,
     showMovementTrails: project.show_movement_trails,
     fieldCrop: project.field_crop as FieldCrop,
+    fieldMirrored: project.field_mirrored,
     pitchLengthM: project.pitch_length_m,
     pitchWidthM: project.pitch_width_m,
     customKit: (project.kit_override as TeamKit | null) ?? null,
@@ -144,6 +146,7 @@ export interface SaveProjectInput {
   showPitchMarkings: boolean
   showMovementTrails: boolean
   fieldCrop: FieldCrop
+  fieldMirrored: boolean
   pitchLengthM: number
   pitchWidthM: number
   customKit: TeamKit | null
@@ -166,6 +169,7 @@ export async function saveProject(input: SaveProjectInput): Promise<string> {
         show_pitch_markings: input.showPitchMarkings,
         show_movement_trails: input.showMovementTrails,
         field_crop: input.fieldCrop,
+        field_mirrored: input.fieldMirrored,
         pitch_length_m: input.pitchLengthM,
         pitch_width_m: input.pitchWidthM,
         kit_override: input.customKit as unknown as Json,
@@ -202,6 +206,7 @@ async function insertProjectRow(
     show_pitch_markings: input.showPitchMarkings,
     show_movement_trails: input.showMovementTrails,
     field_crop: input.fieldCrop,
+    field_mirrored: input.fieldMirrored,
     pitch_length_m: input.pitchLengthM,
     pitch_width_m: input.pitchWidthM,
     kit_override: input.customKit as unknown as Json,
