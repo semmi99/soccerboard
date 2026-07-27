@@ -9,35 +9,23 @@ type Side = 'home' | 'away' | 'gk'
 
 const PATTERN_VALUES: KitPattern[] = ['solid', 'stripes', 'hoops', 'sash', 'split', 'collar']
 
-/** Built-in generic kit templates — an original "9011 Soccer" badge (not a
- * real club's crest) sets the home look with one click; away stays a plain
- * complementary color with no crest, same convention as a linked real
- * team (crest only ever badges the home side, never the opponent). */
-const KIT_TEMPLATES: {
-  id: string
-  nameKey: string
-  swatch: string
-  home: { pattern: KitPattern; color1: string; color2: string; crestUrl: string }
-  away: { pattern: KitPattern; color1: string; color2: string }
-  gk: { pattern: KitPattern; color1: string; color2: string }
-}[] = [
-  {
-    id: '9011-blue',
-    nameKey: 'kitDesignerModal.templates.blue',
-    swatch: '/kit-templates/9011-blue.svg',
-    home: { pattern: 'solid', color1: '#0f3d59', color2: '#0f3d59', crestUrl: '/kit-templates/9011-blue.svg' },
-    away: { pattern: 'solid', color1: '#f5f5f5', color2: '#f5f5f5' },
-    gk: { pattern: 'solid', color1: '#eab308', color2: '#111827' },
-  },
-  {
-    id: '9011-red',
-    nameKey: 'kitDesignerModal.templates.red',
-    swatch: '/kit-templates/9011-red.svg',
-    home: { pattern: 'solid', color1: '#b91c1c', color2: '#b91c1c', crestUrl: '/kit-templates/9011-red.svg' },
-    away: { pattern: 'solid', color1: '#f5f5f5', color2: '#f5f5f5' },
-    gk: { pattern: 'solid', color1: '#eab308', color2: '#111827' },
-  },
-]
+/** Generates an original circular "9011 Soccer" badge (never a real club's
+ * crest) as an inline data-URI SVG, recolored to whatever the user picks —
+ * a generic branded look for a project's own custom kit, not tied to any
+ * fixed preset. */
+function crestBadgeDataUrl(color: string): string {
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+    <circle cx="50" cy="50" r="48" fill="${color}" stroke="#f2a73b" stroke-width="3"/>
+    <circle cx="50" cy="50" r="41" fill="none" stroke="#ffe100" stroke-width="1" opacity="0.5"/>
+    <g transform="translate(50,34)">
+      <circle r="11" fill="#ffffff" stroke="${color}" stroke-width="0.8"/>
+      <polygon points="0,-5.5 5.2,-1.7 3.2,4.4 -3.2,4.4 -5.2,-1.7" fill="${color}"/>
+    </g>
+    <text x="50" y="66" text-anchor="middle" font-family="Arial, sans-serif" font-weight="800" font-size="21" fill="#ffe100">9011</text>
+    <text x="50" y="80" text-anchor="middle" font-family="Arial, sans-serif" font-weight="700" font-size="9" letter-spacing="2" fill="#ffffff">SOCCER</text>
+  </svg>`
+  return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`
+}
 
 function kitPreviewStyle(pattern: KitPattern, color1: string, color2: string): React.CSSProperties {
   switch (pattern) {
@@ -126,17 +114,17 @@ export function KitDesignerModal({
   title,
   description,
   initial,
-  allowTemplates,
+  allowCrestColorPicker,
   onClose,
   onSave,
 }: {
   title: string
   description?: string
   initial: TeamKitPatch
-  /** Show the built-in "9011 Soccer" template quick-picks — only for a
-   * project's own custom kit, never for a real linked team (which has its
-   * own separate identity/crest via the Squad page). */
-  allowTemplates?: boolean
+  /** Show the "9011 Soccer" badge color picker — only for a project's own
+   * custom kit, never for a real linked team (which has its own separate
+   * identity/crest via the Squad page). */
+  allowCrestColorPicker?: boolean
   onClose: () => void
   onSave: (patch: TeamKitPatch) => Promise<void> | void
 }) {
@@ -152,22 +140,24 @@ export function KitDesignerModal({
   const [gkColor2, setGkColor2] = useState(initial.gkKitColor2)
   const [chipScale, setChipScale] = useState(initial.chipScale)
   const [homeCrestUrl, setHomeCrestUrl] = useState(initial.homeCrestUrl ?? null)
-  const [awayCrestUrl, setAwayCrestUrl] = useState(initial.awayCrestUrl ?? null)
+  // Away never gets a crest through this modal (see `applyCrestColor`) — only
+  // ever set via the separate manual upload in TeamSquadPanel — so it's
+  // round-tripped to `onSave` unchanged, with no setter of its own here.
+  const [awayCrestUrl] = useState(initial.awayCrestUrl ?? null)
+  const [crestColor, setCrestColor] = useState(initial.homeCrestUrl ? initial.homeKitColor1 : '#145f89')
   const [isSaving, setIsSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  function applyTemplate(tpl: (typeof KIT_TEMPLATES)[number]) {
-    setHomePattern(tpl.home.pattern)
-    setHomeColor1(tpl.home.color1)
-    setHomeColor2(tpl.home.color2)
-    setAwayPattern(tpl.away.pattern)
-    setAwayColor1(tpl.away.color1)
-    setAwayColor2(tpl.away.color2)
-    setGkPattern(tpl.gk.pattern)
-    setGkColor1(tpl.gk.color1)
-    setGkColor2(tpl.gk.color2)
-    setHomeCrestUrl(tpl.home.crestUrl)
-    setAwayCrestUrl(null)
+  function applyCrestColor(color: string) {
+    setCrestColor(color)
+    setHomePattern('solid')
+    setHomeColor1(color)
+    setHomeColor2(color)
+    setHomeCrestUrl(crestBadgeDataUrl(color))
+  }
+
+  function removeCrest() {
+    setHomeCrestUrl(null)
   }
 
   async function handleSave() {
@@ -210,23 +200,29 @@ export function KitDesignerModal({
           {description ?? t('kitDesignerModal.defaultDescription')}
         </p>
 
-        {allowTemplates && (
+        {allowCrestColorPicker && (
           <div className="mb-4">
             <span className="mb-1.5 block text-xs font-medium text-white/50">
-              {t('kitDesignerModal.templatesLabel')}
+              {t('kitDesignerModal.crestColorLabel')}
             </span>
-            <div className="flex gap-2">
-              {KIT_TEMPLATES.map((tpl) => (
+            <div className="flex items-center gap-3">
+              <img
+                src={homeCrestUrl ?? crestBadgeDataUrl(crestColor)}
+                alt=""
+                className="h-10 w-10 shrink-0 rounded-full"
+              />
+              <div className="flex-1">
+                <ColorSwatchPicker value={crestColor} onChange={applyCrestColor} />
+              </div>
+              {homeCrestUrl && (
                 <button
-                  key={tpl.id}
                   type="button"
-                  onClick={() => applyTemplate(tpl)}
-                  className="flex flex-1 items-center gap-2 rounded-lg border border-pitch-600 bg-pitch-800/60 p-2 text-left text-xs text-white/70 transition-colors hover:border-violet-accent hover:text-white"
+                  onClick={removeCrest}
+                  className="shrink-0 text-xs text-white/40 hover:text-red-400"
                 >
-                  <img src={tpl.swatch} alt="" className="h-8 w-8 shrink-0 rounded-full" />
-                  {t(tpl.nameKey)}
+                  {t('kitDesignerModal.removeCrest')}
                 </button>
-              ))}
+              )}
             </div>
           </div>
         )}

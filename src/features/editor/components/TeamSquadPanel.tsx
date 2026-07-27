@@ -314,7 +314,7 @@ export function TeamSquadPanel() {
               : t('teamSquadPanel.customizeColors')
           }
           description={activeTeam ? undefined : t('teamSquadPanel.noTeamLinkedNote')}
-          allowTemplates={!activeTeam}
+          allowCrestColorPicker={!activeTeam}
           initial={{
             homeKitPattern: (activeTeam?.home_kit_pattern ?? customKit?.home.pattern ?? DEFAULT_CUSTOM_KIT.home.pattern) as KitPattern,
             homeKitColor1: activeTeam?.home_kit_color1 ?? customKit?.home.color1 ?? DEFAULT_CUSTOM_KIT.home.color1,

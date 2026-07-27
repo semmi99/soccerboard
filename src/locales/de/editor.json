@@ -289,11 +289,8 @@
     "goalkeeper": "Torwart",
     "chipSize": "Chip-Größe",
     "saveFailed": "Speichern fehlgeschlagen.",
-    "templatesLabel": "Vorlagen",
-    "templates": {
-      "blue": "9011 Blau",
-      "red": "9011 Rot"
-    }
+    "crestColorLabel": "9011-Wappen-Farbe",
+    "removeCrest": "Wappen entfernen"
   },
   "zoneGridPicker": {
     "label": "Zonenraster",

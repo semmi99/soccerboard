@@ -289,11 +289,8 @@
     "goalkeeper": "Goalkeeper",
     "chipSize": "Chip size",
     "saveFailed": "Save failed.",
-    "templatesLabel": "Templates",
-    "templates": {
-      "blue": "9011 Blue",
-      "red": "9011 Red"
-    }
+    "crestColorLabel": "9011 crest color",
+    "removeCrest": "Remove crest"
   },
   "zoneGridPicker": {
     "label": "Zone grid",
