@@ -123,6 +123,8 @@
     },
     "playerChip": {
       "linked": "Linked to squad player",
+      "showPhoto": "Show photo instead of jersey number/kit",
+      "showPhotoNoPhoto": "Show photo (no photo uploaded in squad)",
       "team": "Team",
       "teamHome": "Home",
       "teamAway": "Away",

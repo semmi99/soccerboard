@@ -46,6 +46,12 @@ export interface PlayerChipData {
   /** Overrides the label text color below the chip. Unset falls back to
    * white — the original look. */
   labelColor?: string
+  /** Shows the linked player's uploaded photo (see Kader page) inside the
+   * chip circle instead of the kit/crest fill — opt-in per chip since a
+   * lineup graphic wants faces, but a tactical board full of photos would
+   * be harder to read at a glance than plain team colors. No effect if
+   * `playerId` isn't set or that player has no photo uploaded. */
+  showPhoto?: boolean
 }
 
 export type KitPattern = 'solid' | 'stripes' | 'hoops' | 'sash' | 'split' | 'collar'

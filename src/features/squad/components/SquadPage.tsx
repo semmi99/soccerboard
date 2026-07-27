@@ -404,7 +404,20 @@ export function SquadPage() {
                       {p.jersey_number ?? '–'}
                     </td>
                     <td className="px-4 py-2.5 text-white">
-                      {p.first_name} {p.last_name}
+                      <div className="flex items-center gap-2.5">
+                        {p.photo_url ? (
+                          <img
+                            src={p.photo_url}
+                            alt=""
+                            className="h-7 w-7 shrink-0 rounded-full object-cover"
+                          />
+                        ) : (
+                          <div className="h-7 w-7 shrink-0 rounded-full bg-pitch-800" />
+                        )}
+                        <span>
+                          {p.first_name} {p.last_name}
+                        </span>
+                      </div>
                     </td>
                     <td className="px-4 py-2.5 text-white/60">
                       {p.position ? t(`positions.${p.position}`, { defaultValue: p.position }) : '–'}

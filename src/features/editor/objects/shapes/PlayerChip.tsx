@@ -183,6 +183,7 @@ function KitFill({ kit }: { kit: KitConfig }) {
 
 export function PlayerChipShape({ data }: { data: PlayerChipData }) {
   const teamKit = useEditorStore((s) => s.teamKit)
+  const playerPhotos = useEditorStore((s) => s.playerPhotos)
   const kit: KitConfig = data.isGoalkeeper
     ? (teamKit?.gk ?? GK_FALLBACK)
     : teamKit
@@ -193,8 +194,10 @@ export function PlayerChipShape({ data }: { data: PlayerChipData }) {
     <Group>
       {data.highlighted && <HighlightRing />}
       {(() => {
+        const photoUrl = data.showPhoto && data.playerId ? playerPhotos[data.playerId] : undefined
         const crestUrl = data.team === 'home' ? teamKit?.homeCrestUrl : teamKit?.awayCrestUrl
-        return crestUrl ? <CrestFill url={crestUrl} /> : <KitFill kit={kit} />
+        const fillUrl = photoUrl ?? crestUrl
+        return fillUrl ? <CrestFill url={fillUrl} /> : <KitFill kit={kit} />
       })()}
       <Text
         text={data.displayText !== undefined ? data.displayText : String(data.number)}

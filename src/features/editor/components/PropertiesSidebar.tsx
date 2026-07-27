@@ -397,12 +397,29 @@ function PlayerChipFields({
   onChange: (patch: Partial<PlayerChipData>) => void
 }) {
   const { t } = useTranslation('editor')
+  const playerPhotos = useEditorStore((s) => s.playerPhotos)
+  const photoUrl = data.playerId ? playerPhotos[data.playerId] : undefined
   return (
     <div className="flex flex-col gap-2">
       {data.playerId && (
         <p className="rounded-md bg-violet-accent/10 px-2 py-1.5 text-xs text-violet-accent-bright">
           {t('properties.playerChip.linked')}
         </p>
+      )}
+      {data.playerId && (
+        <label className="flex items-center gap-2 text-xs text-white/70">
+          <input
+            type="checkbox"
+            className="accent-violet-accent"
+            checked={Boolean(data.showPhoto)}
+            disabled={!photoUrl}
+            onChange={(e) => {
+              onCheckpoint()
+              onChange({ showPhoto: e.target.checked })
+            }}
+          />
+          {photoUrl ? t('properties.playerChip.showPhoto') : t('properties.playerChip.showPhotoNoPhoto')}
+        </label>
       )}
       <Field label={t('properties.playerChip.team')}>
         <select

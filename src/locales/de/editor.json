@@ -123,6 +123,8 @@
     },
     "playerChip": {
       "linked": "Verknüpft mit Kaderspieler",
+      "showPhoto": "Foto statt Rückennummer/Trikot anzeigen",
+      "showPhotoNoPhoto": "Foto anzeigen (kein Foto im Kader hinterlegt)",
       "team": "Team",
       "teamHome": "Heim",
       "teamAway": "Auswärts",
