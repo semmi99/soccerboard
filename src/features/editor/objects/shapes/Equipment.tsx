@@ -42,14 +42,14 @@ function smoothstep(t: number) {
 const MANNEQUIN_OUTLINE: number[] = (() => {
   const keyframes: [number, number][] = [
     [-18, 3],
-    [-13, 4],
-    [-8, 9],
-    [-2, 10],
-    [4, 9],
-    [7, 7],
+    [-14, 4.5],
+    [-9, 9.5],
+    [-3, 10.5],
+    [3, 9.5],
+    [7, 6.5],
     [10, 4],
   ]
-  const STEPS = 6
+  const STEPS = 8
   const right: { x: number; y: number }[] = []
   for (let i = 0; i < keyframes.length - 1; i++) {
     const [y0, w0] = keyframes[i]!
@@ -72,9 +72,9 @@ const MANNEQUIN_OUTLINE: number[] = (() => {
  * basket's bottom edge, matching how the real free-kick mannequins are
  * propped up. */
 const MANNEQUIN_LEGS: [number, number, number, number][] = [
-  [-4, 10, -6, 21],
-  [0, 10, 0, 21],
-  [4, 10, 6, 21],
+  [-3, 10, -4.5, 18],
+  [0, 10.5, 0, 18.5],
+  [3, 10, 4.5, 18],
 ]
 
 export function EquipmentShape({ data }: { data: EquipmentData }) {
@@ -147,11 +147,14 @@ function EquipmentIcon({ data }: { data: EquipmentData }) {
       // (stroke + diagonal crosshatch) rather than a solid silhouette,
       // matching how the real training dummies look.
       const outline = MANNEQUIN_OUTLINE
-      const hatchOffsets = [-30, -22, -14, -6, 2, 10, 18, 26]
+      // Fine woven-basket crosshatch — dense diagonal lines every ~3px
+      // (not a sparse handful) so it reads as a mesh texture, not a kite.
+      const hatchOffsets: number[] = []
+      for (let c = -32; c <= 30; c += 3.2) hatchOffsets.push(c)
       return (
         <Group>
-          <Circle y={-23} radius={3} stroke={color} strokeWidth={1.5} />
-          <Line points={[0, -20, 0, -18]} stroke={color} strokeWidth={1.5} />
+          <Circle y={-21} radius={2.6} stroke={color} strokeWidth={1.4} />
+          <Line points={[0, -18.4, 0, -18]} stroke={color} strokeWidth={1.4} />
           <Group
             clipFunc={(ctx) => {
               ctx.moveTo(outline[0]!, outline[1]!)
@@ -159,17 +162,17 @@ function EquipmentIcon({ data }: { data: EquipmentData }) {
               ctx.closePath()
             }}
           >
-            <Rect x={-16} y={-20} width={32} height={40} fill={`${color}26`} />
+            <Rect x={-16} y={-18} width={32} height={30} fill={`${color}26`} />
             {hatchOffsets.map((c) => (
-              <Line key={`h1-${c}`} points={[-16, c - 16, 16, c + 16]} stroke={color} strokeWidth={0.75} opacity={0.55} />
+              <Line key={`h1-${c}`} points={[-16, c - 16, 16, c + 16]} stroke={color} strokeWidth={0.5} opacity={0.7} />
             ))}
             {hatchOffsets.map((c) => (
-              <Line key={`h2-${c}`} points={[-16, c + 16, 16, c - 16]} stroke={color} strokeWidth={0.75} opacity={0.55} />
+              <Line key={`h2-${c}`} points={[-16, c + 16, 16, c - 16]} stroke={color} strokeWidth={0.5} opacity={0.7} />
             ))}
           </Group>
-          <Line points={outline} closed stroke={color} strokeWidth={1.5} lineJoin="round" />
+          <Line points={outline} closed stroke={color} strokeWidth={1.4} lineJoin="round" />
           {MANNEQUIN_LEGS.map(([x1, y1, x2, y2], i) => (
-            <Line key={`leg-${i}`} points={[x1, y1, x2, y2]} stroke={color} strokeWidth={1.5} lineCap="round" />
+            <Line key={`leg-${i}`} points={[x1, y1, x2, y2]} stroke={color} strokeWidth={1.4} lineCap="round" />
           ))}
         </Group>
       )
