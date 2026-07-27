@@ -224,6 +224,8 @@ export interface QuoteCardData {
   bodyGradient?: boolean
   bodyColor2?: string | null
   bodyGradientDirection?: 'radial' | 'linear'
+  /** undefined = 'left', matching the pre-existing (unconfigurable) default. */
+  bodyAlign?: 'left' | 'center' | 'right'
 }
 
 export interface EquipmentData {

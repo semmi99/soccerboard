@@ -127,6 +127,7 @@ export function QuoteCard({ data, hideText }: { data: QuoteCardData; hideText?: 
             fontSize={data.bodyFontSize}
             fontFamily={QUOTE_FONT_STACKS[data.bodyFontFamily]}
             fontStyle="bold italic"
+            align={data.bodyAlign ?? 'left'}
             wrap="word"
             fill={data.bodyColor}
             {...(data.bodyGradient

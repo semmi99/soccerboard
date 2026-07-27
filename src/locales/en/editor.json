@@ -104,6 +104,12 @@
       "color": "Color",
       "fontFamily": "Font",
       "fontSize": "Font size ({{px}}px)",
+      "textAlign": "Alignment",
+      "textAlignOptions": {
+        "left": "Left",
+        "center": "Center",
+        "right": "Right"
+      },
       "lineStyle": "Line style",
       "strokeWidth": "Stroke width ({{px}}px)",
       "gradientRadial": "Radial (from the center)",

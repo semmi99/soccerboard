@@ -27,6 +27,7 @@ import { getCurveOffset } from '../objects/shapes/arrowCurve'
 import { addArrowMidpoint } from '../objects/shapes/arrowPoints'
 
 const LINE_STYLE_VALUES: LineStyle[] = ['solid', 'dashed', 'dotted']
+const ALIGN_VALUES: Array<'left' | 'center' | 'right'> = ['left', 'center', 'right']
 
 const FONT_SIZE_PRESET_VALUES = [
   { key: 'small', size: 14 },
@@ -1290,6 +1291,27 @@ function QuoteCardFields({
               onChange({ bodyColor: c })
             }}
           />
+        </Field>
+        <Field label={t('properties.shared.textAlign')}>
+          <div className="flex gap-1.5">
+            {ALIGN_VALUES.map((v) => (
+              <button
+                key={v}
+                type="button"
+                onClick={() => {
+                  onCheckpoint()
+                  onChange({ bodyAlign: v })
+                }}
+                className={`flex-1 rounded-md border px-1.5 py-1 text-[11px] transition-colors ${
+                  (data.bodyAlign ?? 'left') === v
+                    ? 'border-violet-accent bg-violet-accent/20 text-white'
+                    : 'border-pitch-600 bg-pitch-800 text-white/60 hover:border-violet-accent/50'
+                }`}
+              >
+                {t(`properties.shared.textAlignOptions.${v}`)}
+              </button>
+            ))}
+          </div>
         </Field>
         <label className="flex items-center gap-2 text-xs text-white/70">
           <input

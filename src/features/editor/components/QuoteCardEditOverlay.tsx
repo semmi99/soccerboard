@@ -115,6 +115,7 @@ export function QuoteCardEditOverlay({
           fontWeight: 'bold',
           fontStyle: 'italic',
           color: data.bodyColor,
+          textAlign: data.bodyAlign ?? 'left',
         }}
       />
     </div>
