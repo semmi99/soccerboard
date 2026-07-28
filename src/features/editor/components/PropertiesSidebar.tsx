@@ -1377,41 +1377,6 @@ function QuoteCardFields({
             ))}
           </div>
         </Field>
-        <label className="flex items-center gap-2 text-xs text-white/70">
-          <input
-            type="checkbox"
-            className="accent-violet-accent"
-            checked={Boolean(data.bodyGradient)}
-            onChange={(e) => {
-              onCheckpoint()
-              onChange({ bodyGradient: e.target.checked })
-            }}
-          />
-          {t('properties.shared.gradientInsteadOfFlat')}
-        </label>
-        {data.bodyGradient && (
-          <>
-            <select
-              className={selectClass}
-              value={data.bodyGradientDirection ?? 'radial'}
-              onChange={(e) => {
-                onCheckpoint()
-                onChange({ bodyGradientDirection: e.target.value as 'radial' | 'linear' })
-              }}
-            >
-              <option value="radial">{t('properties.shared.gradientRadial')}</option>
-              <option value="linear">{t('properties.shared.gradientLinear')}</option>
-            </select>
-            <ColorSwatchPicker
-              size="sm"
-              value={data.bodyColor2 ?? data.bodyColor}
-              onChange={(c) => {
-                onCheckpoint()
-                onChange({ bodyColor2: c })
-              }}
-            />
-          </>
-        )}
       </div>
 
       <div className="flex flex-col gap-2 rounded-md border border-pitch-700 p-2">
