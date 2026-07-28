@@ -87,7 +87,7 @@ export function QuoteCardEditOverlay({
         }}
         style={{
           ...fieldStyleBase,
-          left: layout.pad * visualScale,
+          left: layout.headingBoxX * visualScale,
           top: layout.headingY * visualScale,
           width: layout.headingBoxWidth * visualScale,
           height: layout.headingBoxHeight * visualScale,

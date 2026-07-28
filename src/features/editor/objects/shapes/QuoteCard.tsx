@@ -55,7 +55,19 @@ export function computeQuoteCardLayout(data: QuoteCardData) {
   const headingBoxHeight = data.headingFontSize + HEADING_BOX_PAD_Y * 2
   const headingY = PAD
   const bodyY = headingY + headingBoxHeight + (data.headingBoxEnabled ? 10 : 6)
-  return { pad: PAD, headingBoxWidth, headingBoxHeight, headingY, bodyY }
+  // The heading box hugs its own text tightly, so aligning the *text*
+  // within it has no visible effect — what actually needs to move is the
+  // box itself, left/center/right across the card's full width. Without a
+  // box, the heading already spans the full width, so alignment works the
+  // normal (text-within-area) way instead.
+  const headingBoxX = data.headingBoxEnabled
+    ? data.headingAlign === 'right'
+      ? data.width - PAD - headingBoxWidth
+      : data.headingAlign === 'center'
+        ? (data.width - headingBoxWidth) / 2
+        : PAD
+    : PAD
+  return { pad: PAD, headingBoxWidth, headingBoxHeight, headingY, headingBoxX, bodyY }
 }
 
 /** A freely-placeable heading + body callout card, matching the look of
@@ -69,7 +81,7 @@ export function QuoteCard({ data, hideText }: { data: QuoteCardData; hideText?: 
       : { fill: data.background }
     : {}
 
-  const { headingBoxWidth, headingBoxHeight, headingY, bodyY } = computeQuoteCardLayout(data)
+  const { headingBoxWidth, headingBoxHeight, headingY, headingBoxX, bodyY } = computeQuoteCardLayout(data)
 
   return (
     <Group>
@@ -85,7 +97,7 @@ export function QuoteCard({ data, hideText }: { data: QuoteCardData; hideText?: 
         <>
           {data.headingBoxEnabled && (
             <Rect
-              x={PAD}
+              x={headingBoxX}
               y={headingY}
               width={headingBoxWidth}
               height={headingBoxHeight}
@@ -96,8 +108,8 @@ export function QuoteCard({ data, hideText }: { data: QuoteCardData; hideText?: 
             />
           )}
           <Text
-            x={PAD}
-            y={data.headingBoxEnabled ? headingY : headingY}
+            x={headingBoxX}
+            y={headingY}
             width={data.headingBoxEnabled ? headingBoxWidth : data.width - PAD * 2}
             height={data.headingBoxEnabled ? headingBoxHeight : undefined}
             text={data.headingText}
