@@ -204,7 +204,11 @@ export function createObjectForTool(
 
   if (tool.startsWith('equipment_')) {
     const kind = tool.slice('equipment_'.length) as EquipmentKind
-    return { ...base, objectType: 'training_equipment', data: { kind } }
+    // The dummy reads noticeably larger than the other equipment at the
+    // shared default scale — starts smaller here; the existing "Größe"
+    // slider in the properties sidebar still scales up from this point.
+    const scale = kind === 'mannequin' ? 0.6 : base.scale
+    return { ...base, scale, objectType: 'training_equipment', data: { kind } }
   }
 
   return null

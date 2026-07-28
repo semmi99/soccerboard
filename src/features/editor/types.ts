@@ -9,7 +9,6 @@ export type EquipmentKind =
   | 'slalom_pole'
   | 'ladder'
   | 'ring'
-  | 'coach'
 
 export interface PlayerChipData {
   team: Team

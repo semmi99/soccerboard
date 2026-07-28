@@ -6,7 +6,6 @@ import { uploadBoardImage, readImageDimensions } from '../../../lib/supabase/ima
 import type { EquipmentKind, ToolId } from '../types'
 import {
   BallIcon,
-  CoachIcon,
   ConeIcon,
   ConnectorIcon,
   CircleShapeIcon,
@@ -40,7 +39,6 @@ const EQUIPMENT_ICONS: Record<EquipmentKind, ReactNode> = {
   slalom_pole: <SlalomPoleIcon />,
   ladder: <LadderIcon />,
   ring: <RingIcon />,
-  coach: <CoachIcon />,
 }
 
 export function Toolbar() {
@@ -54,7 +52,6 @@ export function Toolbar() {
     slalom_pole: t('toolbar.equipment.slalomPole'),
     ladder: t('toolbar.equipment.ladder'),
     ring: t('toolbar.equipment.ring'),
-    coach: t('toolbar.equipment.coach'),
   }
 
   const SECTIONS: ToolDef[][] = [
