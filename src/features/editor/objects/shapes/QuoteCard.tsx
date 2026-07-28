@@ -104,7 +104,7 @@ export function QuoteCard({ data, hideText }: { data: QuoteCardData; hideText?: 
             fontSize={data.headingFontSize}
             fontFamily={QUOTE_FONT_STACKS[data.headingFontFamily]}
             fontStyle="bold"
-            align="center"
+            align={data.headingAlign ?? 'center'}
             verticalAlign="middle"
             wrap="word"
             fill={data.headingColor}

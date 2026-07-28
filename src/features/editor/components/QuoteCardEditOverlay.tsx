@@ -95,7 +95,7 @@ export function QuoteCardEditOverlay({
           fontFamily: QUOTE_FONT_STACKS[data.headingFontFamily],
           fontWeight: 'bold',
           color: data.headingColor,
-          textAlign: 'center',
+          textAlign: data.headingAlign ?? 'center',
         }}
       />
       <textarea

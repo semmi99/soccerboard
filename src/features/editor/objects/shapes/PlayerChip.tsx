@@ -184,18 +184,26 @@ function KitFill({ kit }: { kit: KitConfig }) {
 export function PlayerChipShape({ data }: { data: PlayerChipData }) {
   const teamKit = useEditorStore((s) => s.teamKit)
   const playerPhotos = useEditorStore((s) => s.playerPhotos)
-  const kit: KitConfig = data.isGoalkeeper
-    ? (teamKit?.gk ?? GK_FALLBACK)
-    : teamKit
-      ? teamKit[data.team]
-      : { pattern: 'solid', color1: TEAM_COLORS[data.team], color2: TEAM_COLORS[data.team] }
+  const customKit: KitConfig | undefined = data.color
+    ? { pattern: 'solid', color1: data.color, color2: data.color }
+    : undefined
+  const kit: KitConfig =
+    customKit ??
+    (data.isGoalkeeper
+      ? (teamKit?.gk ?? GK_FALLBACK)
+      : teamKit
+        ? teamKit[data.team]
+        : { pattern: 'solid', color1: TEAM_COLORS[data.team], color2: TEAM_COLORS[data.team] })
 
   return (
     <Group>
       {data.highlighted && <HighlightRing />}
       {(() => {
         const photoUrl = data.showPhoto && data.playerId ? playerPhotos[data.playerId] : undefined
-        const crestUrl = data.team === 'home' ? teamKit?.homeCrestUrl : teamKit?.awayCrestUrl
+        // A per-chip custom color is a more specific override than the
+        // team-wide crest, so it wins over the crest — but a linked
+        // player's own photo (opted into explicitly) still wins over both.
+        const crestUrl = customKit ? undefined : data.team === 'home' ? teamKit?.homeCrestUrl : teamKit?.awayCrestUrl
         const fillUrl = photoUrl ?? crestUrl
         return fillUrl ? <CrestFill url={fillUrl} /> : <KitFill kit={kit} />
       })()}

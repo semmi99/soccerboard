@@ -434,6 +434,32 @@ function PlayerChipFields({
           <option value="away">{t('properties.playerChip.teamAway')}</option>
         </select>
       </Field>
+      <Field label={t('properties.playerChip.chipColor')}>
+        <div className="flex flex-col gap-1.5">
+          <label className="flex items-center gap-2 text-xs text-white/70">
+            <input
+              type="checkbox"
+              className="accent-violet-accent"
+              checked={Boolean(data.color)}
+              onChange={(e) => {
+                onCheckpoint()
+                onChange({ color: e.target.checked ? (data.color ?? '#f97316') : null })
+              }}
+            />
+            {t('properties.playerChip.useCustomColor')}
+          </label>
+          {data.color && (
+            <ColorSwatchPicker
+              size="sm"
+              value={data.color}
+              onChange={(c) => {
+                onCheckpoint()
+                onChange({ color: c })
+              }}
+            />
+          )}
+        </div>
+      </Field>
       <Field label={t('properties.playerChip.jerseyNumber')}>
         <input
           type="number"
@@ -1197,6 +1223,27 @@ function QuoteCardFields({
               onChange({ headingColor: c })
             }}
           />
+        </Field>
+        <Field label={t('properties.shared.textAlign')}>
+          <div className="flex gap-1.5">
+            {ALIGN_VALUES.map((v) => (
+              <button
+                key={v}
+                type="button"
+                onClick={() => {
+                  onCheckpoint()
+                  onChange({ headingAlign: v })
+                }}
+                className={`flex-1 rounded-md border px-1.5 py-1 text-[11px] transition-colors ${
+                  (data.headingAlign ?? 'center') === v
+                    ? 'border-violet-accent bg-violet-accent/20 text-white'
+                    : 'border-pitch-600 bg-pitch-800 text-white/60 hover:border-violet-accent/50'
+                }`}
+              >
+                {t(`properties.shared.textAlignOptions.${v}`)}
+              </button>
+            ))}
+          </div>
         </Field>
         <label className="flex items-center gap-2 text-xs text-white/70">
           <input

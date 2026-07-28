@@ -8,6 +8,7 @@ export const EQUIPMENT_DEFAULT_COLORS: Record<EquipmentKind, string> = {
   slalom_pole: '#facc15',
   ladder: '#e5e7eb',
   ring: '#ef4444',
+  coach: '#1e293b',
 }
 
 /** Darkens a hex color for the cone's base/shadow accent. */
@@ -213,6 +214,21 @@ function EquipmentIcon({ data }: { data: EquipmentData }) {
       )
     case 'ring':
       return <Circle radius={15} stroke={color} strokeWidth={5} />
+    case 'coach': {
+      // A simple standing figure — head, jacket-like torso, legs and arms
+      // at the sides — for marking the coach/trainer's own position on the
+      // touchline, distinct from any team's player chips.
+      return (
+        <Group>
+          <Circle y={-16} radius={4} fill={color} />
+          <Rect x={-7} y={-11} width={14} height={20} cornerRadius={6} fill={color} />
+          <Line points={[-3, 9, -5, 21]} stroke={color} strokeWidth={3.5} lineCap="round" />
+          <Line points={[3, 9, 5, 21]} stroke={color} strokeWidth={3.5} lineCap="round" />
+          <Line points={[-7, -8, -11, 1]} stroke={color} strokeWidth={3} lineCap="round" />
+          <Line points={[7, -8, 11, 1]} stroke={color} strokeWidth={3} lineCap="round" />
+        </Group>
+      )
+    }
     default:
       return null
   }

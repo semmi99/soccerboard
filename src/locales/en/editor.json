@@ -23,7 +23,8 @@
       "mannequin": "Mannequin",
       "slalomPole": "Slalom pole",
       "ladder": "Ladder",
-      "ring": "Ring"
+      "ring": "Ring",
+      "coach": "Coach"
     }
   },
   "topBar": {
@@ -125,6 +126,8 @@
       "linked": "Linked to squad player",
       "showPhoto": "Show photo instead of jersey number/kit",
       "showPhotoNoPhoto": "Show photo (no photo uploaded in squad)",
+      "chipColor": "Chip color",
+      "useCustomColor": "Custom color instead of team kit",
       "team": "Team",
       "teamHome": "Home",
       "teamAway": "Away",

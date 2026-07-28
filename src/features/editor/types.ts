@@ -9,6 +9,7 @@ export type EquipmentKind =
   | 'slalom_pole'
   | 'ladder'
   | 'ring'
+  | 'coach'
 
 export interface PlayerChipData {
   team: Team
@@ -52,6 +53,12 @@ export interface PlayerChipData {
    * be harder to read at a glance than plain team colors. No effect if
    * `playerId` isn't set or that player has no photo uploaded. */
   showPhoto?: boolean
+  /** Overrides the chip's fill with a flat custom color instead of the
+   * team's kit pattern/colors — for drills that need to split a team into
+   * more than the usual two (home/away) groups by color. Takes priority
+   * over a team crest (which is team-wide, so a per-player override should
+   * win) but not over `showPhoto`. Unset keeps the normal team-kit look. */
+  color?: string | null
 }
 
 export type KitPattern = 'solid' | 'stripes' | 'hoops' | 'sash' | 'split' | 'collar'
@@ -222,6 +229,8 @@ export interface QuoteCardData {
   headingBoxEnabled?: boolean
   headingBoxBackground?: string
   headingBoxBorderColor?: string
+  /** undefined = 'center', matching the pre-existing (unconfigurable) default. */
+  headingAlign?: 'left' | 'center' | 'right'
 
   bodyText: string
   bodyFontFamily: QuoteFontFamily

@@ -23,7 +23,8 @@
       "mannequin": "Dummy",
       "slalomPole": "Slalomstange",
       "ladder": "Leiter",
-      "ring": "Ring"
+      "ring": "Ring",
+      "coach": "Trainer"
     }
   },
   "topBar": {
@@ -125,6 +126,8 @@
       "linked": "Verknüpft mit Kaderspieler",
       "showPhoto": "Foto statt Rückennummer/Trikot anzeigen",
       "showPhotoNoPhoto": "Foto anzeigen (kein Foto im Kader hinterlegt)",
+      "chipColor": "Chip-Farbe",
+      "useCustomColor": "Eigene Farbe statt Team-Trikot",
       "team": "Team",
       "teamHome": "Heim",
       "teamAway": "Auswärts",

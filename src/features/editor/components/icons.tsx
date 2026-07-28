@@ -137,6 +137,17 @@ export function MannequinIcon(props: SVGProps<SVGSVGElement>) {
   )
 }
 
+export function CoachIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <Base {...props}>
+      <circle cx="12" cy="5" r="2.3" />
+      <path d="M12 7.3v6" />
+      <path d="M12 9.8l-4 2.2M12 9.8l4 2.2" />
+      <path d="M12 13.3L8.5 21M12 13.3L15.5 21" />
+    </Base>
+  )
+}
+
 export function SlalomPoleIcon(props: SVGProps<SVGSVGElement>) {
   return (
     <Base {...props}>
