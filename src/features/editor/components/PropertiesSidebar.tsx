@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type ChangeEvent, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useEditorStore } from '../store/editorStore'
+import { hasPrimaryColor, useEditorStore } from '../store/editorStore'
 import type {
   ArrowData,
   BallData,
@@ -76,6 +76,7 @@ export function PropertiesSidebar() {
   const updateObjectLive = useEditorStore((s) => s.updateObjectLive)
   const applyEquipmentStyleToAll = useEditorStore((s) => s.applyEquipmentStyleToAll)
   const setSelectedLocked = useEditorStore((s) => s.setSelectedLocked)
+  const setColorForSelected = useEditorStore((s) => s.setColorForSelected)
   const removeSelected = useEditorStore((s) => s.removeSelected)
   const duplicateSelected = useEditorStore((s) => s.duplicateSelected)
   const addRatioBadgeFromSelection = useEditorStore((s) => s.addRatioBadgeFromSelection)
@@ -263,6 +264,32 @@ export function PropertiesSidebar() {
               {t('common:actions.delete')}
             </Button>
           </div>
+          {(() => {
+            const colorable = frame?.objects.filter((o) => selection.includes(o.id) && hasPrimaryColor(o)) ?? []
+            if (!colorable.length) return null
+            const first = colorable[0]!
+            let currentColor = '#f0d878'
+            if (first.objectType === 'training_equipment') {
+              currentColor = first.data.color ?? EQUIPMENT_DEFAULT_COLORS[first.data.kind]
+            } else if (
+              first.objectType === 'arrow' ||
+              first.objectType === 'connector' ||
+              first.objectType === 'text' ||
+              first.objectType === 'ball'
+            ) {
+              currentColor = first.data.color ?? currentColor
+            }
+            return (
+              <div className="mt-2">
+                <Field label={t('properties.multiSelect.colorAll')}>
+                  <ColorSwatchPicker
+                    value={currentColor}
+                    onChange={(color) => setColorForSelected(color)}
+                  />
+                </Field>
+              </div>
+            )
+          })()}
           {(frame?.objects.filter((o) => o.objectType === 'player_chip' && selection.includes(o.id)).length ?? 0) >=
             2 && (
             <Button variant="secondary" className="mt-1.5 w-full" onClick={addRatioBadgeFromSelection}>

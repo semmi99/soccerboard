@@ -31,6 +31,34 @@ function cloneObject(o: FrameObject): FrameObject {
   return { ...o, data: { ...o.data } } as FrameObject
 }
 
+/** Object types whose data has one plain hex "color" field — used by the
+ * multi-select color picker so a whole batch (e.g. two arrows) can be
+ * recolored at once. Shapes/quote cards are deliberately excluded: their
+ * fill is stored as an rgba string with its own separate opacity, a
+ * different convention that a single flat hex swatch would clobber. */
+function withPrimaryColor(o: FrameObject, color: string): FrameObject {
+  switch (o.objectType) {
+    case 'arrow':
+    case 'connector':
+    case 'text':
+    case 'ball':
+    case 'training_equipment':
+      return { ...o, data: { ...o.data, color } } as FrameObject
+    default:
+      return o
+  }
+}
+
+export function hasPrimaryColor(o: FrameObject): boolean {
+  return (
+    o.objectType === 'arrow' ||
+    o.objectType === 'connector' ||
+    o.objectType === 'text' ||
+    o.objectType === 'ball' ||
+    o.objectType === 'training_equipment'
+  )
+}
+
 function cloneFrames(frames: EditorFrame[]): EditorFrame[] {
   return frames.map((f) => ({
     ...f,
@@ -147,6 +175,7 @@ interface EditorState {
     patch: { color?: string; scale?: number; rotation?: number },
   ) => void
   setSelectedLocked: (locked: boolean) => void
+  setColorForSelected: (color: string) => void
   removeSelected: () => void
   clearActiveFrame: () => void
   duplicateSelected: () => void
@@ -604,6 +633,22 @@ export const useEditorStore = create<EditorState>((set, get) => ({
     const nextFrames = frames.map((f, i) =>
       i === activeFrameIndex
         ? { ...f, objects: f.objects.map((o) => (selection.includes(o.id) ? { ...o, locked } : o)) }
+        : f,
+    )
+    set({ frames: nextFrames, isDirty: true })
+  },
+
+  // Recolors every selected object that has a plain hex color field (see
+  // withPrimaryColor) — e.g. two selected arrows both take the new color
+  // at once — silently leaving any selected object without one (shapes,
+  // player chips, ...) untouched.
+  setColorForSelected: (color) => {
+    const { selection, frames, activeFrameIndex } = get()
+    if (!selection.length) return
+    pushHistory(get, set)
+    const nextFrames = frames.map((f, i) =>
+      i === activeFrameIndex
+        ? { ...f, objects: f.objects.map((o) => (selection.includes(o.id) ? withPrimaryColor(o, color) : o)) }
         : f,
     )
     set({ frames: nextFrames, isDirty: true })

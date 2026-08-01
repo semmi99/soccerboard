@@ -83,7 +83,8 @@
       "title": "{{count}} objects selected",
       "createRatioBadge": "Create ratio badge (e.g. 3 v 4)",
       "lock": "Lock",
-      "unlock": "Unlock"
+      "unlock": "Unlock",
+      "colorAll": "Color (for all selected)"
     },
     "singleSelect": {
       "title": "Properties",
