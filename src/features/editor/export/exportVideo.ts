@@ -4,9 +4,11 @@ import { useEditorStore } from '../store/editorStore'
 import {
   SOCIAL_HEIGHT,
   SOCIAL_WIDTH,
+  computePlainFitRect,
   computeSocialFitRect,
   drawSocialLogo,
   loadImageElement,
+  paintPlainBackground,
   paintSocialBackground,
 } from './socialFrame'
 import { computeSequenceStats } from './sequenceStats'
@@ -185,7 +187,7 @@ export async function recordFramesAsVideo(
   options: RecordVideoOptions = {},
 ): Promise<VideoRecordingResult> {
   const { fps = 30, social = false, logoUrl = null, recap = false } = options
-  const { frames } = useEditorStore.getState()
+  const { frames, orientation } = useEditorStore.getState()
   if (frames.length < 2) {
     throw new Error(i18n.t('editor:exportInternal.minTwoFramesError'))
   }
@@ -195,9 +197,19 @@ export async function recordFramesAsVideo(
 
   const stageWidth = stage.width()
   const stageHeight = stage.height()
-  const width = social ? SOCIAL_WIDTH : stageWidth
-  const height = social ? SOCIAL_HEIGHT : stageHeight
-  const fitRect = social ? computeSocialFitRect(stageWidth, stageHeight) : null
+  // A portrait board's native stage isn't quite 9:16 (it follows the
+  // pitch's own real-world proportions) — force the exact ratio here rather
+  // than only offering it through the branded "social" export, so a plain
+  // portrait video still drops straight into a Story/Reel slot. Landscape
+  // boards keep their native size; 9:16 wouldn't fit that content anyway.
+  const forcePortrait916 = !social && orientation === 'vertical'
+  const width = social || forcePortrait916 ? SOCIAL_WIDTH : stageWidth
+  const height = social || forcePortrait916 ? SOCIAL_HEIGHT : stageHeight
+  const fitRect = social
+    ? computeSocialFitRect(stageWidth, stageHeight)
+    : forcePortrait916
+      ? computePlainFitRect(stageWidth, stageHeight, SOCIAL_WIDTH, SOCIAL_HEIGHT)
+      : null
 
   // Loaded once up front so each per-tick composite stays synchronous —
   // a failed/slow logo fetch just means no watermark, not a broken export.
@@ -217,13 +229,14 @@ export async function recordFramesAsVideo(
   if (!ctx) throw new Error(i18n.t('editor:exportInternal.canvasNotSupported'))
 
   function compositeOnce() {
-    if (social && fitRect) {
-      paintSocialBackground(ctx!)
+    if (fitRect) {
+      if (social) paintSocialBackground(ctx!)
+      else paintPlainBackground(ctx!, width, height)
       for (const layer of stage.getLayers()) {
         const layerCanvas = (layer.getCanvas() as unknown as { _canvas: HTMLCanvasElement })._canvas
         ctx!.drawImage(layerCanvas, fitRect.x, fitRect.y, fitRect.w, fitRect.h)
       }
-      if (logoImg) drawSocialLogo(ctx!, logoImg)
+      if (social && logoImg) drawSocialLogo(ctx!, logoImg)
       return
     }
     ctx!.clearRect(0, 0, width, height)

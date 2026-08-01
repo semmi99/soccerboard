@@ -30,6 +30,30 @@ export function computeSocialFitRect(contentWidth: number, contentHeight: number
   return { x, y, w, h }
 }
 
+/** Same fit-and-center idea as `computeSocialFitRect`, but full-bleed (no
+ * branding margins reserved top/bottom) — for forcing an exact 9:16 canvas
+ * on a portrait board's plain (non-social) video export, where the pitch
+ * itself should fill as much of the frame as possible with plain letterbox
+ * bars instead of a branded background. */
+export function computePlainFitRect(
+  contentWidth: number,
+  contentHeight: number,
+  targetWidth: number,
+  targetHeight: number,
+) {
+  const scale = Math.min(targetWidth / contentWidth, targetHeight / contentHeight)
+  const w = contentWidth * scale
+  const h = contentHeight * scale
+  const x = (targetWidth - w) / 2
+  const y = (targetHeight - h) / 2
+  return { x, y, w, h }
+}
+
+export function paintPlainBackground(ctx: CanvasRenderingContext2D, width: number, height: number) {
+  ctx.fillStyle = '#000000'
+  ctx.fillRect(0, 0, width, height)
+}
+
 export function loadImageElement(url: string): Promise<HTMLImageElement> {
   return new Promise((resolve, reject) => {
     const img = new Image()
