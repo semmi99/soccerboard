@@ -141,6 +141,7 @@ interface EditorState {
   applyFormationToFrame: (positions: FormationPosition[], players: FormationPlayer[]) => void
   beginHistoryCheckpoint: () => void
   updateObjectLive: (objectId: string, patch: Partial<FrameObject>) => void
+  setObjectPositions: (patches: { id: string; x: number; y: number }[]) => void
   applyEquipmentStyleToAll: (
     kind: EquipmentKind,
     patch: { color?: string; scale?: number; rotation?: number },
@@ -546,6 +547,28 @@ export const useEditorStore = create<EditorState>((set, get) => ({
             objects: f.objects.map((o) =>
               o.id === objectId ? ({ ...o, ...patch } as typeof o) : o,
             ),
+          }
+        : f,
+    )
+    set({ frames: nextFrames, isDirty: true })
+  },
+
+  // Batched sibling of updateObjectLive — applied during a group drag (see
+  // EditorCanvas's handleDragMove) so every object in a multi-selection
+  // moves by the same delta in one store update instead of the dragged
+  // object alone.
+  setObjectPositions: (patches) => {
+    const { frames, activeFrameIndex } = get()
+    if (!patches.length) return
+    const patchMap = new Map(patches.map((p) => [p.id, p]))
+    const nextFrames = frames.map((f, i) =>
+      i === activeFrameIndex
+        ? {
+            ...f,
+            objects: f.objects.map((o) => {
+              const p = patchMap.get(o.id)
+              return p ? { ...o, x: p.x, y: p.y } : o
+            }),
           }
         : f,
     )

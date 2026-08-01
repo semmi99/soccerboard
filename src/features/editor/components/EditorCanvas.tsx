@@ -376,6 +376,7 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
   const addObjectAt = useEditorStore((s) => s.addObjectAt)
   const beginHistoryCheckpoint = useEditorStore((s) => s.beginHistoryCheckpoint)
   const updateObjectLive = useEditorStore((s) => s.updateObjectLive)
+  const setObjectPositions = useEditorStore((s) => s.setObjectPositions)
   const isPlaying = useEditorStore((s) => s.isPlaying)
   const connectorDraftFromId = useEditorStore((s) => s.connectorDraftFromId)
   const setConnectorDraftFromId = useEditorStore((s) => s.setConnectorDraftFromId)
@@ -942,6 +943,18 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
     beginHistoryCheckpoint()
   }
 
+  // Snapshot of a group drag in progress: the dragged object's own starting
+  // position (to derive how far the pointer has actually moved) plus every
+  // OTHER selected, unlocked object's starting position — so the whole
+  // selection can be shifted by the same delta instead of only the one
+  // object Konva is actually dragging. Null outside of a drag.
+  const dragAnchorRef = useRef<{
+    id: string
+    startX: number
+    startY: number
+    others: { id: string; startX: number; startY: number }[]
+  } | null>(null)
+
   // A plain grab-and-drag (no prior click) never fires onSelect — Konva only
   // treats a gesture as a click if the pointer barely moved — so without
   // this, moving a player/ball straight from an unselected state would never
@@ -949,14 +962,44 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
   // the object wasn't already part of it, so dragging one of several
   // selected chips together doesn't collapse the rest of the selection.
   function handleObjectDragStart(id: string) {
-    if (selection.includes(id)) return
-    const obj = frame.objects.find((o) => o.id === id)
-    if (obj && (obj.objectType === 'player_chip' || obj.objectType === 'ball')) {
-      setSelection([id])
+    let activeSelection = selection
+    if (!selection.includes(id)) {
+      const obj = frame.objects.find((o) => o.id === id)
+      if (obj && (obj.objectType === 'player_chip' || obj.objectType === 'ball')) {
+        setSelection([id])
+      }
+      activeSelection = [id]
+    }
+
+    const draggedObj = frame.objects.find((o) => o.id === id)
+    if (!draggedObj) return
+    dragAnchorRef.current = {
+      id,
+      startX: draggedObj.x,
+      startY: draggedObj.y,
+      others: activeSelection
+        .filter((sid) => sid !== id)
+        .map((sid) => frame.objects.find((o) => o.id === sid))
+        .filter((o): o is FrameObject => o !== undefined && !o.locked)
+        .map((o) => ({ id: o.id, startX: o.x, startY: o.y })),
     }
   }
 
+  // Group-drag: when the dragged object is part of a multi-selection, every
+  // other selected (unlocked) object is shifted by the same delta so the
+  // whole selection moves together — e.g. right after a paste, which
+  // selects everything it just added.
   function handleDragMove(id: string, x: number, y: number) {
+    const anchor = dragAnchorRef.current
+    if (anchor && anchor.id === id && anchor.others.length > 0) {
+      const dx = x - anchor.startX
+      const dy = y - anchor.startY
+      setObjectPositions([
+        { id, x, y },
+        ...anchor.others.map((o) => ({ id: o.id, x: o.startX + dx, y: o.startY + dy })),
+      ])
+      return
+    }
     updateObjectLive(id, { x, y })
   }
 
