@@ -41,6 +41,36 @@ export function useKeyboardShortcuts({ onSave }: { onSave: () => void }) {
         return
       }
 
+      if (isMod && e.key.toLowerCase() === 'c') {
+        e.preventDefault()
+        store.copySelected()
+        return
+      }
+
+      if (isMod && e.key.toLowerCase() === 'x') {
+        e.preventDefault()
+        store.cutSelected()
+        return
+      }
+
+      if (isMod && e.key.toLowerCase() === 'v') {
+        e.preventDefault()
+        store.pasteClipboard()
+        return
+      }
+
+      if (
+        (e.key === 'ArrowUp' || e.key === 'ArrowDown' || e.key === 'ArrowLeft' || e.key === 'ArrowRight') &&
+        store.selection.length > 0
+      ) {
+        e.preventDefault()
+        const step = e.shiftKey ? 10 : 1
+        const dx = e.key === 'ArrowLeft' ? -step : e.key === 'ArrowRight' ? step : 0
+        const dy = e.key === 'ArrowUp' ? -step : e.key === 'ArrowDown' ? step : 0
+        store.nudgeSelected(dx, dy)
+        return
+      }
+
       if (e.key === 'Delete' || e.key === 'Backspace') {
         if (store.selection.length === 0) return
         e.preventDefault()

@@ -82,6 +82,10 @@ interface EditorState {
   isDirty: boolean
   past: FramesSnapshot[]
   future: FramesSnapshot[]
+  /** In-memory copy/paste buffer (not persisted with the project) — holds
+   * whatever was last copied/cut so it can be pasted again, including into
+   * a different frame. */
+  clipboard: FrameObject[]
 
   loadProject: (opts: {
     projectId: string
@@ -148,6 +152,10 @@ interface EditorState {
   addRatioBadgeFromSelection: () => void
   bringToFront: (objectId: string) => void
   sendToBack: (objectId: string) => void
+  nudgeSelected: (dx: number, dy: number) => void
+  copySelected: () => void
+  cutSelected: () => void
+  pasteClipboard: () => void
 
   addFrame: (maxFrames: number) => boolean
   removeFrame: (index: number) => void
@@ -194,6 +202,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
   isDirty: false,
   past: [],
   future: [],
+  clipboard: [],
 
   loadProject: ({
     projectId,
@@ -631,6 +640,91 @@ export const useEditorStore = create<EditorState>((set, get) => ({
     set({
       frames: nextFrames,
       selection: duplicates.map((d) => d.id),
+      isDirty: true,
+    })
+  },
+
+  // Arrow-key nudge: moves every selected, unlocked object by the same
+  // delta. Connectors aren't in `selection` themselves (their line is
+  // derived from the two chips they join) so they follow along for free.
+  nudgeSelected: (dx, dy) => {
+    const { selection, frames, activeFrameIndex } = get()
+    if (!selection.length) return
+    pushHistory(get, set)
+    const nextFrames = frames.map((f, i) =>
+      i === activeFrameIndex
+        ? {
+            ...f,
+            objects: f.objects.map((o) =>
+              selection.includes(o.id) && !o.locked ? { ...o, x: o.x + dx, y: o.y + dy } : o,
+            ),
+          }
+        : f,
+    )
+    set({ frames: nextFrames, isDirty: true })
+  },
+
+  // Copies the current selection into an in-memory clipboard (data only —
+  // pasting always mints fresh ids) so it can be pasted again, including
+  // into a different frame or after switching frames entirely.
+  copySelected: () => {
+    const { selection, frames, activeFrameIndex } = get()
+    if (!selection.length) return
+    const frame = frames[activeFrameIndex]!
+    const copied = frame.objects.filter((o) => selection.includes(o.id)).map(cloneObject)
+    if (!copied.length) return
+    set({ clipboard: copied })
+  },
+
+  cutSelected: () => {
+    if (!get().selection.length) return
+    get().copySelected()
+    get().removeSelected()
+  },
+
+  // Pastes the clipboard into the CURRENTLY active frame (which may not be
+  // the frame it was copied from) with fresh ids, offset slightly so the
+  // paste is visibly distinct from the source instead of sitting exactly on
+  // top of it. A connector is only kept if both the chips it joins were
+  // copied alongside it — remapped to their pasted (new-id) counterparts —
+  // otherwise it would dangle off objects that may not exist in the target
+  // frame at all.
+  pasteClipboard: () => {
+    const { clipboard, frames, activeFrameIndex } = get()
+    if (!clipboard.length) return
+    pushHistory(get, set)
+    const idMap = new Map<string, string>()
+    for (const o of clipboard) idMap.set(o.id, crypto.randomUUID())
+    const frame = frames[activeFrameIndex]!
+    const maxZ = frame.objects.reduce((m, o) => Math.max(m, o.zIndex), -1)
+    const pasted: FrameObject[] = clipboard
+      .map((o, i) => {
+        if (o.objectType === 'connector') {
+          const fromId = idMap.get(o.data.fromId)
+          const toId = idMap.get(o.data.toId)
+          if (!fromId || !toId) return null
+          return {
+            ...cloneObject(o),
+            id: idMap.get(o.id)!,
+            zIndex: maxZ + 1 + i,
+            data: { ...o.data, fromId, toId },
+          } as FrameObject
+        }
+        return {
+          ...cloneObject(o),
+          id: idMap.get(o.id)!,
+          x: o.x + 24,
+          y: o.y + 24,
+          zIndex: maxZ + 1 + i,
+        } as FrameObject
+      })
+      .filter((o): o is FrameObject => o !== null)
+    const nextFrames = frames.map((f, i) =>
+      i === activeFrameIndex ? { ...f, objects: [...f.objects, ...pasted] } : f,
+    )
+    set({
+      frames: nextFrames,
+      selection: pasted.map((p) => p.id),
       isDirty: true,
     })
   },
