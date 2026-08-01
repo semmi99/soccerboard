@@ -28,7 +28,8 @@
     "name": "Name",
     "position": "Position",
     "secondaryPosition": "Nebenposition",
-    "foot": "Fuß"
+    "foot": "Fuß",
+    "rating": "Bewertung"
   },
   "deleteDialog": {
     "title": "Spieler löschen?",
@@ -56,7 +57,15 @@
     "nationality": "Nationalität",
     "phone": "Telefon",
     "email": "Email",
-    "notes": "Notizen"
+    "notes": "Notizen",
+    "attributesTitle": "Bewertung (1-5)",
+    "attributes": {
+      "technique": "Technik",
+      "tactics": "Taktik",
+      "physical": "Physis",
+      "mental": "Mentalität",
+      "pace": "Schnelligkeit"
+    }
   },
   "bulkAddDialog": {
     "title": "Mehrere Spieler auf einmal",

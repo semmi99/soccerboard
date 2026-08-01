@@ -4,6 +4,7 @@ import { useAuthStore } from '../../auth/store/authStore'
 import { AppHeader } from '../../../app/AppHeader'
 import { Button } from '../../../components/ui/Button'
 import {
+  averagePlayerRating,
   createPlayer,
   createTeam,
   deletePlayer,
@@ -248,6 +249,7 @@ export function SquadPage() {
         phone: '',
         email: '',
         notes: '',
+        attributes: {},
       })
       created.push(player)
     }
@@ -394,6 +396,7 @@ export function SquadPage() {
                   <th className="px-4 py-3 font-medium">{t('table.position')}</th>
                   <th className="px-4 py-3 font-medium">{t('table.secondaryPosition')}</th>
                   <th className="px-4 py-3 font-medium">{t('table.foot')}</th>
+                  <th className="px-4 py-3 font-medium">{t('table.rating')}</th>
                   <th className="px-4 py-3 font-medium" />
                 </tr>
               </thead>
@@ -429,6 +432,9 @@ export function SquadPage() {
                     </td>
                     <td className="px-4 py-2.5 text-white/60">
                       {p.strong_foot ? t(`feet.${p.strong_foot}`, { defaultValue: p.strong_foot }) : '–'}
+                    </td>
+                    <td className="px-4 py-2.5 text-white/60">
+                      {averagePlayerRating(p.attributes)?.toFixed(1) ?? '–'}
                     </td>
                     <td className="px-4 py-2.5 text-right">
                       <button

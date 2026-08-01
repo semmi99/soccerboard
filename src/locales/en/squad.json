@@ -28,7 +28,8 @@
     "name": "Name",
     "position": "Position",
     "secondaryPosition": "Secondary position",
-    "foot": "Foot"
+    "foot": "Foot",
+    "rating": "Rating"
   },
   "deleteDialog": {
     "title": "Delete player?",
@@ -56,7 +57,15 @@
     "nationality": "Nationality",
     "phone": "Phone",
     "email": "Email",
-    "notes": "Notes"
+    "notes": "Notes",
+    "attributesTitle": "Rating (1-5)",
+    "attributes": {
+      "technique": "Technique",
+      "tactics": "Tactics",
+      "physical": "Physical",
+      "mental": "Mentality",
+      "pace": "Pace"
+    }
   },
   "bulkAddDialog": {
     "title": "Add several players at once",

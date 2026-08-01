@@ -1,9 +1,28 @@
 import { supabase } from './client'
-import type { Tables, TablesInsert, TablesUpdate } from '../../types/database.types'
+import type { Json, Tables, TablesInsert, TablesUpdate } from '../../types/database.types'
 import type { KitPattern } from '../../features/editor/types'
 
 export type Team = Tables<'teams'>
 export type Player = Tables<'players'>
+
+/** Five broad scouting-style categories, rated 1-5, saved into the
+ * players table's existing (previously unused) `attributes` jsonb column —
+ * a quick season-to-season development snapshot rather than a detailed
+ * 20+ stat sheet, which would need real match/training data to back it up
+ * honestly. */
+export const PLAYER_ATTRIBUTE_KEYS = ['technique', 'tactics', 'physical', 'mental', 'pace'] as const
+export type PlayerAttributeKey = (typeof PLAYER_ATTRIBUTE_KEYS)[number]
+export type PlayerAttributes = Partial<Record<PlayerAttributeKey, number>>
+
+/** Average of whichever attributes have actually been rated — null if none
+ * have, so the UI can show "–" instead of a misleading 0. */
+export function averagePlayerRating(attributes: unknown): number | null {
+  const values = Object.values((attributes as PlayerAttributes) ?? {}).filter(
+    (v): v is number => typeof v === 'number',
+  )
+  if (!values.length) return null
+  return values.reduce((a, b) => a + b, 0) / values.length
+}
 
 export async function listTeams(orgId: string): Promise<Team[]> {
   const { data, error } = await supabase
@@ -96,6 +115,7 @@ export interface PlayerFormValues {
   phone: string
   email: string
   notes: string
+  attributes: PlayerAttributes
 }
 
 function toInsert(values: PlayerFormValues): TablesInsert<'players'> {
@@ -112,6 +132,7 @@ function toInsert(values: PlayerFormValues): TablesInsert<'players'> {
     phone: values.phone || null,
     email: values.email || null,
     notes: values.notes || null,
+    attributes: values.attributes as unknown as Json,
   }
 }
 

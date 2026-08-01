@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { Button } from '../../../components/ui/Button'
 import { Input } from '../../../components/ui/Input'
 import { POSITIONS, STRONG_FOOT_OPTIONS } from '../constants'
-import type { Player, PlayerFormValues } from '../../../lib/supabase/squad'
+import { PLAYER_ATTRIBUTE_KEYS, type Player, type PlayerAttributes, type PlayerFormValues } from '../../../lib/supabase/squad'
 
 const selectClass =
   'rounded-lg border border-pitch-600 bg-pitch-800 px-3.5 py-2.5 text-sm text-white outline-none focus:border-violet-accent'
@@ -22,6 +22,7 @@ function toFormValues(teamId: string, player?: Player): PlayerFormValues {
     phone: player?.phone ?? '',
     email: player?.email ?? '',
     notes: player?.notes ?? '',
+    attributes: (player?.attributes as PlayerAttributes) ?? {},
   }
 }
 
@@ -187,6 +188,28 @@ export function PlayerFormDialog({
             value={values.email}
             onChange={(e) => set('email', e.target.value)}
           />
+        </div>
+
+        <div className="mt-4">
+          <span className="text-sm font-medium text-white/70">{t('playerForm.attributesTitle')}</span>
+          <div className="mt-2 flex flex-col gap-2.5">
+            {PLAYER_ATTRIBUTE_KEYS.map((key) => (
+              <label key={key} className="flex items-center gap-3 text-sm">
+                <span className="w-24 shrink-0 text-white/60">{t(`playerForm.attributes.${key}`)}</span>
+                <input
+                  type="range"
+                  min={1}
+                  max={5}
+                  value={values.attributes[key] ?? 3}
+                  onChange={(e) =>
+                    set('attributes', { ...values.attributes, [key]: Number(e.target.value) })
+                  }
+                  className="flex-1"
+                />
+                <span className="w-4 shrink-0 text-right text-white/80">{values.attributes[key] ?? '–'}</span>
+              </label>
+            ))}
+          </div>
         </div>
 
         <label className="mt-3 flex flex-col gap-1.5 text-sm">
