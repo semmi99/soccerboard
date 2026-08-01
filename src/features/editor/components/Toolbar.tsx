@@ -185,48 +185,50 @@ export function Toolbar() {
         </div>
       ))}
       <div className="my-1 h-px w-full bg-gold-accent/20" />
-      <label
-        title={t('toolbar.insertImage')}
-        aria-label={t('toolbar.insertImage')}
-        className={`flex h-11 w-11 cursor-pointer items-center justify-center rounded-lg border border-gold-accent/10 bg-[#0d1e35] text-gold-accent/70 transition-colors hover:border-gold-accent/40 hover:text-gold-accent-bright ${
-          isUploadingImage ? 'pointer-events-none opacity-50' : ''
-        }`}
-      >
-        <ImageInsertIcon />
-        <input
-          type="file"
-          accept="image/*"
-          className="hidden"
-          disabled={isUploadingImage}
-          onChange={(e) => {
-            const file = e.target.files?.[0]
-            if (file) void handleImageFile(file)
-            e.target.value = ''
-          }}
-        />
-      </label>
-      <label
-        title={isPro ? t('toolbar.insertReferenceImage') : t('toolbar.referenceImageProOnly')}
-        aria-label={isPro ? t('toolbar.insertReferenceImage') : t('toolbar.referenceImageProOnly')}
-        className={`flex h-11 w-11 items-center justify-center rounded-lg border border-gold-accent/10 bg-[#0d1e35] text-gold-accent/70 transition-colors ${
-          isPro && !isUploadingReference
-            ? 'cursor-pointer hover:border-gold-accent/40 hover:text-gold-accent-bright'
-            : 'cursor-not-allowed opacity-40'
-        }`}
-      >
-        <TraceImageIcon />
-        <input
-          type="file"
-          accept="image/*"
-          className="hidden"
-          disabled={!isPro || isUploadingReference}
-          onChange={(e) => {
-            const file = e.target.files?.[0]
-            if (file) void handleReferenceImageFile(file)
-            e.target.value = ''
-          }}
-        />
-      </label>
+      <div className="grid w-full grid-cols-2 gap-1.5">
+        <label
+          title={t('toolbar.insertImage')}
+          aria-label={t('toolbar.insertImage')}
+          className={`flex h-11 w-11 cursor-pointer items-center justify-center rounded-lg border border-gold-accent/10 bg-[#0d1e35] text-gold-accent/70 transition-colors hover:border-gold-accent/40 hover:text-gold-accent-bright ${
+            isUploadingImage ? 'pointer-events-none opacity-50' : ''
+          }`}
+        >
+          <ImageInsertIcon />
+          <input
+            type="file"
+            accept="image/*"
+            className="hidden"
+            disabled={isUploadingImage}
+            onChange={(e) => {
+              const file = e.target.files?.[0]
+              if (file) void handleImageFile(file)
+              e.target.value = ''
+            }}
+          />
+        </label>
+        <label
+          title={isPro ? t('toolbar.insertReferenceImage') : t('toolbar.referenceImageProOnly')}
+          aria-label={isPro ? t('toolbar.insertReferenceImage') : t('toolbar.referenceImageProOnly')}
+          className={`flex h-11 w-11 items-center justify-center rounded-lg border border-gold-accent/10 bg-[#0d1e35] text-gold-accent/70 transition-colors ${
+            isPro && !isUploadingReference
+              ? 'cursor-pointer hover:border-gold-accent/40 hover:text-gold-accent-bright'
+              : 'cursor-not-allowed opacity-40'
+          }`}
+        >
+          <TraceImageIcon />
+          <input
+            type="file"
+            accept="image/*"
+            className="hidden"
+            disabled={!isPro || isUploadingReference}
+            onChange={(e) => {
+              const file = e.target.files?.[0]
+              if (file) void handleReferenceImageFile(file)
+              e.target.value = ''
+            }}
+          />
+        </label>
+      </div>
     </aside>
   )
 }

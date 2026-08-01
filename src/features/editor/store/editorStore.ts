@@ -368,10 +368,11 @@ export const useEditorStore = create<EditorState>((set, get) => ({
 
   // "Trace over a match photo" workflow: the image fills the pitch (rather
   // than the small default insert size), starts dimmed so player chips
-  // placed on top stay legible, is sent behind everything already on the
-  // frame, and locks immediately so the very next clicks place chips
-  // instead of accidentally dragging the backdrop. Still selectable to
-  // reposition/unlock/delete like any locked object (see FrameObjectBase).
+  // placed on top stay legible, and is sent behind everything already on
+  // the frame. Left unlocked (unlike an earlier version of this) since the
+  // photo rarely lines up with the pitch on the first try — the user needs
+  // to drag/rotate it into alignment before tracing over it; a manual lock
+  // toggle is still available in the sidebar once it's positioned.
   addReferenceImageObject: (url, naturalWidth, naturalHeight) => {
     const { frames, activeFrameIndex, orientation } = get()
     pushHistory(get, set)
@@ -388,7 +389,6 @@ export const useEditorStore = create<EditorState>((set, get) => ({
       rotation: 0,
       scale: 1,
       zIndex: minZ - 1,
-      locked: true,
       objectType: 'image',
       data: { url, width, height, opacity: 0.55 },
     }
