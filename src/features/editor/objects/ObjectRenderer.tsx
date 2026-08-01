@@ -11,6 +11,7 @@ import { EquipmentShape } from './shapes/Equipment'
 import { BallShape } from './shapes/Ball'
 import { ImageShape } from './shapes/ImageShape'
 import { QuoteCard } from './shapes/QuoteCard'
+import { FreehandShape } from './shapes/Freehand'
 import { straightenInteriorPoints } from './shapes/arrowPoints'
 
 function renderContent(object: FrameObject, isEditingText: boolean) {
@@ -31,6 +32,8 @@ function renderContent(object: FrameObject, isEditingText: boolean) {
       return <ImageShape data={object.data} />
     case 'quote_card':
       return <QuoteCard data={object.data} hideText={isEditingText} />
+    case 'freehand':
+      return <FreehandShape data={object.data} />
   }
 }
 

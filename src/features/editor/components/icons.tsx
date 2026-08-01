@@ -42,6 +42,15 @@ export function CurvedArrowIcon(props: SVGProps<SVGSVGElement>) {
   )
 }
 
+export function PenIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <Base {...props}>
+      <path d="M4 20l1-4.5L15.5 5A2.1 2.1 0 0 1 19 8.5L8.5 19 4 20z" />
+      <path d="M13 7l4 4" />
+    </Base>
+  )
+}
+
 export function TeamLineIcon(props: SVGProps<SVGSVGElement>) {
   return (
     <Base {...props}>

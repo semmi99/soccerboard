@@ -9,6 +9,7 @@
     "arrowCurved": "Arrow (drag points to curve)",
     "arrowRigid": "Straight arrow (not bendable)",
     "teamLine": "Team line (full-width pressing line)",
+    "pen": "Freehand pen",
     "connector": "Connect players",
     "circle": "Circle",
     "rect": "Rectangle",

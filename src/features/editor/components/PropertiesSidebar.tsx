@@ -9,6 +9,7 @@ import type {
   EquipmentKind,
   FieldCrop,
   FrameObject,
+  FreehandData,
   LineStyle,
   PitchDesign,
   PitchOrientation,
@@ -348,6 +349,14 @@ export function PropertiesSidebar() {
               data={selectedObject.data}
               onCheckpoint={beginHistoryCheckpoint}
               onChange={(patch) => updateData<Extract<FrameObject, { objectType: 'text' }>>(patch)}
+            />
+          )}
+
+          {selectedObject.objectType === 'freehand' && (
+            <FreehandFields
+              data={selectedObject.data}
+              onCheckpoint={beginHistoryCheckpoint}
+              onChange={(patch) => updateData<Extract<FrameObject, { objectType: 'freehand' }>>(patch)}
             />
           )}
 
@@ -992,6 +1001,42 @@ function ShapeFields({
         />
         {t('properties.shape.showAreaInfo')}
       </label>
+    </div>
+  )
+}
+
+function FreehandFields({
+  data,
+  onCheckpoint,
+  onChange,
+}: {
+  data: FreehandData
+  onCheckpoint: () => void
+  onChange: (patch: Partial<FreehandData>) => void
+}) {
+  const { t } = useTranslation('editor')
+  return (
+    <div className="flex flex-col gap-2">
+      <Field label={t('properties.shared.color')}>
+        <ColorSwatchPicker
+          value={data.color}
+          onChange={(color) => {
+            onCheckpoint()
+            onChange({ color })
+          }}
+        />
+      </Field>
+      <Field label={t('properties.shared.strokeWidth', { px: data.strokeWidth })}>
+        <input
+          type="range"
+          min={1}
+          max={10}
+          className="w-full"
+          value={data.strokeWidth}
+          onFocus={onCheckpoint}
+          onChange={(e) => onChange({ strokeWidth: Number(e.target.value) })}
+        />
+      </Field>
     </div>
   )
 }

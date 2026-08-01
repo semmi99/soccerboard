@@ -279,6 +279,18 @@ export interface ImageData {
   opacity?: number
 }
 
+/** A hand-drawn stroke — collected from a click-and-drag gesture rather
+ * than placed as a fixed shape, so `points` can hold anywhere from a dozen
+ * to a few hundred pairs. Unlike ArrowData's points (each individually
+ * draggable via its own handle), a freehand path is only ever moved/
+ * resized/rotated as a whole — per-point handles wouldn't be usable at
+ * this density. */
+export interface FreehandData {
+  points: number[] // flat [x1,y1,x2,y2,...], relative to the object's x/y anchor (the stroke's own bounding-box center)
+  color: string
+  strokeWidth: number
+}
+
 export interface ConnectorData {
   fromId: string
   toId: string
@@ -302,6 +314,7 @@ export type ObjectType =
   | 'connector'
   | 'image'
   | 'quote_card'
+  | 'freehand'
 
 export interface FrameObjectBase {
   id: string
@@ -328,6 +341,7 @@ export type FrameObject =
   | (FrameObjectBase & { objectType: 'connector'; data: ConnectorData })
   | (FrameObjectBase & { objectType: 'image'; data: ImageData })
   | (FrameObjectBase & { objectType: 'quote_card'; data: QuoteCardData })
+  | (FrameObjectBase & { objectType: 'freehand'; data: FreehandData })
 
 export interface EditorFrame {
   id: string
@@ -367,6 +381,7 @@ export type ToolId =
   | 'arrow_straight'
   | 'arrow_rigid'
   | 'team_line'
+  | 'pen'
   | 'shape_circle'
   | 'shape_rect'
   | 'text'

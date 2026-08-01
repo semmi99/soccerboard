@@ -16,6 +16,7 @@ import {
   LadderIcon,
   MannequinIcon,
   MiniGoalIcon,
+  PenIcon,
   QuoteCardIcon,
   RectShapeIcon,
   RingIcon,
@@ -83,6 +84,7 @@ export function Toolbar() {
       { id: 'arrow_rigid', label: t('toolbar.arrowRigid'), icon: <StraightArrowIcon /> },
       { id: 'connector', label: t('toolbar.connector'), icon: <ConnectorIcon /> },
       { id: 'team_line', label: t('toolbar.teamLine'), icon: <TeamLineIcon /> },
+      { id: 'pen', label: t('toolbar.pen'), icon: <PenIcon /> },
     ],
     [
       { id: 'shape_circle', label: t('toolbar.circle'), icon: <CircleShapeIcon /> },

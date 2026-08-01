@@ -381,6 +381,7 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
   const connectorDraftFromId = useEditorStore((s) => s.connectorDraftFromId)
   const setConnectorDraftFromId = useEditorStore((s) => s.setConnectorDraftFromId)
   const addConnector = useEditorStore((s) => s.addConnector)
+  const addFreehandObject = useEditorStore((s) => s.addFreehandObject)
 
   const frame = frames[activeFrameIndex] ?? frames[0]!
   const [playbackOverlay, setPlaybackOverlay] = useState<PlaybackOverlay>(EMPTY_OVERLAY)
@@ -388,6 +389,10 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
   const [marqueeRect, setMarqueeRect] = useState<{ x: number; y: number; width: number; height: number } | null>(
     null,
   )
+  // Points collected for a pen stroke in progress (already in the same
+  // crop-shifted object-space every other object's coordinates use), null
+  // when not actively drawing one.
+  const [freehandPoints, setFreehandPoints] = useState<number[] | null>(null)
   // Which quote-card object (if any) currently has its heading/body textarea
   // overlay open for direct in-place editing — see the QuoteCardEditor render
   // near the bottom of this component.
@@ -894,13 +899,35 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
     // getRelativePointerPosition() is relative to the (possibly cropped)
     // stage; shift it back into the full-pitch coordinate space objects
     // are stored in (see the cropShift comment above).
-    if (orientation === 'vertical') addObjectAt(pos.x, pos.y + cropShift)
-    else addObjectAt(pos.x + cropShift, pos.y)
+    const objX = orientation === 'vertical' ? pos.x : pos.x + cropShift
+    const objY = orientation === 'vertical' ? pos.y + cropShift : pos.y
+
+    if (tool === 'pen') {
+      setFreehandPoints([objX, objY])
+      return
+    }
+    addObjectAt(objX, objY)
   }
 
   const MARQUEE_DRAG_THRESHOLD = 4
+  // Minimum gap (in object-space units) between two consecutive recorded
+  // pen points — keeps the stored path a reasonable size instead of one
+  // point per pixel of mouse movement at typical drag speeds.
+  const FREEHAND_MIN_SEGMENT = 4
 
   function handleStageMouseMove() {
+    if (freehandPoints) {
+      const pos = stageRef.current?.getRelativePointerPosition()
+      if (!pos) return
+      const objX = orientation === 'vertical' ? pos.x : pos.x + cropShift
+      const objY = orientation === 'vertical' ? pos.y + cropShift : pos.y
+      const lastX = freehandPoints[freehandPoints.length - 2]!
+      const lastY = freehandPoints[freehandPoints.length - 1]!
+      if (Math.hypot(objX - lastX, objY - lastY) >= FREEHAND_MIN_SEGMENT) {
+        setFreehandPoints([...freehandPoints, objX, objY])
+      }
+      return
+    }
     if (!marqueeStart) return
     const pos = stageRef.current?.getRelativePointerPosition()
     if (!pos) return
@@ -912,6 +939,11 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
   }
 
   function handleStageMouseUp(e: KonvaEventObject<MouseEvent | TouchEvent>) {
+    if (freehandPoints) {
+      addFreehandObject(freehandPoints, '#f0d878', 3)
+      setFreehandPoints(null)
+      return
+    }
     if (!marqueeStart) return
     const rect = marqueeRect
     setMarqueeStart(null)
@@ -1283,6 +1315,17 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
               </Group>
             )
           })}
+          {freehandPoints && freehandPoints.length >= 4 && (
+            <Line
+              points={freehandPoints}
+              stroke="#f0d878"
+              strokeWidth={3}
+              lineCap="round"
+              lineJoin="round"
+              tension={0.3}
+              listening={false}
+            />
+          )}
           {movementTrails.map((g) => (
             <MovementTrail
               key={`trail-${g.id}`}

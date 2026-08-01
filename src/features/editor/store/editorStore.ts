@@ -162,6 +162,7 @@ interface EditorState {
 
   addObjectAt: (x: number, y: number) => void
   addImageObject: (url: string, naturalWidth: number, naturalHeight: number) => void
+  addFreehandObject: (points: number[], color: string, strokeWidth: number) => void
   addReferenceImageObject: (url: string, naturalWidth: number, naturalHeight: number) => void
   placeGroupAt: (x: number, y: number) => void
   addConnector: (fromId: string, toId: string) => void
@@ -435,6 +436,38 @@ export const useEditorStore = create<EditorState>((set, get) => ({
       i === activeFrameIndex ? { ...f, objects: [...f.objects, newObject] } : f,
     )
     set({ frames: nextFrames, selection: [newObject.id], tool: 'select', isDirty: true })
+  },
+
+  // Finalizes a completed pen stroke (EditorCanvas collects the raw points
+  // during the drag gesture, this just turns them into a stored object).
+  // Re-centers the object's own x/y on the stroke's bounding-box middle so
+  // resize/rotate pivots around the drawing itself instead of the pitch
+  // origin — matches how shapes/equipment are anchored.
+  addFreehandObject: (points, color, strokeWidth) => {
+    if (points.length < 4) return
+    const { frames, activeFrameIndex } = get()
+    pushHistory(get, set)
+    const xs = points.filter((_, i) => i % 2 === 0)
+    const ys = points.filter((_, i) => i % 2 === 1)
+    const centerX = (Math.min(...xs) + Math.max(...xs)) / 2
+    const centerY = (Math.min(...ys) + Math.max(...ys)) / 2
+    const relativePoints = points.map((v, i) => v - (i % 2 === 0 ? centerX : centerY))
+    const frame = frames[activeFrameIndex]!
+    const maxZ = frame.objects.reduce((m, o) => Math.max(m, o.zIndex), -1)
+    const newObject: FrameObject = {
+      id: crypto.randomUUID(),
+      x: centerX,
+      y: centerY,
+      rotation: 0,
+      scale: 1,
+      zIndex: maxZ + 1,
+      objectType: 'freehand',
+      data: { points: relativePoints, color, strokeWidth },
+    }
+    const nextFrames = frames.map((f, i) =>
+      i === activeFrameIndex ? { ...f, objects: [...f.objects, newObject] } : f,
+    )
+    set({ frames: nextFrames, selection: [newObject.id], isDirty: true })
   },
 
   placeGroupAt: (x, y) => {
