@@ -8,6 +8,7 @@
     "ball": "Ball",
     "arrowCurved": "Pfeil (Ziehpunkte zum Biegen)",
     "arrowRigid": "Gerader Pfeil (nicht biegbar)",
+    "teamLine": "Team-Linie (Pressinglinie über die volle Breite)",
     "connector": "Spieler verbinden",
     "circle": "Kreis",
     "rect": "Rechteck",

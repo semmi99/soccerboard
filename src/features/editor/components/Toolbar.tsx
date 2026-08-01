@@ -20,6 +20,7 @@ import {
   RingIcon,
   SlalomPoleIcon,
   StraightArrowIcon,
+  TeamLineIcon,
   TextToolIcon,
 } from './icons'
 
@@ -79,6 +80,7 @@ export function Toolbar() {
       { id: 'arrow_straight', label: t('toolbar.arrowCurved'), icon: <CurvedArrowIcon /> },
       { id: 'arrow_rigid', label: t('toolbar.arrowRigid'), icon: <StraightArrowIcon /> },
       { id: 'connector', label: t('toolbar.connector'), icon: <ConnectorIcon /> },
+      { id: 'team_line', label: t('toolbar.teamLine'), icon: <TeamLineIcon /> },
     ],
     [
       { id: 'shape_circle', label: t('toolbar.circle'), icon: <CircleShapeIcon /> },

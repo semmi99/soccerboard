@@ -42,6 +42,15 @@ export function CurvedArrowIcon(props: SVGProps<SVGSVGElement>) {
   )
 }
 
+export function TeamLineIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <Base {...props}>
+      <path d="M3 12h3M9 12h3M15 12h3M21 12h0" strokeDasharray="0.1 5" />
+      <path d="M3 6h18M3 18h18" opacity={0.35} />
+    </Base>
+  )
+}
+
 export function CircleShapeIcon(props: SVGProps<SVGSVGElement>) {
   return (
     <Base {...props}>

@@ -8,6 +8,7 @@
     "ball": "Ball",
     "arrowCurved": "Arrow (drag points to curve)",
     "arrowRigid": "Straight arrow (not bendable)",
+    "teamLine": "Team line (full-width pressing line)",
     "connector": "Connect players",
     "circle": "Circle",
     "rect": "Rectangle",

@@ -354,6 +354,7 @@ export type ToolId =
   | 'player_away_gk'
   | 'arrow_straight'
   | 'arrow_rigid'
+  | 'team_line'
   | 'shape_circle'
   | 'shape_rect'
   | 'text'

@@ -305,7 +305,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
   },
 
   addObjectAt: (x, y) => {
-    const { tool, frames, activeFrameIndex, pendingPlayer, pendingPlayers, teamKit } = get()
+    const { tool, frames, activeFrameIndex, pendingPlayer, pendingPlayers, teamKit, orientation } = get()
     if (tool === 'select') return
     if (
       pendingPlayers.length > 0 &&
@@ -314,7 +314,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
       get().placeGroupAt(x, y)
       return
     }
-    const created = createObjectForTool(tool, x, y, pendingPlayer)
+    const created = createObjectForTool(tool, x, y, pendingPlayer, orientation)
     if (!created) return
 
     pushHistory(get, set)

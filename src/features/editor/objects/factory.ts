@@ -1,5 +1,6 @@
 import i18n from '../../../lib/i18n'
-import type { EquipmentKind, FrameObject, ToolId } from '../types'
+import { PITCH_STAGE_SIZE } from '../constants'
+import type { EquipmentKind, FrameObject, PitchOrientation, ToolId } from '../types'
 
 let homePlayerCount = 0
 let awayPlayerCount = 0
@@ -21,6 +22,7 @@ export function createObjectForTool(
   x: number,
   y: number,
   pendingPlayer?: PendingRealPlayer | null,
+  orientation: PitchOrientation = 'vertical',
 ): FrameObject | null {
   const base = { id: crypto.randomUUID(), x, y, rotation: 0, scale: 1, zIndex: 0 }
 
@@ -85,6 +87,31 @@ export function createObjectForTool(
     }
   }
 
+  // One-click defensive/pressing line: a dashed line spanning the full pitch
+  // width (touchline to touchline), pre-configured with `spaceBehind` so the
+  // shaded zone + meter label appear immediately instead of requiring the
+  // user to draw a full-width line by hand and then find the toggle.
+  if (tool === 'team_line') {
+    const stageSize = PITCH_STAGE_SIZE[orientation]
+    const half = (orientation === 'vertical' ? stageSize.width : stageSize.height) / 2
+    const points = orientation === 'vertical' ? [-half, 0, half, 0] : [0, -half, 0, half]
+    return {
+      ...base,
+      x: orientation === 'vertical' ? stageSize.width / 2 : x,
+      y: orientation === 'vertical' ? y : stageSize.height / 2,
+      objectType: 'arrow',
+      data: {
+        shape: 'straight',
+        points,
+        lineStyle: 'dashed',
+        color: '#22c55e',
+        strokeWidth: 2,
+        showArrowhead: false,
+        bendable: false,
+        spaceBehind: true,
+      },
+    }
+  }
 
   if (tool === 'shape_circle') {
     return {
