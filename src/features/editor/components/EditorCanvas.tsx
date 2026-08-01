@@ -1164,6 +1164,12 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
                 object={object}
                 isSelected={selection.includes(object.id)}
                 interactive={!isPlaying}
+                // An image (e.g. the "trace over a photo" backdrop) can cover
+                // the whole pitch — while a placement tool is active, clicks
+                // on it should reach the Stage and place the new object
+                // instead of just re-selecting the backdrop underneath.
+                // Switching to "select" restores normal click/drag on it.
+                listening={object.objectType !== 'image' || tool === 'select'}
                 onSelect={handleObjectClick}
                 onDragStart={handleDragStart}
                 onObjectDragStart={handleObjectDragStart}

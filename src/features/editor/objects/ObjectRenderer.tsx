@@ -111,6 +111,12 @@ interface Props {
   initialOpacity?: number
   initialScaleFactor?: number
   isEditingText?: boolean
+  /** false makes this object invisible to clicks (Konva's `listening`) —
+   * used for image objects while a placement tool is active, so a
+   * pitch-covering reference photo doesn't swallow every click meant to
+   * place a new player/arrow/shape on top of it. Unset/true behaves as
+   * before (fully clickable). */
+  listening?: boolean
 }
 
 export function ObjectRenderer({
@@ -129,6 +135,7 @@ export function ObjectRenderer({
   initialOpacity,
   initialScaleFactor,
   isEditingText,
+  listening,
 }: Props) {
   const groupRef = useRef<Konva.Group>(null)
 
@@ -246,6 +253,7 @@ export function ObjectRenderer({
       scaleX={object.scale * (initialScaleFactor ?? 1)}
       scaleY={object.scale * (initialScaleFactor ?? 1)}
       opacity={initialOpacity ?? 1}
+      listening={listening ?? true}
       // Deliberately NOT gated on `object.locked` here — toggling this prop
       // false→true was observed to leave the underlying Konva node's own
       // drag-enabled state stuck at false in some later re-render (a
