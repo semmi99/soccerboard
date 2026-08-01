@@ -18,6 +18,8 @@
     "textSubtitle": "Untertitel",
     "quoteCard": "Zitat-Karte",
     "insertImage": "Bild einfügen",
+    "insertReferenceImage": "Foto zum Nachzeichnen einfügen (Spieler-Positionen abpausen)",
+    "referenceImageProOnly": "Nur mit Pro-Abo verfügbar",
     "equipment": {
       "cone": "Hütchen",
       "miniGoal": "Minitor",

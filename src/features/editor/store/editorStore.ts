@@ -130,6 +130,7 @@ interface EditorState {
 
   addObjectAt: (x: number, y: number) => void
   addImageObject: (url: string, naturalWidth: number, naturalHeight: number) => void
+  addReferenceImageObject: (url: string, naturalWidth: number, naturalHeight: number) => void
   placeGroupAt: (x: number, y: number) => void
   addConnector: (fromId: string, toId: string) => void
   setLastConnectorColor: (color: string) => void
@@ -358,6 +359,38 @@ export const useEditorStore = create<EditorState>((set, get) => ({
       zIndex: maxZ + 1,
       objectType: 'image',
       data: { url, width, height },
+    }
+    const nextFrames = frames.map((f, i) =>
+      i === activeFrameIndex ? { ...f, objects: [...f.objects, newObject] } : f,
+    )
+    set({ frames: nextFrames, selection: [newObject.id], tool: 'select', isDirty: true })
+  },
+
+  // "Trace over a match photo" workflow: the image fills the pitch (rather
+  // than the small default insert size), starts dimmed so player chips
+  // placed on top stay legible, is sent behind everything already on the
+  // frame, and locks immediately so the very next clicks place chips
+  // instead of accidentally dragging the backdrop. Still selectable to
+  // reposition/unlock/delete like any locked object (see FrameObjectBase).
+  addReferenceImageObject: (url, naturalWidth, naturalHeight) => {
+    const { frames, activeFrameIndex, orientation } = get()
+    pushHistory(get, set)
+    const stage = PITCH_STAGE_SIZE[orientation]
+    const ratio = Math.min(stage.width / naturalWidth, stage.height / naturalHeight)
+    const width = naturalWidth * ratio
+    const height = naturalHeight * ratio
+    const frame = frames[activeFrameIndex]!
+    const minZ = frame.objects.reduce((m, o) => Math.min(m, o.zIndex), 0)
+    const newObject: FrameObject = {
+      id: crypto.randomUUID(),
+      x: stage.width / 2,
+      y: stage.height / 2,
+      rotation: 0,
+      scale: 1,
+      zIndex: minZ - 1,
+      locked: true,
+      objectType: 'image',
+      data: { url, width, height, opacity: 0.55 },
     }
     const nextFrames = frames.map((f, i) =>
       i === activeFrameIndex ? { ...f, objects: [...f.objects, newObject] } : f,

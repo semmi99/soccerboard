@@ -272,6 +272,11 @@ export interface ImageData {
    * the Transformer, same as chips/equipment) multiplies on top of this. */
   width: number
   height: number
+  /** Dims the image so player chips placed on top of it (the "trace over a
+   * match photo" workflow) stay legible against a busy broadcast frame.
+   * Unset/undefined renders fully opaque, matching every image inserted
+   * before this existed. */
+  opacity?: number
 }
 
 export interface ConnectorData {

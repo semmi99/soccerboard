@@ -21,7 +21,7 @@ export function ImageShape({ data }: { data: ImageData }) {
   const w = data.width
   const h = data.height
   return img ? (
-    <KonvaImage image={img} x={-w / 2} y={-h / 2} width={w} height={h} />
+    <KonvaImage image={img} x={-w / 2} y={-h / 2} width={w} height={h} opacity={data.opacity ?? 1} />
   ) : (
     <Rect x={-w / 2} y={-h / 2} width={w} height={h} fill="#1f2937" stroke="#475569" dash={[4, 4]} />
   )

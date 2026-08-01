@@ -115,6 +115,17 @@ export function ImageInsertIcon(props: SVGProps<SVGSVGElement>) {
   )
 }
 
+export function TraceImageIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <Base {...props}>
+      <rect x="3" y="4" width="18" height="16" rx="2" opacity={0.4} />
+      <circle cx="9" cy="10" r="1.75" opacity={0.4} />
+      <path d="M3 17l5-5 4 4 4-5 5 6" opacity={0.4} />
+      <path d="M8 21l10-14" strokeDasharray="2.5 2.5" />
+    </Base>
+  )
+}
+
 export function ConeIcon(props: SVGProps<SVGSVGElement>) {
   return (
     <Base {...props}>

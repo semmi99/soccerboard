@@ -2,6 +2,7 @@ import { useState, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useEditorStore } from '../store/editorStore'
 import { useAuthStore } from '../../auth/store/authStore'
+import { limitsForTier } from '../../../lib/limits'
 import { uploadBoardImage, readImageDimensions } from '../../../lib/supabase/images'
 import type { EquipmentKind, ToolId } from '../types'
 import {
@@ -22,6 +23,7 @@ import {
   StraightArrowIcon,
   TeamLineIcon,
   TextToolIcon,
+  TraceImageIcon,
 } from './icons'
 
 interface ToolDef {
@@ -102,8 +104,16 @@ export function Toolbar() {
 
   const setTool = useEditorStore((s) => s.setTool)
   const addImageObject = useEditorStore((s) => s.addImageObject)
+  const addReferenceImageObject = useEditorStore((s) => s.addReferenceImageObject)
   const organization = useAuthStore((s) => s.organization)
   const [isUploadingImage, setIsUploadingImage] = useState(false)
+  const [isUploadingReference, setIsUploadingReference] = useState(false)
+  // The "trace over a match photo" tool needs real player-placement help to
+  // be worth the design/support cost, which only pays off for orgs actually
+  // using the product seriously — gated the same way every other Pro-only
+  // limit already is (an org's own free_override, e.g. the platform admin's
+  // account, reads as Pro here too, same as maxFrames/maxProjects).
+  const isPro = organization ? limitsForTier(organization).maxFrames === Infinity : false
 
   async function handleImageFile(file: File) {
     if (!organization) return
@@ -116,6 +126,20 @@ export function Toolbar() {
       addImageObject(url, width, height)
     } finally {
       setIsUploadingImage(false)
+    }
+  }
+
+  async function handleReferenceImageFile(file: File) {
+    if (!organization || !isPro) return
+    setIsUploadingReference(true)
+    try {
+      const [{ width, height }, url] = await Promise.all([
+        readImageDimensions(file),
+        uploadBoardImage(organization.id, file),
+      ])
+      addReferenceImageObject(url, width, height)
+    } finally {
+      setIsUploadingReference(false)
     }
   }
 
@@ -177,6 +201,28 @@ export function Toolbar() {
           onChange={(e) => {
             const file = e.target.files?.[0]
             if (file) void handleImageFile(file)
+            e.target.value = ''
+          }}
+        />
+      </label>
+      <label
+        title={isPro ? t('toolbar.insertReferenceImage') : t('toolbar.referenceImageProOnly')}
+        aria-label={isPro ? t('toolbar.insertReferenceImage') : t('toolbar.referenceImageProOnly')}
+        className={`flex h-11 w-11 items-center justify-center rounded-lg border border-gold-accent/10 bg-[#0d1e35] text-gold-accent/70 transition-colors ${
+          isPro && !isUploadingReference
+            ? 'cursor-pointer hover:border-gold-accent/40 hover:text-gold-accent-bright'
+            : 'cursor-not-allowed opacity-40'
+        }`}
+      >
+        <TraceImageIcon />
+        <input
+          type="file"
+          accept="image/*"
+          className="hidden"
+          disabled={!isPro || isUploadingReference}
+          onChange={(e) => {
+            const file = e.target.files?.[0]
+            if (file) void handleReferenceImageFile(file)
             e.target.value = ''
           }}
         />

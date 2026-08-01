@@ -18,6 +18,8 @@
     "textSubtitle": "Subtitle",
     "quoteCard": "Quote card",
     "insertImage": "Insert image",
+    "insertReferenceImage": "Insert photo to trace over (copy player positions)",
+    "referenceImageProOnly": "Pro subscription required",
     "equipment": {
       "cone": "Cone",
       "miniGoal": "Mini goal",
