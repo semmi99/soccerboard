@@ -438,6 +438,7 @@ export type Database = {
       }
       projects: {
         Row: {
+          active_kit_slot: string
           created_at: string
           created_by: string | null
           field_crop: string
@@ -449,6 +450,7 @@ export type Database = {
           pitch_design: string
           pitch_length_m: number
           pitch_width_m: number
+          secondary_kit_override: Json | null
           show_movement_trails: boolean
           show_pitch_markings: boolean
           team_id: string | null
@@ -460,6 +462,7 @@ export type Database = {
           zone_grid_style: string
         }
         Insert: {
+          active_kit_slot?: string
           created_at?: string
           created_by?: string | null
           field_crop?: string
@@ -471,6 +474,7 @@ export type Database = {
           pitch_design?: string
           pitch_length_m?: number
           pitch_width_m?: number
+          secondary_kit_override?: Json | null
           show_movement_trails?: boolean
           show_pitch_markings?: boolean
           team_id?: string | null
@@ -482,6 +486,7 @@ export type Database = {
           zone_grid_style?: string
         }
         Update: {
+          active_kit_slot?: string
           created_at?: string
           created_by?: string | null
           field_crop?: string
@@ -493,6 +498,7 @@ export type Database = {
           pitch_design?: string
           pitch_length_m?: number
           pitch_width_m?: number
+          secondary_kit_override?: Json | null
           show_movement_trails?: boolean
           show_pitch_markings?: boolean
           team_id?: string | null

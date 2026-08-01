@@ -75,6 +75,8 @@ export function EditorPage() {
         pitchLengthM: project.pitchLengthM,
         pitchWidthM: project.pitchWidthM,
         customKit: project.customKit,
+        secondaryKit: project.secondaryKit,
+        activeKitSlot: project.activeKitSlot,
         frames: project.frames,
       })
     }

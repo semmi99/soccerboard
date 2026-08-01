@@ -4,6 +4,7 @@ import type {
   EditorFrame,
   FieldCrop,
   FrameObject,
+  KitSlot,
   ObjectType,
   PitchDesign,
   PitchOrientation,
@@ -106,6 +107,8 @@ export interface LoadedProject {
   pitchLengthM: number
   pitchWidthM: number
   customKit: TeamKit | null
+  secondaryKit: TeamKit | null
+  activeKitSlot: KitSlot
   frames: EditorFrame[]
 }
 
@@ -113,7 +116,7 @@ export async function loadProject(id: string): Promise<LoadedProject> {
   const { data: project, error: projectError } = await supabase
     .from('projects')
     .select(
-      'id, title, pitch_design, orientation, team_id, zone_grid_style, zone_grid_custom_id, show_pitch_markings, show_movement_trails, field_crop, field_mirrored, pitch_length_m, pitch_width_m, kit_override',
+      'id, title, pitch_design, orientation, team_id, zone_grid_style, zone_grid_custom_id, show_pitch_markings, show_movement_trails, field_crop, field_mirrored, pitch_length_m, pitch_width_m, kit_override, secondary_kit_override, active_kit_slot',
     )
     .eq('id', id)
     .single()
@@ -154,6 +157,8 @@ export async function loadProject(id: string): Promise<LoadedProject> {
     pitchLengthM: project.pitch_length_m,
     pitchWidthM: project.pitch_width_m,
     customKit: (project.kit_override as TeamKit | null) ?? null,
+    secondaryKit: (project.secondary_kit_override as TeamKit | null) ?? null,
+    activeKitSlot: (project.active_kit_slot as KitSlot) ?? 'primary',
     frames,
   }
 }
@@ -175,6 +180,8 @@ export interface SaveProjectInput {
   pitchLengthM: number
   pitchWidthM: number
   customKit: TeamKit | null
+  secondaryKit: TeamKit | null
+  activeKitSlot: KitSlot
   frames: EditorFrame[]
 }
 
@@ -198,6 +205,8 @@ export async function saveProject(input: SaveProjectInput): Promise<string> {
         pitch_length_m: input.pitchLengthM,
         pitch_width_m: input.pitchWidthM,
         kit_override: input.customKit as unknown as Json,
+        secondary_kit_override: input.secondaryKit as unknown as Json,
+        active_kit_slot: input.activeKitSlot,
       })
       .eq('id', projectId)
     if (error) throw error
@@ -235,6 +244,8 @@ async function insertProjectRow(
     pitch_length_m: input.pitchLengthM,
     pitch_width_m: input.pitchWidthM,
     kit_override: input.customKit as unknown as Json,
+    secondary_kit_override: input.secondaryKit as unknown as Json,
+    active_kit_slot: input.activeKitSlot,
   }
   const { data, error } = await supabase
     .from('projects')

@@ -68,6 +68,11 @@ export interface KitConfig {
   color2: string
 }
 
+/** Which of a project's two saved kit configs is currently in effect —
+ * lets a coach flip between "my team" and "the opponent" without
+ * reconfiguring colors each time (see editorStore's swapKitSlot). */
+export type KitSlot = 'primary' | 'secondary'
+
 export interface TeamKit {
   home: KitConfig
   away: KitConfig

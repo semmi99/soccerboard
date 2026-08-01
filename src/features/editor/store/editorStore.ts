@@ -4,6 +4,7 @@ import type {
   EquipmentKind,
   FieldCrop,
   FrameObject,
+  KitSlot,
   PitchDesign,
   PitchOrientation,
   TeamKit,
@@ -12,7 +13,7 @@ import type {
   ZoneGridStyle,
 } from '../types'
 import { createObjectForTool, type PendingRealPlayer } from '../objects/factory'
-import { PITCH_STAGE_SIZE } from '../constants'
+import { PITCH_STAGE_SIZE, TEAM_COLORS } from '../constants'
 import type { FormationPosition } from '../../formations/presets'
 
 export interface FormationPlayer {
@@ -70,6 +71,16 @@ function emptyFrame(durationMs = 1000): EditorFrame {
   return { id: crypto.randomUUID(), durationMs, objects: [] }
 }
 
+/** Starting point the first time a project's secondary kit slot ("the
+ * opponent") is switched to — plain home/away colors, same look a chip
+ * gets today with no kit configured at all (see PlayerChip's own fallback). */
+const DEFAULT_TEAM_KIT: TeamKit = {
+  home: { pattern: 'solid', color1: TEAM_COLORS.home, color2: TEAM_COLORS.home },
+  away: { pattern: 'solid', color1: TEAM_COLORS.away, color2: TEAM_COLORS.away },
+  gk: { pattern: 'solid', color1: '#eab308', color2: '#111827' },
+  chipScale: 1,
+}
+
 interface EditorState {
   projectId: string | null
   projectTitle: string
@@ -95,8 +106,16 @@ interface EditorState {
   teamId: string | null
   teamKit: TeamKit | null
   /** Kit colors chosen when no real team is linked to the project — persisted
-   * with the project itself since there's no team row to hang it off of. */
+   * with the project itself since there's no team row to hang it off of.
+   * This is the "primary" kit slot (see KitSlot / secondaryKit below). */
   customKit: TeamKit | null
+  /** A second, independently-saved kit ("the opponent") for sketching
+   * against without a linked team — only meaningful alongside customKit,
+   * never used at all when a real team is linked. */
+  secondaryKit: TeamKit | null
+  /** Which of customKit/secondaryKit is currently in effect (mirrored into
+   * `teamKit` — see swapKitSlot). */
+  activeKitSlot: KitSlot
   playerPhotos: Record<string, string>
   frames: EditorFrame[]
   activeFrameIndex: number
@@ -130,6 +149,8 @@ interface EditorState {
     pitchLengthM: number
     pitchWidthM: number
     customKit: TeamKit | null
+    secondaryKit: TeamKit | null
+    activeKitSlot: KitSlot
     frames: EditorFrame[]
   }) => void
   resetToBlankProject: () => void
@@ -151,6 +172,7 @@ interface EditorState {
   setTeamId: (id: string | null) => void
   setTeamKit: (kit: TeamKit | null) => void
   setCustomKit: (kit: TeamKit) => void
+  swapKitSlot: () => void
   setPlayerPhotos: (photos: Record<string, string>) => void
   setTool: (tool: ToolId) => void
   setSelection: (ids: string[]) => void
@@ -220,6 +242,8 @@ export const useEditorStore = create<EditorState>((set, get) => ({
   teamId: null,
   teamKit: null,
   customKit: null,
+  secondaryKit: null,
+  activeKitSlot: 'primary',
   playerPhotos: {},
   frames: [emptyFrame()],
   activeFrameIndex: 0,
@@ -250,6 +274,8 @@ export const useEditorStore = create<EditorState>((set, get) => ({
     pitchLengthM,
     pitchWidthM,
     customKit,
+    secondaryKit,
+    activeKitSlot,
     frames,
   }) => {
     set({
@@ -267,8 +293,10 @@ export const useEditorStore = create<EditorState>((set, get) => ({
       pitchLengthM,
       pitchWidthM,
       teamId,
-      teamKit: teamId ? null : customKit,
+      teamKit: teamId ? null : activeKitSlot === 'secondary' ? secondaryKit : customKit,
       customKit,
+      secondaryKit,
+      activeKitSlot,
       playerPhotos: {},
       frames: frames.length ? frames : [emptyFrame()],
       activeFrameIndex: 0,
@@ -302,6 +330,8 @@ export const useEditorStore = create<EditorState>((set, get) => ({
       teamId: null,
       teamKit: null,
       customKit: null,
+      secondaryKit: null,
+      activeKitSlot: 'primary',
       playerPhotos: {},
       frames: [emptyFrame()],
       activeFrameIndex: 0,
@@ -332,7 +362,34 @@ export const useEditorStore = create<EditorState>((set, get) => ({
   setProjectTitle: (title) => set({ projectTitle: title, isDirty: true }),
   setTeamId: (id) => set({ teamId: id, isDirty: true }),
   setTeamKit: (kit) => set({ teamKit: kit }),
-  setCustomKit: (kit) => set({ customKit: kit, teamKit: kit, isDirty: true }),
+  // Writes to whichever kit slot is currently active — so KitDesignerModal
+  // (which only ever knows about "the current kit", not slots) transparently
+  // edits Slot A or Slot B depending on which one's showing, with no
+  // changes needed on its side.
+  setCustomKit: (kit) => {
+    const { activeKitSlot } = get()
+    if (activeKitSlot === 'secondary') {
+      set({ secondaryKit: kit, teamKit: kit, isDirty: true })
+    } else {
+      set({ customKit: kit, teamKit: kit, isDirty: true })
+    }
+  },
+
+  // Flips between the project's two saved kit slots ("my team" / "the
+  // opponent") — only meaningful without a linked real team, where kit
+  // colors are the project's own rather than coming from the Kader. The
+  // slot being switched TO seeds a plain default kit the first time it's
+  // used, so there's something sensible to look at/edit immediately.
+  swapKitSlot: () => {
+    const { activeKitSlot, customKit, secondaryKit } = get()
+    if (activeKitSlot === 'primary') {
+      const nextSecondary = secondaryKit ?? DEFAULT_TEAM_KIT
+      set({ activeKitSlot: 'secondary', secondaryKit: nextSecondary, teamKit: nextSecondary, isDirty: true })
+    } else {
+      set({ activeKitSlot: 'primary', teamKit: customKit, isDirty: true })
+    }
+  },
+
   setPlayerPhotos: (photos) => set({ playerPhotos: photos }),
   setTool: (tool) => set({ tool, selection: [] }),
   setSelection: (ids) => set({ selection: ids }),

@@ -88,8 +88,16 @@ export function TeamSquadPanel() {
   const teamId = useEditorStore((s) => s.teamId)
   const setTeamId = useEditorStore((s) => s.setTeamId)
   const setTeamKit = useEditorStore((s) => s.setTeamKit)
-  const customKit = useEditorStore((s) => s.customKit)
+  const primaryKit = useEditorStore((s) => s.customKit)
+  const secondaryKit = useEditorStore((s) => s.secondaryKit)
   const setCustomKit = useEditorStore((s) => s.setCustomKit)
+  const activeKitSlot = useEditorStore((s) => s.activeKitSlot)
+  const swapKitSlot = useEditorStore((s) => s.swapKitSlot)
+  // Whichever slot is actually showing on the pitch right now — the crest
+  // slots and kit-designer fields below must reflect THIS, not always
+  // Slot A, or editing "the kit" while Slot B is active would silently
+  // read/write the wrong team's colors.
+  const customKit = activeKitSlot === 'secondary' ? secondaryKit : primaryKit
   const setPlayerPhotos = useEditorStore((s) => s.setPlayerPhotos)
   const pendingPlayer = useEditorStore((s) => s.pendingPlayer)
   const setPendingPlayer = useEditorStore((s) => s.setPendingPlayer)
@@ -275,6 +283,14 @@ export function TeamSquadPanel() {
       <Button variant="secondary" className="w-full" onClick={() => setShowKitDesigner(true)}>
         {activeTeam ? t('teamSquadPanel.editKitDesign') : t('teamSquadPanel.customizeColors')}
       </Button>
+
+      {!activeTeam && (
+        <Button variant="secondary" className="w-full" onClick={swapKitSlot}>
+          {activeKitSlot === 'secondary'
+            ? t('teamSquadPanel.switchToPrimaryKit')
+            : t('teamSquadPanel.switchToSecondaryKit')}
+        </Button>
+      )}
 
       {activeTeam ? (
         <CrestSlot

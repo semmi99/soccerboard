@@ -23,6 +23,8 @@ export function useProjectSave() {
   const pitchWidthM = useEditorStore((s) => s.pitchWidthM)
   const teamId = useEditorStore((s) => s.teamId)
   const customKit = useEditorStore((s) => s.customKit)
+  const secondaryKit = useEditorStore((s) => s.secondaryKit)
+  const activeKitSlot = useEditorStore((s) => s.activeKitSlot)
   const frames = useEditorStore((s) => s.frames)
   const isDirty = useEditorStore((s) => s.isDirty)
   const markSaved = useEditorStore((s) => s.markSaved)
@@ -75,6 +77,8 @@ export function useProjectSave() {
         pitchLengthM,
         pitchWidthM,
         customKit,
+        secondaryKit,
+        activeKitSlot,
         frames,
       })
 
@@ -98,6 +102,8 @@ export function useProjectSave() {
     orientation,
     teamId,
     customKit,
+    secondaryKit,
+    activeKitSlot,
     zoneGridStyle,
     zoneGridCustomId,
     showPitchMarkings,
