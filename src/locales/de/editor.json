@@ -328,7 +328,9 @@
   },
   "editorPage": {
     "loadError": "Projekt konnte nicht geladen werden.",
-    "backToDashboard": "Zurück zum Dashboard"
+    "backToDashboard": "Zurück zum Dashboard",
+    "projectLocked": "Dieses Projekt ist gesperrt, da euer Pro-Abo abgelaufen ist. Im kostenlosen Plan könnt ihr nur euer ältestes Projekt bearbeiten.",
+    "manageSubscription": "Abo verwalten"
   },
   "factoryDefaults": {
     "text": "Text",

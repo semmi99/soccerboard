@@ -3,7 +3,9 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import type Konva from 'konva'
 import { useEditorStore } from '../store/editorStore'
-import { loadProject } from '../../../lib/supabase/projects'
+import { useAuthStore } from '../../auth/store/authStore'
+import { limitsForTier } from '../../../lib/limits'
+import { isProjectEditable, loadProject } from '../../../lib/supabase/projects'
 import { useProjectSave } from '../hooks/useProjectSave'
 import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts'
 import { TopBar } from './TopBar'
@@ -19,7 +21,9 @@ export function EditorPage() {
   const stageRef = useRef<Konva.Stage>(null)
   const resetToBlankProject = useEditorStore((s) => s.resetToBlankProject)
   const loadProjectIntoStore = useEditorStore((s) => s.loadProject)
+  const organization = useAuthStore((s) => s.organization)
   const [loadError, setLoadError] = useState<string | null>(null)
+  const [isLocked, setIsLocked] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const save = useProjectSave()
 
@@ -36,28 +40,46 @@ export function EditorPage() {
     let cancelled = false
     setIsLoading(true)
     setLoadError(null)
+    setIsLocked(false)
 
-    loadProject(projectId)
-      .then((project) => {
+    async function run() {
+      // A lapsed Pro org drops back to the free tier's project limit, but
+      // shouldn't silently keep full editing access to every project it
+      // made while still paying — only its oldest (the "Projekt 1" it'd
+      // have under a fresh free plan) stays editable; the rest are locked
+      // instead of loaded at all.
+      if (organization) {
+        const { maxProjects } = limitsForTier(organization)
+        const editable = await isProjectEditable(organization.id, projectId!, maxProjects)
         if (cancelled) return
-        loadProjectIntoStore({
-          projectId: project.id,
-          projectTitle: project.title,
-          pitchDesign: project.pitchDesign,
-          orientation: project.orientation,
-          teamId: project.teamId,
-          zoneGridStyle: project.zoneGridStyle,
-          zoneGridCustomId: project.zoneGridCustomId,
-          showPitchMarkings: project.showPitchMarkings,
-          showMovementTrails: project.showMovementTrails,
-          fieldCrop: project.fieldCrop,
-          fieldMirrored: project.fieldMirrored,
-          pitchLengthM: project.pitchLengthM,
-          pitchWidthM: project.pitchWidthM,
-          customKit: project.customKit,
-          frames: project.frames,
-        })
+        if (!editable) {
+          setIsLocked(true)
+          return
+        }
+      }
+
+      const project = await loadProject(projectId!)
+      if (cancelled) return
+      loadProjectIntoStore({
+        projectId: project.id,
+        projectTitle: project.title,
+        pitchDesign: project.pitchDesign,
+        orientation: project.orientation,
+        teamId: project.teamId,
+        zoneGridStyle: project.zoneGridStyle,
+        zoneGridCustomId: project.zoneGridCustomId,
+        showPitchMarkings: project.showPitchMarkings,
+        showMovementTrails: project.showMovementTrails,
+        fieldCrop: project.fieldCrop,
+        fieldMirrored: project.fieldMirrored,
+        pitchLengthM: project.pitchLengthM,
+        pitchWidthM: project.pitchWidthM,
+        customKit: project.customKit,
+        frames: project.frames,
       })
+    }
+
+    run()
       .catch((err: unknown) => {
         if (cancelled) return
         setLoadError(err instanceof Error ? err.message : t('editorPage.loadError'))
@@ -69,12 +91,36 @@ export function EditorPage() {
     return () => {
       cancelled = true
     }
-  }, [projectId, resetToBlankProject, loadProjectIntoStore])
+  }, [projectId, organization, resetToBlankProject, loadProjectIntoStore])
 
   if (isLoading) {
     return (
       <div className="flex h-full items-center justify-center bg-pitch-950">
         <span className="h-8 w-8 animate-spin rounded-full border-2 border-white/20 border-t-violet-accent" />
+      </div>
+    )
+  }
+
+  if (isLocked) {
+    return (
+      <div className="flex h-full flex-col items-center justify-center gap-3 bg-pitch-950 text-white/70">
+        <p className="max-w-sm text-center">{t('editorPage.projectLocked')}</p>
+        <div className="flex gap-4">
+          <button
+            type="button"
+            onClick={() => navigate('/account')}
+            className="text-sm text-violet-accent-bright underline"
+          >
+            {t('editorPage.manageSubscription')}
+          </button>
+          <button
+            type="button"
+            onClick={() => navigate('/dashboard')}
+            className="text-sm text-violet-accent-bright underline"
+          >
+            {t('editorPage.backToDashboard')}
+          </button>
+        </div>
       </div>
     )
   }

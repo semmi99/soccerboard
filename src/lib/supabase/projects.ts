@@ -62,6 +62,30 @@ export async function countProjects(orgId: string): Promise<number> {
   return count ?? 0
 }
 
+/** Whether a project is still within the org's currently allowed project
+ * count — e.g. an org that lapsed from Pro back to the free tier's 1-project
+ * limit keeps editing access to its single OLDEST project (its "Projekt 1"),
+ * but the rest become locked instead of quietly staying editable past what
+ * they're paying for. `maxProjects` of Infinity (paid/override) always
+ * returns true without a query. */
+export async function isProjectEditable(
+  orgId: string,
+  projectId: string,
+  maxProjects: number,
+): Promise<boolean> {
+  if (!Number.isFinite(maxProjects)) return true
+
+  const { data, error } = await supabase
+    .from('projects')
+    .select('id')
+    .eq('org_id', orgId)
+    .order('created_at', { ascending: true })
+    .limit(maxProjects)
+
+  if (error) throw error
+  return data.some((p) => p.id === projectId)
+}
+
 export async function deleteProject(id: string): Promise<void> {
   const { error } = await supabase.from('projects').delete().eq('id', id)
   if (error) throw error

@@ -328,7 +328,9 @@
   },
   "editorPage": {
     "loadError": "Couldn't load project.",
-    "backToDashboard": "Back to dashboard"
+    "backToDashboard": "Back to dashboard",
+    "projectLocked": "This project is locked because your Pro subscription has lapsed. On the free plan you can only edit your oldest project.",
+    "manageSubscription": "Manage subscription"
   },
   "factoryDefaults": {
     "text": "Text",
