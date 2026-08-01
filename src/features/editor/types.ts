@@ -149,6 +149,13 @@ export interface ShapeData {
   gradientDirection?: 'radial' | 'linear'
   /** Hides the border entirely, regardless of `stroke`/`strokeWidth`. */
   noBorder?: boolean
+  /** Shows a small label above the shape with its real-world size (from the
+   * project's pitch dimensions) and, when one or more player chips sit
+   * inside it, the resulting area per player — the "space per player"
+   * figure used to gauge a small-sided training zone's intensity (less
+   * space per player ≈ more duels/strength work, more space ≈ more
+   * running/speed). */
+  showAreaInfo?: boolean
 }
 
 export interface TextData {

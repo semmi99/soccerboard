@@ -159,7 +159,8 @@
       "showBorder": "Show border",
       "width": "Width ({{px}}px)",
       "height": "Height ({{px}}px)",
-      "opacity": "Opacity ({{percent}}%)"
+      "opacity": "Opacity ({{percent}}%)",
+      "showAreaInfo": "Show size & m²/player"
     },
     "text": {
       "textLabel": "Text",

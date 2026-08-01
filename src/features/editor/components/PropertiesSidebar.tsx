@@ -953,6 +953,18 @@ function ShapeFields({
           onChange={(e) => onChange({ opacity: Number(e.target.value) })}
         />
       </Field>
+      <label className="flex items-center gap-2 text-xs text-white/70">
+        <input
+          type="checkbox"
+          className="accent-violet-accent"
+          checked={data.showAreaInfo ?? false}
+          onChange={(e) => {
+            onCheckpoint()
+            onChange({ showAreaInfo: e.target.checked })
+          }}
+        />
+        {t('properties.shape.showAreaInfo')}
+      </label>
     </div>
   )
 }

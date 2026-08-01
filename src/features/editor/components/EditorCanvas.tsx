@@ -3,7 +3,7 @@ import { Arrow, Circle, Group, Layer, Line, Rect, Stage, Text, Transformer } fro
 import Konva from 'konva'
 import type { KonvaEventObject } from 'konva/lib/Node'
 import { useEditorStore } from '../store/editorStore'
-import { PITCH_STAGE_SIZE, getCropOriginX, getCroppedStageSize } from '../constants'
+import { PITCH_LOGICAL, PITCH_STAGE_SIZE, getCropOriginX, getCroppedStageSize } from '../constants'
 import { useElementSize } from '../hooks/useElementSize'
 import { Pitch } from './Pitch'
 import { ObjectRenderer } from '../objects/ObjectRenderer'
@@ -367,6 +367,7 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
   const fieldCrop = useEditorStore((s) => s.fieldCrop)
   const fieldMirrored = useEditorStore((s) => s.fieldMirrored)
   const pitchLengthM = useEditorStore((s) => s.pitchLengthM)
+  const pitchWidthM = useEditorStore((s) => s.pitchWidthM)
   const frames = useEditorStore((s) => s.frames)
   const activeFrameIndex = useEditorStore((s) => s.activeFrameIndex)
   const tool = useEditorStore((s) => s.tool)
@@ -519,6 +520,51 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
           lengthAxis === 'y'
             ? { x: crossCenter, y: (avgPos + edge) / 2 }
             : { x: (avgPos + edge) / 2, y: crossCenter },
+      }
+    })
+
+  // Training-zone size readout: a rectangle/circle shape with showAreaInfo
+  // reports its real-world dimensions and, if one or more player chips sit
+  // inside it, the resulting m²/player — the "space per player" figure
+  // coaches use to judge a small-sided game's intensity (tighter space per
+  // player skews toward duels/strength, more space toward running/speed).
+  const shapeAreaLabels = sortedObjects
+    .filter(
+      (o): o is Extract<FrameObject, { objectType: 'shape' }> =>
+        o.objectType === 'shape' && Boolean(o.data.showAreaInfo),
+    )
+    .map((o) => {
+      const halfW = (o.data.width * o.scale) / 2
+      const halfH = (o.data.height * o.scale) / 2
+      const isCircle = o.data.kind === 'circle'
+      const widthM = o.data.width * o.scale * (pitchLengthM / PITCH_LOGICAL.width)
+      const heightM = o.data.height * o.scale * (pitchWidthM / PITCH_LOGICAL.height)
+      const areaM2 = isCircle ? Math.PI * (widthM / 2) * (heightM / 2) : widthM * heightM
+
+      const rad = (o.rotation * Math.PI) / 180
+      const cos = Math.cos(rad)
+      const sin = Math.sin(rad)
+      const playerCount = frame.objects.filter((p) => {
+        if (p.objectType !== 'player_chip') return false
+        const dx0 = p.x - o.x
+        const dy0 = p.y - o.y
+        // Un-rotate the player's position into the shape's own local space
+        // (inverse of the object's own rotation), same approach as the
+        // space-behind zone above.
+        const dx = dx0 * cos + dy0 * sin
+        const dy = -dx0 * sin + dy0 * cos
+        return isCircle ? (dx / halfW) ** 2 + (dy / halfH) ** 2 <= 1 : Math.abs(dx) <= halfW && Math.abs(dy) <= halfH
+      }).length
+
+      const localLabelY = -halfH - 14
+      return {
+        id: o.id,
+        x: o.x + localLabelY * -sin,
+        y: o.y + localLabelY * cos,
+        text:
+          playerCount > 0
+            ? `${widthM.toFixed(1)}×${heightM.toFixed(1)}m · ${Math.round(areaM2 / playerCount)} m²/Spieler`
+            : `${widthM.toFixed(1)}×${heightM.toFixed(1)}m`,
       }
     })
 
@@ -1152,6 +1198,33 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
                   y={-11}
                   width={labelWidth}
                   height={22}
+                  align="center"
+                  verticalAlign="middle"
+                  fontSize={10}
+                  fontStyle="bold"
+                  fill="#ffffff"
+                />
+              </Group>
+            )
+          })}
+          {shapeAreaLabels.map((l) => {
+            const labelWidth = Math.max(70, l.text.length * 5.6 + 14)
+            return (
+              <Group key={`area-info-${l.id}`} x={l.x} y={l.y} listening={false}>
+                <Rect
+                  x={-labelWidth / 2}
+                  y={-10}
+                  width={labelWidth}
+                  height={20}
+                  fill="rgba(15, 23, 42, 0.82)"
+                  cornerRadius={4}
+                />
+                <Text
+                  text={l.text}
+                  x={-labelWidth / 2}
+                  y={-10}
+                  width={labelWidth}
+                  height={20}
                   align="center"
                   verticalAlign="middle"
                   fontSize={10}

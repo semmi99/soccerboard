@@ -159,7 +159,8 @@
       "showBorder": "Rahmen anzeigen",
       "width": "Breite ({{px}}px)",
       "height": "Höhe ({{px}}px)",
-      "opacity": "Deckkraft ({{percent}}%)"
+      "opacity": "Deckkraft ({{percent}}%)",
+      "showAreaInfo": "Größe & m²/Spieler anzeigen"
     },
     "text": {
       "textLabel": "Text",
