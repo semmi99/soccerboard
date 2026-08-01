@@ -5,6 +5,7 @@ import { EditorPage } from '../features/editor/components/EditorPage'
 import { DashboardPage } from '../features/projects/components/DashboardPage'
 import { SquadPage } from '../features/squad/components/SquadPage'
 import { FormationsPage } from '../features/formations/components/FormationsPage'
+import { SessionsPage } from '../features/sessions/components/SessionsPage'
 import { LandingPage } from '../features/marketing/components/LandingPage'
 import { AccountPage } from '../features/account/components/AccountPage'
 import { AdminPage } from '../features/admin/components/AdminPage'
@@ -66,6 +67,14 @@ export function AppRoutes() {
         element={
           <AuthGuard>
             <FormationsPage />
+          </AuthGuard>
+        }
+      />
+      <Route
+        path="/sessions"
+        element={
+          <AuthGuard>
+            <SessionsPage />
           </AuthGuard>
         }
       />

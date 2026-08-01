@@ -1,0 +1,20 @@
+{
+  "title": "Training sessions",
+  "createNew": "New session",
+  "empty": "No training sessions saved yet.",
+  "loadError": "Loading failed.",
+  "saveError": "Save failed.",
+  "deleteError": "Delete failed.",
+  "totalMinutes": "{{min}} min",
+  "exerciseCount_one": "{{count}} exercise",
+  "exerciseCount_other": "{{count}} exercises",
+  "print": "Print",
+  "newSessionDefaultName": "New session",
+  "library": "Exercise library",
+  "libraryEmpty": "No exercises saved yet — save some from the editor's \"Exercises\" panel.",
+  "addToSession": "+ Add",
+  "sessionName": "Session name",
+  "sessionItems": "Plan",
+  "sessionEmpty": "No exercises in this session yet — add some from the library on the left.",
+  "minutesAbbr": "min"
+}
