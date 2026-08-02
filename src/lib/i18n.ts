@@ -19,8 +19,6 @@ import legalDe from '../locales/de/legal.json'
 import legalEn from '../locales/en/legal.json'
 import editorDe from '../locales/de/editor.json'
 import editorEn from '../locales/en/editor.json'
-import sessionsDe from '../locales/de/sessions.json'
-import sessionsEn from '../locales/en/sessions.json'
 
 /** Same localStorage key `lib/language.ts` used pre-i18next, so a language
  * choice made on the marketing/auth pages before login survives into the
@@ -42,7 +40,6 @@ void i18n
         admin: adminDe,
         legal: legalDe,
         editor: editorDe,
-        sessions: sessionsDe,
       },
       en: {
         common: commonEn,
@@ -54,12 +51,11 @@ void i18n
         admin: adminEn,
         legal: legalEn,
         editor: editorEn,
-        sessions: sessionsEn,
       },
     },
     fallbackLng: 'de',
     supportedLngs: ['de', 'en'],
-    ns: ['common', 'auth', 'projects', 'squad', 'formations', 'account', 'admin', 'legal', 'editor', 'sessions'],
+    ns: ['common', 'auth', 'projects', 'squad', 'formations', 'account', 'admin', 'legal', 'editor'],
     defaultNS: 'common',
     detection: {
       order: ['localStorage', 'navigator'],

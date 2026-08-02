@@ -608,38 +608,6 @@ export type Database = {
           },
         ]
       }
-      training_sessions: {
-        Row: {
-          created_at: string
-          id: string
-          items: Json
-          name: string
-          org_id: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          items?: Json
-          name: string
-          org_id: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          items?: Json
-          name?: string
-          org_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "training_sessions_org_id_fkey"
-            columns: ["org_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       zone_grids: {
         Row: {
           created_at: string
