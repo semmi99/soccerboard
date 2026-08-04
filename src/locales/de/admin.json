@@ -58,6 +58,9 @@
     "toggleDisabledError": "Konnte Status nicht ändern.",
     "deleteConfirm": "{{name}} wirklich endgültig löschen? Das kann nicht rückgängig gemacht werden.",
     "deleteError": "Löschen fehlgeschlagen.",
+    "orgDeleteConfirm": "Organisation \"{{name}}\" wirklich endgültig löschen? Damit werden auch alle {{count}} zugehörigen Benutzerkonten gelöscht. Das kann nicht rückgängig gemacht werden.",
+    "orgDeleteError": "Löschen der Organisation fehlgeschlagen.",
+    "orgDeleteButton": "Organisation löschen",
     "roles": {
       "admin": "Admin",
       "coach": "Trainer (zahlend)",

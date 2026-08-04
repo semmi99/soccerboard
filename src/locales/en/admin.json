@@ -58,6 +58,9 @@
     "toggleDisabledError": "Couldn't change status.",
     "deleteConfirm": "Permanently delete {{name}}? This can't be undone.",
     "deleteError": "Delete failed.",
+    "orgDeleteConfirm": "Permanently delete organization \"{{name}}\"? This will also delete all {{count}} of its member accounts. This can't be undone.",
+    "orgDeleteError": "Failed to delete organization.",
+    "orgDeleteButton": "Delete organization",
     "roles": {
       "admin": "Admin",
       "coach": "Coach (paid)",

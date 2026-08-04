@@ -20,7 +20,9 @@ function json(body: unknown, status = 200) {
 // the database, and re-checks the TARGET's org_id matches — a client-
 // supplied "I'm an admin of org X" claim is never trusted. Deleting the
 // auth user cascades to the profiles row (see 001_init.sql's `on delete
-// cascade`), so there's nothing else to clean up here.
+// cascade`). If that was the organization's last member, the now-empty
+// organization is deleted too, so solo-coach accounts don't leave an
+// orphaned org behind — but a shared org (multiple members) survives.
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders })
   if (req.method !== "POST") return json({ error: "Method not allowed" }, 405)
@@ -75,6 +77,14 @@ Deno.serve(async (req: Request) => {
 
   const { error: deleteError } = await adminClient.auth.admin.deleteUser(userId)
   if (deleteError) return json({ error: deleteError.message }, 500)
+
+  const { count: remainingMembers, error: remainingError } = await adminClient
+    .from("profiles")
+    .select("id", { count: "exact", head: true })
+    .eq("org_id", targetProfile.org_id)
+  if (!remainingError && remainingMembers === 0) {
+    await adminClient.from("organizations").delete().eq("id", targetProfile.org_id)
+  }
 
   return json({ success: true })
 })

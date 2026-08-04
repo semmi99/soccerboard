@@ -59,10 +59,21 @@ export async function setUserDisabled(userId: string, disabled: boolean): Promis
 
 /** Fully deletes any user platform-wide via the org-remove-member Edge
  * Function — it already grants a platform admin caller access to any
- * user, not just their own org's members. */
+ * user, not just their own org's members. If that was the org's last
+ * member, the Edge Function also deletes the now-empty organization. */
 export async function deleteUser(userId: string): Promise<void> {
   const { data, error } = await supabase.functions.invoke<{ error?: string }>('org-remove-member', {
     body: { userId },
+  })
+  if (error) throw error
+  if (data?.error) throw new Error(data.error)
+}
+
+/** Deletes an organization AND every member account in it, via the
+ * admin-delete-org Edge Function (platform-admin only, irreversible). */
+export async function deleteOrganization(orgId: string): Promise<void> {
+  const { data, error } = await supabase.functions.invoke<{ error?: string }>('admin-delete-org', {
+    body: { orgId },
   })
   if (error) throw error
   if (data?.error) throw new Error(data.error)

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Button } from '../../../components/ui/Button'
 import {
+  deleteOrganization,
   deleteUser,
   listAllOrganizations,
   listAllProfiles,
@@ -93,6 +94,7 @@ export function PlatformAdminSection() {
   const [passwordTarget, setPasswordTarget] = useState<PlatformProfile | null>(null)
   const [togglingId, setTogglingId] = useState<string | null>(null)
   const [deletingId, setDeletingId] = useState<string | null>(null)
+  const [deletingOrgId, setDeletingOrgId] = useState<string | null>(null)
 
   useEffect(() => {
     let cancelled = false
@@ -154,10 +156,30 @@ export function PlatformAdminSection() {
     try {
       await deleteUser(p.id)
       setProfiles((ps) => ps.filter((x) => x.id !== p.id))
+      // The deleted user may have been an org's last member, in which case
+      // the Edge Function also deleted that now-empty organization.
+      const refreshedOrgs = await listAllOrganizations()
+      setOrgs(refreshedOrgs)
     } catch (err) {
       setError(err instanceof Error ? err.message : t('platform.deleteError'))
     } finally {
       setDeletingId(null)
+    }
+  }
+
+  async function handleDeleteOrg(o: PlatformOrg) {
+    const memberCount = profiles.filter((p) => p.org_id === o.id).length
+    if (!window.confirm(t('platform.orgDeleteConfirm', { name: o.name, count: memberCount }))) return
+    setError(null)
+    setDeletingOrgId(o.id)
+    try {
+      await deleteOrganization(o.id)
+      setOrgs((os) => os.filter((x) => x.id !== o.id))
+      setProfiles((ps) => ps.filter((p) => p.org_id !== o.id))
+    } catch (err) {
+      setError(err instanceof Error ? err.message : t('platform.orgDeleteError'))
+    } finally {
+      setDeletingOrgId(null)
     }
   }
 
@@ -199,6 +221,13 @@ export function PlatformAdminSection() {
                     />
                     {t('platform.freeOverrideLabel')}
                   </label>
+                  <Button
+                    variant="danger"
+                    loading={deletingOrgId === o.id}
+                    onClick={() => void handleDeleteOrg(o)}
+                  >
+                    {t('platform.orgDeleteButton')}
+                  </Button>
                 </div>
               ))}
             </div>
