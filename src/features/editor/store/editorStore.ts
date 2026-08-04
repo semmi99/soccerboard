@@ -7,6 +7,7 @@ import type {
   KitSlot,
   PitchDesign,
   PitchOrientation,
+  PlayerLabelFormat,
   TeamKit,
   ToolId,
   ZoneGridLine,
@@ -97,6 +98,8 @@ interface EditorState {
    * motion guide, visible for every mover at once (not just the selection),
    * including during playback. */
   showMovementTrails: boolean
+  /** How every player chip's name label is displayed board-wide. */
+  playerLabelFormat: PlayerLabelFormat
   fieldCrop: FieldCrop
   /** Flips a non-full field crop to show the other end of the pitch (the
    * other goal) — a no-op for the full crop, which already shows both. */
@@ -144,6 +147,7 @@ interface EditorState {
     zoneGridCustomId: string | null
     showPitchMarkings: boolean
     showMovementTrails: boolean
+    playerLabelFormat: PlayerLabelFormat
     fieldCrop: FieldCrop
     fieldMirrored: boolean
     pitchLengthM: number
@@ -164,6 +168,7 @@ interface EditorState {
   setZoneGridCustomLines: (lines: ZoneGridLine[]) => void
   setShowPitchMarkings: (show: boolean) => void
   setShowMovementTrails: (show: boolean) => void
+  setPlayerLabelFormat: (format: PlayerLabelFormat) => void
   setFieldCrop: (crop: FieldCrop) => void
   setFieldMirrored: (mirrored: boolean) => void
   setPitchLengthM: (m: number) => void
@@ -235,6 +240,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
   zoneGridCustomLines: [],
   showPitchMarkings: true,
   showMovementTrails: false,
+  playerLabelFormat: 'full',
   fieldCrop: 'full',
   fieldMirrored: false,
   pitchLengthM: 105,
@@ -269,6 +275,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
     zoneGridCustomId,
     showPitchMarkings,
     showMovementTrails,
+    playerLabelFormat,
     fieldCrop,
     fieldMirrored,
     pitchLengthM,
@@ -288,6 +295,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
       zoneGridCustomLines: [],
       showPitchMarkings,
       showMovementTrails,
+      playerLabelFormat,
       fieldCrop,
       fieldMirrored,
       pitchLengthM,
@@ -323,6 +331,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
       zoneGridCustomLines: [],
       showPitchMarkings: true,
       showMovementTrails: false,
+      playerLabelFormat: 'full',
       fieldCrop: 'full',
       fieldMirrored: false,
       pitchLengthM: 105,
@@ -355,6 +364,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
   setZoneGridCustomLines: (lines) => set({ zoneGridCustomLines: lines }),
   setShowPitchMarkings: (show) => set({ showPitchMarkings: show, isDirty: true }),
   setShowMovementTrails: (show) => set({ showMovementTrails: show, isDirty: true }),
+  setPlayerLabelFormat: (format) => set({ playerLabelFormat: format, isDirty: true }),
   setFieldCrop: (crop) => set({ fieldCrop: crop, isDirty: true }),
   setFieldMirrored: (mirrored) => set({ fieldMirrored: mirrored, isDirty: true }),
   setPitchLengthM: (m) => set({ pitchLengthM: m, isDirty: true }),

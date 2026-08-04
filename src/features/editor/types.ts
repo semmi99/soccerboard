@@ -73,6 +73,13 @@ export interface KitConfig {
  * reconfiguring colors each time (see editorStore's swapKitSlot). */
 export type KitSlot = 'primary' | 'secondary'
 
+/** How a player chip's name label is displayed: the full "First Last"
+ * string (auto-wrapping if too wide to fit), just the last name on one
+ * line, or the first/last name forced onto their own line each — a
+ * project-wide choice rather than per-chip, since a team should look
+ * consistent across the whole board. */
+export type PlayerLabelFormat = 'full' | 'lastName' | 'twoLine'
+
 export interface TeamKit {
   home: KitConfig
   away: KitConfig

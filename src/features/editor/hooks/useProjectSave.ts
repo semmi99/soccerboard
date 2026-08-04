@@ -17,6 +17,7 @@ export function useProjectSave() {
   const zoneGridCustomId = useEditorStore((s) => s.zoneGridCustomId)
   const showPitchMarkings = useEditorStore((s) => s.showPitchMarkings)
   const showMovementTrails = useEditorStore((s) => s.showMovementTrails)
+  const playerLabelFormat = useEditorStore((s) => s.playerLabelFormat)
   const fieldCrop = useEditorStore((s) => s.fieldCrop)
   const fieldMirrored = useEditorStore((s) => s.fieldMirrored)
   const pitchLengthM = useEditorStore((s) => s.pitchLengthM)
@@ -72,6 +73,7 @@ export function useProjectSave() {
         zoneGridCustomId,
         showPitchMarkings,
         showMovementTrails,
+        playerLabelFormat,
         fieldCrop,
         fieldMirrored,
         pitchLengthM,
@@ -108,6 +110,7 @@ export function useProjectSave() {
     zoneGridCustomId,
     showPitchMarkings,
     showMovementTrails,
+    playerLabelFormat,
     fieldCrop,
     fieldMirrored,
     pitchLengthM,

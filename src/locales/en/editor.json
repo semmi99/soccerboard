@@ -72,6 +72,12 @@
       },
       "showMarkings": "Show pitch markings",
       "showMovementTrails": "Show movement trail (frame to frame)",
+      "playerLabelFormat": "Player name display",
+      "playerLabelFormatOptions": {
+        "full": "First and last name",
+        "lastName": "Last name only",
+        "twoLine": "First name / last name (2 lines)"
+      },
       "mirrorField": "Mirror field (other side)",
       "lengthM": "Length (m)",
       "widthM": "Width (m)",

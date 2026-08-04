@@ -8,6 +8,21 @@ import { useEditorStore } from '../../store/editorStore'
 const CHIP_R = 18
 const GK_FALLBACK: KitConfig = { pattern: 'solid', color1: '#eab308', color2: '#111827' }
 
+/** The label is stored as one "First Last" string (see TeamSquadPanel) with
+ * no structured first/last fields of its own — splitting at the LAST space
+ * treats everything before it as the first name (so multi-word first names
+ * like "Ben Luca" still work) and the final word as the last name. Applies
+ * only to `lastName`/`twoLine` formats; `full` renders the string as-is. */
+function formatPlayerLabel(label: string, format: 'full' | 'lastName' | 'twoLine'): string {
+  if (format === 'full') return label
+  const trimmed = label.trim()
+  const lastSpace = trimmed.lastIndexOf(' ')
+  if (lastSpace === -1) return trimmed
+  const first = trimmed.slice(0, lastSpace)
+  const last = trimmed.slice(lastSpace + 1)
+  return format === 'lastName' ? last : `${first}\n${last}`
+}
+
 /** Pulsing glow ring behind a highlighted chip — its radius/opacity oscillate
  * on a Konva.Animation tied to the shape's own layer, so it keeps pulsing
  * continuously (including while recording video export) without React
@@ -184,6 +199,7 @@ function KitFill({ kit }: { kit: KitConfig }) {
 export function PlayerChipShape({ data }: { data: PlayerChipData }) {
   const teamKit = useEditorStore((s) => s.teamKit)
   const playerPhotos = useEditorStore((s) => s.playerPhotos)
+  const playerLabelFormat = useEditorStore((s) => s.playerLabelFormat)
   const customKit: KitConfig | undefined = data.color
     ? { pattern: 'solid', color1: data.color, color2: data.color }
     : undefined
@@ -225,7 +241,7 @@ export function PlayerChipShape({ data }: { data: PlayerChipData }) {
       />
       {data.label && (
         <Text
-          text={data.label}
+          text={formatPlayerLabel(data.label, playerLabelFormat)}
           fontSize={16}
           fontStyle="bold"
           fill={data.labelColor ?? '#ffffff'}
@@ -233,6 +249,7 @@ export function PlayerChipShape({ data }: { data: PlayerChipData }) {
           offsetX={55}
           y={22}
           align="center"
+          lineHeight={1.15}
           listening={false}
           shadowColor="#000000"
           shadowBlur={3}

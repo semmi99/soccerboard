@@ -70,6 +70,7 @@ export function EditorPage() {
         zoneGridCustomId: project.zoneGridCustomId,
         showPitchMarkings: project.showPitchMarkings,
         showMovementTrails: project.showMovementTrails,
+        playerLabelFormat: project.playerLabelFormat,
         fieldCrop: project.fieldCrop,
         fieldMirrored: project.fieldMirrored,
         pitchLengthM: project.pitchLengthM,

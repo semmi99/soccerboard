@@ -14,6 +14,7 @@ import type {
   PitchDesign,
   PitchOrientation,
   PlayerChipData,
+  PlayerLabelFormat,
   QuoteCardData,
   QuoteFontFamily,
   ShapeData,
@@ -57,6 +58,7 @@ export function PropertiesSidebar() {
   const orientation = useEditorStore((s) => s.orientation)
   const showPitchMarkings = useEditorStore((s) => s.showPitchMarkings)
   const showMovementTrails = useEditorStore((s) => s.showMovementTrails)
+  const playerLabelFormat = useEditorStore((s) => s.playerLabelFormat)
   const fieldCrop = useEditorStore((s) => s.fieldCrop)
   const fieldMirrored = useEditorStore((s) => s.fieldMirrored)
   const pitchLengthM = useEditorStore((s) => s.pitchLengthM)
@@ -65,6 +67,7 @@ export function PropertiesSidebar() {
   const setOrientation = useEditorStore((s) => s.setOrientation)
   const setShowPitchMarkings = useEditorStore((s) => s.setShowPitchMarkings)
   const setShowMovementTrails = useEditorStore((s) => s.setShowMovementTrails)
+  const setPlayerLabelFormat = useEditorStore((s) => s.setPlayerLabelFormat)
   const setFieldCrop = useEditorStore((s) => s.setFieldCrop)
   const setFieldMirrored = useEditorStore((s) => s.setFieldMirrored)
   const setPitchLengthM = useEditorStore((s) => s.setPitchLengthM)
@@ -202,6 +205,17 @@ export function PropertiesSidebar() {
             />
             {t('properties.field.showMovementTrails')}
           </label>
+          <Field label={t('properties.field.playerLabelFormat')}>
+            <select
+              className={selectClass}
+              value={playerLabelFormat}
+              onChange={(e) => setPlayerLabelFormat(e.target.value as PlayerLabelFormat)}
+            >
+              <option value="full">{t('properties.field.playerLabelFormatOptions.full')}</option>
+              <option value="lastName">{t('properties.field.playerLabelFormatOptions.lastName')}</option>
+              <option value="twoLine">{t('properties.field.playerLabelFormatOptions.twoLine')}</option>
+            </select>
+          </Field>
           <div className="flex gap-2">
             <div className="min-w-0 flex-1">
               <Field label={t('properties.field.lengthM')}>

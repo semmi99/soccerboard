@@ -72,6 +72,12 @@
       },
       "showMarkings": "Spielfeldmarkierungen anzeigen",
       "showMovementTrails": "Laufweg-Linie anzeigen (Frame zu Frame)",
+      "playerLabelFormat": "Spielername-Anzeige",
+      "playerLabelFormatOptions": {
+        "full": "Vor- und Nachname",
+        "lastName": "Nur Nachname",
+        "twoLine": "Vorname / Nachname (2 Zeilen)"
+      },
       "mirrorField": "Feld spiegeln (andere Seite)",
       "lengthM": "Länge (m)",
       "widthM": "Breite (m)",

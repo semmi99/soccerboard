@@ -8,6 +8,7 @@ import type {
   ObjectType,
   PitchDesign,
   PitchOrientation,
+  PlayerLabelFormat,
   TeamKit,
   ZoneGridStyle,
 } from '../../features/editor/types'
@@ -102,6 +103,7 @@ export interface LoadedProject {
   zoneGridCustomId: string | null
   showPitchMarkings: boolean
   showMovementTrails: boolean
+  playerLabelFormat: PlayerLabelFormat
   fieldCrop: FieldCrop
   fieldMirrored: boolean
   pitchLengthM: number
@@ -116,7 +118,7 @@ export async function loadProject(id: string): Promise<LoadedProject> {
   const { data: project, error: projectError } = await supabase
     .from('projects')
     .select(
-      'id, title, pitch_design, orientation, team_id, zone_grid_style, zone_grid_custom_id, show_pitch_markings, show_movement_trails, field_crop, field_mirrored, pitch_length_m, pitch_width_m, kit_override, secondary_kit_override, active_kit_slot',
+      'id, title, pitch_design, orientation, team_id, zone_grid_style, zone_grid_custom_id, show_pitch_markings, show_movement_trails, player_label_format, field_crop, field_mirrored, pitch_length_m, pitch_width_m, kit_override, secondary_kit_override, active_kit_slot',
     )
     .eq('id', id)
     .single()
@@ -152,6 +154,7 @@ export async function loadProject(id: string): Promise<LoadedProject> {
     zoneGridCustomId: project.zone_grid_custom_id,
     showPitchMarkings: project.show_pitch_markings,
     showMovementTrails: project.show_movement_trails,
+    playerLabelFormat: (project.player_label_format as PlayerLabelFormat) ?? 'full',
     fieldCrop: project.field_crop as FieldCrop,
     fieldMirrored: project.field_mirrored,
     pitchLengthM: project.pitch_length_m,
@@ -175,6 +178,7 @@ export interface SaveProjectInput {
   zoneGridCustomId: string | null
   showPitchMarkings: boolean
   showMovementTrails: boolean
+  playerLabelFormat: PlayerLabelFormat
   fieldCrop: FieldCrop
   fieldMirrored: boolean
   pitchLengthM: number
@@ -200,6 +204,7 @@ export async function saveProject(input: SaveProjectInput): Promise<string> {
         zone_grid_custom_id: input.zoneGridCustomId,
         show_pitch_markings: input.showPitchMarkings,
         show_movement_trails: input.showMovementTrails,
+        player_label_format: input.playerLabelFormat,
         field_crop: input.fieldCrop,
         field_mirrored: input.fieldMirrored,
         pitch_length_m: input.pitchLengthM,
@@ -239,6 +244,7 @@ async function insertProjectRow(
     zone_grid_custom_id: input.zoneGridCustomId,
     show_pitch_markings: input.showPitchMarkings,
     show_movement_trails: input.showMovementTrails,
+    player_label_format: input.playerLabelFormat,
     field_crop: input.fieldCrop,
     field_mirrored: input.fieldMirrored,
     pitch_length_m: input.pitchLengthM,

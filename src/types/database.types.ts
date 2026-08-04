@@ -450,6 +450,7 @@ export type Database = {
           pitch_design: string
           pitch_length_m: number
           pitch_width_m: number
+          player_label_format: string
           secondary_kit_override: Json | null
           show_movement_trails: boolean
           show_pitch_markings: boolean
@@ -474,6 +475,7 @@ export type Database = {
           pitch_design?: string
           pitch_length_m?: number
           pitch_width_m?: number
+          player_label_format?: string
           secondary_kit_override?: Json | null
           show_movement_trails?: boolean
           show_pitch_markings?: boolean
@@ -498,6 +500,7 @@ export type Database = {
           pitch_design?: string
           pitch_length_m?: number
           pitch_width_m?: number
+          player_label_format?: string
           secondary_kit_override?: Json | null
           show_movement_trails?: boolean
           show_pitch_markings?: boolean
