@@ -1,6 +1,8 @@
 import { Navigate, Route, Routes } from 'react-router-dom'
 import { LoginPage } from '../features/auth/components/LoginPage'
 import { SignupPage } from '../features/auth/components/SignupPage'
+import { ForgotPasswordPage } from '../features/auth/components/ForgotPasswordPage'
+import { ResetPasswordPage } from '../features/auth/components/ResetPasswordPage'
 import { EditorPage } from '../features/editor/components/EditorPage'
 import { DashboardPage } from '../features/projects/components/DashboardPage'
 import { SquadPage } from '../features/squad/components/SquadPage'
@@ -41,6 +43,15 @@ export function AppRoutes() {
           </GuestGuard>
         }
       />
+      <Route
+        path="/forgot-password"
+        element={
+          <GuestGuard>
+            <ForgotPasswordPage />
+          </GuestGuard>
+        }
+      />
+      <Route path="/reset-password" element={<ResetPasswordPage />} />
       <Route path="/impressum" element={<ImpressumPage />} />
       <Route path="/agb" element={<AgbPage />} />
       <Route path="/datenschutz" element={<DatenschutzPage />} />

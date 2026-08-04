@@ -52,6 +52,11 @@ export function LoginPage() {
           {t('login.submit')}
         </Button>
       </form>
+      <p className="mt-3 text-center text-sm">
+        <Link to="/forgot-password" className="font-medium text-white/50 hover:text-white/80 hover:underline">
+          {t('login.forgotPasswordLink')}
+        </Link>
+      </p>
       <p className="mt-5 text-center text-sm text-white/60">
         {t('login.noAccount')}{' '}
         <Link to="/signup" className="font-medium text-brand-yellow hover:underline">

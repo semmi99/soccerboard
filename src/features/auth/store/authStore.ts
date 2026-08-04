@@ -25,6 +25,7 @@ interface AuthState {
   ) => Promise<{ error: string | null; needsEmailConfirmation: boolean }>
   signOut: () => Promise<void>
   setOrganization: (organization: Organization) => void
+  resetPasswordForEmail: (email: string) => Promise<{ error: string | null }>
   updatePassword: (newPassword: string) => Promise<{ error: string | null }>
   updateProfileName: (fullName: string) => Promise<{ error: string | null }>
   updateProfileLocale: (locale: 'de' | 'en') => Promise<{ error: string | null }>
@@ -139,6 +140,19 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
 
   setOrganization: (organization) => set({ organization }),
+
+  // Sends a recovery email with a link back to /reset-password — Supabase
+  // auto-authenticates a short-lived session from that link's token (via
+  // the client's default detectSessionInUrl), which the existing
+  // onAuthStateChange listener above picks up like any other sign-in, so
+  // ResetPasswordPage just waits for status to become 'signed_in' and then
+  // reuses updatePassword below to actually set the new one.
+  resetPasswordForEmail: async (email) => {
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/reset-password`,
+    })
+    return { error: error?.message ?? null }
+  },
 
   updatePassword: async (newPassword) => {
     const { error } = await supabase.auth.updateUser({ password: newPassword })

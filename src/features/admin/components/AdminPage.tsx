@@ -10,6 +10,7 @@ import {
   listOrgMembers,
   listPendingInvites,
   removeMember,
+  setMemberDisabled,
   updateMemberRole,
   type OrgInvite,
   type OrgMember,
@@ -48,6 +49,7 @@ export function AdminPage() {
   const [createPassword, setCreatePassword] = useState('')
   const [createRole, setCreateRole] = useState<OrgRole>('coach')
   const [isCreating, setIsCreating] = useState(false)
+  const [togglingId, setTogglingId] = useState<string | null>(null)
 
   useEffect(() => {
     if (!organization) return
@@ -119,6 +121,19 @@ export function AdminPage() {
       setError(err instanceof Error ? err.message : t('createError'))
     } finally {
       setIsCreating(false)
+    }
+  }
+
+  async function handleToggleDisabled(member: OrgMember) {
+    setTogglingId(member.id)
+    setError(null)
+    try {
+      await setMemberDisabled(member.id, !member.disabled)
+      setMembers((ms) => ms.map((m) => (m.id === member.id ? { ...m, disabled: !member.disabled } : m)))
+    } catch (err) {
+      setError(err instanceof Error ? err.message : t('toggleDisabledError'))
+    } finally {
+      setTogglingId(null)
     }
   }
 
@@ -318,6 +333,11 @@ export function AdminPage() {
                       {m.id === profile.id && (
                         <span className="ml-2 text-xs text-white/30">{t('membersSection.you')}</span>
                       )}
+                      {m.disabled && (
+                        <span className="ml-2 rounded bg-red-500/20 px-1.5 py-0.5 text-[10px] font-medium text-red-400">
+                          {t('platform.disabledBadge')}
+                        </span>
+                      )}
                     </p>
                     {m.full_name && m.email && (
                       <p className="truncate text-xs text-white/40">{m.email}</p>
@@ -338,14 +358,23 @@ export function AdminPage() {
                       ))}
                     </select>
                     {m.id !== profile.id && (
-                      <Button
-                        variant="danger"
-                        loading={removingId === m.id}
-                        onClick={() => void handleRemoveMember(m)}
-                        title={t('membersSection.removeTitle')}
-                      >
-                        {t('membersSection.remove')}
-                      </Button>
+                      <>
+                        <Button
+                          variant="secondary"
+                          loading={togglingId === m.id}
+                          onClick={() => void handleToggleDisabled(m)}
+                        >
+                          {m.disabled ? t('platform.activate') : t('platform.deactivate')}
+                        </Button>
+                        <Button
+                          variant="danger"
+                          loading={removingId === m.id}
+                          onClick={() => void handleRemoveMember(m)}
+                          title={t('membersSection.removeTitle')}
+                        >
+                          {t('membersSection.remove')}
+                        </Button>
+                      </>
                     )}
                   </div>
                 </div>

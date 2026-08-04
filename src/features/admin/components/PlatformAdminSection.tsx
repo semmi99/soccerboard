@@ -2,8 +2,10 @@ import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Button } from '../../../components/ui/Button'
 import {
+  deleteUser,
   listAllOrganizations,
   listAllProfiles,
+  setUserDisabled,
   setUserPassword,
   updateAnyProfileRole,
   updateOrgFreeOverride,
@@ -89,6 +91,8 @@ export function PlatformAdminSection() {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [passwordTarget, setPasswordTarget] = useState<PlatformProfile | null>(null)
+  const [togglingId, setTogglingId] = useState<string | null>(null)
+  const [deletingId, setDeletingId] = useState<string | null>(null)
 
   useEffect(() => {
     let cancelled = false
@@ -126,6 +130,34 @@ export function PlatformAdminSection() {
       setProfiles((ps) => ps.map((p) => (p.id === updated.id ? updated : p)))
     } catch (err) {
       setError(err instanceof Error ? err.message : t('roleChangeError'))
+    }
+  }
+
+  async function handleToggleDisabled(p: PlatformProfile) {
+    setError(null)
+    setTogglingId(p.id)
+    try {
+      await setUserDisabled(p.id, !p.disabled)
+      setProfiles((ps) => ps.map((x) => (x.id === p.id ? { ...x, disabled: !p.disabled } : x)))
+    } catch (err) {
+      setError(err instanceof Error ? err.message : t('platform.toggleDisabledError'))
+    } finally {
+      setTogglingId(null)
+    }
+  }
+
+  async function handleDelete(p: PlatformProfile) {
+    if (!window.confirm(t('platform.deleteConfirm', { name: p.full_name || p.email || t('membersSection.unnamed') })))
+      return
+    setError(null)
+    setDeletingId(p.id)
+    try {
+      await deleteUser(p.id)
+      setProfiles((ps) => ps.filter((x) => x.id !== p.id))
+    } catch (err) {
+      setError(err instanceof Error ? err.message : t('platform.deleteError'))
+    } finally {
+      setDeletingId(null)
     }
   }
 
@@ -183,6 +215,11 @@ export function PlatformAdminSection() {
                   <div className="min-w-0">
                     <p className="truncate text-sm text-white">
                       {p.full_name || p.email || t('membersSection.unnamed')}
+                      {p.disabled && (
+                        <span className="ml-2 rounded bg-red-500/20 px-1.5 py-0.5 text-[10px] font-medium text-red-400">
+                          {t('platform.disabledBadge')}
+                        </span>
+                      )}
                     </p>
                     <p className="truncate text-xs text-white/40">
                       {p.email} · {orgById.get(p.org_id)?.name ?? '–'}
@@ -202,6 +239,16 @@ export function PlatformAdminSection() {
                     </select>
                     <Button variant="secondary" onClick={() => setPasswordTarget(p)}>
                       {t('platform.setPassword')}
+                    </Button>
+                    <Button
+                      variant="secondary"
+                      loading={togglingId === p.id}
+                      onClick={() => void handleToggleDisabled(p)}
+                    >
+                      {p.disabled ? t('platform.activate') : t('platform.deactivate')}
+                    </Button>
+                    <Button variant="danger" loading={deletingId === p.id} onClick={() => void handleDelete(p)}>
+                      {t('common:actions.delete')}
                     </Button>
                   </div>
                 </div>
