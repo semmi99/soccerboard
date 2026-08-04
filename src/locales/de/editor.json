@@ -132,6 +132,9 @@
       "showDistance": "Distanz anzeigen (m)",
       "glow": "Leuchteffekt (weicher Farbkanal entlang der Linie)"
     },
+    "connector": {
+      "zone": "Farbfläche entlang der Linie anzeigen"
+    },
     "playerChip": {
       "linked": "Verknüpft mit Kaderspieler",
       "showPhoto": "Foto statt Rückennummer/Trikot anzeigen",

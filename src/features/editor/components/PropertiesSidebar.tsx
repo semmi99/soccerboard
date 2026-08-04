@@ -1646,6 +1646,18 @@ function ConnectorFields({
         />
         {t('properties.shared.glow')}
       </label>
+      <label className="flex items-center gap-2 text-xs text-white/70">
+        <input
+          type="checkbox"
+          className="accent-violet-accent"
+          checked={data.zone ?? false}
+          onChange={(e) => {
+            onCheckpoint()
+            onChange({ zone: e.target.checked })
+          }}
+        />
+        {t('properties.connector.zone')}
+      </label>
     </div>
   )
 }

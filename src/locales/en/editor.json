@@ -132,6 +132,9 @@
       "showDistance": "Show distance (m)",
       "glow": "Glow effect (soft color channel along the line)"
     },
+    "connector": {
+      "zone": "Show color band along the line"
+    },
     "playerChip": {
       "linked": "Linked to squad player",
       "showPhoto": "Show photo instead of jersey number/kit",

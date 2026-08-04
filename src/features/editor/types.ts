@@ -314,6 +314,11 @@ export interface ConnectorData {
   lineStyle: LineStyle
   /** Soft, narrow glow following the connector's path — see ArrowData.glow. */
   glow?: boolean
+  /** Wider, filled color band running alongside the connector (the
+   * "corridor" look in reference tactics-analysis graphics) — distinct
+   * from `glow`'s blur-based halo, this is an actual translucent shape,
+   * visible even at a small render size where a blur washes out. */
+  zone?: boolean
 }
 
 export type ObjectType =

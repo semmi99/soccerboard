@@ -33,8 +33,29 @@ export function ConnectorShape({
   const mid = distanceLabel ? midpointOf(points) : null
   const labelWidth = distanceLabel ? LABEL_FONT_SIZE * distanceLabel.length * 0.62 + 12 : 0
 
+  const dx = to.x - from.x
+  const dy = to.y - from.y
+  const length = Math.hypot(dx, dy)
+  const angleDeg = (Math.atan2(dy, dx) * 180) / Math.PI
+  const zoneWidth = Math.max(24, data.strokeWidth * 7)
+
   return (
     <Group>
+      {data.zone && length > 0 && (
+        <Rect
+          x={(from.x + to.x) / 2}
+          y={(from.y + to.y) / 2}
+          width={length}
+          height={zoneWidth}
+          offsetX={length / 2}
+          offsetY={zoneWidth / 2}
+          rotation={angleDeg}
+          fill={data.color}
+          opacity={0.28}
+          cornerRadius={zoneWidth / 2}
+          listening={false}
+        />
+      )}
       <Line
         ref={lineRef}
         points={points}
@@ -44,8 +65,8 @@ export function ConnectorShape({
         lineCap="round"
         hitStrokeWidth={16}
         shadowColor={isSelected ? '#a855f7' : data.glow ? data.color : undefined}
-        shadowBlur={isSelected ? 6 : data.glow ? data.strokeWidth * 3 : 0}
-        shadowOpacity={isSelected ? 0.7 : data.glow ? 0.8 : 0}
+        shadowBlur={isSelected ? 6 : data.glow ? data.strokeWidth * 5.5 : 0}
+        shadowOpacity={isSelected ? 0.7 : data.glow ? 0.95 : 0}
         onClick={(e: KonvaEventObject<MouseEvent>) => {
           e.cancelBubble = true
           onSelect(e.evt.shiftKey)
