@@ -369,6 +369,7 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
   // persisted with the project, same as how a map app's zoom isn't saved.
   const [zoom, setZoom] = useState(1)
   const pitchDesign = useEditorStore((s) => s.pitchDesign)
+  const pitchDesignCustomColors = useEditorStore((s) => s.pitchDesignCustomColors)
   const orientation = useEditorStore((s) => s.orientation)
   const zoneGridStyle = useEditorStore((s) => s.zoneGridStyle)
   const zoneGridCustomLines = useEditorStore((s) => s.zoneGridCustomLines)
@@ -1188,6 +1189,7 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
         <Layer>
           <Pitch
             design={pitchDesign}
+            customTheme={pitchDesignCustomColors ?? undefined}
             orientation={orientation}
             zoneGridStyle={zoneGridStyle}
             customGridLines={zoneGridCustomLines}

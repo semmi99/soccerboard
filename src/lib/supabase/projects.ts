@@ -97,6 +97,7 @@ export interface LoadedProject {
   id: string
   title: string
   pitchDesign: PitchDesign
+  pitchDesignCustomId: string | null
   orientation: PitchOrientation
   teamId: string | null
   zoneGridStyle: ZoneGridStyle
@@ -118,7 +119,7 @@ export async function loadProject(id: string): Promise<LoadedProject> {
   const { data: project, error: projectError } = await supabase
     .from('projects')
     .select(
-      'id, title, pitch_design, orientation, team_id, zone_grid_style, zone_grid_custom_id, show_pitch_markings, show_movement_trails, player_label_format, field_crop, field_mirrored, pitch_length_m, pitch_width_m, kit_override, secondary_kit_override, active_kit_slot',
+      'id, title, pitch_design, pitch_design_custom_id, orientation, team_id, zone_grid_style, zone_grid_custom_id, show_pitch_markings, show_movement_trails, player_label_format, field_crop, field_mirrored, pitch_length_m, pitch_width_m, kit_override, secondary_kit_override, active_kit_slot',
     )
     .eq('id', id)
     .single()
@@ -148,6 +149,7 @@ export async function loadProject(id: string): Promise<LoadedProject> {
     id: project.id,
     title: project.title,
     pitchDesign: project.pitch_design as PitchDesign,
+    pitchDesignCustomId: project.pitch_design_custom_id,
     orientation: project.orientation as PitchOrientation,
     teamId: project.team_id,
     zoneGridStyle: project.zone_grid_style as ZoneGridStyle,
@@ -172,6 +174,7 @@ export interface SaveProjectInput {
   createdBy: string
   title: string
   pitchDesign: PitchDesign
+  pitchDesignCustomId: string | null
   orientation: PitchOrientation
   teamId: string | null
   zoneGridStyle: ZoneGridStyle
@@ -198,6 +201,7 @@ export async function saveProject(input: SaveProjectInput): Promise<string> {
       .update({
         title: input.title,
         pitch_design: input.pitchDesign,
+        pitch_design_custom_id: input.pitchDesignCustomId,
         orientation: input.orientation,
         team_id: input.teamId,
         zone_grid_style: input.zoneGridStyle,
@@ -238,6 +242,7 @@ async function insertProjectRow(
     title: input.title,
     type: 'tactic',
     pitch_design: input.pitchDesign,
+    pitch_design_custom_id: input.pitchDesignCustomId,
     orientation: input.orientation,
     team_id: input.teamId,
     zone_grid_style: input.zoneGridStyle,

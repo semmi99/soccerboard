@@ -11,7 +11,6 @@ import type {
   FrameObject,
   FreehandData,
   LineStyle,
-  PitchDesign,
   PitchOrientation,
   PlayerChipData,
   PlayerLabelFormat,
@@ -23,6 +22,7 @@ import type {
 import { Button } from '../../../components/ui/Button'
 import { TeamSquadPanel } from './TeamSquadPanel'
 import { ZoneGridPicker } from './ZoneGridPicker'
+import { PitchDesignPicker } from './PitchDesignPicker'
 import { EQUIPMENT_DEFAULT_COLORS } from '../objects/shapes/Equipment'
 import { ColorSwatchPicker } from '../../../components/ui/ColorSwatchPicker'
 import { getCurveOffset } from '../objects/shapes/arrowCurve'
@@ -92,7 +92,6 @@ export function PropertiesSidebar({
   onClose: () => void
 }) {
   const { t } = useTranslation('editor')
-  const pitchDesign = useEditorStore((s) => s.pitchDesign)
   const orientation = useEditorStore((s) => s.orientation)
   const showPitchMarkings = useEditorStore((s) => s.showPitchMarkings)
   const showMovementTrails = useEditorStore((s) => s.showMovementTrails)
@@ -101,7 +100,6 @@ export function PropertiesSidebar({
   const fieldMirrored = useEditorStore((s) => s.fieldMirrored)
   const pitchLengthM = useEditorStore((s) => s.pitchLengthM)
   const pitchWidthM = useEditorStore((s) => s.pitchWidthM)
-  const setPitchDesign = useEditorStore((s) => s.setPitchDesign)
   const setOrientation = useEditorStore((s) => s.setOrientation)
   const setShowPitchMarkings = useEditorStore((s) => s.setShowPitchMarkings)
   const setShowMovementTrails = useEditorStore((s) => s.setShowMovementTrails)
@@ -180,20 +178,7 @@ export function PropertiesSidebar({
         {isFieldPanelOpen && (
         <div className="flex flex-col gap-2">
           <Field label={t('properties.field.design')}>
-            <select
-              className={selectClass}
-              value={pitchDesign}
-              onChange={(e) => setPitchDesign(e.target.value as PitchDesign)}
-            >
-              <option value="classic_green">{t('properties.field.designOptions.classic_green')}</option>
-              <option value="night_navy">{t('properties.field.designOptions.night_navy')}</option>
-              <option value="dark_orange">{t('properties.field.designOptions.dark_orange')}</option>
-              <option value="turquoise">{t('properties.field.designOptions.turquoise')}</option>
-              <option value="royal_blue">{t('properties.field.designOptions.royal_blue')}</option>
-              <option value="maroon">{t('properties.field.designOptions.maroon')}</option>
-              <option value="light_gray">{t('properties.field.designOptions.light_gray')}</option>
-              <option value="brand_blue">{t('properties.field.designOptions.brand_blue')}</option>
-            </select>
+            <PitchDesignPicker />
           </Field>
           <Field label={t('properties.field.orientation')}>
             <select

@@ -12,6 +12,7 @@ export function useProjectSave() {
   const projectId = useEditorStore((s) => s.projectId)
   const projectTitle = useEditorStore((s) => s.projectTitle)
   const pitchDesign = useEditorStore((s) => s.pitchDesign)
+  const pitchDesignCustomId = useEditorStore((s) => s.pitchDesignCustomId)
   const orientation = useEditorStore((s) => s.orientation)
   const zoneGridStyle = useEditorStore((s) => s.zoneGridStyle)
   const zoneGridCustomId = useEditorStore((s) => s.zoneGridCustomId)
@@ -67,6 +68,7 @@ export function useProjectSave() {
         createdBy: profile.id,
         title: projectTitle,
         pitchDesign,
+        pitchDesignCustomId,
         orientation,
         teamId,
         zoneGridStyle,
@@ -101,6 +103,7 @@ export function useProjectSave() {
     projectId,
     projectTitle,
     pitchDesign,
+    pitchDesignCustomId,
     orientation,
     teamId,
     customKit,

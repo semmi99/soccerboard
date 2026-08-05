@@ -324,6 +324,44 @@ export type Database = {
         }
         Relationships: []
       }
+      pitch_designs: {
+        Row: {
+          created_at: string
+          grass_a: string
+          grass_b: string
+          id: string
+          line_color: string
+          name: string
+          org_id: string
+        }
+        Insert: {
+          created_at?: string
+          grass_a: string
+          grass_b: string
+          id?: string
+          line_color: string
+          name: string
+          org_id: string
+        }
+        Update: {
+          created_at?: string
+          grass_a?: string
+          grass_b?: string
+          id?: string
+          line_color?: string
+          name?: string
+          org_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pitch_designs_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       players: {
         Row: {
           attributes: Json
@@ -451,6 +489,7 @@ export type Database = {
           org_id: string
           orientation: string
           pitch_design: string
+          pitch_design_custom_id: string | null
           pitch_length_m: number
           pitch_width_m: number
           player_label_format: string
@@ -476,6 +515,7 @@ export type Database = {
           org_id: string
           orientation?: string
           pitch_design?: string
+          pitch_design_custom_id?: string | null
           pitch_length_m?: number
           pitch_width_m?: number
           player_label_format?: string
@@ -501,6 +541,7 @@ export type Database = {
           org_id?: string
           orientation?: string
           pitch_design?: string
+          pitch_design_custom_id?: string | null
           pitch_length_m?: number
           pitch_width_m?: number
           player_label_format?: string
@@ -528,6 +569,13 @@ export type Database = {
             columns: ["org_id"]
             isOneToOne: false
             referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "projects_pitch_design_custom_id_fkey"
+            columns: ["pitch_design_custom_id"]
+            isOneToOne: false
+            referencedRelation: "pitch_designs"
             referencedColumns: ["id"]
           },
           {

@@ -345,6 +345,19 @@
     "addHorizontalLine": "+ Horizontal line",
     "saveFailed": "Save failed."
   },
+  "pitchDesignPicker": {
+    "customGroup": "Custom",
+    "addCustom": "+ Custom pitch",
+    "deleteConfirm": "Delete this custom pitch design?",
+    "editorTitle": "Custom pitch design",
+    "editorDescription": "Pick your own grass and line colors, then name and save.",
+    "nameLabel": "Name",
+    "namePlaceholder": "e.g. Club colors",
+    "grassALabel": "Grass color 1",
+    "grassBLabel": "Grass color 2",
+    "lineColorLabel": "Line color",
+    "saveFailed": "Save failed."
+  },
   "editorPage": {
     "loadError": "Couldn't load project.",
     "backToDashboard": "Back to dashboard",

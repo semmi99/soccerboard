@@ -345,6 +345,19 @@
     "addHorizontalLine": "+ Horizontale Linie",
     "saveFailed": "Speichern fehlgeschlagen."
   },
+  "pitchDesignPicker": {
+    "customGroup": "Eigene",
+    "addCustom": "+ Eigenes Spielfeld",
+    "deleteConfirm": "Dieses eigene Spielfeld löschen?",
+    "editorTitle": "Eigenes Spielfeld",
+    "editorDescription": "Eigene Farben für Rasen und Linien wählen, dann benennen und speichern.",
+    "nameLabel": "Name",
+    "namePlaceholder": "z.B. Vereinsfarben",
+    "grassALabel": "Rasenfarbe 1",
+    "grassBLabel": "Rasenfarbe 2",
+    "lineColorLabel": "Linienfarbe",
+    "saveFailed": "Speichern fehlgeschlagen."
+  },
   "editorPage": {
     "loadError": "Projekt konnte nicht geladen werden.",
     "backToDashboard": "Zurück zum Dashboard",

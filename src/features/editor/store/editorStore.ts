@@ -100,6 +100,11 @@ interface EditorState {
   projectId: string | null
   projectTitle: string
   pitchDesign: PitchDesign
+  pitchDesignCustomId: string | null
+  /** Resolved colors for `pitchDesignCustomId` — mirrors how `zoneGridCustomLines`
+   * is resolved from `zoneGridCustomId` by whoever fetched the org's saved
+   * pitch designs (see PitchDesignPicker). */
+  pitchDesignCustomColors: { grassA: string; grassB: string; line: string } | null
   orientation: PitchOrientation
   zoneGridStyle: ZoneGridStyle
   zoneGridCustomId: string | null
@@ -155,6 +160,7 @@ interface EditorState {
     projectId: string
     projectTitle: string
     pitchDesign: PitchDesign
+    pitchDesignCustomId: string | null
     orientation: PitchOrientation
     teamId: string | null
     zoneGridStyle: ZoneGridStyle
@@ -176,6 +182,8 @@ interface EditorState {
   setProjectId: (id: string) => void
 
   setPitchDesign: (d: PitchDesign) => void
+  setPitchDesignCustomId: (id: string | null) => void
+  setPitchDesignCustomColors: (colors: { grassA: string; grassB: string; line: string } | null) => void
   setOrientation: (o: PitchOrientation) => void
   setZoneGridStyle: (style: ZoneGridStyle) => void
   setZoneGridCustomId: (id: string | null) => void
@@ -249,6 +257,8 @@ export const useEditorStore = create<EditorState>((set, get) => ({
   projectId: null,
   projectTitle: 'Neues Projekt',
   pitchDesign: 'classic_green',
+  pitchDesignCustomId: null,
+  pitchDesignCustomColors: null,
   orientation: 'vertical',
   zoneGridStyle: 'none',
   zoneGridCustomId: null,
@@ -284,6 +294,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
     projectId,
     projectTitle,
     pitchDesign,
+    pitchDesignCustomId,
     orientation,
     teamId,
     zoneGridStyle,
@@ -304,6 +315,8 @@ export const useEditorStore = create<EditorState>((set, get) => ({
       projectId,
       projectTitle,
       pitchDesign,
+      pitchDesignCustomId,
+      pitchDesignCustomColors: null,
       orientation,
       zoneGridStyle,
       zoneGridCustomId,
@@ -341,6 +354,8 @@ export const useEditorStore = create<EditorState>((set, get) => ({
       projectId: null,
       projectTitle: 'Neues Projekt',
       pitchDesign: 'brand_blue',
+      pitchDesignCustomId: null,
+      pitchDesignCustomColors: null,
       zoneGridStyle: 'none',
       zoneGridCustomId: null,
       zoneGridCustomLines: [],
@@ -373,6 +388,8 @@ export const useEditorStore = create<EditorState>((set, get) => ({
   markSaved: () => set({ isDirty: false }),
 
   setPitchDesign: (d) => set({ pitchDesign: d, isDirty: true }),
+  setPitchDesignCustomId: (id) => set({ pitchDesignCustomId: id, isDirty: true }),
+  setPitchDesignCustomColors: (colors) => set({ pitchDesignCustomColors: colors }),
   setOrientation: (o) => set({ orientation: o, isDirty: true }),
   setZoneGridStyle: (style) => set({ zoneGridStyle: style, isDirty: true }),
   setZoneGridCustomId: (id) => set({ zoneGridCustomId: id, isDirty: true }),

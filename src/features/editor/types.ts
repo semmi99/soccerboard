@@ -380,6 +380,7 @@ export type PitchDesign =
   | 'maroon'
   | 'light_gray'
   | 'brand_blue'
+  | 'custom'
 export type PitchOrientation = 'vertical' | 'horizontal'
 export type ZoneGridStyle = 'none' | 'thirds_channels' | 'guardiola' | 'custom'
 

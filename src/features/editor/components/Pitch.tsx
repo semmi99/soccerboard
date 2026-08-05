@@ -11,7 +11,7 @@ const CY = B / 2
 const PENALTY_DEPTH = 157
 const PENALTY_WIDTH = 385
 
-const THEMES: Record<PitchDesign, { grassA: string; grassB: string; line: string }> = {
+const THEMES: Record<Exclude<PitchDesign, 'custom'>, { grassA: string; grassB: string; line: string }> = {
   classic_green: { grassA: '#1e7d32', grassB: '#1a6b2b', line: 'rgba(255,255,255,0.85)' },
   night_navy: { grassA: '#0f1a2e', grassB: '#0b1424', line: 'rgba(212,175,55,0.8)' },
   dark_orange: { grassA: '#0c0c0c', grassB: '#090909', line: 'rgba(255,140,26,0.9)' },
@@ -205,6 +205,7 @@ function CustomGrid({ lines, stroke }: { lines: ZoneGridLine[]; stroke: string }
 
 export function Pitch({
   design,
+  customTheme,
   orientation,
   zoneGridStyle = 'none',
   customGridLines = [],
@@ -213,6 +214,10 @@ export function Pitch({
   fieldMirrored = false,
 }: {
   design: PitchDesign
+  /** Colors for design === 'custom' — a user-created pitch design has no
+   * static THEMES entry, so its colors are resolved elsewhere (from
+   * pitch_designs, see PitchDesignPicker) and passed in directly. */
+  customTheme?: { grassA: string; grassB: string; line: string }
   orientation: PitchOrientation
   zoneGridStyle?: ZoneGridStyle
   customGridLines?: ZoneGridLine[]
@@ -220,7 +225,10 @@ export function Pitch({
   fieldCrop?: FieldCrop
   fieldMirrored?: boolean
 }) {
-  const theme = THEMES[design]
+  const theme =
+    design === 'custom'
+      ? (customTheme ?? THEMES.classic_green)
+      : THEMES[design]
   const stage = getCroppedStageSize(orientation, fieldCrop)
   const rotation = orientation === 'vertical' ? 90 : 0
 

@@ -77,6 +77,7 @@ export function EditorPage() {
         projectId: project.id,
         projectTitle: project.title,
         pitchDesign: project.pitchDesign,
+        pitchDesignCustomId: project.pitchDesignCustomId,
         orientation: project.orientation,
         teamId: project.teamId,
         zoneGridStyle: project.zoneGridStyle,
