@@ -45,6 +45,7 @@
     "saveTitle": "Save (Ctrl+S) — also saves automatically"
   },
   "properties": {
+    "close": "Close",
     "field": {
       "title": "Field",
       "design": "Design",
@@ -347,7 +348,8 @@
     "loadError": "Couldn't load project.",
     "backToDashboard": "Back to dashboard",
     "projectLocked": "This project is locked because your Pro subscription has lapsed. On the free plan you can only edit your oldest project.",
-    "manageSubscription": "Manage subscription"
+    "manageSubscription": "Manage subscription",
+    "openProperties": "Properties"
   },
   "factoryDefaults": {
     "text": "Text",

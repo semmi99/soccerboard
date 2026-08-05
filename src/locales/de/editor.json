@@ -45,6 +45,7 @@
     "saveTitle": "Speichern (Strg+S) — wird auch automatisch gespeichert"
   },
   "properties": {
+    "close": "Schließen",
     "field": {
       "title": "Feld",
       "design": "Design",
@@ -347,7 +348,8 @@
     "loadError": "Projekt konnte nicht geladen werden.",
     "backToDashboard": "Zurück zum Dashboard",
     "projectLocked": "Dieses Projekt ist gesperrt, da euer Pro-Abo abgelaufen ist. Im kostenlosen Plan könnt ihr nur euer ältestes Projekt bearbeiten.",
-    "manageSubscription": "Abo verwalten"
+    "manageSubscription": "Abo verwalten",
+    "openProperties": "Eigenschaften"
   },
   "factoryDefaults": {
     "text": "Text",

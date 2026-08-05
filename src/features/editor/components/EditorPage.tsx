@@ -6,6 +6,7 @@ import { useEditorStore } from '../store/editorStore'
 import { useAuthStore } from '../../auth/store/authStore'
 import { limitsForTier } from '../../../lib/limits'
 import { isProjectEditable, loadProject } from '../../../lib/supabase/projects'
+import { listTeams } from '../../../lib/supabase/squad'
 import { useProjectSave } from '../hooks/useProjectSave'
 import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts'
 import { TopBar } from './TopBar'
@@ -21,10 +22,12 @@ export function EditorPage() {
   const stageRef = useRef<Konva.Stage>(null)
   const resetToBlankProject = useEditorStore((s) => s.resetToBlankProject)
   const loadProjectIntoStore = useEditorStore((s) => s.loadProject)
+  const setTeamId = useEditorStore((s) => s.setTeamId)
   const organization = useAuthStore((s) => s.organization)
   const [loadError, setLoadError] = useState<string | null>(null)
   const [isLocked, setIsLocked] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+  const [isPropertiesOpen, setIsPropertiesOpen] = useState(false)
   const save = useProjectSave()
 
   useKeyboardShortcuts({ onSave: save.handleSave })
@@ -34,6 +37,16 @@ export function EditorPage() {
 
     if (projectId === 'new') {
       resetToBlankProject()
+      // Most orgs only manage a single team — defaulting to it saves having
+      // to pick it from the sidebar dropdown on every new board just to get
+      // real player names/photos on the chips instead of generic ones.
+      if (organization) {
+        listTeams(organization.id)
+          .then((teams) => {
+            if (teams.length === 1) setTeamId(teams[0]!.id)
+          })
+          .catch(() => {})
+      }
       return
     }
 
@@ -94,7 +107,7 @@ export function EditorPage() {
     return () => {
       cancelled = true
     }
-  }, [projectId, organization, resetToBlankProject, loadProjectIntoStore])
+  }, [projectId, organization, resetToBlankProject, loadProjectIntoStore, setTeamId])
 
   if (isLoading) {
     return (
@@ -148,10 +161,23 @@ export function EditorPage() {
       <TopBar stageRef={stageRef} save={save} />
       <div className="flex min-h-0 flex-1">
         <Toolbar />
-        <main className="min-w-0 flex-1 bg-pitch-950 p-4">
+        <main className="relative min-w-0 flex-1 bg-pitch-950 p-4">
           <EditorCanvas stageRef={stageRef} />
+          <button
+            type="button"
+            onClick={() => setIsPropertiesOpen(true)}
+            className="absolute right-6 top-6 z-30 rounded-full border border-pitch-700 bg-pitch-900/90 px-3 py-2 text-xs font-medium text-white/80 shadow-lg lg:hidden"
+          >
+            {t('editorPage.openProperties')}
+          </button>
         </main>
-        <PropertiesSidebar />
+        {isPropertiesOpen && (
+          <div
+            className="fixed inset-0 z-30 bg-black/50 lg:hidden"
+            onClick={() => setIsPropertiesOpen(false)}
+          />
+        )}
+        <PropertiesSidebar isOpen={isPropertiesOpen} onClose={() => setIsPropertiesOpen(false)} />
       </div>
       <Timeline />
     </div>

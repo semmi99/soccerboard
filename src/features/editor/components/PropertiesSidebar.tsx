@@ -52,7 +52,15 @@ const selectClass =
 const inputClass =
   'rounded-md border border-pitch-600 bg-pitch-800 px-2 py-1.5 text-xs text-white outline-none focus:border-violet-accent'
 
-export function PropertiesSidebar() {
+export function PropertiesSidebar({
+  isOpen,
+  onClose,
+}: {
+  /** Whether the sidebar is pulled into view on narrow (below lg) screens —
+   * ignored at lg and above, where it's always visible in the flex row. */
+  isOpen: boolean
+  onClose: () => void
+}) {
   const { t } = useTranslation('editor')
   const pitchDesign = useEditorStore((s) => s.pitchDesign)
   const orientation = useEditorStore((s) => s.orientation)
@@ -120,7 +128,18 @@ export function PropertiesSidebar() {
   }
 
   return (
-    <aside className="flex w-64 flex-col gap-5 overflow-y-auto border-l border-pitch-700 bg-pitch-900 p-4">
+    <aside
+      className={`fixed inset-y-0 right-0 z-40 flex w-72 flex-col gap-5 overflow-y-auto border-l border-pitch-700 bg-pitch-900 p-4 transition-transform duration-200 ease-in-out lg:static lg:z-auto lg:w-64 lg:translate-x-0 ${
+        isOpen ? 'translate-x-0' : 'translate-x-full'
+      }`}
+    >
+      <button
+        type="button"
+        onClick={onClose}
+        className="self-end text-xs text-white/50 hover:text-white lg:hidden"
+      >
+        {t('properties.close')} ✕
+      </button>
       <div>
         <button
           type="button"
