@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { useTranslation } from 'react-i18next'
 import { useEditorStore } from '../store/editorStore'
 import { useAuthStore } from '../../auth/store/authStore'
@@ -160,7 +161,11 @@ function ZoneGridEditorModal({
     }
   }
 
-  return (
+  // Portal to <body>: opened from inside the properties sidebar, whose
+  // mobile drawer is CSS-transformed — that creates a new containing block
+  // for `position: fixed` descendants, so without a portal this modal gets
+  // clipped to the sidebar's own width instead of the full viewport.
+  return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
       <div className="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-xl border border-pitch-700 bg-pitch-900 p-6 shadow-2xl">
         <h2 className="mb-1 text-sm font-semibold text-white">{t('zoneGridPicker.editorTitle')}</h2>
@@ -189,7 +194,7 @@ function ZoneGridEditorModal({
                 max={100}
                 value={Math.round(l.position * 100)}
                 onChange={(e) => updatePosition(i, Number(e.target.value) / 100)}
-                className="flex-1"
+                className="min-w-0 flex-1"
               />
               <span className="w-10 shrink-0 text-right text-xs text-white/50">
                 {Math.round(l.position * 100)}%
@@ -209,11 +214,11 @@ function ZoneGridEditorModal({
           )}
         </div>
 
-        <div className="mt-3 flex gap-2">
-          <Button variant="secondary" onClick={() => addLine('vertical')}>
+        <div className="mt-3 grid grid-cols-1 gap-2 min-[420px]:grid-cols-2">
+          <Button variant="secondary" className="w-full" onClick={() => addLine('vertical')}>
             {t('zoneGridPicker.addVerticalLine')}
           </Button>
-          <Button variant="secondary" onClick={() => addLine('horizontal')}>
+          <Button variant="secondary" className="w-full" onClick={() => addLine('horizontal')}>
             {t('zoneGridPicker.addHorizontalLine')}
           </Button>
         </div>
@@ -234,6 +239,7 @@ function ZoneGridEditorModal({
           </Button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   )
 }

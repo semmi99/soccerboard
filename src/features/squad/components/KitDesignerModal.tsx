@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { createPortal } from 'react-dom'
 import { useTranslation } from 'react-i18next'
 import { Button } from '../../../components/ui/Button'
 import { ColorSwatchPicker } from '../../../components/ui/ColorSwatchPicker'
@@ -192,7 +193,12 @@ export function KitDesignerModal({
     gk: { pattern: gkPattern, color1: gkColor1, color2: gkColor2 },
   }
 
-  return (
+  // Rendered via portal: this modal is opened from within the editor's
+  // properties sidebar, whose mobile drawer uses a CSS transform — which
+  // creates a new containing block for `position: fixed` descendants, so
+  // without a portal this would be clipped to the sidebar's own width
+  // instead of covering the full viewport.
+  return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
       <div className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-xl border border-pitch-700 bg-pitch-900 p-6 shadow-2xl">
         <h2 className="mb-1 text-sm font-semibold text-white">{title}</h2>
@@ -284,6 +290,7 @@ export function KitDesignerModal({
           </Button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   )
 }
