@@ -134,7 +134,8 @@
       "glow": "Leuchteffekt (weicher Farbkanal entlang der Linie)"
     },
     "connector": {
-      "zone": "Farbfläche entlang der Linie anzeigen"
+      "zone": "Farbfläche entlang der Linie anzeigen",
+      "loopFillColor": "Farbe der Fläche (bei geschlossener Verbindung)"
     },
     "playerChip": {
       "linked": "Verknüpft mit Kaderspieler",

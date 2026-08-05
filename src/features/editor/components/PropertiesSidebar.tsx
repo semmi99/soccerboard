@@ -110,7 +110,7 @@ export function PropertiesSidebar({
   const setFieldMirrored = useEditorStore((s) => s.setFieldMirrored)
   const setPitchLengthM = useEditorStore((s) => s.setPitchLengthM)
   const setPitchWidthM = useEditorStore((s) => s.setPitchWidthM)
-  const setLastConnectorColor = useEditorStore((s) => s.setLastConnectorColor)
+  const setLastConnectorStyle = useEditorStore((s) => s.setLastConnectorStyle)
   const selection = useEditorStore((s) => s.selection)
   const activeFrameIndex = useEditorStore((s) => s.activeFrameIndex)
   const frames = useEditorStore((s) => s.frames)
@@ -438,7 +438,7 @@ export function PropertiesSidebar({
               data={selectedObject.data}
               onCheckpoint={beginHistoryCheckpoint}
               onChange={(patch) => {
-                if (patch.color) setLastConnectorColor(patch.color)
+                setLastConnectorStyle(patch)
                 updateData<Extract<FrameObject, { objectType: 'connector' }>>(patch)
               }}
             />
@@ -1697,6 +1697,16 @@ function ConnectorFields({
         />
         {t('properties.connector.zone')}
       </label>
+      <Field label={t('properties.connector.loopFillColor')}>
+        <ColorSwatchPicker
+          size="sm"
+          value={data.loopFillColor ?? data.color}
+          onChange={(c) => {
+            onCheckpoint()
+            onChange({ loopFillColor: c })
+          }}
+        />
+      </Field>
     </div>
   )
 }

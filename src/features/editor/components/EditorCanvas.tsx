@@ -444,9 +444,9 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
       if (points.length !== z.ids.length) return null
       // The zone's own color follows whichever connector forms its first
       // edge — loops are realistically drawn with one consistent color
-      // already (connector color is sticky across new connectors), so this
-      // just carries that same color into the derived fill instead of a
-      // fixed one.
+      // already (connector color is sticky across new connectors) — unless
+      // that connector has its own dedicated loopFillColor set, letting the
+      // enclosed area be colored independently of the line itself.
       const firstEdgeConnector = connectorObjects.find(
         (o) =>
           (o.data.fromId === z.ids[0] && o.data.toId === z.ids[1]) ||
@@ -455,7 +455,7 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
       return {
         key: z.key,
         points: points.flatMap((p) => [p.x, p.y]),
-        color: firstEdgeConnector?.data.color,
+        color: firstEdgeConnector?.data.loopFillColor ?? firstEdgeConnector?.data.color,
       }
     })
     .filter((z): z is { key: string; points: number[]; color: string | undefined } => Boolean(z))

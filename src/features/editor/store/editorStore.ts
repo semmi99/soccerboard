@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import type {
+  ConnectorData,
   EditorFrame,
   EquipmentKind,
   FieldCrop,
@@ -16,6 +17,18 @@ import type {
 import { createObjectForTool, type PendingRealPlayer } from '../objects/factory'
 import { PITCH_STAGE_SIZE, TEAM_COLORS } from '../constants'
 import type { FormationPosition } from '../../formations/presets'
+
+// The first connector line drawn sets the look for the rest of the chain
+// (see setLastConnectorStyle), covering every visual property of ConnectorData
+// except the two players it links — so a multi-hop connection reads as one
+// consistent sequence instead of resetting to hardcoded defaults each time.
+export type LastConnectorStyle = Omit<ConnectorData, 'fromId' | 'toId'>
+
+const DEFAULT_LAST_CONNECTOR_STYLE: LastConnectorStyle = {
+  color: '#f0d878',
+  strokeWidth: 2.5,
+  lineStyle: 'dashed',
+}
 
 export interface FormationPlayer {
   id: string
@@ -127,7 +140,7 @@ interface EditorState {
   pendingPlayer: PendingRealPlayer | null
   pendingPlayers: PendingRealPlayer[]
   connectorDraftFromId: string | null
-  lastConnectorColor: string
+  lastConnectorStyle: LastConnectorStyle
   isPlaying: boolean
   isDirty: boolean
   past: FramesSnapshot[]
@@ -193,7 +206,7 @@ interface EditorState {
   addReferenceImageObject: (url: string, naturalWidth: number, naturalHeight: number) => void
   placeGroupAt: (x: number, y: number) => void
   addConnector: (fromId: string, toId: string) => void
-  setLastConnectorColor: (color: string) => void
+  setLastConnectorStyle: (patch: Partial<LastConnectorStyle>) => void
   applyFormationToFrame: (positions: FormationPosition[], players: FormationPlayer[]) => void
   beginHistoryCheckpoint: () => void
   updateObjectLive: (objectId: string, patch: Partial<FrameObject>) => void
@@ -258,7 +271,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
   pendingPlayer: null,
   pendingPlayers: [],
   connectorDraftFromId: null,
-  lastConnectorColor: '#f0d878',
+  lastConnectorStyle: DEFAULT_LAST_CONNECTOR_STYLE,
   isPlaying: false,
   isDirty: false,
   past: [],
@@ -312,7 +325,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
       pendingPlayer: null,
       pendingPlayers: [],
       connectorDraftFromId: null,
-      lastConnectorColor: '#f0d878',
+      lastConnectorStyle: DEFAULT_LAST_CONNECTOR_STYLE,
       past: [],
       future: [],
       isDirty: false,
@@ -348,7 +361,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
       pendingPlayer: null,
       pendingPlayers: [],
       connectorDraftFromId: null,
-      lastConnectorColor: '#f0d878',
+      lastConnectorStyle: DEFAULT_LAST_CONNECTOR_STYLE,
       past: [],
       future: [],
       isDirty: false,
@@ -581,7 +594,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
 
   addConnector: (fromId, toId) => {
     if (fromId === toId) return
-    const { frames, activeFrameIndex, lastConnectorColor } = get()
+    const { frames, activeFrameIndex, lastConnectorStyle } = get()
     const frame = frames[activeFrameIndex]!
     const exists = frame.objects.some(
       (o) =>
@@ -603,10 +616,10 @@ export const useEditorStore = create<EditorState>((set, get) => ({
       scale: 1,
       zIndex: maxZ + 1,
       objectType: 'connector',
-      // The first connector line drawn sets the color for the rest of the
-      // chain (see setLastConnectorColor) instead of always resetting to a
-      // hardcoded default, so a multi-hop connection reads as one sequence.
-      data: { fromId, toId, color: lastConnectorColor, strokeWidth: 2.5, lineStyle: 'dashed' },
+      // The first connector line drawn sets the look for the rest of the
+      // chain (see setLastConnectorStyle) instead of always resetting to
+      // hardcoded defaults, so a multi-hop connection reads as one sequence.
+      data: { fromId, toId, ...lastConnectorStyle },
     }
     const nextFrames = frames.map((f, i) =>
       i === activeFrameIndex ? { ...f, objects: [...f.objects, newObject] } : f,
@@ -619,7 +632,8 @@ export const useEditorStore = create<EditorState>((set, get) => ({
     })
   },
 
-  setLastConnectorColor: (color) => set({ lastConnectorColor: color }),
+  setLastConnectorStyle: (patch) =>
+    set((s) => ({ lastConnectorStyle: { ...s.lastConnectorStyle, ...patch } })),
 
   applyFormationToFrame: (positions, players) => {
     pushHistory(get, set)

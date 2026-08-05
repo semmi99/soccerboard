@@ -134,7 +134,8 @@
       "glow": "Glow effect (soft color channel along the line)"
     },
     "connector": {
-      "zone": "Show color band along the line"
+      "zone": "Show color band along the line",
+      "loopFillColor": "Enclosed area color (when connectors form a closed loop)"
     },
     "playerChip": {
       "linked": "Linked to squad player",

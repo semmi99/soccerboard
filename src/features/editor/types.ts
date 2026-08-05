@@ -319,6 +319,11 @@ export interface ConnectorData {
    * from `glow`'s blur-based halo, this is an actual translucent shape,
    * visible even at a small render size where a blur washes out. */
   zone?: boolean
+  /** Fill color for the area enclosed when this connector is part of a
+   * closed loop (see connectorZones.ts) — falls back to `color` when unset,
+   * so existing boards keep looking the same until someone picks a
+   * dedicated fill color for the enclosed area. */
+  loopFillColor?: string
 }
 
 export type ObjectType =
