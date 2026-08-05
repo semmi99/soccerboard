@@ -70,7 +70,6 @@ export function ConnectorShape({
           fillLinearGradientEndPoint={{ x: 0, y: zoneWidth }}
           fillLinearGradientColorStops={[0, zoneDark, 1, zoneLight]}
           opacity={0.32}
-          cornerRadius={zoneWidth / 2}
           listening={false}
         />
       )}

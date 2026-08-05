@@ -427,12 +427,17 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
     ...playbackOverlay.entering,
     ...playbackOverlay.exiting,
   ]
-  // Rect/circle shapes (heatmap-style zone markers) always render behind
-  // every other object, regardless of their own z-order — so a coach can
-  // always drag a player (or anything else) on top of one instead of
-  // having to remember to send it to back first.
+  // Rect/circle shapes (heatmap-style zone markers) and connectors always
+  // render behind every other object, regardless of their own z-order — so
+  // a coach can always drag a player (or anything else) on top of one
+  // instead of having to remember to send it to back first. Connectors
+  // specifically need this because their line's endpoints sit exactly on
+  // the two players they link — without it, whichever was created more
+  // recently (usually the connector) would win the hit-test at that shared
+  // point and swallow every click meant to drag the player instead.
   const isBackgroundShape = (o: FrameObject) =>
-    o.objectType === 'shape' && (o.data.kind === 'rect' || o.data.kind === 'circle')
+    (o.objectType === 'shape' && (o.data.kind === 'rect' || o.data.kind === 'circle')) ||
+    o.objectType === 'connector'
   const sortedObjects = [...visibleObjects].sort((a, b) => {
     const bucketDiff = Number(isBackgroundShape(a)) - Number(isBackgroundShape(b))
     return bucketDiff !== 0 ? -bucketDiff : a.zIndex - b.zIndex
