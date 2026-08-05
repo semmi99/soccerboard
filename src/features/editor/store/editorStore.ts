@@ -17,6 +17,7 @@ import type {
 import { createObjectForTool, type PendingRealPlayer } from '../objects/factory'
 import { PITCH_STAGE_SIZE, TEAM_COLORS } from '../constants'
 import type { FormationPosition } from '../../formations/presets'
+import { findConnectorZones } from '../objects/shapes/connectorZones'
 
 // The first connector line drawn sets the look for the rest of the chain
 // (see setLastConnectorStyle), covering every visual property of ConnectorData
@@ -207,6 +208,7 @@ interface EditorState {
   placeGroupAt: (x: number, y: number) => void
   addConnector: (fromId: string, toId: string) => void
   setLastConnectorStyle: (patch: Partial<LastConnectorStyle>) => void
+  setConnectorLoopFillColor: (connectorId: string, color: string) => void
   applyFormationToFrame: (positions: FormationPosition[], players: FormationPlayer[]) => void
   beginHistoryCheckpoint: () => void
   updateObjectLive: (objectId: string, patch: Partial<FrameObject>) => void
@@ -634,6 +636,55 @@ export const useEditorStore = create<EditorState>((set, get) => ({
 
   setLastConnectorStyle: (patch) =>
     set((s) => ({ lastConnectorStyle: { ...s.lastConnectorStyle, ...patch } })),
+
+  // Applies the same loopFillColor to every connector that shares a
+  // detected closed loop with this one — not just this single edge —
+  // since the rendered fill only reads ONE edge's loopFillColor (see
+  // EditorCanvas.tsx), so a value set on just one of several edges could
+  // silently lose to a different edge that happened to be checked first.
+  // Keeping every edge in a loop in agreement removes that ambiguity.
+  setConnectorLoopFillColor: (connectorId, color) => {
+    const { frames, activeFrameIndex } = get()
+    const frame = frames[activeFrameIndex]!
+    const connectors = frame.objects.filter(
+      (o): o is Extract<FrameObject, { objectType: 'connector' }> => o.objectType === 'connector',
+    )
+    const target = connectors.find((o) => o.id === connectorId)
+    if (!target) return
+
+    const edgeKey = (a: string, b: string) => [a, b].sort().join('|')
+    const findConnector = (a: string, b: string) =>
+      connectors.find(
+        (o) =>
+          (o.data.fromId === a && o.data.toId === b) || (o.data.toId === a && o.data.fromId === b),
+      )
+
+    const zones = findConnectorZones(connectors.map((o): [string, string] => [o.data.fromId, o.data.toId]))
+    const targetEdgeKey = edgeKey(target.data.fromId, target.data.toId)
+    const idsToUpdate = new Set<string>([connectorId])
+    for (const zone of zones) {
+      const zoneEdgeKeys = zone.ids.map((id, i) => edgeKey(id, zone.ids[(i + 1) % zone.ids.length]!))
+      if (!zoneEdgeKeys.includes(targetEdgeKey)) continue
+      for (let i = 0; i < zone.ids.length; i++) {
+        const conn = findConnector(zone.ids[i]!, zone.ids[(i + 1) % zone.ids.length]!)
+        if (conn) idsToUpdate.add(conn.id)
+      }
+    }
+
+    const nextFrames = frames.map((f, i) =>
+      i === activeFrameIndex
+        ? {
+            ...f,
+            objects: f.objects.map((o) =>
+              idsToUpdate.has(o.id) && o.objectType === 'connector'
+                ? { ...o, data: { ...o.data, loopFillColor: color } }
+                : o,
+            ),
+          }
+        : f,
+    )
+    set({ frames: nextFrames, isDirty: true })
+  },
 
   applyFormationToFrame: (positions, players) => {
     pushHistory(get, set)

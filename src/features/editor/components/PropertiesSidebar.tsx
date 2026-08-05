@@ -111,6 +111,7 @@ export function PropertiesSidebar({
   const setPitchLengthM = useEditorStore((s) => s.setPitchLengthM)
   const setPitchWidthM = useEditorStore((s) => s.setPitchWidthM)
   const setLastConnectorStyle = useEditorStore((s) => s.setLastConnectorStyle)
+  const setConnectorLoopFillColor = useEditorStore((s) => s.setConnectorLoopFillColor)
   const selection = useEditorStore((s) => s.selection)
   const activeFrameIndex = useEditorStore((s) => s.activeFrameIndex)
   const frames = useEditorStore((s) => s.frames)
@@ -439,7 +440,17 @@ export function PropertiesSidebar({
               onCheckpoint={beginHistoryCheckpoint}
               onChange={(patch) => {
                 setLastConnectorStyle(patch)
-                updateData<Extract<FrameObject, { objectType: 'connector' }>>(patch)
+                // The enclosed-area fill only reads ONE edge's loopFillColor
+                // (see EditorCanvas.tsx), so this keeps every connector that
+                // shares a detected loop with the selected one in sync — a
+                // plain updateData here would only ever touch this one edge,
+                // leaving the fill at the mercy of whichever other edge
+                // happened to be checked first.
+                if (patch.loopFillColor !== undefined) {
+                  setConnectorLoopFillColor(selectedObject.id, patch.loopFillColor)
+                } else {
+                  updateData<Extract<FrameObject, { objectType: 'connector' }>>(patch)
+                }
               }}
             />
           )}

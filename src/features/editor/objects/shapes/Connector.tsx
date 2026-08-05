@@ -8,6 +8,14 @@ import { useEditorStore } from '../../store/editorStore'
 
 const LABEL_FONT_SIZE = 12
 
+function mixHex(hex: string, target: number, amount: number): string {
+  const r = parseInt(hex.slice(1, 3), 16)
+  const g = parseInt(hex.slice(3, 5), 16)
+  const b = parseInt(hex.slice(5, 7), 16)
+  const mix = (c: number) => Math.round(c + (target - c) * amount)
+  return `rgb(${mix(r)}, ${mix(g)}, ${mix(b)})`
+}
+
 export function ConnectorShape({
   data,
   from,
@@ -37,7 +45,12 @@ export function ConnectorShape({
   const dy = to.y - from.y
   const length = Math.hypot(dx, dy)
   const angleDeg = (Math.atan2(dy, dx) * 180) / Math.PI
-  const zoneWidth = Math.max(24, data.strokeWidth * 7)
+  // One-sided (not centered on the line) so it reads as a shaded corridor
+  // spilling to one side rather than a symmetric halo — wider than the old
+  // centered band since it's no longer split across both sides.
+  const zoneWidth = Math.max(40, data.strokeWidth * 14)
+  const zoneDark = mixHex(data.color, 0, 0.55)
+  const zoneLight = mixHex(data.color, 255, 0.65)
 
   return (
     <Group>
@@ -48,10 +61,12 @@ export function ConnectorShape({
           width={length}
           height={zoneWidth}
           offsetX={length / 2}
-          offsetY={zoneWidth / 2}
+          offsetY={0}
           rotation={angleDeg}
-          fill={data.color}
-          opacity={0.28}
+          fillLinearGradientStartPoint={{ x: 0, y: 0 }}
+          fillLinearGradientEndPoint={{ x: 0, y: zoneWidth }}
+          fillLinearGradientColorStops={[0, zoneDark, 1, zoneLight]}
+          opacity={0.32}
           cornerRadius={zoneWidth / 2}
           listening={false}
         />
