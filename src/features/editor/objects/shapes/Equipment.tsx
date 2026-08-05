@@ -201,7 +201,11 @@ function EquipmentIcon({ data }: { data: EquipmentData }) {
       )
     }
     case 'slalom_pole':
-      return <Line points={[0, -22, 0, 10]} stroke={color} strokeWidth={3} />
+      // strokeScaleEnabled=false: the pole is stretched via the parent
+      // Group's scaleY (see EquipmentShape) when a user drags it longer —
+      // without this, Konva scales the stroke right along with it, making
+      // a taller pole visibly thicker too.
+      return <Line points={[0, -22, 0, 10]} stroke={color} strokeWidth={3} strokeScaleEnabled={false} />
     case 'ladder':
       return (
         <Group>
