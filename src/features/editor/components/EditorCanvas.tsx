@@ -444,6 +444,26 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
   })
   const enteringIds = new Set(playbackOverlay.entering.map((o) => o.id))
 
+  // Loose bounding box (padded) around every selected object's own anchor
+  // point — backs the invisible group-drag Rect below. Deliberately a plain
+  // min/max over x/y rather than each object's true visual extent (would
+  // need per-type size lookups for little practical benefit here).
+  const multiSelectBounds = (() => {
+    if (selection.length < 2) return null
+    const pts = selection
+      .map((id) => frame.objects.find((o) => o.id === id))
+      .filter((o): o is FrameObject => o != null)
+    if (pts.length < 2) return null
+    const pad = 36
+    const xs = pts.map((p) => p.x)
+    const ys = pts.map((p) => p.y)
+    const minX = Math.min(...xs) - pad
+    const maxX = Math.max(...xs) + pad
+    const minY = Math.min(...ys) - pad
+    const maxY = Math.max(...ys) + pad
+    return { x: minX, y: minY, width: maxX - minX, height: maxY - minY }
+  })()
+
   // Auto-highlight: whenever connectors form a closed loop between players
   // (e.g. 1-2-3-4-1), fill the enclosed area — derived fresh from the
   // connectors themselves every render, so it always matches exactly what's
@@ -679,9 +699,17 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
     else delete zoneRefs.current[id]
   }, [])
 
+  // Suppressed while a Transformer-box drag (see transformDragAnchorRef
+  // below) is in progress: re-syncing the Transformer's own nodes()/bounding
+  // box from every intermediate store update would fight Konva's own drag
+  // tracking on the Transformer node mid-gesture, since that resync resets
+  // its x/y to match the (already-updated) objects — pulling the rug out
+  // from under the delta calculation the very next tick.
+  const isTransformerDraggingRef = useRef(false)
+
   useEffect(() => {
     const tr = trRef.current
-    if (!tr) return
+    if (!tr || isTransformerDraggingRef.current) return
     const nodes = selection
       .map((id) => nodeRefs.current[id])
       .filter((n): n is Konva.Group => Boolean(n))
@@ -1002,6 +1030,54 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
     beginHistoryCheckpoint()
   }
 
+  // Grabbing anywhere inside a multi-selection's bounding area (not just
+  // precisely on one of the selected shapes) moves the whole group — via a
+  // separate invisible draggable Rect (see multiSelectDragBounds below),
+  // not the Transformer itself: Transformer continuously recomputes its own
+  // x/y from its attached nodes' bounding box (that's how it stays in sync
+  // as objects move via any other means), which fights and immediately
+  // overwrites any manual drag offset applied directly to it — confirmed
+  // live: the Transformer's own x/y never actually changed across a
+  // simulated drag despite the drag events firing correctly.
+  const groupDragAnchorRef = useRef<{
+    startX: number
+    startY: number
+    objects: { id: string; startX: number; startY: number }[]
+  } | null>(null)
+
+  function handleGroupDragStart(e: KonvaEventObject<DragEvent>) {
+    isTransformerDraggingRef.current = true
+    beginHistoryCheckpoint()
+    groupDragAnchorRef.current = {
+      startX: e.target.x(),
+      startY: e.target.y(),
+      objects: selection
+        .map((id) => frame.objects.find((o) => o.id === id))
+        .filter((o): o is FrameObject => o != null && !o.locked)
+        .map((o) => ({ id: o.id, startX: o.x, startY: o.y })),
+    }
+  }
+
+  function handleGroupDragMove(e: KonvaEventObject<DragEvent>) {
+    const anchor = groupDragAnchorRef.current
+    if (!anchor) return
+    const dx = e.target.x() - anchor.startX
+    const dy = e.target.y() - anchor.startY
+    setObjectPositions(anchor.objects.map((o) => ({ id: o.id, x: o.startX + dx, y: o.startY + dy })))
+  }
+
+  function handleGroupDragEnd() {
+    isTransformerDraggingRef.current = false
+    groupDragAnchorRef.current = null
+    const tr = trRef.current
+    if (!tr) return
+    const nodes = selection
+      .map((id) => nodeRefs.current[id])
+      .filter((n): n is Konva.Group => Boolean(n))
+    tr.nodes(nodes)
+    tr.getLayer()?.batchDraw()
+  }
+
   // Snapshot of a group drag in progress: the dragged object's own starting
   // position (to derive how far the pointer has actually moved) plus every
   // OTHER selected, unlocked object's starting position — so the whole
@@ -1208,6 +1284,19 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
           x={orientation === 'horizontal' ? -cropShift : 0}
           y={orientation === 'vertical' ? -cropShift : 0}
         >
+          {multiSelectBounds && (
+            <Rect
+              x={multiSelectBounds.x}
+              y={multiSelectBounds.y}
+              width={multiSelectBounds.width}
+              height={multiSelectBounds.height}
+              fill="transparent"
+              draggable
+              onDragStart={handleGroupDragStart}
+              onDragMove={handleGroupDragMove}
+              onDragEnd={handleGroupDragEnd}
+            />
+          )}
           {connectorZones.map((z) => (
             <ConnectorZoneShape
               key={z.key}
