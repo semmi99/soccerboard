@@ -1693,6 +1693,44 @@ function ConnectorFields({
         />
         {t('properties.connector.zone')}
       </label>
+      <label className="flex items-center gap-2 text-xs text-white/70">
+        <input
+          type="checkbox"
+          className="accent-violet-accent"
+          checked={data.zoneFlipped ?? false}
+          onChange={(e) => {
+            onCheckpoint()
+            onChange({ zoneFlipped: e.target.checked })
+          }}
+        />
+        {t('properties.connector.zoneFlipped')}
+      </label>
+      <Field
+        label={t('properties.connector.zoneWidth', {
+          px: Math.round(data.zoneWidth ?? Math.max(40, data.strokeWidth * 14)),
+        })}
+      >
+        <input
+          type="range"
+          min={16}
+          max={120}
+          step={2}
+          className="w-full"
+          value={data.zoneWidth ?? Math.max(40, data.strokeWidth * 14)}
+          onFocus={onCheckpoint}
+          onChange={(e) => onChange({ zoneWidth: Number(e.target.value) })}
+        />
+      </Field>
+      <Field label={t('properties.connector.zoneColor')}>
+        <ColorSwatchPicker
+          size="sm"
+          value={data.zoneColor ?? data.color}
+          onChange={(c) => {
+            onCheckpoint()
+            onChange({ zoneColor: c })
+          }}
+        />
+      </Field>
       <Field label={t('properties.connector.loopFillColor')}>
         <ColorSwatchPicker
           size="sm"

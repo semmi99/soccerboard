@@ -47,10 +47,13 @@ export function ConnectorShape({
   const angleDeg = (Math.atan2(dy, dx) * 180) / Math.PI
   // One-sided (not centered on the line) so it reads as a shaded corridor
   // spilling to one side rather than a symmetric halo — wider than the old
-  // centered band since it's no longer split across both sides.
-  const zoneWidth = Math.max(40, data.strokeWidth * 14)
-  const zoneDark = mixHex(data.color, 0, 0.55)
-  const zoneLight = mixHex(data.color, 255, 0.65)
+  // centered band since it's no longer split across both sides. `zoneWidth`
+  // and `zoneColor` are user-adjustable (see ConnectorFields) with the old
+  // fixed formula/line-color as the fallback for existing boards.
+  const zoneWidth = data.zoneWidth ?? Math.max(40, data.strokeWidth * 14)
+  const zoneBaseColor = data.zoneColor ?? data.color
+  const zoneDark = mixHex(zoneBaseColor, 0, 0.55)
+  const zoneLight = mixHex(zoneBaseColor, 255, 0.65)
 
   return (
     <Group>
@@ -61,7 +64,7 @@ export function ConnectorShape({
           width={length}
           height={zoneWidth}
           offsetX={length / 2}
-          offsetY={0}
+          offsetY={data.zoneFlipped ? zoneWidth : 0}
           rotation={angleDeg}
           fillLinearGradientStartPoint={{ x: 0, y: 0 }}
           fillLinearGradientEndPoint={{ x: 0, y: zoneWidth }}

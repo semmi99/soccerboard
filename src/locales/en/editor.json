@@ -135,6 +135,9 @@
     },
     "connector": {
       "zone": "Show color band along the line",
+      "zoneFlipped": "Flip side",
+      "zoneWidth": "Band width ({{px}}px)",
+      "zoneColor": "Color band's color",
       "loopFillColor": "Enclosed area color (when connectors form a closed loop)"
     },
     "playerChip": {

@@ -319,6 +319,15 @@ export interface ConnectorData {
    * from `glow`'s blur-based halo, this is an actual translucent shape,
    * visible even at a small render size where a blur washes out. */
   zone?: boolean
+  /** Which side of the line the `zone` band spills toward — flips the band
+   * to the opposite side instead of always pointing the same way. */
+  zoneFlipped?: boolean
+  /** Width (perpendicular reach) of the `zone` band in px — falls back to a
+   * strokeWidth-derived default when unset. */
+  zoneWidth?: number
+  /** Color for the `zone` band's dark-to-light gradient — falls back to
+   * `color` when unset, same as `loopFillColor` below. */
+  zoneColor?: string
   /** Fill color for the area enclosed when this connector is part of a
    * closed loop (see connectorZones.ts) — falls back to `color` when unset,
    * so existing boards keep looking the same until someone picks a

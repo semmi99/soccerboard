@@ -135,6 +135,9 @@
     },
     "connector": {
       "zone": "Farbfläche entlang der Linie anzeigen",
+      "zoneFlipped": "Seite wechseln",
+      "zoneWidth": "Breite der Fläche ({{px}}px)",
+      "zoneColor": "Farbe der Fläche entlang der Linie",
       "loopFillColor": "Farbe der Fläche (bei geschlossener Verbindung)"
     },
     "playerChip": {
