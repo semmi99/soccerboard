@@ -1165,7 +1165,7 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
 
   return (
     <div className="relative h-full w-full">
-    <div ref={containerRef} className="flex h-full w-full items-center justify-center overflow-auto">
+    <div ref={containerRef} className="flex h-full w-full overflow-auto">
       <Stage
         ref={stageRef}
         width={logical.width * scale}
@@ -1183,7 +1183,7 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
           e.evt.preventDefault()
           setZoom((z) => Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, z - e.evt.deltaY * 0.001)))
         }}
-        className="rounded-lg shadow-2xl shadow-black/60"
+        className="m-auto rounded-lg shadow-2xl shadow-black/60"
       >
         <Layer>
           <Pitch
