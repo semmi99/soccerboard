@@ -442,20 +442,30 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
         .map((id) => visibleObjects.find((o) => o.id === id))
         .filter((o): o is FrameObject => Boolean(o))
       if (points.length !== z.ids.length) return null
-      // The zone's own color follows whichever connector forms its first
-      // edge — loops are realistically drawn with one consistent color
-      // already (connector color is sticky across new connectors) — unless
-      // that connector has its own dedicated loopFillColor set, letting the
-      // enclosed area be colored independently of the line itself.
-      const firstEdgeConnector = connectorObjects.find(
-        (o) =>
-          (o.data.fromId === z.ids[0] && o.data.toId === z.ids[1]) ||
-          (o.data.toId === z.ids[0] && o.data.fromId === z.ids[1]),
+      // Every connector forming this loop is a candidate for the fill color
+      // — checking only the cycle's arbitrary "first" edge meant setting
+      // loopFillColor on whichever segment the user actually had selected
+      // often did nothing, since that segment could land anywhere in the
+      // cycle. Any explicit loopFillColor along the loop wins; otherwise
+      // fall back to the first edge's plain line color, matching how a
+      // loop is realistically drawn with one consistent color already
+      // (connector color is sticky across new connectors).
+      const loopEdges = z.ids.map(
+        (id, i): [string, string] => [id, z.ids[(i + 1) % z.ids.length]!],
       )
+      const edgeConnectors = loopEdges
+        .map(([a, b]) =>
+          connectorObjects.find(
+            (o) =>
+              (o.data.fromId === a && o.data.toId === b) || (o.data.toId === a && o.data.fromId === b),
+          ),
+        )
+        .filter((o): o is (typeof connectorObjects)[number] => Boolean(o))
+      const explicitFill = edgeConnectors.find((o) => o.data.loopFillColor)?.data.loopFillColor
       return {
         key: z.key,
         points: points.flatMap((p) => [p.x, p.y]),
-        color: firstEdgeConnector?.data.loopFillColor ?? firstEdgeConnector?.data.color,
+        color: explicitFill ?? edgeConnectors[0]?.data.color,
       }
     })
     .filter((z): z is { key: string; points: number[]; color: string | undefined } => Boolean(z))
