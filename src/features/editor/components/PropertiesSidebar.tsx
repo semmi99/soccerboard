@@ -47,6 +47,36 @@ function Field({ label, children }: { label: string; children: ReactNode }) {
   )
 }
 
+// A section header that visibly reads as a clickable toggle — pill
+// background + chevron, rather than a plain uppercase label with a tiny
+// +/− that's easy to mistake for static text (this used to be a lone
+// muted <button>, which people didn't realize was interactive).
+function CollapsibleSectionHeader({
+  title,
+  isOpen,
+  onToggle,
+}: {
+  title: string
+  isOpen: boolean
+  onToggle: () => void
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onToggle}
+      className="mb-2 flex w-full items-center justify-between rounded-md bg-pitch-800/70 px-2.5 py-2 text-xs font-semibold uppercase tracking-wide text-white/80 hover:bg-pitch-800 hover:text-white"
+    >
+      {title}
+      <span
+        className={`text-[10px] transition-transform ${isOpen ? 'rotate-90' : ''}`}
+        aria-hidden="true"
+      >
+        ▶
+      </span>
+    </button>
+  )
+}
+
 const selectClass =
   'rounded-md border border-pitch-600 bg-pitch-800 px-2 py-1.5 text-xs text-white outline-none focus:border-violet-accent'
 const inputClass =
@@ -141,16 +171,11 @@ export function PropertiesSidebar({
         {t('properties.close')} ✕
       </button>
       <div>
-        <button
-          type="button"
-          onClick={() => setIsFieldPanelOpen((v) => !v)}
-          className="mb-2 flex w-full items-center justify-between text-[11px] font-semibold uppercase tracking-wide text-white/40 hover:text-white/70"
-        >
-          {t('properties.field.title')}
-          <span className="flex h-5 w-5 shrink-0 items-center justify-center text-base font-bold text-white/70">
-            {isFieldPanelOpen ? '−' : '+'}
-          </span>
-        </button>
+        <CollapsibleSectionHeader
+          title={t('properties.field.title')}
+          isOpen={isFieldPanelOpen}
+          onToggle={() => setIsFieldPanelOpen((v) => !v)}
+        />
         {isFieldPanelOpen && (
         <div className="flex flex-col gap-2">
           <Field label={t('properties.field.design')}>
@@ -265,23 +290,18 @@ export function PropertiesSidebar({
       </div>
 
       <div>
-        <button
-          type="button"
-          onClick={() => setIsTeamPanelOpen((v) => !v)}
-          className="mb-2 flex w-full items-center justify-between text-[11px] font-semibold uppercase tracking-wide text-white/40 hover:text-white/70"
-        >
-          {t('properties.team.title')}
-          <span className="flex h-5 w-5 shrink-0 items-center justify-center text-base font-bold text-white/70">
-            {isTeamPanelOpen ? '−' : '+'}
-          </span>
-        </button>
+        <CollapsibleSectionHeader
+          title={t('properties.team.title')}
+          isOpen={isTeamPanelOpen}
+          onToggle={() => setIsTeamPanelOpen((v) => !v)}
+        />
         {isTeamPanelOpen && <TeamSquadPanel />}
       </div>
 
 
       {selection.length > 1 && (
         <div>
-          <h3 className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-white/40">
+          <h3 className="mb-2 border-l-2 border-violet-accent pl-2 text-xs font-semibold uppercase tracking-wide text-violet-accent-bright">
             {t('properties.multiSelect.title', { count: selection.length })}
           </h3>
           <div className="flex flex-wrap gap-1.5">
@@ -335,7 +355,7 @@ export function PropertiesSidebar({
 
       {selection.length === 1 && selectedObject && (
         <div className="flex flex-col gap-4">
-          <h3 className="text-[11px] font-semibold uppercase tracking-wide text-white/40">
+          <h3 className="border-l-2 border-violet-accent pl-2 text-xs font-semibold uppercase tracking-wide text-violet-accent-bright">
             {t('properties.singleSelect.title')}
           </h3>
 
