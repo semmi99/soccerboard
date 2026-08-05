@@ -356,8 +356,18 @@ function MovementTrail({
   )
 }
 
+const MIN_ZOOM = 0.5
+const MAX_ZOOM = 3
+const ZOOM_STEP = 0.1
+
 export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | null> }) {
   const { ref: containerRef, size } = useElementSize<HTMLDivElement>()
+  // A manual multiplier on top of the "fit the whole pitch in view" scale —
+  // lets the pitch be rendered larger than the container (spilling over
+  // into a scrollbar) instead of always being shrunk down to whatever fits,
+  // which wasted a lot of screen space on wide monitors. Session-only, not
+  // persisted with the project, same as how a map app's zoom isn't saved.
+  const [zoom, setZoom] = useState(1)
   const pitchDesign = useEditorStore((s) => s.pitchDesign)
   const orientation = useEditorStore((s) => s.orientation)
   const zoneGridStyle = useEditorStore((s) => s.zoneGridStyle)
@@ -635,10 +645,11 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
   const zoneRefs = useRef<Record<string, Konva.Line>>({})
 
   const logical = getCroppedStageSize(orientation, fieldCrop)
-  const scale =
+  const fitScale =
     size.width > 0 && size.height > 0
       ? Math.min(size.width / logical.width, size.height / logical.height)
       : 1
+  const scale = fitScale * zoom
 
   // Objects are stored in the full (uncropped) pitch's coordinate system.
   // When a crop is active, the stage itself only spans the cropped slice,
@@ -1153,7 +1164,8 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
   )
 
   return (
-    <div ref={containerRef} className="flex h-full w-full items-center justify-center overflow-hidden">
+    <div className="relative h-full w-full">
+    <div ref={containerRef} className="flex h-full w-full items-center justify-center overflow-auto">
       <Stage
         ref={stageRef}
         width={logical.width * scale}
@@ -1166,6 +1178,11 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
         onTouchMove={handleStageMouseMove}
         onMouseUp={handleStageMouseUp}
         onTouchEnd={handleStageMouseUp}
+        onWheel={(e: KonvaEventObject<WheelEvent>) => {
+          if (!e.evt.ctrlKey && !e.evt.metaKey) return
+          e.evt.preventDefault()
+          setZoom((z) => Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, z - e.evt.deltaY * 0.001)))
+        }}
         className="rounded-lg shadow-2xl shadow-black/60"
       >
         <Layer>
@@ -1409,6 +1426,30 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
             />
           )
         })()}
+    </div>
+      <div className="absolute bottom-4 right-4 z-20 flex items-center gap-1 rounded-full border border-pitch-700 bg-pitch-900/90 px-1.5 py-1 shadow-lg">
+        <button
+          type="button"
+          onClick={() => setZoom((z) => Math.max(MIN_ZOOM, +(z - ZOOM_STEP).toFixed(2)))}
+          className="flex h-7 w-7 items-center justify-center rounded-full text-sm font-bold text-white/70 hover:bg-pitch-800 hover:text-white"
+        >
+          −
+        </button>
+        <button
+          type="button"
+          onClick={() => setZoom(1)}
+          className="min-w-[3.5rem] rounded-full px-2 py-1 text-center text-xs text-white/70 hover:bg-pitch-800 hover:text-white"
+        >
+          {Math.round(zoom * 100)}%
+        </button>
+        <button
+          type="button"
+          onClick={() => setZoom((z) => Math.min(MAX_ZOOM, +(z + ZOOM_STEP).toFixed(2)))}
+          className="flex h-7 w-7 items-center justify-center rounded-full text-sm font-bold text-white/70 hover:bg-pitch-800 hover:text-white"
+        >
+          +
+        </button>
+      </div>
     </div>
   )
 }
