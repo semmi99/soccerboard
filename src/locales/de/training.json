@@ -11,7 +11,8 @@
   "playerStatus": {
     "aktiv": "aktiv",
     "individuell": "individuell",
-    "krank": "krank"
+    "krank": "krank",
+    "entschuldigt": "entschuldigt"
   },
   "exercisePicker": {
     "title": "Übung auswählen",

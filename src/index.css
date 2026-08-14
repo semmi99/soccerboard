@@ -77,28 +77,3 @@ body {
 ::-webkit-scrollbar-thumb:hover {
   background: var(--color-violet-accent);
 }
-
-/* Training-session "Als PDF speichern": prints only #training-print-sheet
-   via the browser's native print dialog instead of opening a popup window
-   (popup blockers silently swallowed that approach for some users). The
-   classic visibility:hidden-then-visible trick keeps the rest of the SPA's
-   DOM around (no unmount/remount) while still hiding it from the printed
-   page. */
-@media print {
-  body * {
-    visibility: hidden;
-  }
-  #training-print-sheet,
-  #training-print-sheet * {
-    visibility: visible;
-  }
-  #training-print-sheet {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-  }
-  @page {
-    size: A4 landscape;
-    margin: 12mm;
-  }
-}

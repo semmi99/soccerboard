@@ -24,7 +24,7 @@ import { PLAYER_STATUS_OPTIONS, SCHWERPUNKT_OPTIONS, SPIELPHASE_OPTIONS } from '
 import type { PlayerStatus, Schwerpunkt, Spielphase } from '../types'
 import { ExercisePickerModal } from './ExercisePickerModal'
 import { ExerciseThumbnail } from './ExerciseThumbnail'
-import { SessionPrintSheet } from '../pdf/SessionPrintSheet'
+import { downloadSessionPdf } from '../pdf/sessionPdf'
 import {
   readAndClearDraftSession,
   readAndClearPendingExercise,
@@ -40,6 +40,7 @@ const STATUS_COLORS: Record<PlayerStatus, string> = {
   aktiv: 'bg-green-600/80 text-white',
   individuell: 'bg-yellow-600/80 text-white',
   krank: 'bg-red-600/80 text-white',
+  entschuldigt: 'bg-slate-500/80 text-white',
 }
 
 function TaxonomyPicker({
@@ -294,11 +295,25 @@ export function TrainingSessionEditor({
     navigate('/editor/new?exercise=1')
   }
 
-  function handlePrint() {
-    window.print()
+  function handleSavePdf() {
+    downloadSessionPdf({
+      sessionNumber,
+      sessionDate,
+      teamName: teams.find((tm) => tm.id === teamId)?.name ?? '',
+      schwerpunkt,
+      spielphase,
+      unterphaseName: unterphasen.find((u) => u.id === unterphaseId)?.name ?? null,
+      prinzipName: prinzipien.find((p) => p.id === prinzipId)?.name ?? null,
+      koerperlich,
+      physisch,
+      players: players.map((p) => ({
+        name: `${p.first_name} ${p.last_name}`.trim(),
+        position: p.position,
+        status: playerStatuses[p.id] ?? 'aktiv',
+      })),
+      exercises,
+    })
   }
-
-  const printTeamName = teams.find((tm) => tm.id === teamId)?.name ?? ''
 
   if (isLoading) {
     return (
@@ -320,7 +335,7 @@ export function TrainingSessionEditor({
             <Button variant="ghost" onClick={onClose}>
               {t('common:actions.cancel')}
             </Button>
-            <Button variant="secondary" onClick={handlePrint} disabled={!teamId}>
+            <Button variant="secondary" onClick={handleSavePdf} disabled={!teamId}>
               {t('sessionEditor.savePdf')}
             </Button>
             <Button loading={isSaving} disabled={!teamId} onClick={() => void handleSave()}>
@@ -542,24 +557,6 @@ export function TrainingSessionEditor({
           onCreateNew={handleCreateNewExercise}
         />
       )}
-
-      <SessionPrintSheet
-        sessionNumber={sessionNumber}
-        sessionDate={sessionDate}
-        teamName={printTeamName}
-        schwerpunkt={schwerpunkt}
-        spielphase={spielphase}
-        unterphaseName={unterphasen.find((u) => u.id === unterphaseId)?.name ?? null}
-        prinzipName={prinzipien.find((p) => p.id === prinzipId)?.name ?? null}
-        koerperlich={koerperlich}
-        physisch={physisch}
-        players={players.map((p) => ({
-          name: `${p.first_name} ${p.last_name}`.trim(),
-          position: p.position,
-          status: playerStatuses[p.id] ?? 'aktiv',
-        }))}
-        exercises={exercises}
-      />
     </div>
   )
 }

@@ -15,5 +15,5 @@ export const SPIELPHASE_OPTIONS = [
 ] as const
 export type Spielphase = (typeof SPIELPHASE_OPTIONS)[number]
 
-export const PLAYER_STATUS_OPTIONS = ['aktiv', 'individuell', 'krank'] as const
+export const PLAYER_STATUS_OPTIONS = ['aktiv', 'individuell', 'krank', 'entschuldigt'] as const
 export type PlayerStatus = (typeof PLAYER_STATUS_OPTIONS)[number]
