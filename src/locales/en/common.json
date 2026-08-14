@@ -4,7 +4,8 @@
     "squad": "Squad",
     "formations": "Formations",
     "account": "Account",
-    "admin": "Team"
+    "admin": "Team",
+    "training": "Training"
   },
   "actions": {
     "signOut": "Sign out",
@@ -13,6 +14,7 @@
     "delete": "Delete",
     "add": "Add",
     "edit": "Edit",
-    "duplicate": "Duplicate"
+    "duplicate": "Duplicate",
+    "remove": "Remove"
   }
 }

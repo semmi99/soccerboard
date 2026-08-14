@@ -15,7 +15,12 @@ export function AppHeader() {
     { to: '/squad', label: t('common:nav.squad') },
     { to: '/formations', label: t('common:nav.formations') },
     { to: '/account', label: t('common:nav.account') },
-    ...(profile?.role === 'admin' ? [{ to: '/admin', label: t('common:nav.admin') }] : []),
+    ...(profile?.role === 'admin'
+      ? [
+          { to: '/training', label: t('common:nav.training') },
+          { to: '/admin', label: t('common:nav.admin') },
+        ]
+      : []),
   ]
 
   return (

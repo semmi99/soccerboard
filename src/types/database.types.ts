@@ -662,6 +662,229 @@ export type Database = {
           },
         ]
       }
+      training_prinzipien: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          org_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          org_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          org_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "training_prinzipien_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      training_session_exercises: {
+        Row: {
+          created_at: string
+          exercise_id: string
+          id: string
+          order_index: number
+          session_id: string
+        }
+        Insert: {
+          created_at?: string
+          exercise_id: string
+          id?: string
+          order_index?: number
+          session_id: string
+        }
+        Update: {
+          created_at?: string
+          exercise_id?: string
+          id?: string
+          order_index?: number
+          session_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "training_session_exercises_exercise_id_fkey"
+            columns: ["exercise_id"]
+            isOneToOne: false
+            referencedRelation: "exercises"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "training_session_exercises_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "training_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      training_session_players: {
+        Row: {
+          created_at: string
+          id: string
+          player_id: string
+          session_id: string
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          player_id: string
+          session_id: string
+          status?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          player_id?: string
+          session_id?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "training_session_players_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "training_session_players_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "training_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      training_sessions: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          koerperlich: number | null
+          org_id: string
+          physisch: number | null
+          prinzip_id: string | null
+          schwerpunkt: string
+          session_date: string
+          session_number: number
+          spielphase: string
+          team_id: string
+          unterphase_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          koerperlich?: number | null
+          org_id: string
+          physisch?: number | null
+          prinzip_id?: string | null
+          schwerpunkt: string
+          session_date: string
+          session_number: number
+          spielphase: string
+          team_id: string
+          unterphase_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          koerperlich?: number | null
+          org_id?: string
+          physisch?: number | null
+          prinzip_id?: string | null
+          schwerpunkt?: string
+          session_date?: string
+          session_number?: number
+          spielphase?: string
+          team_id?: string
+          unterphase_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "training_sessions_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "training_sessions_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "training_sessions_prinzip_id_fkey"
+            columns: ["prinzip_id"]
+            isOneToOne: false
+            referencedRelation: "training_prinzipien"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "training_sessions_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "training_sessions_unterphase_id_fkey"
+            columns: ["unterphase_id"]
+            isOneToOne: false
+            referencedRelation: "training_unterphasen"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      training_unterphasen: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          org_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          org_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          org_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "training_unterphasen_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       zone_grids: {
         Row: {
           created_at: string

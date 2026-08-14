@@ -4,7 +4,8 @@
     "squad": "Kader",
     "formations": "Formationen",
     "account": "Konto",
-    "admin": "Team"
+    "admin": "Team",
+    "training": "Training"
   },
   "actions": {
     "signOut": "Abmelden",
@@ -13,6 +14,7 @@
     "delete": "Löschen",
     "add": "Hinzufügen",
     "edit": "Bearbeiten",
-    "duplicate": "Duplizieren"
+    "duplicate": "Duplizieren",
+    "remove": "Entfernen"
   }
 }
