@@ -24,7 +24,7 @@ import { PLAYER_STATUS_OPTIONS, SCHWERPUNKT_OPTIONS, SPIELPHASE_OPTIONS } from '
 import type { PlayerStatus, Schwerpunkt, Spielphase } from '../types'
 import { ExercisePickerModal } from './ExercisePickerModal'
 import { ExerciseThumbnail } from './ExerciseThumbnail'
-import { openSessionPrintWindow } from '../pdf/sessionPrint'
+import { SessionPrintSheet } from '../pdf/SessionPrintSheet'
 import {
   readAndClearDraftSession,
   readAndClearPendingExercise,
@@ -295,25 +295,10 @@ export function TrainingSessionEditor({
   }
 
   function handlePrint() {
-    const team = teams.find((tm) => tm.id === teamId)
-    openSessionPrintWindow({
-      sessionNumber,
-      sessionDate,
-      teamName: team?.name ?? '',
-      schwerpunkt,
-      spielphase,
-      unterphaseName: unterphasen.find((u) => u.id === unterphaseId)?.name ?? null,
-      prinzipName: prinzipien.find((p) => p.id === prinzipId)?.name ?? null,
-      koerperlich,
-      physisch,
-      players: players.map((p) => ({
-        name: `${p.first_name} ${p.last_name}`.trim(),
-        position: p.position,
-        status: playerStatuses[p.id] ?? 'aktiv',
-      })),
-      exercises,
-    })
+    window.print()
   }
+
+  const printTeamName = teams.find((tm) => tm.id === teamId)?.name ?? ''
 
   if (isLoading) {
     return (
@@ -509,7 +494,7 @@ export function TrainingSessionEditor({
                 {exercises.map((ex, i) => (
                   <div
                     key={`${ex.exerciseId}-${i}`}
-                    className="flex gap-3 rounded-lg border border-pitch-700 bg-pitch-800/40 p-3"
+                    className="flex min-w-0 gap-3 overflow-hidden rounded-lg border border-pitch-700 bg-pitch-800/40 p-3"
                   >
                     <ExerciseThumbnail frame={ex.frames[0]} />
                     <div className="flex min-w-0 flex-1 flex-col gap-1">
@@ -557,6 +542,24 @@ export function TrainingSessionEditor({
           onCreateNew={handleCreateNewExercise}
         />
       )}
+
+      <SessionPrintSheet
+        sessionNumber={sessionNumber}
+        sessionDate={sessionDate}
+        teamName={printTeamName}
+        schwerpunkt={schwerpunkt}
+        spielphase={spielphase}
+        unterphaseName={unterphasen.find((u) => u.id === unterphaseId)?.name ?? null}
+        prinzipName={prinzipien.find((p) => p.id === prinzipId)?.name ?? null}
+        koerperlich={koerperlich}
+        physisch={physisch}
+        players={players.map((p) => ({
+          name: `${p.first_name} ${p.last_name}`.trim(),
+          position: p.position,
+          status: playerStatuses[p.id] ?? 'aktiv',
+        }))}
+        exercises={exercises}
+      />
     </div>
   )
 }

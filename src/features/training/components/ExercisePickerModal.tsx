@@ -68,10 +68,10 @@ export function ExercisePickerModal({
               key={ex.id}
               type="button"
               onClick={() => onPick(ex)}
-              className="flex items-start gap-3 rounded-lg border border-pitch-700 bg-pitch-800/40 p-3 text-left hover:border-violet-accent/60"
+              className="flex w-full min-w-0 items-start gap-3 overflow-hidden rounded-lg border border-pitch-700 bg-pitch-800/40 p-3 text-left hover:border-violet-accent/60"
             >
               <ExerciseThumbnail frame={ex.frames[0]} />
-              <div className="flex min-w-0 flex-col items-start gap-0.5">
+              <div className="flex min-w-0 flex-1 flex-col items-start gap-0.5">
                 <span className="text-sm font-medium text-white">{ex.name}</span>
                 <span className="text-xs text-white/40">{ex.category}</span>
                 {ex.description && <span className="mt-1 text-xs text-white/50">{ex.description}</span>}
