@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
+import type Konva from 'konva'
 import { useAuthStore } from '../../auth/store/authStore'
 import { AppHeader } from '../../../app/AppHeader'
 import { Button } from '../../../components/ui/Button'
@@ -133,6 +134,10 @@ export function TrainingSessionEditor({
   // that effect skip loadSession entirely when we just came back from
   // building a new exercise in the editor.
   const restoredFromDraftRef = useRef(false)
+  // Keyed the same way as the exercise cards below (`${exerciseId}-${i}`) —
+  // lets handleSavePdf pull a PNG snapshot of each already-rendered
+  // diagram straight out of Konva instead of re-rendering off-screen.
+  const exerciseStagesRef = useRef(new Map<string, Konva.Stage>())
 
   const [teams, setTeams] = useState<Team[]>([])
   const [teamId, setTeamId] = useState<string | null>(null)
@@ -311,7 +316,15 @@ export function TrainingSessionEditor({
         position: p.position,
         status: playerStatuses[p.id] ?? 'aktiv',
       })),
-      exercises,
+      exercises: exercises.map((ex, i) => {
+        const stage = exerciseStagesRef.current.get(`${ex.exerciseId}-${i}`)
+        return {
+          exerciseName: ex.exerciseName,
+          exerciseCategory: ex.exerciseCategory,
+          exerciseDescription: ex.exerciseDescription,
+          imageDataUrl: stage ? stage.toDataURL({ pixelRatio: 2 }) : null,
+        }
+      }),
     })
   }
 
@@ -511,7 +524,14 @@ export function TrainingSessionEditor({
                     key={`${ex.exerciseId}-${i}`}
                     className="flex min-w-0 gap-3 overflow-hidden rounded-lg border border-pitch-700 bg-pitch-800/40 p-3"
                   >
-                    <ExerciseThumbnail frame={ex.frames[0]} />
+                    <ExerciseThumbnail
+                      frame={ex.frames[0]}
+                      stageRef={(stage) => {
+                        const key = `${ex.exerciseId}-${i}`
+                        if (stage) exerciseStagesRef.current.set(key, stage)
+                        else exerciseStagesRef.current.delete(key)
+                      }}
+                    />
                     <div className="flex min-w-0 flex-1 flex-col gap-1">
                       <div className="flex items-start justify-between gap-2">
                         <span className="text-sm font-medium text-white">{ex.exerciseName}</span>

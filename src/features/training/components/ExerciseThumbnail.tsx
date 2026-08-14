@@ -1,5 +1,6 @@
 import { Layer, Stage } from 'react-konva'
 import { useTranslation } from 'react-i18next'
+import type Konva from 'konva'
 import { Pitch } from '../../editor/components/Pitch'
 import { ObjectRenderer } from '../../editor/objects/ObjectRenderer'
 import { PITCH_LOGICAL } from '../../editor/constants'
@@ -17,7 +18,16 @@ function noop() {}
  * design/orientation (only object data), so this always renders a neutral
  * default background rather than whatever the exercise's author had
  * picked. */
-export function ExerciseThumbnail({ frame }: { frame: EditorFrame | undefined }) {
+export function ExerciseThumbnail({
+  frame,
+  stageRef,
+}: {
+  frame: EditorFrame | undefined
+  /** Hands back the underlying Konva.Stage so a caller can pull a PNG
+   * snapshot out via stage.toDataURL() — used to embed the real diagram
+   * into the training-session PDF instead of just text. */
+  stageRef?: (stage: Konva.Stage | null) => void
+}) {
   const { t } = useTranslation('training')
 
   if (!frame || frame.objects.length === 0) {
@@ -33,7 +43,14 @@ export function ExerciseThumbnail({ frame }: { frame: EditorFrame | undefined })
 
   return (
     <div style={{ width: THUMB_WIDTH, height: THUMB_HEIGHT }} className="shrink-0 overflow-hidden rounded-md">
-      <Stage width={THUMB_WIDTH} height={THUMB_HEIGHT} scaleX={SCALE} scaleY={SCALE} listening={false}>
+      <Stage
+        ref={stageRef}
+        width={THUMB_WIDTH}
+        height={THUMB_HEIGHT}
+        scaleX={SCALE}
+        scaleY={SCALE}
+        listening={false}
+      >
         <Layer>
           <Pitch design="classic_green" orientation="horizontal" />
         </Layer>
