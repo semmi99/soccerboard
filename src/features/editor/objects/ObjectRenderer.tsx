@@ -166,6 +166,24 @@ export function ObjectRenderer({
         ...object.data,
         width: Math.max(8, object.data.width * scaleX),
         height: Math.max(8, object.data.height * scaleY),
+        // Quote cards (incl. the callout-pill preset) grow/shrink their
+        // text along with the box — a resize handle otherwise only
+        // stretched the box while the heading/body stayed whatever size
+        // they were, which read as broken for a label-only pill where the
+        // box IS the visible thing. Shapes have no text, so they're
+        // unaffected by this branch.
+        ...(object.objectType === 'quote_card'
+          ? {
+              headingFontSize: Math.max(
+                6,
+                Math.round(object.data.headingFontSize * Math.sqrt(scaleX * scaleY)),
+              ),
+              bodyFontSize: Math.max(
+                6,
+                Math.round(object.data.bodyFontSize * Math.sqrt(scaleX * scaleY)),
+              ),
+            }
+          : {}),
       }
       onTransformEnd(object.id, {
         x: node.x(),
