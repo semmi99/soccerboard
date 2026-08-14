@@ -1,18 +1,22 @@
 import { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useTranslation } from 'react-i18next'
+import { Button } from '../../../components/ui/Button'
 import { listExercises, type Exercise } from '../../../lib/supabase/exercises'
+import { ExerciseThumbnail } from './ExerciseThumbnail'
 
 export function ExercisePickerModal({
   orgId,
   excludeIds,
   onClose,
   onPick,
+  onCreateNew,
 }: {
   orgId: string
   excludeIds: string[]
   onClose: () => void
   onPick: (exercise: Exercise) => void
+  onCreateNew: () => void
 }) {
   const { t } = useTranslation('training')
   const [exercises, setExercises] = useState<Exercise[]>([])
@@ -48,6 +52,10 @@ export function ExercisePickerModal({
           </button>
         </div>
 
+        <Button variant="secondary" onClick={onCreateNew}>
+          {t('exercisePicker.createNew')}
+        </Button>
+
         {error && <p className="text-sm text-red-400">{error}</p>}
 
         <div className="flex flex-col gap-2 overflow-y-auto">
@@ -60,11 +68,14 @@ export function ExercisePickerModal({
               key={ex.id}
               type="button"
               onClick={() => onPick(ex)}
-              className="flex flex-col items-start gap-0.5 rounded-lg border border-pitch-700 bg-pitch-800/40 p-3 text-left hover:border-violet-accent/60"
+              className="flex items-start gap-3 rounded-lg border border-pitch-700 bg-pitch-800/40 p-3 text-left hover:border-violet-accent/60"
             >
-              <span className="text-sm font-medium text-white">{ex.name}</span>
-              <span className="text-xs text-white/40">{ex.category}</span>
-              {ex.description && <span className="mt-1 text-xs text-white/50">{ex.description}</span>}
+              <ExerciseThumbnail frame={ex.frames[0]} />
+              <div className="flex min-w-0 flex-col items-start gap-0.5">
+                <span className="text-sm font-medium text-white">{ex.name}</span>
+                <span className="text-xs text-white/40">{ex.category}</span>
+                {ex.description && <span className="mt-1 text-xs text-white/50">{ex.description}</span>}
+              </div>
             </button>
           ))}
         </div>

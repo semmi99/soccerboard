@@ -11,9 +11,13 @@ import { ExportMenu } from './ExportMenu'
 export function TopBar({
   stageRef,
   save,
+  backTo = '/dashboard',
+  backLabel,
 }: {
   stageRef: RefObject<Konva.Stage | null>
   save: ReturnType<typeof useProjectSave>
+  backTo?: string
+  backLabel?: string
 }) {
   const { t } = useTranslation('editor')
   const navigate = useNavigate()
@@ -30,10 +34,10 @@ export function TopBar({
     <header className="flex h-14 shrink-0 items-center gap-3 overflow-x-auto border-b border-pitch-700 bg-pitch-900 px-4">
       <button
         type="button"
-        onClick={() => navigate('/dashboard')}
+        onClick={() => navigate(backTo)}
         className="shrink-0 rounded-md px-2 py-1 text-sm text-white/60 hover:bg-pitch-800 hover:text-white"
       >
-        ← {t('topBar.dashboard')}
+        ← {backLabel ?? t('topBar.dashboard')}
       </button>
 
       <input

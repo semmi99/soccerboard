@@ -15,9 +15,13 @@
   },
   "exercisePicker": {
     "title": "Übung auswählen",
+    "createNew": "+ Neue Übung erstellen",
     "loading": "Lade Übungen…",
     "loadError": "Laden fehlgeschlagen.",
     "empty": "Keine passenden Übungen in der Bibliothek."
+  },
+  "exerciseThumbnail": {
+    "empty": "Kein Diagramm"
   },
   "sessionEditor": {
     "editTitle": "Trainingseinheit #{{number}}",

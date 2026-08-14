@@ -6,7 +6,8 @@ import { useAuthStore } from '../../auth/store/authStore'
 import { limitsForTier } from '../../../lib/limits'
 import { countProjects, saveProject } from '../../../lib/supabase/projects'
 
-export function useProjectSave() {
+export function useProjectSave(options: { exerciseMode?: boolean } = {}) {
+  const { exerciseMode = false } = options
   const { t } = useTranslation('editor')
   const navigate = useNavigate()
   const projectId = useEditorStore((s) => s.projectId)
@@ -46,6 +47,11 @@ export function useProjectSave() {
   const isSavingRef = useRef(false)
 
   const handleSave = useCallback(async () => {
+    // Exercise-creation mode uses a blank, unsaved board purely as a
+    // scratchpad for building an exercise diagram (see SaveExerciseBar) —
+    // it must never turn into a real `projects` row via autosave, the
+    // Strg+S shortcut, or TopBar's own Save button.
+    if (exerciseMode) return
     if (!organization || !profile) return
     if (isSavingRef.current) return
     isSavingRef.current = true
@@ -98,6 +104,7 @@ export function useProjectSave() {
       setIsSaving(false)
     }
   }, [
+    exerciseMode,
     organization,
     profile,
     projectId,

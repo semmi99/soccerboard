@@ -15,9 +15,13 @@
   },
   "exercisePicker": {
     "title": "Choose an exercise",
+    "createNew": "+ Create new exercise",
     "loading": "Loading exercises…",
     "loadError": "Failed to load.",
     "empty": "No matching exercises in the library."
+  },
+  "exerciseThumbnail": {
+    "empty": "No diagram"
   },
   "sessionEditor": {
     "editTitle": "Training session #{{number}}",

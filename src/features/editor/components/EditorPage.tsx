@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import type Konva from 'konva'
 import { useEditorStore } from '../store/editorStore'
@@ -14,11 +14,14 @@ import { Toolbar } from './Toolbar'
 import { PropertiesSidebar } from './PropertiesSidebar'
 import { EditorCanvas } from './EditorCanvas'
 import { Timeline } from './Timeline'
+import { SaveExerciseBar } from './SaveExerciseBar'
 
 export function EditorPage() {
   const { t } = useTranslation('editor')
   const { projectId } = useParams<{ projectId: string }>()
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+  const exerciseMode = projectId === 'new' && searchParams.get('exercise') === '1'
   const stageRef = useRef<Konva.Stage>(null)
   const resetToBlankProject = useEditorStore((s) => s.resetToBlankProject)
   const loadProjectIntoStore = useEditorStore((s) => s.loadProject)
@@ -28,7 +31,7 @@ export function EditorPage() {
   const [isLocked, setIsLocked] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [isPropertiesOpen, setIsPropertiesOpen] = useState(false)
-  const save = useProjectSave()
+  const save = useProjectSave({ exerciseMode })
 
   useKeyboardShortcuts({ onSave: save.handleSave })
 
@@ -159,7 +162,13 @@ export function EditorPage() {
 
   return (
     <div className="flex h-full flex-col bg-pitch-950">
-      <TopBar stageRef={stageRef} save={save} />
+      <TopBar
+        stageRef={stageRef}
+        save={save}
+        backTo={exerciseMode ? '/training' : undefined}
+        backLabel={exerciseMode ? t('editorPage.backToTraining') : undefined}
+      />
+      {exerciseMode && <SaveExerciseBar />}
       <div className="flex min-h-0 flex-1">
         <Toolbar />
         <main className="relative min-w-0 flex-1 bg-pitch-950 p-4">

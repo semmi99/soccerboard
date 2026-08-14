@@ -9,8 +9,17 @@ import {
   type TrainingSessionSummary,
 } from '../../../lib/supabase/trainingSessions'
 import { TrainingSessionEditor } from './TrainingSessionEditor'
+import { peekDraftSessionId } from '../draftBridge'
 
 type View = { mode: 'list' } | { mode: 'edit'; sessionId: string | null }
+
+/** Land back on the session editor (not the list) after a round-trip to
+ * /editor/new to build a new exercise — TrainingSessionEditor itself does
+ * the real (consuming) draft read once mounted. */
+function initialView(): View {
+  const draftSessionId = peekDraftSessionId()
+  return draftSessionId !== undefined ? { mode: 'edit', sessionId: draftSessionId } : { mode: 'list' }
+}
 
 export function TrainingPage() {
   const { t } = useTranslation(['training', 'common'])
@@ -20,7 +29,7 @@ export function TrainingPage() {
   const [sessions, setSessions] = useState<TrainingSessionSummary[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [view, setView] = useState<View>({ mode: 'list' })
+  const [view, setView] = useState<View>(initialView)
   const [deletingId, setDeletingId] = useState<string | null>(null)
 
   function reload() {

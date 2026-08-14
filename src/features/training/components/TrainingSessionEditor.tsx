@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useAuthStore } from '../../auth/store/authStore'
 import { AppHeader } from '../../../app/AppHeader'
@@ -22,7 +23,13 @@ import type { Exercise } from '../../../lib/supabase/exercises'
 import { PLAYER_STATUS_OPTIONS, SCHWERPUNKT_OPTIONS, SPIELPHASE_OPTIONS } from '../types'
 import type { PlayerStatus, Schwerpunkt, Spielphase } from '../types'
 import { ExercisePickerModal } from './ExercisePickerModal'
+import { ExerciseThumbnail } from './ExerciseThumbnail'
 import { openSessionPrintWindow } from '../pdf/sessionPrint'
+import {
+  readAndClearDraftSession,
+  readAndClearPendingExercise,
+  writeDraftSession,
+} from '../draftBridge'
 
 const selectClass =
   'rounded-md border border-pitch-600 bg-pitch-800 px-2 py-1.5 text-xs text-white outline-none focus:border-violet-accent'
@@ -117,8 +124,14 @@ export function TrainingSessionEditor({
   onSaved: () => void
 }) {
   const { t } = useTranslation(['training', 'common'])
+  const navigate = useNavigate()
   const organization = useAuthStore((s) => s.organization)
   const profile = useAuthStore((s) => s.profile)
+  // Set synchronously by the draft-restore effect below, before the
+  // network-load effect (declared after it) runs in the same commit — lets
+  // that effect skip loadSession entirely when we just came back from
+  // building a new exercise in the editor.
+  const restoredFromDraftRef = useRef(false)
 
   const [teams, setTeams] = useState<Team[]>([])
   const [teamId, setTeamId] = useState<string | null>(null)
@@ -151,8 +164,32 @@ export function TrainingSessionEditor({
     listPrinzipien(organization.id).then(setPrinzipien).catch(() => setPrinzipien([]))
   }, [organization])
 
+  // Restore an in-progress form after a round-trip to /editor/new to build
+  // a brand-new exercise (see handleCreateNewExercise) — runs before the
+  // loadSession effect below so it can skip the network fetch entirely.
+  useEffect(() => {
+    const draft = readAndClearDraftSession()
+    if (!draft) return
+    restoredFromDraftRef.current = true
+    setTeamId(draft.teamId)
+    setSessionNumber(draft.sessionNumber)
+    setSessionDate(draft.sessionDate)
+    setSchwerpunkt(draft.schwerpunkt)
+    setSpielphase(draft.spielphase)
+    setUnterphaseId(draft.unterphaseId)
+    setPrinzipId(draft.prinzipId)
+    setKoerperlich(draft.koerperlich)
+    setPhysisch(draft.physisch)
+    setPlayerStatuses(draft.playerStatuses)
+    const pending = readAndClearPendingExercise()
+    setExercises(pending ? [...draft.exercises, pending] : draft.exercises)
+    setIsLoading(false)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
   // Load the existing session (edit mode) once the picklists exist.
   useEffect(() => {
+    if (restoredFromDraftRef.current) return
     if (!sessionId) return
     let cancelled = false
     loadSession(sessionId)
@@ -237,6 +274,24 @@ export function TrainingSessionEditor({
     } finally {
       setIsSaving(false)
     }
+  }
+
+  function handleCreateNewExercise() {
+    writeDraftSession({
+      sessionId,
+      teamId,
+      sessionNumber,
+      sessionDate,
+      schwerpunkt,
+      spielphase,
+      unterphaseId,
+      prinzipId,
+      koerperlich,
+      physisch,
+      playerStatuses,
+      exercises,
+    })
+    navigate('/editor/new?exercise=1')
   }
 
   function handlePrint() {
@@ -454,22 +509,25 @@ export function TrainingSessionEditor({
                 {exercises.map((ex, i) => (
                   <div
                     key={`${ex.exerciseId}-${i}`}
-                    className="flex flex-col gap-1 rounded-lg border border-pitch-700 bg-pitch-800/40 p-3"
+                    className="flex gap-3 rounded-lg border border-pitch-700 bg-pitch-800/40 p-3"
                   >
-                    <div className="flex items-start justify-between gap-2">
-                      <span className="text-sm font-medium text-white">{ex.exerciseName}</span>
-                      <button
-                        type="button"
-                        onClick={() => setExercises((prev) => prev.filter((_, idx) => idx !== i))}
-                        className="text-xs text-white/40 hover:text-red-400"
-                      >
-                        {t('common:actions.remove')}
-                      </button>
+                    <ExerciseThumbnail frame={ex.frames[0]} />
+                    <div className="flex min-w-0 flex-1 flex-col gap-1">
+                      <div className="flex items-start justify-between gap-2">
+                        <span className="text-sm font-medium text-white">{ex.exerciseName}</span>
+                        <button
+                          type="button"
+                          onClick={() => setExercises((prev) => prev.filter((_, idx) => idx !== i))}
+                          className="text-xs text-white/40 hover:text-red-400"
+                        >
+                          {t('common:actions.remove')}
+                        </button>
+                      </div>
+                      <span className="text-xs text-white/40">{ex.exerciseCategory}</span>
+                      {ex.exerciseDescription && (
+                        <span className="text-xs text-white/50">{ex.exerciseDescription}</span>
+                      )}
                     </div>
-                    <span className="text-xs text-white/40">{ex.exerciseCategory}</span>
-                    {ex.exerciseDescription && (
-                      <span className="text-xs text-white/50">{ex.exerciseDescription}</span>
-                    )}
                   </div>
                 ))}
               </div>
@@ -491,10 +549,12 @@ export function TrainingSessionEditor({
                 exerciseName: exercise.name,
                 exerciseCategory: exercise.category,
                 exerciseDescription: exercise.description,
+                frames: exercise.frames,
               },
             ])
             setShowExercisePicker(false)
           }}
+          onCreateNew={handleCreateNewExercise}
         />
       )}
     </div>

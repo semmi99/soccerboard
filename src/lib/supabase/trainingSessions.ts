@@ -1,6 +1,7 @@
 import { supabase } from './client'
-import type { Tables, TablesInsert } from '../../types/database.types'
+import type { Json, Tables, TablesInsert } from '../../types/database.types'
 import type { PlayerStatus, Schwerpunkt, Spielphase } from '../../features/training/types'
+import type { EditorFrame } from '../../features/editor/types'
 
 export interface TrainingSessionSummary {
   id: string
@@ -51,6 +52,11 @@ export interface SessionExerciseRef {
   exerciseName: string
   exerciseCategory: string
   exerciseDescription: string | null
+  // Not persisted onto training_session_exercises itself — always sourced
+  // from the exercises table (via the join below, or straight off the
+  // Exercise object when freshly picked/created client-side) so the
+  // diagram thumbnail has something to render.
+  frames: EditorFrame[]
 }
 
 export interface LoadedTrainingSession {
@@ -84,7 +90,7 @@ export async function loadSession(id: string): Promise<LoadedTrainingSession> {
 
   const { data: exerciseRows, error: exercisesError } = await supabase
     .from('training_session_exercises')
-    .select('exercise_id, order_index, exercises(name, category, description)')
+    .select('exercise_id, order_index, exercises(name, category, description, data)')
     .eq('session_id', id)
     .order('order_index', { ascending: true })
   if (exercisesError) throw exercisesError
@@ -105,12 +111,18 @@ export async function loadSession(id: string): Promise<LoadedTrainingSession> {
       status: p.status as PlayerStatus,
     })),
     exercises: exerciseRows.map((e) => {
-      const exercise = e.exercises as { name: string; category: string; description: string | null } | null
+      const exercise = e.exercises as {
+        name: string
+        category: string
+        description: string | null
+        data: Json
+      } | null
       return {
         exerciseId: e.exercise_id,
         exerciseName: exercise?.name ?? '',
         exerciseCategory: exercise?.category ?? '',
         exerciseDescription: exercise?.description ?? null,
+        frames: (exercise?.data as unknown as EditorFrame[]) ?? [],
       }
     }),
   }

@@ -5,16 +5,7 @@ import { useEditorStore } from '../store/editorStore'
 import { limitsForTier } from '../../../lib/limits'
 import { Button } from '../../../components/ui/Button'
 import { createExercise, deleteExercise, listExercises, type Exercise } from '../../../lib/supabase/exercises'
-
-const CATEGORIES = [
-  'Aufwärmen',
-  'Passen',
-  'Abschluss',
-  'Kondition',
-  'Taktik',
-  'Standardsituationen',
-  'Sonstiges',
-]
+import { EXERCISE_CATEGORIES as CATEGORIES } from '../exerciseCategories'
 
 const inputClass =
   'rounded-md border border-pitch-600 bg-pitch-800 px-2.5 py-1.5 text-sm text-white outline-none focus:border-violet-accent'
