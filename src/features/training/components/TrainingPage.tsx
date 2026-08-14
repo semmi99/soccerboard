@@ -94,7 +94,10 @@ export function TrainingPage() {
       <main className="mx-auto max-w-4xl p-8">
         <div className="mb-6 flex items-center justify-between gap-3">
           <div>
-            <h1 className="text-lg font-semibold text-white">{t('title')}</h1>
+            <span className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-widest text-violet-accent">
+              <span aria-hidden="true">—</span> {t('eyebrow')}
+            </span>
+            <h1 className="mt-1 text-xl font-bold text-white">{t('title')}</h1>
             <p className="mt-1 text-sm text-white/40">{t('subtitle')}</p>
           </div>
           <Button onClick={() => setView({ mode: 'edit', sessionId: null })}>{t('newSession')}</Button>

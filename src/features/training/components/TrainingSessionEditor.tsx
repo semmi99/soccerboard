@@ -341,9 +341,14 @@ export function TrainingSessionEditor({
       <AppHeader />
       <main className="mx-auto max-w-5xl p-8">
         <div className="mb-6 flex items-center justify-between gap-3">
-          <h1 className="text-lg font-semibold text-white">
-            {sessionId ? t('sessionEditor.editTitle', { number: sessionNumber }) : t('sessionEditor.newTitle')}
-          </h1>
+          <div>
+            <span className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-widest text-violet-accent">
+              <span aria-hidden="true">—</span> {t('sessionEditor.eyebrow')}
+            </span>
+            <h1 className="mt-1 text-xl font-bold text-white">
+              {sessionId ? t('sessionEditor.editTitle', { number: sessionNumber }) : t('sessionEditor.newTitle')}
+            </h1>
+          </div>
           <div className="flex gap-2">
             <Button variant="ghost" onClick={onClose}>
               {t('common:actions.cancel')}

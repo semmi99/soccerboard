@@ -95,6 +95,15 @@ export function QuoteCardIcon(props: SVGProps<SVGSVGElement>) {
   )
 }
 
+export function CalloutPillIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <Base {...props}>
+      <rect x="2.5" y="8" width="19" height="8" rx="4" />
+      <path d="M8 12h8" strokeWidth={2} />
+    </Base>
+  )
+}
+
 export function BallIcon(props: SVGProps<SVGSVGElement>) {
   return (
     <Base {...props}>

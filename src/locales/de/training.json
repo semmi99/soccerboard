@@ -3,6 +3,7 @@
   "deleteConfirm": "Diese Trainingseinheit endgültig löschen?",
   "deleteError": "Löschen fehlgeschlagen.",
   "adminOnlyNotice": "Diese Seite ist nur für Admins deines Teams.",
+  "eyebrow": "Trainingsplaner",
   "title": "Trainingsplanung",
   "subtitle": "Plane Trainingseinheiten, wähle Spieler und Übungen aus und speichere sie als PDF.",
   "newSession": "Neue Einheit",
@@ -25,6 +26,7 @@
     "empty": "Kein Diagramm"
   },
   "sessionEditor": {
+    "eyebrow": "Trainingseinheit",
     "editTitle": "Trainingseinheit #{{number}}",
     "newTitle": "Neue Trainingseinheit",
     "loadError": "Laden fehlgeschlagen.",

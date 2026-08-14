@@ -18,6 +18,7 @@
     "textTitle": "Titel",
     "textSubtitle": "Untertitel",
     "quoteCard": "Zitat-Karte",
+    "calloutPill": "Callout-Label",
     "insertImage": "Bild einfügen",
     "insertReferenceImage": "Foto zum Nachzeichnen einfügen (Spieler-Positionen abpausen)",
     "referenceImageProOnly": "Nur mit Pro-Abo verfügbar",
@@ -382,7 +383,8 @@
     "title": "Titel",
     "subtitle": "Untertitel",
     "quoteHeading": "ÜBERSCHRIFT",
-    "quoteBody": "Text hier eingeben"
+    "quoteBody": "Text hier eingeben",
+    "calloutPillLabel": "LABEL"
   },
   "exportInternal": {
     "minTwoFramesError": "Mindestens 2 Frames für ein Video nötig.",

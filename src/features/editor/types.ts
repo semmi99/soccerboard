@@ -421,6 +421,7 @@ export type ToolId =
   | 'text_title'
   | 'text_subtitle'
   | 'quote_card'
+  | 'callout_pill'
   | 'ball'
   | 'connector'
   | `equipment_${EquipmentKind}`

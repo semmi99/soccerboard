@@ -225,6 +225,34 @@ export function createObjectForTool(
     }
   }
 
+  if (tool === 'callout_pill') {
+    // A compact pointer-label ("THEIR GOAL"-style) — just the existing
+    // QuoteCard's heading-box pill, no card background/border and no body
+    // text, so only the small rounded label shows. Reuses the QuoteCard
+    // object type entirely, so it's automatically draggable/resizable and
+    // every existing QuoteCard property control applies to it as-is.
+    return {
+      ...base,
+      objectType: 'quote_card',
+      data: {
+        width: 140,
+        height: 34,
+        background: null,
+        borderColor: null,
+        headingText: i18n.t('editor:factoryDefaults.calloutPillLabel'),
+        headingFontFamily: 'system',
+        headingFontSize: 12,
+        headingColor: '#ffffff',
+        headingBoxEnabled: true,
+        headingBoxBackground: '#0f172a',
+        bodyText: '',
+        bodyFontFamily: 'system',
+        bodyFontSize: 12,
+        bodyColor: '#0f172a',
+      },
+    }
+  }
+
   if (tool === 'ball') {
     return { ...base, objectType: 'ball', data: {} }
   }

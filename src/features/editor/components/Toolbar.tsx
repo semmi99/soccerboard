@@ -7,6 +7,7 @@ import { uploadBoardImage, readImageDimensions } from '../../../lib/supabase/ima
 import type { EquipmentKind, ToolId } from '../types'
 import {
   BallIcon,
+  CalloutPillIcon,
   ConeIcon,
   ConnectorIcon,
   CircleShapeIcon,
@@ -96,6 +97,7 @@ export function Toolbar() {
       { id: 'text_title', label: t('toolbar.textTitle'), swatch: '#f8fafc', swatchLabel: 'T' },
       { id: 'text_subtitle', label: t('toolbar.textSubtitle'), swatch: '#94a3b8', swatchLabel: 'U' },
       { id: 'quote_card', label: t('toolbar.quoteCard'), icon: <QuoteCardIcon /> },
+      { id: 'callout_pill', label: t('toolbar.calloutPill'), icon: <CalloutPillIcon /> },
     ],
     (Object.keys(EQUIPMENT_ICONS) as EquipmentKind[]).map((kind) => ({
       id: `equipment_${kind}` as ToolId,

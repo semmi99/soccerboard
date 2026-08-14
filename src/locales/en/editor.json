@@ -18,6 +18,7 @@
     "textTitle": "Title",
     "textSubtitle": "Subtitle",
     "quoteCard": "Quote card",
+    "calloutPill": "Callout label",
     "insertImage": "Insert image",
     "insertReferenceImage": "Insert photo to trace over (copy player positions)",
     "referenceImageProOnly": "Pro subscription required",
@@ -382,7 +383,8 @@
     "title": "Title",
     "subtitle": "Subtitle",
     "quoteHeading": "HEADING",
-    "quoteBody": "Enter text here"
+    "quoteBody": "Enter text here",
+    "calloutPillLabel": "LABEL"
   },
   "exportInternal": {
     "minTwoFramesError": "At least 2 frames needed for a video.",

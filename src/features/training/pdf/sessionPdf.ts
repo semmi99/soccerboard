@@ -43,6 +43,10 @@ const PAGE_WIDTH = 297
 const MARGIN_X = 12
 const IMAGE_ASPECT = 650 / 1000 // matches ExerciseThumbnail's pitch aspect ratio
 const EXERCISE_COLUMNS = 3
+// Print-legible version of the app's on-screen violet-accent (#ffe100) —
+// that bright yellow reads fine on the app's dark background but nearly
+// disappears on white paper, so the accent is darkened for print use.
+const ACCENT_RGB: [number, number, number] = [184, 134, 11]
 
 /** Builds an actual downloadable A4-landscape PDF with jsPDF instead of
  * relying on the browser's print dialog (window.print() left it up to the
@@ -54,9 +58,19 @@ const EXERCISE_COLUMNS = 3
 export function downloadSessionPdf(input: PdfSessionInput): void {
   const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' })
 
-  let y = 14
+  let y = 11
+  doc.setFontSize(8)
+  doc.setFont('helvetica', 'bold')
+  doc.setTextColor(...ACCENT_RGB)
+  doc.text('— TRAININGSEINHEIT', MARGIN_X, y)
+  doc.setFont('helvetica', 'normal')
+  doc.setTextColor(20)
+
+  y += 7
   doc.setFontSize(16)
+  doc.setFont('helvetica', 'bold')
   doc.text(`Trainingseinheit ${input.sessionNumber}`, MARGIN_X, y)
+  doc.setFont('helvetica', 'normal')
 
   y += 6
   doc.setFontSize(10)
@@ -64,18 +78,51 @@ export function downloadSessionPdf(input: PdfSessionInput): void {
   doc.text(`${input.teamName} · ${input.sessionDate}`, MARGIN_X, y)
   doc.setTextColor(20)
 
-  y += 8
-  const metaRows: [string, string][] = [
-    [`Schwerpunkt: ${input.schwerpunkt}`, `Spielphase: ${input.spielphase}`],
-    [`Unterphase: ${input.unterphaseName ?? '–'}`, `Prinzip: ${input.prinzipName ?? '–'}`],
-    [`Körperlich: ${input.koerperlich}/10`, `Physisch: ${input.physisch}/10`],
+  // Stat-card row: big number + small caption, mirroring the reference's
+  // "9.0m / SHUT" cards — the numeric metrics get this treatment,
+  // the categorical fields (Schwerpunkt etc.) stay as plain text below.
+  y += 6
+  const activeCount = input.players.filter((p) => p.status === 'aktiv').length
+  const stats: [string, string][] = [
+    [`${input.koerperlich}/10`, 'KÖRPERLICH'],
+    [`${input.physisch}/10`, 'PHYSISCH'],
+    [`${input.exercises.length}`, 'ÜBUNGEN'],
+    [`${activeCount}/${input.players.length}`, 'KADER AKTIV'],
   ]
-  for (const [left, right] of metaRows) {
-    doc.text(left, MARGIN_X, y)
-    doc.text(right, MARGIN_X + 60, y)
-    y += 5
-  }
-  y += 4
+  const cardGap = 4
+  const cardWidth = (PAGE_WIDTH - MARGIN_X * 2 - cardGap * 3) / 4
+  const cardHeight = 17
+  stats.forEach(([value, label], i) => {
+    const cardX = MARGIN_X + i * (cardWidth + cardGap)
+    doc.setDrawColor(210)
+    doc.rect(cardX, y, cardWidth, cardHeight)
+    doc.setFillColor(...ACCENT_RGB)
+    doc.rect(cardX, y, cardWidth, 1.2, 'F')
+    doc.setFontSize(13)
+    doc.setFont('helvetica', 'bold')
+    doc.setTextColor(20)
+    doc.text(value, cardX + cardWidth / 2, y + 9, { align: 'center' })
+    doc.setFontSize(7)
+    doc.setFont('helvetica', 'normal')
+    doc.setTextColor(110)
+    doc.text(label, cardX + cardWidth / 2, y + 14, { align: 'center' })
+  })
+  doc.setTextColor(20)
+  y += cardHeight + 5
+
+  doc.setFontSize(9)
+  doc.text(
+    `Schwerpunkt: ${input.schwerpunkt}   ·   Spielphase: ${input.spielphase}`,
+    MARGIN_X,
+    y,
+  )
+  y += 5
+  doc.text(
+    `Unterphase: ${input.unterphaseName ?? '–'}   ·   Prinzip: ${input.prinzipName ?? '–'}`,
+    MARGIN_X,
+    y,
+  )
+  y += 5
 
   const tableWidth = 95
   autoTable(doc, {

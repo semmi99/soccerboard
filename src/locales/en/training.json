@@ -3,6 +3,7 @@
   "deleteConfirm": "Permanently delete this training session?",
   "deleteError": "Failed to delete.",
   "adminOnlyNotice": "This page is only for admins of your team.",
+  "eyebrow": "Training planner",
   "title": "Training planner",
   "subtitle": "Plan training sessions, pick players and exercises, and save them as a PDF.",
   "newSession": "New session",
@@ -25,6 +26,7 @@
     "empty": "No diagram"
   },
   "sessionEditor": {
+    "eyebrow": "Training session",
     "editTitle": "Training session #{{number}}",
     "newTitle": "New training session",
     "loadError": "Failed to load.",
