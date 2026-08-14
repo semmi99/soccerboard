@@ -235,14 +235,23 @@ export function createObjectForTool(
       ...base,
       objectType: 'quote_card',
       data: {
-        width: 140,
-        height: 34,
+        // The card itself (width/height) drives the object's own
+        // selection/transform bounding box, but the visible pill is only
+        // the heading box, which auto-sizes to its own text — sized
+        // snugly around the default "LABEL" text at this font size so
+        // the invisible card doesn't leave a big dead-space margin
+        // around the small pill (with headingAlign explicitly 'center'
+        // so any slack from a longer/shorter label stays symmetric
+        // instead of defaulting to the box's own left-aligned position).
+        width: 86,
+        height: 38,
         background: null,
         borderColor: null,
         headingText: i18n.t('editor:factoryDefaults.calloutPillLabel'),
         headingFontFamily: 'system',
         headingFontSize: 12,
         headingColor: '#ffffff',
+        headingAlign: 'center',
         headingBoxEnabled: true,
         headingBoxBackground: '#0f172a',
         bodyText: '',
