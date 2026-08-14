@@ -226,34 +226,30 @@ export function createObjectForTool(
   }
 
   if (tool === 'callout_pill') {
-    // A compact pointer-label ("THEIR GOAL"-style) — just the existing
-    // QuoteCard's heading-box pill, no card background/border and no body
-    // text, so only the small rounded label shows. Reuses the QuoteCard
-    // object type entirely, so it's automatically draggable/resizable and
-    // every existing QuoteCard property control applies to it as-is.
+    // A compact pointer-label ("THEIR GOAL"-style). Uses the existing
+    // QuoteCard object type (so it's automatically draggable/resizable
+    // and every existing QuoteCard property control applies to it), but
+    // with headingBoxEnabled OFF — that inner box auto-sizes to fit its
+    // own text (Math.min against the text length) and ignores the card's
+    // own width/height entirely, which made dragging the resize handles
+    // visibly do nothing. Here the *card itself* (background color,
+    // rounded corners already baked into QuoteCard's Rect) is the pill,
+    // so resizing it resizes the actual visible shape like any other
+    // object.
     return {
       ...base,
       objectType: 'quote_card',
       data: {
-        // The card itself (width/height) drives the object's own
-        // selection/transform bounding box, but the visible pill is only
-        // the heading box, which auto-sizes to its own text — sized
-        // snugly around the default "LABEL" text at this font size so
-        // the invisible card doesn't leave a big dead-space margin
-        // around the small pill (with headingAlign explicitly 'center'
-        // so any slack from a longer/shorter label stays symmetric
-        // instead of defaulting to the box's own left-aligned position).
-        width: 86,
-        height: 38,
-        background: null,
+        width: 90,
+        height: 34,
+        background: '#0f172a',
         borderColor: null,
         headingText: i18n.t('editor:factoryDefaults.calloutPillLabel'),
         headingFontFamily: 'system',
         headingFontSize: 12,
         headingColor: '#ffffff',
         headingAlign: 'center',
-        headingBoxEnabled: true,
-        headingBoxBackground: '#0f172a',
+        headingBoxEnabled: false,
         bodyText: '',
         bodyFontFamily: 'system',
         bodyFontSize: 12,
