@@ -4,8 +4,7 @@
     "squad": "Squad",
     "formations": "Formations",
     "account": "Account",
-    "admin": "Team",
-    "training": "Training"
+    "admin": "Team"
   },
   "actions": {
     "signOut": "Sign out",

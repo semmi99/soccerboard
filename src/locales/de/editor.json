@@ -365,17 +365,9 @@
   "editorPage": {
     "loadError": "Projekt konnte nicht geladen werden.",
     "backToDashboard": "Zurück zum Dashboard",
-    "backToTraining": "Zurück zur Trainingsplanung",
     "projectLocked": "Dieses Projekt ist gesperrt, da euer Pro-Abo abgelaufen ist. Im kostenlosen Plan könnt ihr nur euer ältestes Projekt bearbeiten.",
     "manageSubscription": "Abo verwalten",
     "openProperties": "Eigenschaften"
-  },
-  "saveExerciseBar": {
-    "label": "Neue Übung für die Trainingsplanung:",
-    "namePlaceholder": "Name der Übung",
-    "descriptionPlaceholder": "Beschreibung (optional)",
-    "save": "Als Übung speichern & zurück",
-    "saveError": "Übung konnte nicht gespeichert werden."
   },
   "factoryDefaults": {
     "text": "Text",

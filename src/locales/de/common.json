@@ -4,8 +4,7 @@
     "squad": "Kader",
     "formations": "Formationen",
     "account": "Konto",
-    "admin": "Team",
-    "training": "Training"
+    "admin": "Team"
   },
   "actions": {
     "signOut": "Abmelden",

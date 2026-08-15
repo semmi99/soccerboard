@@ -365,17 +365,9 @@
   "editorPage": {
     "loadError": "Couldn't load project.",
     "backToDashboard": "Back to dashboard",
-    "backToTraining": "Back to training planner",
     "projectLocked": "This project is locked because your Pro subscription has lapsed. On the free plan you can only edit your oldest project.",
     "manageSubscription": "Manage subscription",
     "openProperties": "Properties"
-  },
-  "saveExerciseBar": {
-    "label": "New exercise for the training planner:",
-    "namePlaceholder": "Exercise name",
-    "descriptionPlaceholder": "Description (optional)",
-    "save": "Save as exercise & return",
-    "saveError": "Failed to save the exercise."
   },
   "factoryDefaults": {
     "text": "Text",
