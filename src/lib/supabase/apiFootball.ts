@@ -3,8 +3,9 @@ import { supabase } from './client'
 export interface ApiFootballTeam {
   id: number
   name: string
-  country: string
   logoUrl: string
+  /** Nur bei der Team-Suche vorhanden — Fixtures liefern kein Land pro Team. */
+  country?: string
 }
 
 export interface ApiFootballPlayer {
@@ -13,6 +14,14 @@ export interface ApiFootballPlayer {
   number: number | null
   position: string | null
   photoUrl: string | null
+}
+
+export interface ApiFootballFixture {
+  id: number
+  date: string
+  leagueName: string
+  home: ApiFootballTeam
+  away: ApiFootballTeam
 }
 
 /** API-Football only returns 4 broad English position categories — map them
@@ -47,4 +56,14 @@ export async function getApiFootballSquad(teamId: number): Promise<ApiFootballPl
   if (error) throw error
   if (data?.error) throw new Error(data.error)
   return data?.players ?? []
+}
+
+export async function getApiFootballFixtures(teamId: number): Promise<ApiFootballFixture[]> {
+  const { data, error } = await supabase.functions.invoke<{ fixtures?: ApiFootballFixture[]; error?: string }>(
+    'import-api-football-squad',
+    { body: { action: 'fixtures', teamId } },
+  )
+  if (error) throw error
+  if (data?.error) throw new Error(data.error)
+  return data?.fixtures ?? []
 }

@@ -1,7 +1,13 @@
 import { supabase } from './client'
 import type { Json, Tables, TablesInsert, TablesUpdate } from '../../types/database.types'
 import type { KitPattern } from '../../features/editor/types'
-import { translateApiFootballPosition, type ApiFootballPlayer, type ApiFootballTeam } from './apiFootball'
+import {
+  getApiFootballSquad,
+  translateApiFootballPosition,
+  type ApiFootballFixture,
+  type ApiFootballPlayer,
+  type ApiFootballTeam,
+} from './apiFootball'
 import { extractCrestColors } from './extractCrestColors'
 
 export type Team = Tables<'teams'>
@@ -295,7 +301,7 @@ export interface ImportApiFootballSquadResult {
  * onProgress is optional UI feedback for the (potentially 20-30 player,
  * one-request-per-player) import loop — there's no bulk-insert endpoint
  * wrapping createPlayer, so a full-squad import can take several seconds. */
-export async function importApiFootballSquad(
+async function importOneApiFootballTeam(
   orgId: string,
   apiTeam: ApiFootballTeam,
   players: ApiFootballPlayer[],
@@ -350,4 +356,46 @@ export async function importApiFootballSquad(
   }
 
   return { team, playerCount: players.length }
+}
+
+export async function importApiFootballSquad(
+  orgId: string,
+  apiTeam: ApiFootballTeam,
+  players: ApiFootballPlayer[],
+  onProgress?: (done: number, total: number) => void,
+): Promise<ImportApiFootballSquadResult> {
+  return importOneApiFootballTeam(orgId, apiTeam, players, onProgress)
+}
+
+export interface ImportApiFootballFixtureResult {
+  home: ImportApiFootballSquadResult
+  away: ImportApiFootballSquadResult
+}
+
+/** Imports both sides of a fixture in one go — fetches each squad, then
+ * reuses importOneApiFootballTeam for both, so a scouted upcoming or recent
+ * match lands as two ready-to-use teams instead of two separate manual
+ * searches. onProgress reports combined progress across both squads. */
+export async function importApiFootballFixture(
+  orgId: string,
+  fixture: ApiFootballFixture,
+  onProgress?: (done: number, total: number) => void,
+): Promise<ImportApiFootballFixtureResult> {
+  const [homePlayers, awayPlayers] = await Promise.all([
+    getApiFootballSquad(fixture.home.id),
+    getApiFootballSquad(fixture.away.id),
+  ])
+  const total = homePlayers.length + awayPlayers.length
+  let done = 0
+
+  const home = await importOneApiFootballTeam(orgId, fixture.home, homePlayers, (d) => {
+    onProgress?.(done + d, total)
+  })
+  done += homePlayers.length
+
+  const away = await importOneApiFootballTeam(orgId, fixture.away, awayPlayers, (d) => {
+    onProgress?.(done + d, total)
+  })
+
+  return { home, away }
 }

@@ -26,6 +26,17 @@ interface ApiFootballSquadsResponse {
   }[]
 }
 
+interface ApiFootballFixturesResponse {
+  response: {
+    fixture: { id: number; date: string }
+    league: { name: string }
+    teams: {
+      home: { id: number; name: string; logo: string }
+      away: { id: number; name: string; logo: string }
+    }
+  }[]
+}
+
 // Lets an org admin search API-Football for a real team and pull its squad
 // — used to drop a recognizable pro roster onto the board for promo
 // videos, not for day-to-day club-roster management. The API-Football key
@@ -108,6 +119,46 @@ Deno.serve(async (req: Request) => {
         photoUrl: p.photo,
       })),
     })
+  }
+
+  if (body.action === "fixtures") {
+    if (typeof body.teamId !== "number") {
+      return json({ error: "teamId erforderlich." }, 400)
+    }
+    // Free-Tier sperrt oft entweder `next` oder `last` je nach Liga/Saison —
+    // beide abfragen und zusammenführen liefert zuverlässiger eine brauchbare
+    // Auswahl an kommenden UND kürzlich gespielten Partien.
+    const [nextRes, lastRes] = await Promise.all([
+      fetch(`${API_BASE}/fixtures?team=${body.teamId}&next=10`, {
+        headers: { "x-apisports-key": apiFootballKey },
+      }),
+      fetch(`${API_BASE}/fixtures?team=${body.teamId}&last=10`, {
+        headers: { "x-apisports-key": apiFootballKey },
+      }),
+    ])
+    if (nextRes.status === 429 || lastRes.status === 429) {
+      return json({ error: "API-Football-Tageslimit erreicht. Bitte später erneut versuchen." }, 429)
+    }
+    if (!nextRes.ok && !lastRes.ok) {
+      return json({ error: `API-Football error (${nextRes.status})` }, 502)
+    }
+    const nextData = nextRes.ok ? ((await nextRes.json()) as ApiFootballFixturesResponse) : { response: [] }
+    const lastData = lastRes.ok ? ((await lastRes.json()) as ApiFootballFixturesResponse) : { response: [] }
+
+    const byId = new Map<number, ApiFootballFixturesResponse["response"][number]>()
+    for (const f of [...lastData.response, ...nextData.response]) byId.set(f.fixture.id, f)
+
+    const fixtures = Array.from(byId.values())
+      .sort((a, b) => a.fixture.date.localeCompare(b.fixture.date))
+      .map((f) => ({
+        id: f.fixture.id,
+        date: f.fixture.date,
+        leagueName: f.league.name,
+        home: { id: f.teams.home.id, name: f.teams.home.name, logoUrl: f.teams.home.logo },
+        away: { id: f.teams.away.id, name: f.teams.away.name, logoUrl: f.teams.away.logo },
+      }))
+
+    return json({ fixtures })
   }
 
   return json({ error: "Unknown action" }, 400)

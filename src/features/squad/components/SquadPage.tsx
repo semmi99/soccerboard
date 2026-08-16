@@ -1,4 +1,4 @@
-import { Fragment, useEffect, useMemo, useState } from 'react'
+import { Fragment, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useAuthStore } from '../../auth/store/authStore'
 import { AppHeader } from '../../../app/AppHeader'
@@ -10,6 +10,7 @@ import {
   createTeam,
   deletePlayer,
   deleteTeam,
+  importApiFootballFixture,
   importApiFootballSquad,
   listPlayers,
   listTeams,
@@ -22,10 +23,11 @@ import {
   type PlayerFormValues,
   type Team,
 } from '../../../lib/supabase/squad'
-import type { ApiFootballPlayer, ApiFootballTeam } from '../../../lib/supabase/apiFootball'
+import type { ApiFootballFixture, ApiFootballPlayer, ApiFootballTeam } from '../../../lib/supabase/apiFootball'
 import { PlayerFormDialog } from './PlayerFormDialog'
 import { BulkAddPlayersDialog } from './BulkAddPlayersDialog'
 import { ApiFootballImportDialog } from './ApiFootballImportDialog'
+import { ApiFootballFixtureImportDialog } from './ApiFootballFixtureImportDialog'
 
 const POSITION_GROUP_LABEL_KEYS = [
   'positionGroups.goalkeeper',
@@ -138,6 +140,96 @@ function NewTeamDialog({
   )
 }
 
+/** Bündelt die selteneren Team-Aktionen (Anlegen/Löschen/Profi-Import) hinter
+ * einem Menü-Button — nebeneinander als Textlinks liefen sie neben dem
+ * Wappen-Upload zu einer unübersichtlichen Zeile voll, gerade mit langen
+ * Teamnamen im Dropdown daneben. */
+function TeamActionsMenu({
+  onNewTeam,
+  onDeleteTeam,
+  onImport,
+  onImportFixture,
+  hasActiveTeam,
+  canImport,
+}: {
+  onNewTeam: () => void
+  onDeleteTeam: () => void
+  onImport: () => void
+  onImportFixture: () => void
+  hasActiveTeam: boolean
+  canImport: boolean
+}) {
+  const { t } = useTranslation('squad')
+  const [isOpen, setIsOpen] = useState(false)
+  const containerRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!isOpen) return
+    function handleClickOutside(e: MouseEvent) {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) setIsOpen(false)
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [isOpen])
+
+  function pick(action: () => void) {
+    action()
+    setIsOpen(false)
+  }
+
+  return (
+    <div ref={containerRef} className="relative">
+      <button
+        type="button"
+        onClick={() => setIsOpen((v) => !v)}
+        aria-label={t('teamActions')}
+        title={t('teamActions')}
+        className="flex h-9 w-9 items-center justify-center rounded-lg border border-pitch-700 text-white/50 hover:border-pitch-600 hover:text-white"
+      >
+        ⋮
+      </button>
+      {isOpen && (
+        <div className="absolute left-0 top-full z-20 mt-1.5 w-56 rounded-lg border border-pitch-700 bg-pitch-900 p-1 shadow-2xl">
+          <button
+            type="button"
+            onClick={() => pick(onNewTeam)}
+            className="block w-full rounded-md px-3 py-2 text-left text-sm text-white/80 hover:bg-pitch-800 hover:text-white"
+          >
+            {t('newTeam')}
+          </button>
+          {canImport && (
+            <button
+              type="button"
+              onClick={() => pick(onImport)}
+              className="block w-full rounded-md px-3 py-2 text-left text-sm text-white/80 hover:bg-pitch-800 hover:text-white"
+            >
+              {t('apiFootballImport')}
+            </button>
+          )}
+          {canImport && (
+            <button
+              type="button"
+              onClick={() => pick(onImportFixture)}
+              className="block w-full rounded-md px-3 py-2 text-left text-sm text-white/80 hover:bg-pitch-800 hover:text-white"
+            >
+              {t('apiFootballFixtureImport')}
+            </button>
+          )}
+          {hasActiveTeam && (
+            <button
+              type="button"
+              onClick={() => pick(onDeleteTeam)}
+              className="block w-full rounded-md px-3 py-2 text-left text-sm text-white/70 hover:bg-red-500/10 hover:text-red-400"
+            >
+              {t('deleteTeam')}
+            </button>
+          )}
+        </div>
+      )}
+    </div>
+  )
+}
+
 export function SquadPage() {
   const { t } = useTranslation(['squad', 'common'])
   const organization = useAuthStore((s) => s.organization)
@@ -158,6 +250,7 @@ export function SquadPage() {
   const [showNewTeam, setShowNewTeam] = useState(false)
   const [showBulkAdd, setShowBulkAdd] = useState(false)
   const [showApiFootballImport, setShowApiFootballImport] = useState(false)
+  const [showFixtureImport, setShowFixtureImport] = useState(false)
   const [isUploadingCrest, setIsUploadingCrest] = useState(false)
   const [sortBy, setSortBy] = useState<'number' | 'position'>('number')
 
@@ -299,6 +392,19 @@ export function SquadPage() {
     setShowApiFootballImport(false)
   }
 
+  async function handleApiFootballFixtureImport(
+    fixture: ApiFootballFixture,
+    onProgress: (done: number, total: number) => void,
+  ) {
+    if (!organization) return
+    const result = await importApiFootballFixture(organization.id, fixture, onProgress)
+    setTeams((prev) =>
+      [...prev, result.home.team, result.away.team].sort((a, b) => a.name.localeCompare(b.name)),
+    )
+    setActiveTeamId(result.home.team.id)
+    setShowFixtureImport(false)
+  }
+
   async function confirmDeletePlayer() {
     if (!pendingDelete) return
     setDeletingId(pendingDelete.id)
@@ -351,31 +457,14 @@ export function SquadPage() {
               ))}
             </select>
           )}
-          <button
-            type="button"
-            onClick={() => setShowNewTeam(true)}
-            className="text-sm text-white/40 hover:text-white/70"
-          >
-            {t('newTeam')}
-          </button>
-          {activeTeam && (
-            <button
-              type="button"
-              onClick={() => setPendingDeleteTeam(activeTeam)}
-              className="text-sm text-white/40 hover:text-red-400"
-            >
-              {t('deleteTeam')}
-            </button>
-          )}
-          {profile?.role === 'admin' && (
-            <button
-              type="button"
-              onClick={() => setShowApiFootballImport(true)}
-              className="text-sm text-white/40 hover:text-white/70"
-            >
-              {t('apiFootballImport')}
-            </button>
-          )}
+          <TeamActionsMenu
+            onNewTeam={() => setShowNewTeam(true)}
+            onDeleteTeam={() => activeTeam && setPendingDeleteTeam(activeTeam)}
+            onImport={() => setShowApiFootballImport(true)}
+            onImportFixture={() => setShowFixtureImport(true)}
+            hasActiveTeam={!!activeTeam}
+            canImport={profile?.role === 'admin'}
+          />
           {activeTeam && (
             <div
               className="flex items-center gap-2 rounded-lg border border-pitch-700 px-2 py-1"
@@ -605,6 +694,12 @@ export function SquadPage() {
         <ApiFootballImportDialog
           onCancel={() => setShowApiFootballImport(false)}
           onImport={handleApiFootballImport}
+        />
+      )}
+      {showFixtureImport && (
+        <ApiFootballFixtureImportDialog
+          onCancel={() => setShowFixtureImport(false)}
+          onImport={handleApiFootballFixtureImport}
         />
       )}
     </div>

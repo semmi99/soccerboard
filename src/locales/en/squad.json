@@ -1,8 +1,10 @@
 {
   "title": "Squad",
+  "teamActions": "Team actions",
   "newTeam": "+ New team",
   "deleteTeam": "Delete team",
   "apiFootballImport": "Import pro squad",
+  "apiFootballFixtureImport": "Import a match",
   "apiFootballDialog": {
     "title": "Import pro squad (API-Football)",
     "searchPlaceholder": "Search a team, e.g. Real Madrid",
@@ -14,6 +16,20 @@
     "squadError": "Failed to load squad.",
     "importError": "Import failed.",
     "importCount": "Import {{count}} players"
+  },
+  "apiFootballFixtureDialog": {
+    "title": "Import a match (API-Football)",
+    "searchPlaceholder": "Search a team, e.g. Real Madrid",
+    "searchButton": "Search",
+    "searchError": "Search failed.",
+    "noResults": "No teams found.",
+    "backToSearch": "← Back to search",
+    "loadingFixtures": "Loading matches…",
+    "fixturesError": "Couldn't load matches.",
+    "noFixtures": "No matches found.",
+    "importError": "Import failed.",
+    "importButton": "Import both squads",
+    "importProgress": "{{done}}/{{total}}…"
   },
   "crestTitle": "The crest replaces the kit colors on all of this team's player chips in the editor",
   "crestAlt": "Crest",
