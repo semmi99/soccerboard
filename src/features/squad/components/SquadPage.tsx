@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { Fragment, useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useAuthStore } from '../../auth/store/authStore'
 import { AppHeader } from '../../../app/AppHeader'
@@ -8,6 +8,7 @@ import {
   createPlayer,
   createTeam,
   deletePlayer,
+  deleteTeam,
   importApiFootballSquad,
   listPlayers,
   listTeams,
@@ -24,24 +25,51 @@ import { PlayerFormDialog } from './PlayerFormDialog'
 import { BulkAddPlayersDialog } from './BulkAddPlayersDialog'
 import { ApiFootballImportDialog } from './ApiFootballImportDialog'
 
+/** Buckets a free-text position string into the tactical Tor/Abwehr/
+ * Mittelfeld/Sturm grouping used for the sortable squad table — matches
+ * on keywords so it works for both the manual position vocabulary
+ * (Innenverteidigung, Offensives Mittelfeld, ...) and the generic
+ * API-Football import labels (Abwehr, Mittelfeld, Sturm). */
+function positionGroup(position: string | null): number {
+  if (!position) return 4
+  const p = position.toLowerCase()
+  if (p.includes('tor')) return 0
+  if (p.includes('verteidig') || p.includes('abwehr')) return 1
+  if (p.includes('mittelfeld')) return 2
+  if (p.includes('flügel') || p.includes('stürmer') || p.includes('sturm')) return 3
+  return 4
+}
+
+const POSITION_GROUP_LABEL_KEYS = [
+  'positionGroups.goalkeeper',
+  'positionGroups.defense',
+  'positionGroups.midfield',
+  'positionGroups.attack',
+  'positionGroups.none',
+] as const
+
 function DeleteConfirmDialog({
   name,
   onCancel,
   onConfirm,
   isDeleting,
+  titleKey = 'deleteDialog.title',
+  bodyAfterKey = 'deleteDialog.bodyAfter',
 }: {
   name: string
   onCancel: () => void
   onConfirm: () => void
   isDeleting: boolean
+  titleKey?: string
+  bodyAfterKey?: string
 }) {
   const { t } = useTranslation(['squad', 'common'])
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
       <div className="w-full max-w-sm rounded-xl border border-pitch-700 bg-pitch-900 p-5 shadow-2xl">
-        <h2 className="text-sm font-semibold text-white">{t('deleteDialog.title')}</h2>
+        <h2 className="text-sm font-semibold text-white">{t(titleKey)}</h2>
         <p className="mt-2 text-sm text-white/60">
-          <span className="text-white">{name}</span> {t('deleteDialog.bodyAfter')}
+          <span className="text-white">{name}</span> {t(bodyAfterKey)}
         </p>
         <div className="mt-5 flex justify-end gap-2">
           <Button variant="secondary" onClick={onCancel} disabled={isDeleting}>
@@ -138,6 +166,8 @@ export function SquadPage() {
   const [editingPlayer, setEditingPlayer] = useState<Player | 'new' | null>(null)
   const [pendingDelete, setPendingDelete] = useState<Player | null>(null)
   const [deletingId, setDeletingId] = useState<string | null>(null)
+  const [pendingDeleteTeam, setPendingDeleteTeam] = useState<Team | null>(null)
+  const [isDeletingTeam, setIsDeletingTeam] = useState(false)
   const [showNewTeam, setShowNewTeam] = useState(false)
   const [showBulkAdd, setShowBulkAdd] = useState(false)
   const [showApiFootballImport, setShowApiFootballImport] = useState(false)
@@ -146,9 +176,11 @@ export function SquadPage() {
 
   const sortedPlayers = useMemo(() => {
     if (sortBy === 'number') return players
-    return [...players].sort((a, b) =>
-      (a.position ?? '').localeCompare(b.position ?? '', 'de', { sensitivity: 'base' }),
-    )
+    return [...players].sort((a, b) => {
+      const groupDiff = positionGroup(a.position) - positionGroup(b.position)
+      if (groupDiff !== 0) return groupDiff
+      return (a.jersey_number ?? 999) - (b.jersey_number ?? 999)
+    })
   }, [players, sortBy])
 
   useEffect(() => {
@@ -294,6 +326,22 @@ export function SquadPage() {
     }
   }
 
+  async function confirmDeleteTeam() {
+    if (!pendingDeleteTeam) return
+    setIsDeletingTeam(true)
+    try {
+      await deleteTeam(pendingDeleteTeam.id)
+      const remaining = teams.filter((t) => t.id !== pendingDeleteTeam.id)
+      setTeams(remaining)
+      setActiveTeamId((current) => (current === pendingDeleteTeam.id ? (remaining[0]?.id ?? null) : current))
+      setPendingDeleteTeam(null)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : t('errors.deleteTeamFailed'))
+    } finally {
+      setIsDeletingTeam(false)
+    }
+  }
+
   const activeTeam = teams.find((t) => t.id === activeTeamId)
 
   return (
@@ -323,6 +371,15 @@ export function SquadPage() {
           >
             {t('newTeam')}
           </button>
+          {activeTeam && (
+            <button
+              type="button"
+              onClick={() => setPendingDeleteTeam(activeTeam)}
+              className="text-sm text-white/40 hover:text-red-400"
+            >
+              {t('deleteTeam')}
+            </button>
+          )}
           {profile?.role === 'admin' && (
             <button
               type="button"
@@ -447,8 +504,20 @@ export function SquadPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-pitch-700 bg-pitch-900/40">
-                {sortedPlayers.map((p) => (
-                  <tr key={p.id} className="hover:bg-pitch-800/60">
+                {sortedPlayers.map((p, i) => {
+                  const group = positionGroup(p.position)
+                  const prevGroup = i > 0 ? positionGroup(sortedPlayers[i - 1]!.position) : null
+                  const showDivider = sortBy === 'position' && prevGroup !== null && group !== prevGroup
+                  return (
+                    <Fragment key={p.id}>
+                      {showDivider && (
+                        <tr key={`divider-${p.id}`} aria-hidden="true">
+                          <td colSpan={7} className="border-t-2 border-violet-accent/40 bg-pitch-900 px-4 py-1 text-[10px] font-semibold uppercase tracking-wide text-white/40">
+                            {t(POSITION_GROUP_LABEL_KEYS[group]!)}
+                          </td>
+                        </tr>
+                      )}
+                  <tr className="hover:bg-pitch-800/60">
                     <td className="px-4 py-2.5 font-semibold text-white/80">
                       {p.jersey_number ?? '–'}
                     </td>
@@ -499,7 +568,9 @@ export function SquadPage() {
                       </button>
                     </td>
                   </tr>
-                ))}
+                    </Fragment>
+                  )
+                })}
               </tbody>
             </table>
           </div>
@@ -521,6 +592,17 @@ export function SquadPage() {
           isDeleting={deletingId === pendingDelete.id}
           onCancel={() => setPendingDelete(null)}
           onConfirm={confirmDeletePlayer}
+        />
+      )}
+
+      {pendingDeleteTeam && (
+        <DeleteConfirmDialog
+          name={pendingDeleteTeam.name}
+          isDeleting={isDeletingTeam}
+          onCancel={() => setPendingDeleteTeam(null)}
+          onConfirm={confirmDeleteTeam}
+          titleKey="deleteTeamDialog.title"
+          bodyAfterKey="deleteTeamDialog.bodyAfter"
         />
       )}
 

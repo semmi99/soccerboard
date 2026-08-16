@@ -1,6 +1,7 @@
 {
   "title": "Kader",
   "newTeam": "+ Neues Team",
+  "deleteTeam": "Team löschen",
   "apiFootballImport": "Profi-Kader importieren",
   "apiFootballDialog": {
     "title": "Profi-Kader importieren (API-Football)",
@@ -27,6 +28,7 @@
     "crestUploadFailed": "Wappen-Upload fehlgeschlagen.",
     "crestRemoveFailed": "Konnte nicht entfernt werden.",
     "deleteFailed": "Löschen fehlgeschlagen.",
+    "deleteTeamFailed": "Team konnte nicht gelöscht werden.",
     "saveFailed": "Speichern fehlgeschlagen.",
     "createFailed": "Anlegen fehlgeschlagen."
   },
@@ -44,9 +46,20 @@
     "foot": "Fuß",
     "rating": "Bewertung"
   },
+  "positionGroups": {
+    "goalkeeper": "Tor",
+    "defense": "Abwehr",
+    "midfield": "Mittelfeld",
+    "attack": "Sturm",
+    "none": "Ohne Position"
+  },
   "deleteDialog": {
     "title": "Spieler löschen?",
     "bodyAfter": "wird aus dem Kader entfernt."
+  },
+  "deleteTeamDialog": {
+    "title": "Team löschen?",
+    "bodyAfter": "wird inklusive aller Spieler unwiderruflich gelöscht."
   },
   "newTeamDialog": {
     "title": "Neues Team",

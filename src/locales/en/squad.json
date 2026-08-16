@@ -1,6 +1,7 @@
 {
   "title": "Squad",
   "newTeam": "+ New team",
+  "deleteTeam": "Delete team",
   "apiFootballImport": "Import pro squad",
   "apiFootballDialog": {
     "title": "Import pro squad (API-Football)",
@@ -27,6 +28,7 @@
     "crestUploadFailed": "Crest upload failed.",
     "crestRemoveFailed": "Couldn't remove it.",
     "deleteFailed": "Delete failed.",
+    "deleteTeamFailed": "Couldn't delete team.",
     "saveFailed": "Save failed.",
     "createFailed": "Creation failed."
   },
@@ -44,9 +46,20 @@
     "foot": "Foot",
     "rating": "Rating"
   },
+  "positionGroups": {
+    "goalkeeper": "Goalkeeper",
+    "defense": "Defense",
+    "midfield": "Midfield",
+    "attack": "Attack",
+    "none": "No position"
+  },
   "deleteDialog": {
     "title": "Delete player?",
     "bodyAfter": "will be removed from the squad."
+  },
+  "deleteTeamDialog": {
+    "title": "Delete team?",
+    "bodyAfter": "will be permanently deleted, including all its players."
   },
   "newTeamDialog": {
     "title": "New team",

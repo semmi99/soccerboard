@@ -164,6 +164,11 @@ export async function deletePlayer(id: string): Promise<void> {
   if (error) throw error
 }
 
+export async function deleteTeam(id: string): Promise<void> {
+  const { error } = await supabase.from('teams').delete().eq('id', id)
+  if (error) throw error
+}
+
 export async function uploadTeamCrest(orgId: string, teamId: string, file: File): Promise<string> {
   const ext = file.name.split('.').pop() || 'png'
   const path = `${orgId}/${teamId}.${ext}`
