@@ -1,7 +1,8 @@
 import { supabase } from './client'
 import type { Json, Tables, TablesInsert, TablesUpdate } from '../../types/database.types'
 import type { KitPattern } from '../../features/editor/types'
-import { translateApiFootballPosition, type ApiFootballPlayer } from './apiFootball'
+import { translateApiFootballPosition, type ApiFootballPlayer, type ApiFootballTeam } from './apiFootball'
+import { extractCrestColors } from './extractCrestColors'
 
 export type Team = Tables<'teams'>
 export type Player = Tables<'players'>
@@ -285,33 +286,45 @@ export interface ImportApiFootballSquadResult {
  * reuses createTeam/createPlayer as-is, so the result is a completely
  * normal team, editable/deletable afterward exactly like any other. Photo
  * URLs already point at API-Football's own hosting, so they're written
- * directly on insert instead of a follow-up update per player.
+ * directly on insert instead of a follow-up update per player. The team
+ * takes the club's real name (no suffix), its crest, and a home kit color
+ * pair sampled from that crest (API-Football has no kit-color data of its
+ * own) — matches the look of manually created teams instead of an
+ * obviously-imported-looking placeholder.
  *
  * onProgress is optional UI feedback for the (potentially 20-30 player,
  * one-request-per-player) import loop — there's no bulk-insert endpoint
  * wrapping createPlayer, so a full-squad import can take several seconds. */
 export async function importApiFootballSquad(
   orgId: string,
-  teamName: string,
+  apiTeam: ApiFootballTeam,
   players: ApiFootballPlayer[],
   onProgress?: (done: number, total: number) => void,
 ): Promise<ImportApiFootballSquadResult> {
-  const teamLabel = `${teamName} (API-Football)`
-
-  // Reines Namens-Match statt eigener external_team_id-Spalte — reicht für den
-  // schmalen Admin/Promo-Anwendungsfall und verhindert versehentliche Doppel-Importe.
   const { data: existing, error: existingError } = await supabase
     .from('teams')
     .select('id')
     .eq('org_id', orgId)
-    .eq('name', teamLabel)
+    .eq('name', apiTeam.name)
     .maybeSingle()
   if (existingError) throw existingError
   if (existing) {
-    throw new Error(`„${teamLabel}“ wurde bereits importiert. Team löschen, um erneut zu importieren.`)
+    throw new Error(`„${apiTeam.name}“ wurde bereits importiert. Team löschen, um erneut zu importieren.`)
   }
 
-  const team = await createTeam({ orgId, name: teamLabel, ageGroup: '', season: '' })
+  let team = await createTeam({ orgId, name: apiTeam.name, ageGroup: '', season: '' })
+
+  if (apiTeam.logoUrl) {
+    const colors = await extractCrestColors(apiTeam.logoUrl)
+    const { data: updated, error: kitError } = await supabase
+      .from('teams')
+      .update({ crest_url: apiTeam.logoUrl, home_kit_color1: colors.primary, home_kit_color2: colors.secondary })
+      .eq('id', team.id)
+      .select('*')
+      .single()
+    if (kitError) throw kitError
+    team = updated
+  }
 
   let done = 0
   for (const p of players) {

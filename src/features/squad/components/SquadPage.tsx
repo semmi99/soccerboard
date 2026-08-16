@@ -293,7 +293,7 @@ export function SquadPage() {
     onProgress: (done: number, total: number) => void,
   ) {
     if (!organization) return
-    const result = await importApiFootballSquad(organization.id, team.name, players, onProgress)
+    const result = await importApiFootballSquad(organization.id, team, players, onProgress)
     setTeams((prev) => [...prev, result.team].sort((a, b) => a.name.localeCompare(b.name)))
     setActiveTeamId(result.team.id)
     setShowApiFootballImport(false)
