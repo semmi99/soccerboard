@@ -10,6 +10,7 @@ import type {
   FieldCrop,
   FrameObject,
   FreehandData,
+  ImageData,
   LineStyle,
   PitchOrientation,
   PlayerChipData,
@@ -445,6 +446,14 @@ export function PropertiesSidebar({
               data={selectedObject.data}
               onCheckpoint={beginHistoryCheckpoint}
               onChange={(patch) => updateData<Extract<FrameObject, { objectType: 'ball' }>>(patch)}
+            />
+          )}
+
+          {selectedObject.objectType === 'image' && (
+            <ImageFields
+              data={selectedObject.data}
+              onCheckpoint={beginHistoryCheckpoint}
+              onChange={(patch) => updateData<Extract<FrameObject, { objectType: 'image' }>>(patch)}
             />
           )}
 
@@ -1834,6 +1843,34 @@ function BallFields({
             onCheckpoint()
             onChange({ color: c })
           }}
+        />
+      </Field>
+    </div>
+  )
+}
+
+function ImageFields({
+  data,
+  onCheckpoint,
+  onChange,
+}: {
+  data: ImageData
+  onCheckpoint: () => void
+  onChange: (patch: Partial<ImageData>) => void
+}) {
+  const { t } = useTranslation('editor')
+  return (
+    <div className="flex flex-col gap-2">
+      <Field label={t('properties.shape.opacity', { percent: Math.round((data.opacity ?? 1) * 100) })}>
+        <input
+          type="range"
+          min={0.1}
+          max={1}
+          step={0.05}
+          className="w-full"
+          value={data.opacity ?? 1}
+          onFocus={onCheckpoint}
+          onChange={(e) => onChange({ opacity: Number(e.target.value) })}
         />
       </Field>
     </div>
