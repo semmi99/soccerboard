@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useAuthStore } from '../../auth/store/authStore'
 import { AppHeader } from '../../../app/AppHeader'
@@ -142,6 +142,14 @@ export function SquadPage() {
   const [showBulkAdd, setShowBulkAdd] = useState(false)
   const [showApiFootballImport, setShowApiFootballImport] = useState(false)
   const [isUploadingCrest, setIsUploadingCrest] = useState(false)
+  const [sortBy, setSortBy] = useState<'number' | 'position'>('number')
+
+  const sortedPlayers = useMemo(() => {
+    if (sortBy === 'number') return players
+    return [...players].sort((a, b) =>
+      (a.position ?? '').localeCompare(b.position ?? '', 'de', { sensitivity: 'base' }),
+    )
+  }, [players, sortBy])
 
   useEffect(() => {
     if (!organization) return
@@ -413,9 +421,25 @@ export function SquadPage() {
             <table className="w-full text-left text-sm">
               <thead className="bg-pitch-900 text-xs uppercase tracking-wide text-white/40">
                 <tr>
-                  <th className="px-4 py-3 font-medium">{t('table.number')}</th>
+                  <th className="px-4 py-3 font-medium">
+                    <button
+                      type="button"
+                      onClick={() => setSortBy('number')}
+                      className={sortBy === 'number' ? 'text-white' : 'hover:text-white/70'}
+                    >
+                      {t('table.number')}
+                    </button>
+                  </th>
                   <th className="px-4 py-3 font-medium">{t('table.name')}</th>
-                  <th className="px-4 py-3 font-medium">{t('table.position')}</th>
+                  <th className="px-4 py-3 font-medium">
+                    <button
+                      type="button"
+                      onClick={() => setSortBy('position')}
+                      className={sortBy === 'position' ? 'text-white' : 'hover:text-white/70'}
+                    >
+                      {t('table.position')}
+                    </button>
+                  </th>
                   <th className="px-4 py-3 font-medium">{t('table.secondaryPosition')}</th>
                   <th className="px-4 py-3 font-medium">{t('table.foot')}</th>
                   <th className="px-4 py-3 font-medium">{t('table.rating')}</th>
@@ -423,7 +447,7 @@ export function SquadPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-pitch-700 bg-pitch-900/40">
-                {players.map((p) => (
+                {sortedPlayers.map((p) => (
                   <tr key={p.id} className="hover:bg-pitch-800/60">
                     <td className="px-4 py-2.5 font-semibold text-white/80">
                       {p.jersey_number ?? '–'}

@@ -1,7 +1,7 @@
 import { supabase } from './client'
 import type { Json, Tables, TablesInsert, TablesUpdate } from '../../types/database.types'
 import type { KitPattern } from '../../features/editor/types'
-import type { ApiFootballPlayer } from './apiFootball'
+import { translateApiFootballPosition, type ApiFootballPlayer } from './apiFootball'
 
 export type Team = Tables<'teams'>
 export type Player = Tables<'players'>
@@ -263,7 +263,7 @@ export async function importApiFootballSquad(
       firstName,
       lastName,
       jerseyNumber: p.number,
-      position: p.position ?? '',
+      position: translateApiFootballPosition(p.position) ?? '',
       secondaryPosition: '',
       strongFoot: '',
       birthDate: '',

@@ -4,6 +4,7 @@ import { Button } from '../../../components/ui/Button'
 import {
   getApiFootballSquad,
   searchApiFootballTeams,
+  translateApiFootballPosition,
   type ApiFootballPlayer,
   type ApiFootballTeam,
 } from '../../../lib/supabase/apiFootball'
@@ -153,7 +154,9 @@ export function ApiFootballImportDialog({
                       <div className="h-8 w-8 shrink-0 rounded-full bg-pitch-700" />
                     )}
                     <span className="min-w-0 flex-1 truncate text-sm text-white">{p.name}</span>
-                    <span className="shrink-0 text-xs text-white/40">{p.position}</span>
+                    <span className="shrink-0 text-xs text-white/40">
+                      {translateApiFootballPosition(p.position)}
+                    </span>
                     {p.number != null && (
                       <span className="shrink-0 text-xs font-semibold text-white/60">#{p.number}</span>
                     )}
