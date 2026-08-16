@@ -1,6 +1,19 @@
 {
   "title": "Squad",
   "newTeam": "+ New team",
+  "apiFootballImport": "Import pro squad",
+  "apiFootballDialog": {
+    "title": "Import pro squad (API-Football)",
+    "searchPlaceholder": "Search a team, e.g. Real Madrid",
+    "searchButton": "Search",
+    "searchError": "Search failed.",
+    "noResults": "No teams found.",
+    "backToSearch": "← Back to search",
+    "loadingSquad": "Loading squad…",
+    "squadError": "Failed to load squad.",
+    "importError": "Import failed.",
+    "importCount": "Import {{count}} players"
+  },
   "crestTitle": "The crest replaces the kit colors on all of this team's player chips in the editor",
   "crestAlt": "Crest",
   "crestUploading": "Uploading…",

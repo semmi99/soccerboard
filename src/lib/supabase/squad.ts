@@ -1,6 +1,7 @@
 import { supabase } from './client'
 import type { Json, Tables, TablesInsert, TablesUpdate } from '../../types/database.types'
 import type { KitPattern } from '../../features/editor/types'
+import type { ApiFootballPlayer } from './apiFootball'
 
 export type Team = Tables<'teams'>
 export type Player = Tables<'players'>
@@ -224,4 +225,59 @@ export async function uploadPlayerPhoto(orgId: string, playerId: string, file: F
   if (updateError) throw updateError
 
   return photoUrl
+}
+
+/** API-Football gives one "First Last" string — split on the last space so
+ * multi-word first names (e.g. "Vinicius Junior" → wait, that's actually a
+ * last name in their data; this is a best-effort heuristic, same as any
+ * "paste a full name" flow) still land somewhere sensible rather than
+ * failing outright. */
+function splitApiFootballName(fullName: string): { firstName: string; lastName: string } {
+  const parts = fullName.trim().split(/\s+/)
+  if (parts.length === 1) return { firstName: parts[0] ?? '', lastName: '' }
+  return { firstName: parts.slice(0, -1).join(' '), lastName: parts[parts.length - 1]! }
+}
+
+export interface ImportApiFootballSquadResult {
+  team: Team
+  playerCount: number
+}
+
+/** Creates a brand-new team + its full squad from API-Football data —
+ * reuses createTeam/createPlayer as-is, so the result is a completely
+ * normal team, editable/deletable afterward exactly like any other. Photo
+ * URLs already point at API-Football's own hosting, so they're written
+ * directly instead of going through uploadPlayerPhoto (which is only for
+ * user-supplied File uploads). */
+export async function importApiFootballSquad(
+  orgId: string,
+  teamName: string,
+  players: ApiFootballPlayer[],
+): Promise<ImportApiFootballSquadResult> {
+  const team = await createTeam({ orgId, name: `${teamName} (API-Football)`, ageGroup: '', season: '' })
+
+  for (const p of players) {
+    const { firstName, lastName } = splitApiFootballName(p.name)
+    const created = await createPlayer({
+      teamId: team.id,
+      firstName,
+      lastName,
+      jerseyNumber: p.number,
+      position: p.position ?? '',
+      secondaryPosition: '',
+      strongFoot: '',
+      birthDate: '',
+      nationality: '',
+      phone: '',
+      email: '',
+      notes: '',
+      attributes: {},
+    })
+    if (p.photoUrl) {
+      const { error } = await supabase.from('players').update({ photo_url: p.photoUrl }).eq('id', created.id)
+      if (error) throw error
+    }
+  }
+
+  return { team, playerCount: players.length }
 }

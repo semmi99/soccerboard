@@ -173,6 +173,23 @@ Kunde, bleibt der Zugang bis zum Ende des bereits bezahlten Zeitraums bestehen
 und läuft dann automatisch ab — auch falls das
 `customer.subscription.deleted`-Event verspätet oder gar nicht ankommt.
 
+## Profi-Kader-Import (API-Football, nur für Admins)
+
+Auf der Kader-Seite gibt es für Org-Admins den Button „Profi-Kader
+importieren“ — sucht ein echtes Team über [API-Football](https://dashboard.api-football.com/)
+und legt es samt Spielern (Name, Rückennummer, Position, Foto) als
+normales Team an. Gedacht für Werbevideos mit einem bekannten Kader, nicht
+für die eigentliche Kaderverwaltung.
+
+Damit das funktioniert, einmalig den eigenen API-Football-Key als Secret
+in Supabase hinterlegen (Dashboard → Edge Functions → Secrets, oder
+`supabase secrets set` via CLI):
+
+- `API_FOOTBALL_KEY` – der API-Key aus dem eigenen API-Football-Dashboard
+
+Ohne gesetztes Secret meldet der Import-Dialog einen Fehler, alles andere
+in der App bleibt unberührt.
+
 ## Vor Produktivbetrieb
 
 - Supabase Security Advisor meldet **„Leaked Password Protection Disabled“** – unter

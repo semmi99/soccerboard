@@ -1,6 +1,19 @@
 {
   "title": "Kader",
   "newTeam": "+ Neues Team",
+  "apiFootballImport": "Profi-Kader importieren",
+  "apiFootballDialog": {
+    "title": "Profi-Kader importieren (API-Football)",
+    "searchPlaceholder": "Team suchen, z.B. Real Madrid",
+    "searchButton": "Suchen",
+    "searchError": "Suche fehlgeschlagen.",
+    "noResults": "Keine Teams gefunden.",
+    "backToSearch": "← Zurück zur Suche",
+    "loadingSquad": "Lade Kader…",
+    "squadError": "Kader konnte nicht geladen werden.",
+    "importError": "Import fehlgeschlagen.",
+    "importCount": "{{count}} Spieler importieren"
+  },
   "crestTitle": "Wappen ersetzt die Trikotfarben auf allen Spieler-Chips dieses Teams im Editor",
   "crestAlt": "Wappen",
   "crestUploading": "Lädt hoch…",

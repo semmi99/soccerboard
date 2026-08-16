@@ -8,6 +8,7 @@ import {
   createPlayer,
   createTeam,
   deletePlayer,
+  importApiFootballSquad,
   listPlayers,
   listTeams,
   removeTeamCrest,
@@ -18,8 +19,10 @@ import {
   type PlayerFormValues,
   type Team,
 } from '../../../lib/supabase/squad'
+import type { ApiFootballPlayer, ApiFootballTeam } from '../../../lib/supabase/apiFootball'
 import { PlayerFormDialog } from './PlayerFormDialog'
 import { BulkAddPlayersDialog } from './BulkAddPlayersDialog'
+import { ApiFootballImportDialog } from './ApiFootballImportDialog'
 
 function DeleteConfirmDialog({
   name,
@@ -123,6 +126,7 @@ function NewTeamDialog({
 export function SquadPage() {
   const { t } = useTranslation(['squad', 'common'])
   const organization = useAuthStore((s) => s.organization)
+  const profile = useAuthStore((s) => s.profile)
 
   const [teams, setTeams] = useState<Team[]>([])
   const [activeTeamId, setActiveTeamId] = useState<string | null>(null)
@@ -136,6 +140,7 @@ export function SquadPage() {
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const [showNewTeam, setShowNewTeam] = useState(false)
   const [showBulkAdd, setShowBulkAdd] = useState(false)
+  const [showApiFootballImport, setShowApiFootballImport] = useState(false)
   const [isUploadingCrest, setIsUploadingCrest] = useState(false)
 
   useEffect(() => {
@@ -259,6 +264,14 @@ export function SquadPage() {
     setShowBulkAdd(false)
   }
 
+  async function handleApiFootballImport(team: ApiFootballTeam, players: ApiFootballPlayer[]) {
+    if (!organization) return
+    const result = await importApiFootballSquad(organization.id, team.name, players)
+    setTeams((prev) => [...prev, result.team].sort((a, b) => a.name.localeCompare(b.name)))
+    setActiveTeamId(result.team.id)
+    setShowApiFootballImport(false)
+  }
+
   async function confirmDeletePlayer() {
     if (!pendingDelete) return
     setDeletingId(pendingDelete.id)
@@ -302,6 +315,15 @@ export function SquadPage() {
           >
             {t('newTeam')}
           </button>
+          {profile?.role === 'admin' && (
+            <button
+              type="button"
+              onClick={() => setShowApiFootballImport(true)}
+              className="text-sm text-white/40 hover:text-white/70"
+            >
+              {t('apiFootballImport')}
+            </button>
+          )}
           {activeTeam && (
             <div
               className="flex items-center gap-2 rounded-lg border border-pitch-700 px-2 py-1"
@@ -484,6 +506,13 @@ export function SquadPage() {
 
       {showBulkAdd && (
         <BulkAddPlayersDialog onCancel={() => setShowBulkAdd(false)} onSubmit={handleBulkAdd} />
+      )}
+
+      {showApiFootballImport && (
+        <ApiFootballImportDialog
+          onCancel={() => setShowApiFootballImport(false)}
+          onImport={handleApiFootballImport}
+        />
       )}
     </div>
   )
