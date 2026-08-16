@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { useEditorStore } from '../store/editorStore'
 import { useAuthStore } from '../../auth/store/authStore'
 import {
+  comparePlayersByPosition,
   listTeams,
   listPlayers,
   updateTeamKit,
@@ -417,7 +418,7 @@ export function TeamSquadPanel() {
               ) : (
                 players
                   .slice()
-                  .sort((a, b) => (a.jersey_number ?? 99) - (b.jersey_number ?? 99))
+                  .sort(comparePlayersByPosition)
                   .map((p) => (
                     <div
                       key={p.id}

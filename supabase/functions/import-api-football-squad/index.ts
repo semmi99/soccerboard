@@ -75,6 +75,7 @@ Deno.serve(async (req: Request) => {
     const res = await fetch(`${API_BASE}/teams?search=${encodeURIComponent(body.query)}`, {
       headers: { "x-apisports-key": apiFootballKey },
     })
+    if (res.status === 429) return json({ error: "API-Football-Tageslimit erreicht. Bitte später erneut versuchen." }, 429)
     if (!res.ok) return json({ error: `API-Football error (${res.status})` }, 502)
     const data = (await res.json()) as ApiFootballTeamsResponse
     return json({
@@ -94,6 +95,7 @@ Deno.serve(async (req: Request) => {
     const res = await fetch(`${API_BASE}/players/squads?team=${body.teamId}`, {
       headers: { "x-apisports-key": apiFootballKey },
     })
+    if (res.status === 429) return json({ error: "API-Football-Tageslimit erreicht. Bitte später erneut versuchen." }, 429)
     if (!res.ok) return json({ error: `API-Football error (${res.status})` }, 502)
     const data = (await res.json()) as ApiFootballSquadsResponse
     const players = data.response[0]?.players ?? []

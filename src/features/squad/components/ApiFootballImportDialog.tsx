@@ -18,7 +18,11 @@ export function ApiFootballImportDialog({
   onImport,
 }: {
   onCancel: () => void
-  onImport: (team: ApiFootballTeam, players: ApiFootballPlayer[]) => Promise<void>
+  onImport: (
+    team: ApiFootballTeam,
+    players: ApiFootballPlayer[],
+    onProgress: (done: number, total: number) => void,
+  ) => Promise<void>
 }) {
   const { t } = useTranslation(['squad', 'common'])
   const [query, setQuery] = useState('')
@@ -29,6 +33,7 @@ export function ApiFootballImportDialog({
   const [players, setPlayers] = useState<ApiFootballPlayer[]>([])
   const [isLoadingSquad, setIsLoadingSquad] = useState(false)
   const [isImporting, setIsImporting] = useState(false)
+  const [importProgress, setImportProgress] = useState<{ done: number; total: number } | null>(null)
   const [error, setError] = useState<string | null>(null)
 
   async function handleSearch(e: FormEvent) {
@@ -62,12 +67,14 @@ export function ApiFootballImportDialog({
   async function handleImport() {
     if (!selectedTeam) return
     setIsImporting(true)
+    setImportProgress({ done: 0, total: players.length })
     setError(null)
     try {
-      await onImport(selectedTeam, players)
+      await onImport(selectedTeam, players, (done, total) => setImportProgress({ done, total }))
     } catch (err) {
       setError(err instanceof Error ? err.message : t('apiFootballDialog.importError'))
       setIsImporting(false)
+      setImportProgress(null)
     }
   }
 
@@ -175,7 +182,9 @@ export function ApiFootballImportDialog({
                 disabled={players.length === 0}
                 onClick={() => void handleImport()}
               >
-                {t('apiFootballDialog.importCount', { count: players.length })}
+                {isImporting && importProgress
+                  ? `${importProgress.done}/${importProgress.total}…`
+                  : t('apiFootballDialog.importCount', { count: players.length })}
               </Button>
             </div>
           </>

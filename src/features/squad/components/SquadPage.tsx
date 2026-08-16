@@ -5,6 +5,7 @@ import { AppHeader } from '../../../app/AppHeader'
 import { Button } from '../../../components/ui/Button'
 import {
   averagePlayerRating,
+  comparePlayersByPosition,
   createPlayer,
   createTeam,
   deletePlayer,
@@ -12,6 +13,7 @@ import {
   importApiFootballSquad,
   listPlayers,
   listTeams,
+  positionGroup,
   removeTeamCrest,
   updatePlayer,
   uploadPlayerPhoto,
@@ -24,21 +26,6 @@ import type { ApiFootballPlayer, ApiFootballTeam } from '../../../lib/supabase/a
 import { PlayerFormDialog } from './PlayerFormDialog'
 import { BulkAddPlayersDialog } from './BulkAddPlayersDialog'
 import { ApiFootballImportDialog } from './ApiFootballImportDialog'
-
-/** Buckets a free-text position string into the tactical Tor/Abwehr/
- * Mittelfeld/Sturm grouping used for the sortable squad table — matches
- * on keywords so it works for both the manual position vocabulary
- * (Innenverteidigung, Offensives Mittelfeld, ...) and the generic
- * API-Football import labels (Abwehr, Mittelfeld, Sturm). */
-function positionGroup(position: string | null): number {
-  if (!position) return 4
-  const p = position.toLowerCase()
-  if (p.includes('tor')) return 0
-  if (p.includes('verteidig') || p.includes('abwehr')) return 1
-  if (p.includes('mittelfeld')) return 2
-  if (p.includes('flügel') || p.includes('stürmer') || p.includes('sturm')) return 3
-  return 4
-}
 
 const POSITION_GROUP_LABEL_KEYS = [
   'positionGroups.goalkeeper',
@@ -176,11 +163,7 @@ export function SquadPage() {
 
   const sortedPlayers = useMemo(() => {
     if (sortBy === 'number') return players
-    return [...players].sort((a, b) => {
-      const groupDiff = positionGroup(a.position) - positionGroup(b.position)
-      if (groupDiff !== 0) return groupDiff
-      return (a.jersey_number ?? 999) - (b.jersey_number ?? 999)
-    })
+    return [...players].sort(comparePlayersByPosition)
   }, [players, sortBy])
 
   useEffect(() => {
@@ -304,9 +287,13 @@ export function SquadPage() {
     setShowBulkAdd(false)
   }
 
-  async function handleApiFootballImport(team: ApiFootballTeam, players: ApiFootballPlayer[]) {
+  async function handleApiFootballImport(
+    team: ApiFootballTeam,
+    players: ApiFootballPlayer[],
+    onProgress: (done: number, total: number) => void,
+  ) {
     if (!organization) return
-    const result = await importApiFootballSquad(organization.id, team.name, players)
+    const result = await importApiFootballSquad(organization.id, team.name, players, onProgress)
     setTeams((prev) => [...prev, result.team].sort((a, b) => a.name.localeCompare(b.name)))
     setActiveTeamId(result.team.id)
     setShowApiFootballImport(false)

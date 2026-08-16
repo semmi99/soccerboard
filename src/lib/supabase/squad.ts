@@ -25,6 +25,34 @@ export function averagePlayerRating(attributes: unknown): number | null {
   return values.reduce((a, b) => a + b, 0) / values.length
 }
 
+/** Buckets a free-text position string into the tactical Tor/Abwehr/
+ * Mittelfeld/Sturm grouping — matches on keywords so it works for both the
+ * manual position vocabulary (Innenverteidigung, Offensives Mittelfeld, ...)
+ * and the generic API-Football import labels (Abwehr, Mittelfeld, Sturm). */
+export function positionGroup(position: string | null): number {
+  if (!position) return 4
+  const p = position.toLowerCase()
+  if (p.includes('tor')) return 0
+  if (p.includes('verteidig') || p.includes('abwehr')) return 1
+  if (p.includes('mittelfeld')) return 2
+  if (p.includes('flügel') || p.includes('stürmer') || p.includes('sturm')) return 3
+  return 4
+}
+
+/** Position (Tor→Abwehr→Mittelfeld→Sturm→ohne) → Rückennummer → Name, in
+ * dieser Reihenfolge als Tiebreaker — die Standard-Kaderreihenfolge überall,
+ * wo Spieler positionsbezogen aufgelistet werden. */
+export function comparePlayersByPosition(a: Player, b: Player): number {
+  const groupDiff = positionGroup(a.position) - positionGroup(b.position)
+  if (groupDiff !== 0) return groupDiff
+  const aNum = a.jersey_number
+  const bNum = b.jersey_number
+  if (aNum != null && bNum != null && aNum !== bNum) return aNum - bNum
+  if (aNum != null && bNum == null) return -1
+  if (aNum == null && bNum != null) return 1
+  return `${a.first_name} ${a.last_name}`.localeCompare(`${b.first_name} ${b.last_name}`)
+}
+
 export async function listTeams(orgId: string): Promise<Team[]> {
   const { data, error } = await supabase
     .from('teams')
@@ -117,6 +145,10 @@ export interface PlayerFormValues {
   email: string
   notes: string
   attributes: PlayerAttributes
+  /** Nur beim API-Football-Import gesetzt — zeigt direkt auf deren gehostetes
+   * Bild, kein Umweg über uploadPlayerPhoto (das ist nur für eigene
+   * File-Uploads). Optional, damit das reguläre Spielerformular unverändert bleibt. */
+  photoUrl?: string | null
 }
 
 function toInsert(values: PlayerFormValues): TablesInsert<'players'> {
@@ -134,6 +166,7 @@ function toInsert(values: PlayerFormValues): TablesInsert<'players'> {
     email: values.email || null,
     notes: values.notes || null,
     attributes: values.attributes as unknown as Json,
+    ...(values.photoUrl !== undefined ? { photo_url: values.photoUrl } : {}),
   }
 }
 
@@ -252,18 +285,38 @@ export interface ImportApiFootballSquadResult {
  * reuses createTeam/createPlayer as-is, so the result is a completely
  * normal team, editable/deletable afterward exactly like any other. Photo
  * URLs already point at API-Football's own hosting, so they're written
- * directly instead of going through uploadPlayerPhoto (which is only for
- * user-supplied File uploads). */
+ * directly on insert instead of a follow-up update per player.
+ *
+ * onProgress is optional UI feedback for the (potentially 20-30 player,
+ * one-request-per-player) import loop — there's no bulk-insert endpoint
+ * wrapping createPlayer, so a full-squad import can take several seconds. */
 export async function importApiFootballSquad(
   orgId: string,
   teamName: string,
   players: ApiFootballPlayer[],
+  onProgress?: (done: number, total: number) => void,
 ): Promise<ImportApiFootballSquadResult> {
-  const team = await createTeam({ orgId, name: `${teamName} (API-Football)`, ageGroup: '', season: '' })
+  const teamLabel = `${teamName} (API-Football)`
 
+  // Reines Namens-Match statt eigener external_team_id-Spalte — reicht für den
+  // schmalen Admin/Promo-Anwendungsfall und verhindert versehentliche Doppel-Importe.
+  const { data: existing, error: existingError } = await supabase
+    .from('teams')
+    .select('id')
+    .eq('org_id', orgId)
+    .eq('name', teamLabel)
+    .maybeSingle()
+  if (existingError) throw existingError
+  if (existing) {
+    throw new Error(`„${teamLabel}“ wurde bereits importiert. Team löschen, um erneut zu importieren.`)
+  }
+
+  const team = await createTeam({ orgId, name: teamLabel, ageGroup: '', season: '' })
+
+  let done = 0
   for (const p of players) {
     const { firstName, lastName } = splitApiFootballName(p.name)
-    const created = await createPlayer({
+    await createPlayer({
       teamId: team.id,
       firstName,
       lastName,
@@ -277,11 +330,10 @@ export async function importApiFootballSquad(
       email: '',
       notes: '',
       attributes: {},
+      photoUrl: p.photoUrl,
     })
-    if (p.photoUrl) {
-      const { error } = await supabase.from('players').update({ photo_url: p.photoUrl }).eq('id', created.id)
-      if (error) throw error
-    }
+    done += 1
+    onProgress?.(done, players.length)
   }
 
   return { team, playerCount: players.length }
