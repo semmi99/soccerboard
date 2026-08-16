@@ -37,6 +37,16 @@ interface ApiFootballFixturesResponse {
   }[]
 }
 
+function mapFixture(f: ApiFootballFixturesResponse["response"][number]) {
+  return {
+    id: f.fixture.id,
+    date: f.fixture.date,
+    leagueName: f.league.name,
+    home: { id: f.teams.home.id, name: f.teams.home.name, logoUrl: f.teams.home.logo },
+    away: { id: f.teams.away.id, name: f.teams.away.name, logoUrl: f.teams.away.logo },
+  }
+}
+
 // Lets an org admin search API-Football for a real team and pull its squad
 // — used to drop a recognizable pro roster onto the board for promo
 // videos, not for day-to-day club-roster management. The API-Football key
@@ -125,38 +135,56 @@ Deno.serve(async (req: Request) => {
     if (typeof body.teamId !== "number") {
       return json({ error: "teamId erforderlich." }, 400)
     }
-    // Free-Tier sperrt oft entweder `next` oder `last` je nach Liga/Saison —
-    // beide abfragen und zusammenführen liefert zuverlässiger eine brauchbare
-    // Auswahl an kommenden UND kürzlich gespielten Partien.
-    const [nextRes, lastRes] = await Promise.all([
-      fetch(`${API_BASE}/fixtures?team=${body.teamId}&next=10`, {
-        headers: { "x-apisports-key": apiFootballKey },
-      }),
-      fetch(`${API_BASE}/fixtures?team=${body.teamId}&last=10`, {
-        headers: { "x-apisports-key": apiFootballKey },
-      }),
-    ])
-    if (nextRes.status === 429 || lastRes.status === 429) {
+
+    // The free plan often returns an empty `next`/`last` result unless a
+    // `season` is given explicitly (API-Football expects the season's start
+    // year, e.g. 2025 for the 2025/26 season) — and it rejects seasons
+    // outside what the plan covers. So: try the current season, then the
+    // previous one, then no season at all (some leagues/plans need that
+    // instead), and use the first attempt that actually returns fixtures.
+    const now = new Date()
+    const currentSeasonGuess = now.getUTCMonth() >= 6 ? now.getUTCFullYear() : now.getUTCFullYear() - 1
+    const seasonAttempts: (number | undefined)[] = [currentSeasonGuess, currentSeasonGuess - 1, undefined]
+
+    let sawRateLimit = false
+    let lastErrorStatus: number | null = null
+    let fixtures: ReturnType<typeof mapFixture>[] = []
+
+    for (const season of seasonAttempts) {
+      const seasonQuery = season !== undefined ? `&season=${season}` : ""
+      const [nextRes, lastRes] = await Promise.all([
+        fetch(`${API_BASE}/fixtures?team=${body.teamId}&next=10${seasonQuery}`, {
+          headers: { "x-apisports-key": apiFootballKey },
+        }),
+        fetch(`${API_BASE}/fixtures?team=${body.teamId}&last=10${seasonQuery}`, {
+          headers: { "x-apisports-key": apiFootballKey },
+        }),
+      ])
+      if (nextRes.status === 429 || lastRes.status === 429) {
+        sawRateLimit = true
+        break
+      }
+      if (!nextRes.ok && !lastRes.ok) {
+        lastErrorStatus = nextRes.status
+        continue
+      }
+      const nextData = nextRes.ok ? ((await nextRes.json()) as ApiFootballFixturesResponse) : { response: [] }
+      const lastData = lastRes.ok ? ((await lastRes.json()) as ApiFootballFixturesResponse) : { response: [] }
+
+      const byId = new Map<number, ApiFootballFixturesResponse["response"][number]>()
+      for (const f of [...lastData.response, ...nextData.response]) byId.set(f.fixture.id, f)
+      if (byId.size === 0) continue
+
+      fixtures = Array.from(byId.values()).sort((a, b) => a.fixture.date.localeCompare(b.fixture.date)).map(mapFixture)
+      break
+    }
+
+    if (sawRateLimit) {
       return json({ error: "API-Football-Tageslimit erreicht. Bitte später erneut versuchen." }, 429)
     }
-    if (!nextRes.ok && !lastRes.ok) {
-      return json({ error: `API-Football error (${nextRes.status})` }, 502)
+    if (fixtures.length === 0 && lastErrorStatus !== null) {
+      return json({ error: `API-Football error (${lastErrorStatus})` }, 502)
     }
-    const nextData = nextRes.ok ? ((await nextRes.json()) as ApiFootballFixturesResponse) : { response: [] }
-    const lastData = lastRes.ok ? ((await lastRes.json()) as ApiFootballFixturesResponse) : { response: [] }
-
-    const byId = new Map<number, ApiFootballFixturesResponse["response"][number]>()
-    for (const f of [...lastData.response, ...nextData.response]) byId.set(f.fixture.id, f)
-
-    const fixtures = Array.from(byId.values())
-      .sort((a, b) => a.fixture.date.localeCompare(b.fixture.date))
-      .map((f) => ({
-        id: f.fixture.id,
-        date: f.fixture.date,
-        leagueName: f.league.name,
-        home: { id: f.teams.home.id, name: f.teams.home.name, logoUrl: f.teams.home.logo },
-        away: { id: f.teams.away.id, name: f.teams.away.name, logoUrl: f.teams.away.logo },
-      }))
 
     return json({ fixtures })
   }
