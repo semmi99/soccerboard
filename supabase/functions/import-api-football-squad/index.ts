@@ -27,6 +27,7 @@ interface ApiFootballSquadsResponse {
 }
 
 interface ApiFootballFixturesResponse {
+  errors?: unknown
   response: {
     fixture: { id: number; date: string }
     league: { name: string }
@@ -35,6 +36,21 @@ interface ApiFootballFixturesResponse {
       away: { id: number; name: string; logo: string }
     }
   }[]
+}
+
+// API-Football returns HTTP 200 even for plan/parameter problems (invalid
+// key, endpoint not included in the plan, bad param, etc.) — the actual
+// reason lives in `errors`, either an object ({"plan": "..."}) or an empty
+// array when there's nothing wrong. Without checking this, those failures
+// look indistinguishable from "no results found".
+function apiFootballErrorMessage(data: { errors?: unknown }): string | null {
+  const errors = data.errors
+  if (!errors) return null
+  if (Array.isArray(errors)) return errors.length > 0 ? errors.join(", ") : null
+  if (typeof errors === "object" && Object.keys(errors as object).length > 0) {
+    return Object.values(errors as Record<string, string>).join(", ")
+  }
+  return null
 }
 
 function mapFixture(f: ApiFootballFixturesResponse["response"][number]) {
@@ -99,6 +115,8 @@ Deno.serve(async (req: Request) => {
     if (res.status === 429) return json({ error: "API-Football-Tageslimit erreicht. Bitte später erneut versuchen." }, 429)
     if (!res.ok) return json({ error: `API-Football error (${res.status})` }, 502)
     const data = (await res.json()) as ApiFootballTeamsResponse
+    const apiError = apiFootballErrorMessage(data)
+    if (apiError) return json({ error: `API-Football: ${apiError}` }, 502)
     return json({
       teams: data.response.map((t) => ({
         id: t.team.id,
@@ -119,6 +137,8 @@ Deno.serve(async (req: Request) => {
     if (res.status === 429) return json({ error: "API-Football-Tageslimit erreicht. Bitte später erneut versuchen." }, 429)
     if (!res.ok) return json({ error: `API-Football error (${res.status})` }, 502)
     const data = (await res.json()) as ApiFootballSquadsResponse
+    const apiError = apiFootballErrorMessage(data)
+    if (apiError) return json({ error: `API-Football: ${apiError}` }, 502)
     const players = data.response[0]?.players ?? []
     return json({
       players: players.map((p) => ({
@@ -148,6 +168,7 @@ Deno.serve(async (req: Request) => {
 
     let sawRateLimit = false
     let lastErrorStatus: number | null = null
+    let apiError: string | null = null
     let fixtures: ReturnType<typeof mapFixture>[] = []
 
     for (const season of seasonAttempts) {
@@ -170,6 +191,7 @@ Deno.serve(async (req: Request) => {
       }
       const nextData = nextRes.ok ? ((await nextRes.json()) as ApiFootballFixturesResponse) : { response: [] }
       const lastData = lastRes.ok ? ((await lastRes.json()) as ApiFootballFixturesResponse) : { response: [] }
+      apiError = apiError ?? apiFootballErrorMessage(nextData) ?? apiFootballErrorMessage(lastData)
 
       const byId = new Map<number, ApiFootballFixturesResponse["response"][number]>()
       for (const f of [...lastData.response, ...nextData.response]) byId.set(f.fixture.id, f)
@@ -181,6 +203,9 @@ Deno.serve(async (req: Request) => {
 
     if (sawRateLimit) {
       return json({ error: "API-Football-Tageslimit erreicht. Bitte später erneut versuchen." }, 429)
+    }
+    if (fixtures.length === 0 && apiError) {
+      return json({ error: `API-Football: ${apiError}` }, 502)
     }
     if (fixtures.length === 0 && lastErrorStatus !== null) {
       return json({ error: `API-Football error (${lastErrorStatus})` }, 502)
