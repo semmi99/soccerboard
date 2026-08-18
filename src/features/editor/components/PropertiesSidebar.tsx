@@ -1105,43 +1105,56 @@ function ShapeFields({
               onChange({ statsCardColor: color })
             }}
           />
-          {(data.statsCardBars ?? []).map((bar, i) => (
-            <div key={i} className="flex items-center gap-1.5">
-              <input
-                type="text"
-                value={bar.label}
-                onFocus={onCheckpoint}
-                onChange={(e) => {
-                  const bars = [...(data.statsCardBars ?? [])]
-                  bars[i] = { ...bar, label: e.target.value }
-                  onChange({ statsCardBars: bars })
-                }}
-                placeholder={t('properties.shape.statsCardBarPlaceholder', { n: i + 1 })}
-                className="min-w-0 flex-1 rounded-md border border-pitch-600 bg-pitch-800 px-2 py-1.5 text-xs text-white outline-none focus:border-violet-accent"
-              />
-              <div className="flex shrink-0 gap-0.5">
-                {[1, 2, 3, 4].map((level) => (
-                  <button
-                    key={level}
-                    type="button"
-                    onClick={() => {
-                      onCheckpoint()
-                      const bars = [...(data.statsCardBars ?? [])]
-                      bars[i] = { ...bar, level }
-                      onChange({ statsCardBars: bars })
-                    }}
-                    className={`h-5 w-3.5 rounded-sm border ${
-                      level <= bar.level
-                        ? 'border-transparent'
-                        : 'border-pitch-600 bg-pitch-800'
-                    }`}
-                    style={level <= bar.level ? { backgroundColor: data.statsCardColor ?? '#f2a73b' } : undefined}
-                    aria-label={t('properties.shape.statsCardLevel', { level })}
-                  />
-                ))}
+          {(data.statsCardBars ?? []).map((bar, i) => {
+            const barColor = bar.color ?? data.statsCardColor ?? '#f2a73b'
+            return (
+              <div key={i} className="flex items-center gap-1.5">
+                <input
+                  type="color"
+                  value={barColor}
+                  onFocus={onCheckpoint}
+                  onChange={(e) => {
+                    const bars = [...(data.statsCardBars ?? [])]
+                    bars[i] = { ...bar, color: e.target.value }
+                    onChange({ statsCardBars: bars })
+                  }}
+                  title={t('properties.shape.statsCardBarColor', { n: i + 1 })}
+                  className="h-7 w-7 shrink-0 cursor-pointer rounded-md border border-pitch-600 bg-transparent p-0.5"
+                />
+                <input
+                  type="text"
+                  value={bar.label}
+                  onFocus={onCheckpoint}
+                  onChange={(e) => {
+                    const bars = [...(data.statsCardBars ?? [])]
+                    bars[i] = { ...bar, label: e.target.value }
+                    onChange({ statsCardBars: bars })
+                  }}
+                  placeholder={t('properties.shape.statsCardBarPlaceholder', { n: i + 1 })}
+                  className="min-w-0 flex-1 rounded-md border border-pitch-600 bg-pitch-800 px-2 py-1.5 text-xs text-white outline-none focus:border-violet-accent"
+                />
+                <div className="flex shrink-0 gap-0.5">
+                  {[1, 2, 3, 4].map((level) => (
+                    <button
+                      key={level}
+                      type="button"
+                      onClick={() => {
+                        onCheckpoint()
+                        const bars = [...(data.statsCardBars ?? [])]
+                        bars[i] = { ...bar, level }
+                        onChange({ statsCardBars: bars })
+                      }}
+                      className={`h-5 w-3.5 rounded-sm border ${
+                        level <= bar.level ? 'border-transparent' : 'border-pitch-600 bg-pitch-800'
+                      }`}
+                      style={level <= bar.level ? { backgroundColor: barColor } : undefined}
+                      aria-label={t('properties.shape.statsCardLevel', { level })}
+                    />
+                  ))}
+                </div>
               </div>
-            </div>
-          ))}
+            )
+          })}
           <Field
             label={t('properties.shape.statsCardSize', {
               percent: Math.round((data.statsCardScale ?? 1) * 100),

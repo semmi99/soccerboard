@@ -185,7 +185,10 @@ export interface ShapeData {
   showStatsCard?: boolean
   statsCardCategory?: string
   statsCardColor?: string
-  statsCardBars?: { label: string; level: number }[]
+  /** `color` unset falls back to `statsCardColor` (the original one-color-
+   * for-everything look) — only set per bar when a coach wants to tell
+   * bars apart at a glance (e.g. red for intensity, blue for technique). */
+  statsCardBars?: { label: string; level: number; color?: string }[]
   /** Drag offset (stage px, world space) from the card's default
    * calculated position beside the shape — unset/0 keeps the original
    * auto-placement. Lets a coach nudge the card clear of other objects

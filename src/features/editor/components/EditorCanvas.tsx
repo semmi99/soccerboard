@@ -1640,7 +1640,7 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
                           y={rowY}
                           width={pipSize}
                           height={pipSize}
-                          fill={level <= bar.level ? c.color : 'rgba(255,255,255,0.12)'}
+                          fill={level <= bar.level ? (bar.color ?? c.color) : 'rgba(255,255,255,0.12)'}
                           cornerRadius={2}
                         />
                       ))}

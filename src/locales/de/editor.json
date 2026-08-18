@@ -184,6 +184,7 @@
       "statsCardCategory": "Kategorie",
       "statsCardCategoryPlaceholder": "z. B. KRAFT",
       "statsCardBarPlaceholder": "Balken {{n}}, z. B. Sprint",
+      "statsCardBarColor": "Farbe für Balken {{n}}",
       "statsCardLevel": "Stufe {{level}}",
       "statsCardSize": "Kartengröße ({{percent}}%)",
       "statsCardResetPosition": "Position zurücksetzen"

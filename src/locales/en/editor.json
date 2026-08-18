@@ -184,6 +184,7 @@
       "statsCardCategory": "Category",
       "statsCardCategoryPlaceholder": "e.g. STRENGTH",
       "statsCardBarPlaceholder": "Bar {{n}}, e.g. Sprint",
+      "statsCardBarColor": "Color for bar {{n}}",
       "statsCardLevel": "Level {{level}}",
       "statsCardSize": "Card size ({{percent}}%)",
       "statsCardResetPosition": "Reset position"
