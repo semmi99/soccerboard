@@ -22,6 +22,8 @@ const POSITION_DE: Record<string, string> = {
   'Defensives Mittelfeld': 'Defensives Mittelfeld',
   'Zentrales Mittelfeld': 'Zentrales Mittelfeld',
   'Offensives Mittelfeld': 'Offensives Mittelfeld',
+  'Linkes Mittelfeld': 'Flügel',
+  'Rechtes Mittelfeld': 'Flügel',
   Linksaußen: 'Flügel',
   Rechtsaußen: 'Flügel',
   'Hängende Spitze': 'Stürmer',
