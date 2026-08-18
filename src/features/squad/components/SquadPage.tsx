@@ -28,6 +28,7 @@ import { PlayerFormDialog } from './PlayerFormDialog'
 import { BulkAddPlayersDialog } from './BulkAddPlayersDialog'
 import { ApiFootballImportDialog } from './ApiFootballImportDialog'
 import { ApiFootballFixtureImportDialog } from './ApiFootballFixtureImportDialog'
+import { FootballDataImportDialog } from './FootballDataImportDialog'
 
 const POSITION_GROUP_LABEL_KEYS = [
   'positionGroups.goalkeeper',
@@ -149,6 +150,7 @@ function TeamActionsMenu({
   onDeleteTeam,
   onImport,
   onImportFixture,
+  onImportFootballData,
   hasActiveTeam,
   canImport,
 }: {
@@ -156,6 +158,7 @@ function TeamActionsMenu({
   onDeleteTeam: () => void
   onImport: () => void
   onImportFixture: () => void
+  onImportFootballData: () => void
   hasActiveTeam: boolean
   canImport: boolean
 }) {
@@ -215,6 +218,15 @@ function TeamActionsMenu({
               {t('apiFootballFixtureImport')}
             </button>
           )}
+          {canImport && (
+            <button
+              type="button"
+              onClick={() => pick(onImportFootballData)}
+              className="block w-full rounded-md px-3 py-2 text-left text-sm text-white/80 hover:bg-pitch-800 hover:text-white"
+            >
+              {t('footballDataImport')}
+            </button>
+          )}
           {hasActiveTeam && (
             <button
               type="button"
@@ -251,6 +263,7 @@ export function SquadPage() {
   const [showBulkAdd, setShowBulkAdd] = useState(false)
   const [showApiFootballImport, setShowApiFootballImport] = useState(false)
   const [showFixtureImport, setShowFixtureImport] = useState(false)
+  const [showFootballDataImport, setShowFootballDataImport] = useState(false)
   const [isUploadingCrest, setIsUploadingCrest] = useState(false)
   const [sortBy, setSortBy] = useState<'number' | 'position'>('number')
 
@@ -405,6 +418,14 @@ export function SquadPage() {
     setShowFixtureImport(false)
   }
 
+  async function handleFootballDataImport(team: ApiFootballTeam, players: ApiFootballPlayer[]) {
+    if (!organization) return
+    const result = await importApiFootballSquad(organization.id, team, players)
+    setTeams((prev) => [...prev, result.team].sort((a, b) => a.name.localeCompare(b.name)))
+    setActiveTeamId(result.team.id)
+    setShowFootballDataImport(false)
+  }
+
   async function confirmDeletePlayer() {
     if (!pendingDelete) return
     setDeletingId(pendingDelete.id)
@@ -462,6 +483,7 @@ export function SquadPage() {
             onDeleteTeam={() => activeTeam && setPendingDeleteTeam(activeTeam)}
             onImport={() => setShowApiFootballImport(true)}
             onImportFixture={() => setShowFixtureImport(true)}
+            onImportFootballData={() => setShowFootballDataImport(true)}
             hasActiveTeam={!!activeTeam}
             canImport={profile?.role === 'admin'}
           />
@@ -700,6 +722,12 @@ export function SquadPage() {
         <ApiFootballFixtureImportDialog
           onCancel={() => setShowFixtureImport(false)}
           onImport={handleApiFootballFixtureImport}
+        />
+      )}
+      {showFootballDataImport && (
+        <FootballDataImportDialog
+          onCancel={() => setShowFootballDataImport(false)}
+          onImport={handleFootballDataImport}
         />
       )}
     </div>

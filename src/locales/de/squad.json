@@ -5,6 +5,7 @@
   "deleteTeam": "Team löschen",
   "apiFootballImport": "Profi-Kader importieren",
   "apiFootballFixtureImport": "Spiel importieren",
+  "footballDataImport": "Kader importieren (football-data.org)",
   "apiFootballDialog": {
     "title": "Profi-Kader importieren (API-Football)",
     "searchPlaceholder": "Team suchen, z.B. Real Madrid",
@@ -30,6 +31,19 @@
     "importError": "Import fehlgeschlagen.",
     "importButton": "Beide Kader importieren",
     "importProgress": "{{done}}/{{total}}…"
+  },
+  "footballDataDialog": {
+    "title": "Kader importieren (football-data.org)",
+    "competitionsError": "Ligen konnten nicht geladen werden.",
+    "loadingCompetitions": "Lade Ligen…",
+    "teamsError": "Teams konnten nicht geladen werden.",
+    "loadingTeams": "Lade Teams…",
+    "backToCompetitions": "← Zurück zu den Ligen",
+    "backToTeams": "← Zurück zu den Teams",
+    "squadError": "Kader konnte nicht geladen werden.",
+    "loadingSquad": "Lade Kader…",
+    "importError": "Import fehlgeschlagen.",
+    "importCount": "{{count}} Spieler importieren"
   },
   "crestTitle": "Wappen ersetzt die Trikotfarben auf allen Spieler-Chips dieses Teams im Editor",
   "crestAlt": "Wappen",
