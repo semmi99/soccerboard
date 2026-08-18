@@ -41,17 +41,24 @@ const POSITION_PATTERN = Object.keys(POSITION_DE)
   .map((p) => p.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
   .join('|')
 
-// number (or "-" for an unassigned squad number) → gap → name → gap → one
-// of the known position labels. The gaps match any whitespace (\s+, not
-// just \n/\t) since a real OS copy-paste's exact cell separators vary by
-// browser: Windows clipboards often use \r\n instead of \n, and some
-// browsers tab-separate a multi-line cell's content on one line instead of
-// using a real newline. Anchoring loosely on "some whitespace" rather than
-// an exact character sequence is what makes this resilient to that. Global
-// match scans the whole pasted blob for this shape wherever it occurs, so
-// it doesn't care how many rows there are or what other columns surround
-// each one.
-const ROW_PATTERN = new RegExp(`(\\d{1,3}|-)\\s+([^\\s\\d][^\\r\\n\\t]*?)\\s+(${POSITION_PATTERN})\\b`, 'g')
+// number (or "-" for an unassigned squad number) → rest of that same line,
+// discarded → a line break → name → gap → one of the known position
+// labels. The "rest of that line" is normally empty, but for an on-loan
+// player Transfermarkt inserts their current parent club right there
+// ("26\tRoda JC Kerkrade\nJordy Steins...") — common enough in a real
+// squad (loan-heavy academy sides) that it can't be treated as a rare
+// edge case. Discarding everything up to the next line break, whatever it
+// is, handles both. The name→position gap stays \s+ (not just \n) since a
+// real OS copy-paste's exact cell separators vary by browser: Windows
+// clipboards often use \r\n instead of \n, and some browsers tab-separate
+// a multi-line cell's content on one line instead of using a real newline.
+// Global match scans the whole pasted blob for this shape wherever it
+// occurs, so it doesn't care how many rows there are or what other columns
+// surround each one.
+const ROW_PATTERN = new RegExp(
+  `(\\d{1,3}|-)[^\\r\\n]*\\r?\\n\\s*([^\\s\\d][^\\r\\n\\t]*?)\\s+(${POSITION_PATTERN})\\b`,
+  'g',
+)
 
 // Transfermarkt's player-name cell links to the player's profile, which a
 // real browser copy serializes as the name twice in a row (link text +
