@@ -5,6 +5,7 @@
   "deleteTeam": "Delete team",
   "apiFootballImport": "Import pro squad",
   "apiFootballFixtureImport": "Import a match",
+  "transfermarktImport": "Paste squad (Transfermarkt)",
   "apiFootballDialog": {
     "title": "Import pro squad (API-Football)",
     "searchPlaceholder": "Search a team, e.g. Real Madrid",
@@ -30,6 +31,17 @@
     "importError": "Import failed.",
     "importButton": "Import both squads",
     "importProgress": "{{done}}/{{total}}…"
+  },
+  "transfermarktDialog": {
+    "title": "Paste a squad from Transfermarkt",
+    "description": "Open a club's Kader page on transfermarkt.at/.de yourself, select the squad table, copy it, and paste it here. No API access, no automated request — you open the page yourself.",
+    "teamNameLabel": "Team name",
+    "teamNamePlaceholder": "e.g. SV Kapfenberg",
+    "pastePlaceholder": "Paste the squad table here…",
+    "recognizedCount": "{{count}} players recognized.",
+    "noneRecognized": "No players recognized yet.",
+    "importError": "Import failed.",
+    "importCount": "Import {{count}} players"
   },
   "crestTitle": "The crest replaces the kit colors on all of this team's player chips in the editor",
   "crestAlt": "Crest",

@@ -401,3 +401,54 @@ export async function importApiFootballFixture(
 
   return { home, away }
 }
+
+export interface PastedSquadEntry {
+  firstName: string
+  lastName: string
+  jerseyNumber: number | null
+  position: string | null
+}
+
+/** Creates a team from a manually pasted squad list (see
+ * parseTransfermarktPaste) — same duplicate-name guard as the API imports,
+ * but no crest/kit-color step since there's no image URL to sample from a
+ * paste; the admin uploads a crest afterward via the normal team controls
+ * if they want one. */
+export async function importPastedSquad(
+  orgId: string,
+  teamName: string,
+  entries: PastedSquadEntry[],
+): Promise<ImportApiFootballSquadResult> {
+  const { data: existing, error: existingError } = await supabase
+    .from('teams')
+    .select('id')
+    .eq('org_id', orgId)
+    .eq('name', teamName)
+    .maybeSingle()
+  if (existingError) throw existingError
+  if (existing) {
+    throw new Error(`„${teamName}“ existiert bereits. Team löschen oder anderen Namen wählen.`)
+  }
+
+  const team = await createTeam({ orgId, name: teamName, ageGroup: '', season: '' })
+
+  for (const entry of entries) {
+    await createPlayer({
+      teamId: team.id,
+      firstName: entry.firstName,
+      lastName: entry.lastName,
+      jerseyNumber: entry.jerseyNumber,
+      position: entry.position ?? '',
+      secondaryPosition: '',
+      strongFoot: '',
+      birthDate: '',
+      nationality: '',
+      phone: '',
+      email: '',
+      notes: '',
+      attributes: {},
+    })
+  }
+
+  return { team, playerCount: entries.length }
+}

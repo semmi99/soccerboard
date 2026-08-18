@@ -5,6 +5,7 @@
   "deleteTeam": "Team löschen",
   "apiFootballImport": "Profi-Kader importieren",
   "apiFootballFixtureImport": "Spiel importieren",
+  "transfermarktImport": "Kader einfügen (Transfermarkt)",
   "apiFootballDialog": {
     "title": "Profi-Kader importieren (API-Football)",
     "searchPlaceholder": "Team suchen, z.B. Real Madrid",
@@ -30,6 +31,17 @@
     "importError": "Import fehlgeschlagen.",
     "importButton": "Beide Kader importieren",
     "importProgress": "{{done}}/{{total}}…"
+  },
+  "transfermarktDialog": {
+    "title": "Kader von Transfermarkt einfügen",
+    "description": "Auf transfermarkt.at/.de die Kader-Seite eines Vereins öffnen, die Kader-Tabelle markieren, kopieren und hier einfügen. Kein API-Zugriff, keine automatische Abfrage — du öffnest die Seite selbst.",
+    "teamNameLabel": "Teamname",
+    "teamNamePlaceholder": "z. B. SV Kapfenberg",
+    "pastePlaceholder": "Kader-Tabelle hier einfügen…",
+    "recognizedCount": "{{count}} Spieler werden erkannt.",
+    "noneRecognized": "Noch keine Spieler erkannt.",
+    "importError": "Import fehlgeschlagen.",
+    "importCount": "{{count}} Spieler importieren"
   },
   "crestTitle": "Wappen ersetzt die Trikotfarben auf allen Spieler-Chips dieses Teams im Editor",
   "crestAlt": "Wappen",
