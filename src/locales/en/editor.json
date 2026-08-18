@@ -91,6 +91,7 @@
     "multiSelect": {
       "title": "{{count}} objects selected",
       "createRatioBadge": "Create ratio badge (e.g. 3 v 4)",
+      "distributeOntoShape": "Distribute onto shape",
       "lock": "Lock",
       "unlock": "Unlock",
       "colorAll": "Color (for all selected)"

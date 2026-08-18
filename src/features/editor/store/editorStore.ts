@@ -232,6 +232,7 @@ interface EditorState {
   clearActiveFrame: () => void
   duplicateSelected: () => void
   addRatioBadgeFromSelection: () => void
+  distributeSelectedOntoShape: () => void
   bringToFront: (objectId: string) => void
   sendToBack: (objectId: string) => void
   nudgeSelected: (dx: number, dy: number) => void
@@ -1020,6 +1021,70 @@ export const useEditorStore = create<EditorState>((set, get) => ({
       i === activeFrameIndex ? { ...f, objects: [...f.objects, newObject] } : f,
     )
     set({ frames: nextFrames, selection: [newObject.id], isDirty: true })
+  },
+
+  // Selecting 2+ player chips plus exactly one shape and clicking "Auf Form
+  // verteilen" spaces the chips evenly around a circle's edge or in a grid
+  // inside a rectangle — the manual alternative (dragging each chip by
+  // hand onto a rough estimate of an evenly-spaced point) is exactly the
+  // kind of fiddly work this is meant to replace for rondo/possession-drill
+  // setups. 0.8/0.85 insets keep the chips inside the shape's own border
+  // instead of sitting exactly on it.
+  distributeSelectedOntoShape: () => {
+    const { frames, activeFrameIndex, selection } = get()
+    const frame = frames[activeFrameIndex]
+    if (!frame) return
+    const selected = frame.objects.filter((o) => selection.includes(o.id))
+    const shape = selected.find(
+      (o): o is Extract<FrameObject, { objectType: 'shape' }> => o.objectType === 'shape',
+    )
+    const chips = selected.filter(
+      (o): o is Extract<FrameObject, { objectType: 'player_chip' }> => o.objectType === 'player_chip',
+    )
+    if (!shape || chips.length < 2) return
+
+    const halfW = (shape.data.width * shape.scale) / 2
+    const halfH = (shape.data.height * shape.scale) / 2
+    const rad = (shape.rotation * Math.PI) / 180
+    const cos = Math.cos(rad)
+    const sin = Math.sin(rad)
+    const toWorld = (lx: number, ly: number) => ({
+      x: shape.x + lx * cos - ly * sin,
+      y: shape.y + lx * sin + ly * cos,
+    })
+
+    const n = chips.length
+    const points: { x: number; y: number }[] = []
+    if (shape.data.kind === 'circle') {
+      for (let i = 0; i < n; i++) {
+        const angle = (i / n) * Math.PI * 2 - Math.PI / 2
+        points.push(toWorld(Math.cos(angle) * halfW * 0.85, Math.sin(angle) * halfH * 0.85))
+      }
+    } else {
+      const cols = Math.ceil(Math.sqrt(n))
+      const rows = Math.ceil(n / cols)
+      for (let i = 0; i < n; i++) {
+        const col = i % cols
+        const row = Math.floor(i / cols)
+        const fx = cols > 1 ? col / (cols - 1) : 0.5
+        const fy = rows > 1 ? row / (rows - 1) : 0.5
+        points.push(toWorld((fx - 0.5) * 2 * halfW * 0.8, (fy - 0.5) * 2 * halfH * 0.8))
+      }
+    }
+
+    pushHistory(get, set)
+    const nextFrames = frames.map((f, i) => {
+      if (i !== activeFrameIndex) return f
+      return {
+        ...f,
+        objects: f.objects.map((o) => {
+          const idx = chips.findIndex((c) => c.id === o.id)
+          if (idx === -1) return o
+          return { ...o, x: points[idx]!.x, y: points[idx]!.y }
+        }),
+      }
+    })
+    set({ frames: nextFrames, isDirty: true })
   },
 
   bringToFront: (objectId) => {

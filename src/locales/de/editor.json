@@ -91,6 +91,7 @@
     "multiSelect": {
       "title": "{{count}} Objekte ausgewählt",
       "createRatioBadge": "Verhältnis-Badge erstellen (z.B. 3 v 4)",
+      "distributeOntoShape": "Auf Form verteilen",
       "lock": "Fixieren",
       "unlock": "Lösen",
       "colorAll": "Farbe (für alle markierten)"

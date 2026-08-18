@@ -122,6 +122,7 @@ export function PropertiesSidebar({
   const removeSelected = useEditorStore((s) => s.removeSelected)
   const duplicateSelected = useEditorStore((s) => s.duplicateSelected)
   const addRatioBadgeFromSelection = useEditorStore((s) => s.addRatioBadgeFromSelection)
+  const distributeSelectedOntoShape = useEditorStore((s) => s.distributeSelectedOntoShape)
   const bringToFront = useEditorStore((s) => s.bringToFront)
   const sendToBack = useEditorStore((s) => s.sendToBack)
 
@@ -337,6 +338,14 @@ export function PropertiesSidebar({
               {t('properties.multiSelect.createRatioBadge')}
             </Button>
           )}
+          {(frame?.objects.filter((o) => o.objectType === 'player_chip' && selection.includes(o.id)).length ?? 0) >=
+            2 &&
+            (frame?.objects.filter((o) => o.objectType === 'shape' && selection.includes(o.id)).length ?? 0) ===
+              1 && (
+              <Button variant="secondary" className="mt-1.5 w-full" onClick={distributeSelectedOntoShape}>
+                {t('properties.multiSelect.distributeOntoShape')}
+              </Button>
+            )}
         </div>
       )}
 
