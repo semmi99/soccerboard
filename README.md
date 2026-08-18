@@ -190,13 +190,6 @@ in Supabase hinterlegen (Dashboard → Edge Functions → Secrets, oder
 Ohne gesetztes Secret meldet der Import-Dialog einen Fehler, alles andere
 in der App bleibt unberührt.
 
-Daneben gibt es „Kader importieren (football-data.org)“ — kein Freitext-
-Suchfeld wie bei API-Football, sondern erst Liga, dann Team wählen (nur die
-~12 Top-Ligen, die der [football-data.org](https://www.football-data.org/)-Free-Plan
-abdeckt), und ohne Spielerfotos (die liefert die API nicht). Eigenes Secret:
-
-- `FOOTBALL_DATA_TOKEN` – der API-Token aus dem eigenen football-data.org-Konto
-
 ## Vor Produktivbetrieb
 
 - Supabase Security Advisor meldet **„Leaked Password Protection Disabled“** – unter
