@@ -580,10 +580,14 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
   // inside it, the resulting m²/player — the "space per player" figure
   // coaches use to judge a small-sided game's intensity (tighter space per
   // player skews toward duels/strength, more space toward running/speed).
-  const shapeAreaLabels = sortedObjects
+  // showStatsCard is a separate opt-in (never implied by showAreaInfo) for
+  // a bigger card with a coach-labeled category tag and custom strength
+  // bars — shared geometry (dimensions/rotation/player count) is computed
+  // once for whichever of the two a shape has turned on.
+  const zoneInfos = sortedObjects
     .filter(
       (o): o is Extract<FrameObject, { objectType: 'shape' }> =>
-        o.objectType === 'shape' && Boolean(o.data.showAreaInfo),
+        o.objectType === 'shape' && Boolean(o.data.showAreaInfo || o.data.showStatsCard),
     )
     .map((o) => {
       const halfW = (o.data.width * o.scale) / 2
@@ -608,15 +612,56 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
         return isCircle ? (dx / halfW) ** 2 + (dy / halfH) ** 2 <= 1 : Math.abs(dx) <= halfW && Math.abs(dy) <= halfH
       }).length
 
-      const localLabelY = -halfH - 14
+      return { o, halfW, halfH, widthM, heightM, areaM2, cos, sin, playerCount }
+    })
+
+  // Prominent dimension band right at the zone's top edge — split out from
+  // the m²/player readout below so it reads at a glance instead of being
+  // buried in one long combined line.
+  const shapeDimLabels = zoneInfos
+    .filter((z) => z.o.data.showAreaInfo)
+    .map((z) => {
+      const localLabelY = -z.halfH - 16
       return {
-        id: o.id,
-        x: o.x + localLabelY * -sin,
-        y: o.y + localLabelY * cos,
-        text:
-          playerCount > 0
-            ? `${widthM.toFixed(1)}×${heightM.toFixed(1)}m · ${Math.round(areaM2 / playerCount)} m²/Spieler`
-            : `${widthM.toFixed(1)}×${heightM.toFixed(1)}m`,
+        id: z.o.id,
+        x: z.o.x + localLabelY * -z.sin,
+        y: z.o.y + localLabelY * z.cos,
+        text: `${z.widthM.toFixed(1)} × ${z.heightM.toFixed(1)} m`,
+      }
+    })
+
+  const shapeAreaLabels = zoneInfos
+    .filter((z) => z.o.data.showAreaInfo && z.playerCount > 0)
+    .map((z) => {
+      const localLabelY = z.halfH + 16
+      return {
+        id: z.o.id,
+        x: z.o.x + localLabelY * -z.sin,
+        y: z.o.y + localLabelY * z.cos,
+        text: `${Math.round(z.areaM2)} m² · ${z.playerCount} Sp. · ${Math.round(z.areaM2 / z.playerCount)} m²/Spieler`,
+      }
+    })
+
+  const STATS_BAR_ROW_H = 20
+  const shapeStatsCards = zoneInfos
+    .filter((z) => z.o.data.showStatsCard)
+    .map((z) => {
+      const bars = z.o.data.statsCardBars ?? []
+      const width = 176
+      const height = 108 + bars.length * STATS_BAR_ROW_H
+      const localOffsetX = -(z.halfW + width / 2 + 24)
+      return {
+        id: z.o.id,
+        x: z.o.x + localOffsetX * z.cos,
+        y: z.o.y + localOffsetX * z.sin,
+        width,
+        height,
+        category: z.o.data.statsCardCategory || '',
+        color: z.o.data.statsCardColor || '#f2a73b',
+        bigNumber: z.playerCount > 0 ? Math.round(z.areaM2 / z.playerCount) : Math.round(z.areaM2),
+        bigNumberUnit: z.playerCount > 0 ? 'm²/Sp.' : 'm²',
+        subtitle: `${Math.round(z.areaM2)} m² · ${z.playerCount} Sp.`,
+        bars,
       }
     })
 
@@ -1411,30 +1456,169 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
               </Group>
             )
           })}
-          {shapeAreaLabels.map((l) => {
-            const labelWidth = Math.max(70, l.text.length * 5.6 + 14)
+          {shapeDimLabels.map((l) => {
+            const labelWidth = Math.max(80, l.text.length * 6.6 + 18)
             return (
-              <Group key={`area-info-${l.id}`} x={l.x} y={l.y} listening={false}>
+              <Group key={`dim-info-${l.id}`} x={l.x} y={l.y} listening={false}>
                 <Rect
                   x={-labelWidth / 2}
-                  y={-10}
+                  y={-12}
                   width={labelWidth}
-                  height={20}
-                  fill="rgba(15, 23, 42, 0.82)"
-                  cornerRadius={4}
+                  height={24}
+                  fill="rgba(15, 23, 42, 0.9)"
+                  stroke="rgba(255, 255, 255, 0.25)"
+                  strokeWidth={1}
+                  cornerRadius={6}
                 />
                 <Text
                   text={l.text}
                   x={-labelWidth / 2}
-                  y={-10}
+                  y={-12}
                   width={labelWidth}
-                  height={20}
+                  height={24}
+                  align="center"
+                  verticalAlign="middle"
+                  fontSize={12}
+                  fontStyle="bold"
+                  fill="#ffffff"
+                />
+              </Group>
+            )
+          })}
+          {shapeAreaLabels.map((l) => {
+            const labelWidth = Math.max(70, l.text.length * 5.6 + 16)
+            return (
+              <Group key={`area-info-${l.id}`} x={l.x} y={l.y} listening={false}>
+                <Rect
+                  x={-labelWidth / 2}
+                  y={-11}
+                  width={labelWidth}
+                  height={22}
+                  fill="rgba(15, 23, 42, 0.82)"
+                  stroke="rgba(255, 255, 255, 0.12)"
+                  strokeWidth={1}
+                  cornerRadius={8}
+                />
+                <Text
+                  text={l.text}
+                  x={-labelWidth / 2}
+                  y={-11}
+                  width={labelWidth}
+                  height={22}
                   align="center"
                   verticalAlign="middle"
                   fontSize={10}
                   fontStyle="bold"
                   fill="#ffffff"
                 />
+              </Group>
+            )
+          })}
+          {shapeStatsCards.map((c) => {
+            const pad = 12
+            const categoryWidth = Math.max(50, c.category.length * 6.5 + 18)
+            const numberY = pad + 24
+            const subtitleY = numberY + 34
+            const dividerY = subtitleY + 20
+            return (
+              <Group key={`stats-card-${c.id}`} x={c.x} y={c.y} listening={false}>
+                <Rect
+                  x={-c.width / 2}
+                  y={-c.height / 2}
+                  width={c.width}
+                  height={c.height}
+                  fill="rgba(15, 23, 42, 0.92)"
+                  stroke={c.color}
+                  strokeWidth={2}
+                  cornerRadius={12}
+                  shadowColor="#000000"
+                  shadowBlur={10}
+                  shadowOpacity={0.4}
+                />
+                {c.category && (
+                  <>
+                    <Rect
+                      x={-c.width / 2 + pad}
+                      y={-c.height / 2 + pad}
+                      width={categoryWidth}
+                      height={18}
+                      fill={c.color}
+                      cornerRadius={4}
+                    />
+                    <Text
+                      text={c.category.toUpperCase()}
+                      x={-c.width / 2 + pad}
+                      y={-c.height / 2 + pad}
+                      width={categoryWidth}
+                      height={18}
+                      align="center"
+                      verticalAlign="middle"
+                      fontSize={9}
+                      fontStyle="bold"
+                      fill="#0f172a"
+                    />
+                  </>
+                )}
+                <Text
+                  text={String(c.bigNumber)}
+                  x={-c.width / 2 + pad}
+                  y={-c.height / 2 + numberY}
+                  fontSize={28}
+                  fontStyle="bold"
+                  fill="#ffffff"
+                />
+                <Text
+                  text={c.bigNumberUnit}
+                  x={-c.width / 2 + pad + String(c.bigNumber).length * 17 + 6}
+                  y={-c.height / 2 + numberY + 16}
+                  fontSize={10}
+                  fill="rgba(255,255,255,0.5)"
+                />
+                <Text
+                  text={c.subtitle}
+                  x={-c.width / 2 + pad}
+                  y={-c.height / 2 + subtitleY}
+                  fontSize={10}
+                  fill="rgba(255,255,255,0.55)"
+                />
+                <Rect
+                  x={-c.width / 2 + pad}
+                  y={-c.height / 2 + dividerY}
+                  width={c.width - pad * 2}
+                  height={1}
+                  fill="rgba(255,255,255,0.15)"
+                />
+                {c.bars.map((bar, i) => {
+                  const rowY = -c.height / 2 + dividerY + 12 + i * STATS_BAR_ROW_H
+                  const pipSize = 12
+                  const pipGap = 3
+                  const pipsTotalWidth = pipSize * 4 + pipGap * 3
+                  return (
+                    <Group key={i}>
+                      <Text
+                        text={bar.label || `Balken ${i + 1}`}
+                        x={-c.width / 2 + pad}
+                        y={rowY}
+                        width={c.width - pad * 2 - pipsTotalWidth - 8}
+                        fontSize={10}
+                        fill="rgba(255,255,255,0.8)"
+                        ellipsis
+                        wrap="none"
+                      />
+                      {[1, 2, 3, 4].map((level) => (
+                        <Rect
+                          key={level}
+                          x={c.width / 2 - pad - pipsTotalWidth + (level - 1) * (pipSize + pipGap)}
+                          y={rowY}
+                          width={pipSize}
+                          height={pipSize}
+                          fill={level <= bar.level ? c.color : 'rgba(255,255,255,0.12)'}
+                          cornerRadius={2}
+                        />
+                      ))}
+                    </Group>
+                  )
+                })}
               </Group>
             )
           })}

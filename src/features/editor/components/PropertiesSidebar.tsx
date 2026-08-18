@@ -457,7 +457,7 @@ export function PropertiesSidebar({
             />
           )}
 
-          <div className="flex flex-wrap gap-1.5 border-t border-pitch-700 pt-3">
+          <div className="grid grid-cols-2 gap-1.5 border-t border-pitch-700 pt-3">
             <Button variant="secondary" onClick={() => bringToFront(selectedObject.id)}>
               {t('properties.singleSelect.bringToFront')}
             </Button>
@@ -1059,6 +1059,91 @@ function ShapeFields({
         />
         {t('properties.shape.showAreaInfo')}
       </label>
+
+      <label className="flex items-center gap-2 text-xs text-white/70">
+        <input
+          type="checkbox"
+          className="accent-violet-accent"
+          checked={data.showStatsCard ?? false}
+          onChange={(e) => {
+            onCheckpoint()
+            onChange(
+              e.target.checked
+                ? {
+                    showStatsCard: true,
+                    statsCardCategory: data.statsCardCategory ?? '',
+                    statsCardColor: data.statsCardColor ?? '#f2a73b',
+                    statsCardBars: data.statsCardBars ?? [
+                      { label: '', level: 2 },
+                      { label: '', level: 2 },
+                      { label: '', level: 2 },
+                    ],
+                  }
+                : { showStatsCard: false },
+            )
+          }}
+        />
+        {t('properties.shape.showStatsCard')}
+      </label>
+
+      {data.showStatsCard && (
+        <div className="flex flex-col gap-1.5 rounded-md border border-pitch-700 bg-pitch-800/60 p-2.5">
+          <Field label={t('properties.shape.statsCardCategory')}>
+            <input
+              type="text"
+              value={data.statsCardCategory ?? ''}
+              onFocus={onCheckpoint}
+              onChange={(e) => onChange({ statsCardCategory: e.target.value })}
+              placeholder={t('properties.shape.statsCardCategoryPlaceholder')}
+              className="w-full rounded-md border border-pitch-600 bg-pitch-800 px-2 py-1.5 text-xs text-white outline-none focus:border-violet-accent"
+            />
+          </Field>
+          <ColorSwatchPicker
+            value={data.statsCardColor ?? '#f2a73b'}
+            onChange={(color) => {
+              onCheckpoint()
+              onChange({ statsCardColor: color })
+            }}
+          />
+          {(data.statsCardBars ?? []).map((bar, i) => (
+            <div key={i} className="flex items-center gap-1.5">
+              <input
+                type="text"
+                value={bar.label}
+                onFocus={onCheckpoint}
+                onChange={(e) => {
+                  const bars = [...(data.statsCardBars ?? [])]
+                  bars[i] = { ...bar, label: e.target.value }
+                  onChange({ statsCardBars: bars })
+                }}
+                placeholder={t('properties.shape.statsCardBarPlaceholder', { n: i + 1 })}
+                className="min-w-0 flex-1 rounded-md border border-pitch-600 bg-pitch-800 px-2 py-1.5 text-xs text-white outline-none focus:border-violet-accent"
+              />
+              <div className="flex shrink-0 gap-0.5">
+                {[1, 2, 3, 4].map((level) => (
+                  <button
+                    key={level}
+                    type="button"
+                    onClick={() => {
+                      onCheckpoint()
+                      const bars = [...(data.statsCardBars ?? [])]
+                      bars[i] = { ...bar, level }
+                      onChange({ statsCardBars: bars })
+                    }}
+                    className={`h-5 w-3.5 rounded-sm border ${
+                      level <= bar.level
+                        ? 'border-transparent'
+                        : 'border-pitch-600 bg-pitch-800'
+                    }`}
+                    style={level <= bar.level ? { backgroundColor: data.statsCardColor ?? '#f2a73b' } : undefined}
+                    aria-label={t('properties.shape.statsCardLevel', { level })}
+                  />
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   )
 }

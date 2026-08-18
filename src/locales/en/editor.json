@@ -179,7 +179,12 @@
       "width": "Width ({{px}}px)",
       "height": "Height ({{px}}px)",
       "opacity": "Opacity ({{percent}}%)",
-      "showAreaInfo": "Show size & m²/player"
+      "showAreaInfo": "Show size & m²/player",
+      "showStatsCard": "Show stats card",
+      "statsCardCategory": "Category",
+      "statsCardCategoryPlaceholder": "e.g. STRENGTH",
+      "statsCardBarPlaceholder": "Bar {{n}}, e.g. Sprint",
+      "statsCardLevel": "Level {{level}}"
     },
     "text": {
       "textLabel": "Text",

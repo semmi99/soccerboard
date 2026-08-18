@@ -179,7 +179,12 @@
       "width": "Breite ({{px}}px)",
       "height": "Höhe ({{px}}px)",
       "opacity": "Deckkraft ({{percent}}%)",
-      "showAreaInfo": "Größe & m²/Spieler anzeigen"
+      "showAreaInfo": "Größe & m²/Spieler anzeigen",
+      "showStatsCard": "Statistik-Karte anzeigen",
+      "statsCardCategory": "Kategorie",
+      "statsCardCategoryPlaceholder": "z. B. KRAFT",
+      "statsCardBarPlaceholder": "Balken {{n}}, z. B. Sprint",
+      "statsCardLevel": "Stufe {{level}}"
     },
     "text": {
       "textLabel": "Text",

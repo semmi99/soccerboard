@@ -176,6 +176,16 @@ export interface ShapeData {
    * space per player ≈ more duels/strength work, more space ≈ more
    * running/speed). */
   showAreaInfo?: boolean
+  /** Opt-in richer stat card next to the shape — a coach-labeled category
+   * tag plus up to 3 custom-labeled strength bars (1-4 pips each), for
+   * characterizing a training zone's physical demand at a glance. Separate
+   * from `showAreaInfo`/never auto-enabled by it — a coach who just wants
+   * the plain size/space-per-player readout shouldn't get an extra card
+   * they didn't ask for. */
+  showStatsCard?: boolean
+  statsCardCategory?: string
+  statsCardColor?: string
+  statsCardBars?: { label: string; level: number }[]
 }
 
 export interface TextData {
