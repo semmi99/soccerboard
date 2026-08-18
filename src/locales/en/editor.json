@@ -181,6 +181,8 @@
       "opacity": "Opacity ({{percent}}%)",
       "showAreaInfo": "Show size & m²/player",
       "areaInfoResetPosition": "Reset size/area labels",
+      "areaInfoSize": "Size ({{percent}}%)",
+      "areaInfoFontSize": "Font size ({{px}}px)",
       "showStatsCard": "Show stats card",
       "statsCardCategory": "Category",
       "statsCardCategoryPlaceholder": "e.g. STRENGTH",

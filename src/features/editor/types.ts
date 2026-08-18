@@ -185,6 +185,13 @@ export interface ShapeData {
   dimLabelOffsetY?: number
   areaLabelOffsetX?: number
   areaLabelOffsetY?: number
+  /** Shared formatting for both the dimension band and the m²/player badge
+   * (one setting for the pair, not one each — they're toggled by the same
+   * checkbox and read as a matched set). Unset behaves as the original
+   * fixed look: dark navy background, box at 1x, 12px/10px text. */
+  areaInfoColor?: string
+  areaInfoScale?: number
+  areaInfoFontSize?: number
   /** Opt-in richer stat card next to the shape — a coach-labeled category
    * tag plus up to 3 custom-labeled strength bars (1-4 pips each), for
    * characterizing a training zone's physical demand at a glance. Separate

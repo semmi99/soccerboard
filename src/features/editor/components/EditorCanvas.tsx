@@ -630,6 +630,9 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
         baseY,
         x: baseX + (z.o.data.dimLabelOffsetX ?? 0),
         y: baseY + (z.o.data.dimLabelOffsetY ?? 0),
+        color: z.o.data.areaInfoColor || 'rgba(15, 23, 42, 0.9)',
+        scale: z.o.data.areaInfoScale ?? 1,
+        fontSize: z.o.data.areaInfoFontSize ?? 12,
         text: `${z.widthM.toFixed(1)} × ${z.heightM.toFixed(1)} m`,
       }
     })
@@ -644,6 +647,9 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
         id: z.o.id,
         baseX,
         baseY,
+        color: z.o.data.areaInfoColor || 'rgba(15, 23, 42, 0.82)',
+        scale: z.o.data.areaInfoScale ?? 1,
+        fontSize: z.o.data.areaInfoFontSize ? z.o.data.areaInfoFontSize - 2 : 10,
         x: baseX + (z.o.data.areaLabelOffsetX ?? 0),
         y: baseY + (z.o.data.areaLabelOffsetY ?? 0),
         text: `${Math.round(z.areaM2)} m² · ${z.playerCount} Sp. · ${Math.round(z.areaM2 / z.playerCount)} m²/Spieler`,
@@ -1505,7 +1511,8 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
             )
           })}
           {shapeDimLabels.map((l) => {
-            const labelWidth = Math.max(80, l.text.length * 6.6 + 18)
+            const height = 24 * l.scale
+            const labelWidth = Math.max(80, l.text.length * l.fontSize * 0.55 + 18) * l.scale
             return (
               <Group
                 key={`dim-info-${l.id}`}
@@ -1519,10 +1526,10 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
               >
                 <Rect
                   x={-labelWidth / 2}
-                  y={-12}
+                  y={-height / 2}
                   width={labelWidth}
-                  height={24}
-                  fill="rgba(15, 23, 42, 0.9)"
+                  height={height}
+                  fill={l.color}
                   stroke="rgba(255, 255, 255, 0.25)"
                   strokeWidth={1}
                   cornerRadius={6}
@@ -1530,12 +1537,12 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
                 <Text
                   text={l.text}
                   x={-labelWidth / 2}
-                  y={-12}
+                  y={-height / 2}
                   width={labelWidth}
-                  height={24}
+                  height={height}
                   align="center"
                   verticalAlign="middle"
-                  fontSize={12}
+                  fontSize={l.fontSize}
                   fontStyle="bold"
                   fill="#ffffff"
                 />
@@ -1543,7 +1550,8 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
             )
           })}
           {shapeAreaLabels.map((l) => {
-            const labelWidth = Math.max(70, l.text.length * 5.6 + 16)
+            const height = 22 * l.scale
+            const labelWidth = Math.max(70, l.text.length * l.fontSize * 0.55 + 16) * l.scale
             return (
               <Group
                 key={`area-info-${l.id}`}
@@ -1557,10 +1565,10 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
               >
                 <Rect
                   x={-labelWidth / 2}
-                  y={-11}
+                  y={-height / 2}
                   width={labelWidth}
-                  height={22}
-                  fill="rgba(15, 23, 42, 0.82)"
+                  height={height}
+                  fill={l.color}
                   stroke="rgba(255, 255, 255, 0.12)"
                   strokeWidth={1}
                   cornerRadius={8}
@@ -1568,12 +1576,12 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
                 <Text
                   text={l.text}
                   x={-labelWidth / 2}
-                  y={-11}
+                  y={-height / 2}
                   width={labelWidth}
-                  height={22}
+                  height={height}
                   align="center"
                   verticalAlign="middle"
-                  fontSize={10}
+                  fontSize={l.fontSize}
                   fontStyle="bold"
                   fill="#ffffff"
                 />

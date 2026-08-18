@@ -1059,16 +1059,51 @@ function ShapeFields({
         />
         {t('properties.shape.showAreaInfo')}
       </label>
-      {data.showAreaInfo && (data.dimLabelOffsetX || data.dimLabelOffsetY || data.areaLabelOffsetX || data.areaLabelOffsetY) && (
-        <Button
-          variant="secondary"
-          onClick={() => {
-            onCheckpoint()
-            onChange({ dimLabelOffsetX: 0, dimLabelOffsetY: 0, areaLabelOffsetX: 0, areaLabelOffsetY: 0 })
-          }}
-        >
-          {t('properties.shape.areaInfoResetPosition')}
-        </Button>
+      {data.showAreaInfo && (
+        <div className="flex flex-col gap-1.5 rounded-md border border-pitch-700 bg-pitch-800/60 p-2.5">
+          <ColorSwatchPicker
+            value={data.areaInfoColor ?? '#0f172a'}
+            onChange={(color) => {
+              onCheckpoint()
+              onChange({ areaInfoColor: color })
+            }}
+          />
+          <Field label={t('properties.shape.areaInfoSize', { percent: Math.round((data.areaInfoScale ?? 1) * 100) })}>
+            <input
+              type="range"
+              min={0.6}
+              max={1.8}
+              step={0.05}
+              className="w-full"
+              value={data.areaInfoScale ?? 1}
+              onFocus={onCheckpoint}
+              onChange={(e) => onChange({ areaInfoScale: Number(e.target.value) })}
+            />
+          </Field>
+          <Field label={t('properties.shape.areaInfoFontSize', { px: data.areaInfoFontSize ?? 12 })}>
+            <input
+              type="range"
+              min={8}
+              max={22}
+              step={1}
+              className="w-full"
+              value={data.areaInfoFontSize ?? 12}
+              onFocus={onCheckpoint}
+              onChange={(e) => onChange({ areaInfoFontSize: Number(e.target.value) })}
+            />
+          </Field>
+          {(data.dimLabelOffsetX || data.dimLabelOffsetY || data.areaLabelOffsetX || data.areaLabelOffsetY) && (
+            <Button
+              variant="secondary"
+              onClick={() => {
+                onCheckpoint()
+                onChange({ dimLabelOffsetX: 0, dimLabelOffsetY: 0, areaLabelOffsetX: 0, areaLabelOffsetY: 0 })
+              }}
+            >
+              {t('properties.shape.areaInfoResetPosition')}
+            </Button>
+          )}
+        </div>
       )}
 
       <label className="flex items-center gap-2 text-xs text-white/70">
