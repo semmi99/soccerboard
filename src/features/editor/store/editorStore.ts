@@ -94,6 +94,7 @@ const DEFAULT_TEAM_KIT: TeamKit = {
   away: { pattern: 'solid', color1: TEAM_COLORS.away, color2: TEAM_COLORS.away },
   gk: { pattern: 'solid', color1: '#eab308', color2: '#111827' },
   chipScale: 1,
+  markerShape: 'circle',
 }
 
 interface EditorState {

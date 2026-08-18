@@ -1,6 +1,6 @@
 import { supabase } from './client'
 import type { Json, Tables, TablesInsert, TablesUpdate } from '../../types/database.types'
-import type { KitPattern } from '../../features/editor/types'
+import type { KitPattern, MarkerShape } from '../../features/editor/types'
 import {
   getApiFootballSquad,
   translateApiFootballPosition,
@@ -98,6 +98,7 @@ export interface TeamKitPatch {
   gkKitColor1: string
   gkKitColor2: string
   chipScale: number
+  markerShape: MarkerShape
   /** Only meaningful for a project's custom (no-team) kit — a linked real
    * team's crest lives on the `teams` row instead and isn't touched by this
    * patch. Lets a kit template set the crest alongside pattern/colors. */
@@ -117,6 +118,7 @@ export async function updateTeamKit(teamId: string, patch: TeamKitPatch): Promis
     gk_kit_color1: patch.gkKitColor1,
     gk_kit_color2: patch.gkKitColor2,
     chip_scale: patch.chipScale,
+    marker_shape: patch.markerShape,
   }
   const { data, error } = await supabase
     .from('teams')

@@ -610,6 +610,7 @@ export type Database = {
           home_kit_color2: string
           home_kit_pattern: string
           id: string
+          marker_shape: string
           name: string
           org_id: string
           season: string | null
@@ -629,6 +630,7 @@ export type Database = {
           home_kit_color2?: string
           home_kit_pattern?: string
           id?: string
+          marker_shape?: string
           name: string
           org_id: string
           season?: string | null
@@ -648,6 +650,7 @@ export type Database = {
           home_kit_color2?: string
           home_kit_pattern?: string
           id?: string
+          marker_shape?: string
           name?: string
           org_id?: string
           season?: string | null

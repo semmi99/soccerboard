@@ -324,6 +324,11 @@
     "home": "Home",
     "away": "Away",
     "goalkeeper": "Goalkeeper",
+    "markerShape": "Marker shape",
+    "markerShapes": {
+      "circle": "Circle",
+      "shirt": "Shirt"
+    },
     "chipSize": "Chip size",
     "saveFailed": "Save failed.",
     "crestColorLabel": "9011 crest color",

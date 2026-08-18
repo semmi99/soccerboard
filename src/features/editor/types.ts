@@ -62,6 +62,11 @@ export interface PlayerChipData {
 
 export type KitPattern = 'solid' | 'stripes' | 'hoops' | 'sash' | 'split' | 'collar'
 
+/** Chip outline used for every player marker on the board — a plain circle
+ * (the original look) or a jersey silhouette. One board-wide choice rather
+ * than per-side, since a mixed circle/shirt board would look inconsistent. */
+export type MarkerShape = 'circle' | 'shirt'
+
 export interface KitConfig {
   pattern: KitPattern
   color1: string
@@ -94,6 +99,9 @@ export interface TeamKit {
   homeCrestUrl?: string | null
   /** Same as homeCrestUrl, for AWAY chips. */
   awayCrestUrl?: string | null
+  /** Unset behaves as 'circle' — matches every board saved before this
+   * setting existed. */
+  markerShape?: MarkerShape
 }
 
 export interface ArrowData {

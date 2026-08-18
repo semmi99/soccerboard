@@ -324,6 +324,11 @@
     "home": "Heim",
     "away": "Auswärts",
     "goalkeeper": "Torwart",
+    "markerShape": "Marker-Form",
+    "markerShapes": {
+      "circle": "Kreis",
+      "shirt": "Trikot"
+    },
     "chipSize": "Chip-Größe",
     "saveFailed": "Speichern fehlgeschlagen.",
     "crestColorLabel": "9011-Wappen-Farbe",

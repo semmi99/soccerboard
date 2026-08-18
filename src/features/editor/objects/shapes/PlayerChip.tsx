@@ -1,12 +1,96 @@
 import { useEffect, useRef, useState } from 'react'
-import { Circle, Group, Image as KonvaImage, Rect, Text } from 'react-konva'
+import { Circle, Group, Image as KonvaImage, Rect, Shape, Text } from 'react-konva'
 import Konva from 'konva'
 import { TEAM_COLORS } from '../../constants'
-import type { KitConfig, PlayerChipData } from '../../types'
+import type { KitConfig, MarkerShape, PlayerChipData } from '../../types'
 import { useEditorStore } from '../../store/editorStore'
 
 const CHIP_R = 18
+// The fill content (pattern rects / crest image) is drawn slightly larger
+// than CHIP_R so the shirt clip's sleeve tips (which reach ~1.05·CHIP_R)
+// are fully covered — otherwise a sliver at each sleeve tip would show
+// nothing instead of the kit color. Harmless for the circle clip, which
+// crops back down to CHIP_R regardless.
+const FILL_HALF = CHIP_R * 1.1
 const GK_FALLBACK: KitConfig = { pattern: 'solid', color1: '#eab308', color2: '#111827' }
+
+/** Traces a simplified jersey silhouette (collar notch + short sleeves)
+ * into any context with a canvas-2D-like path API — used both as a Group's
+ * clipFunc (Konva.Context) and inside a Shape's sceneFunc (plain
+ * CanvasRenderingContext2D) for the matching stroke outline. Sized so its
+ * overall footprint (±1.05·r wide, ±1·r/1·r tall) roughly matches the
+ * circle marker's own 2r×2r box, so switching shapes doesn't throw off chip
+ * spacing on a packed formation. */
+function traceShirtPath(ctx: { moveTo: (x: number, y: number) => void; lineTo: (x: number, y: number) => void; quadraticCurveTo: (cpx: number, cpy: number, x: number, y: number) => void; closePath: () => void }, r: number) {
+  const collarHalf = 0.22 * r
+  const shoulderY = -r
+  const sleeveTipX = 1.05 * r
+  const sleeveTipY = -0.6 * r
+  const sleeveInX = 0.8 * r
+  const sleeveInY = -0.05 * r
+  const bodyX = 0.75 * r
+  const bodyTopY = -0.15 * r
+  const bodyBottomY = 1.0 * r
+  const corner = 0.15 * r
+
+  ctx.moveTo(-collarHalf, shoulderY)
+  ctx.lineTo(-0.55 * r, shoulderY)
+  ctx.lineTo(-sleeveTipX, sleeveTipY)
+  ctx.lineTo(-sleeveInX, sleeveInY)
+  ctx.lineTo(-bodyX, bodyTopY)
+  ctx.lineTo(-bodyX, bodyBottomY - corner)
+  ctx.quadraticCurveTo(-bodyX, bodyBottomY, -bodyX + corner, bodyBottomY)
+  ctx.lineTo(bodyX - corner, bodyBottomY)
+  ctx.quadraticCurveTo(bodyX, bodyBottomY, bodyX, bodyBottomY - corner)
+  ctx.lineTo(bodyX, bodyTopY)
+  ctx.lineTo(sleeveInX, sleeveInY)
+  ctx.lineTo(sleeveTipX, sleeveTipY)
+  ctx.lineTo(0.55 * r, shoulderY)
+  ctx.lineTo(collarHalf, shoulderY)
+  ctx.quadraticCurveTo(0, -0.65 * r, -collarHalf, shoulderY)
+  ctx.closePath()
+}
+
+function clipToMarkerShape(ctx: Konva.Context, shape: MarkerShape) {
+  ctx.beginPath()
+  if (shape === 'shirt') traceShirtPath(ctx, CHIP_R)
+  else ctx.arc(0, 0, CHIP_R, 0, Math.PI * 2, false)
+}
+
+/** Stroke-only outline matching whichever shape the fill was clipped to —
+ * a plain Circle for 'circle' (unchanged from before), a custom Shape
+ * tracing the same jersey path for 'shirt'. */
+function MarkerOutline({ shape }: { shape: MarkerShape }) {
+  if (shape === 'shirt') {
+    return (
+      <Shape
+        sceneFunc={(context, konvaShape) => {
+          context.beginPath()
+          traceShirtPath(context, CHIP_R)
+          context.closePath()
+          context.fillStrokeShape(konvaShape)
+        }}
+        stroke="#ffffff"
+        strokeWidth={2}
+        shadowColor="#000000"
+        shadowBlur={6}
+        shadowOffsetY={3}
+        shadowOpacity={0.45}
+      />
+    )
+  }
+  return (
+    <Circle
+      radius={CHIP_R}
+      stroke="#ffffff"
+      strokeWidth={2}
+      shadowColor="#000000"
+      shadowBlur={6}
+      shadowOffsetY={3}
+      shadowOpacity={0.45}
+    />
+  )
+}
 
 /** The label is stored as one "First Last" string (see TeamSquadPanel) with
  * no structured first/last fields of its own — splitting at the LAST space
@@ -62,14 +146,14 @@ function KitPatternContent({ kit }: { kit: KitConfig }) {
       return (
         <>
           {Array.from({ length: 5 }, (_, i) => {
-            const w = (CHIP_R * 2) / 5
+            const w = (FILL_HALF * 2) / 5
             return (
               <Rect
                 key={i}
-                x={-CHIP_R + i * w}
-                y={-CHIP_R}
+                x={-FILL_HALF + i * w}
+                y={-FILL_HALF}
                 width={w}
-                height={CHIP_R * 2}
+                height={FILL_HALF * 2}
                 fill={i % 2 === 0 ? kit.color1 : kit.color2}
               />
             )
@@ -80,13 +164,13 @@ function KitPatternContent({ kit }: { kit: KitConfig }) {
       return (
         <>
           {Array.from({ length: 4 }, (_, i) => {
-            const h = (CHIP_R * 2) / 4
+            const h = (FILL_HALF * 2) / 4
             return (
               <Rect
                 key={i}
-                x={-CHIP_R}
-                y={-CHIP_R + i * h}
-                width={CHIP_R * 2}
+                x={-FILL_HALF}
+                y={-FILL_HALF + i * h}
+                width={FILL_HALF * 2}
                 height={h}
                 fill={i % 2 === 0 ? kit.color1 : kit.color2}
               />
@@ -97,14 +181,14 @@ function KitPatternContent({ kit }: { kit: KitConfig }) {
     case 'sash':
       return (
         <>
-          <Rect x={-CHIP_R} y={-CHIP_R} width={CHIP_R * 2} height={CHIP_R * 2} fill={kit.color1} />
+          <Rect x={-FILL_HALF} y={-FILL_HALF} width={FILL_HALF * 2} height={FILL_HALF * 2} fill={kit.color1} />
           <Rect
             x={0}
             y={0}
-            offsetX={CHIP_R * 1.5}
-            offsetY={CHIP_R * 0.45}
-            width={CHIP_R * 3}
-            height={CHIP_R * 0.9}
+            offsetX={FILL_HALF * 1.5}
+            offsetY={FILL_HALF * 0.45}
+            width={FILL_HALF * 3}
+            height={FILL_HALF * 0.9}
             rotation={45}
             fill={kit.color2}
           />
@@ -113,20 +197,20 @@ function KitPatternContent({ kit }: { kit: KitConfig }) {
     case 'split':
       return (
         <>
-          <Rect x={-CHIP_R} y={-CHIP_R} width={CHIP_R} height={CHIP_R * 2} fill={kit.color1} />
-          <Rect x={0} y={-CHIP_R} width={CHIP_R} height={CHIP_R * 2} fill={kit.color2} />
+          <Rect x={-FILL_HALF} y={-FILL_HALF} width={FILL_HALF} height={FILL_HALF * 2} fill={kit.color1} />
+          <Rect x={0} y={-FILL_HALF} width={FILL_HALF} height={FILL_HALF * 2} fill={kit.color2} />
         </>
       )
     case 'collar':
       return (
         <>
-          <Rect x={-CHIP_R} y={-CHIP_R} width={CHIP_R * 2} height={CHIP_R * 2} fill={kit.color1} />
-          <Rect x={-CHIP_R} y={-CHIP_R} width={CHIP_R * 2} height={CHIP_R * 0.6} fill={kit.color2} />
+          <Rect x={-FILL_HALF} y={-FILL_HALF} width={FILL_HALF * 2} height={FILL_HALF * 2} fill={kit.color1} />
+          <Rect x={-FILL_HALF} y={-FILL_HALF} width={FILL_HALF * 2} height={FILL_HALF * 0.6} fill={kit.color2} />
         </>
       )
     case 'solid':
     default:
-      return <Rect x={-CHIP_R} y={-CHIP_R} width={CHIP_R * 2} height={CHIP_R * 2} fill={kit.color1} />
+      return <Rect x={-FILL_HALF} y={-FILL_HALF} width={FILL_HALF * 2} height={FILL_HALF * 2} fill={kit.color1} />
   }
 }
 
@@ -148,50 +232,34 @@ function useHtmlImage(url: string | null | undefined): HTMLImageElement | null {
   return img
 }
 
-function CrestFill({ url }: { url: string }) {
+function CrestFill({ url, shape }: { url: string; shape: MarkerShape }) {
   const img = useHtmlImage(url)
   return (
     <>
-      <Group clipFunc={(ctx) => ctx.arc(0, 0, CHIP_R, 0, Math.PI * 2, false)}>
-        <Rect x={-CHIP_R} y={-CHIP_R} width={CHIP_R * 2} height={CHIP_R * 2} fill="#1f2937" />
+      <Group clipFunc={(ctx) => clipToMarkerShape(ctx, shape)}>
+        <Rect x={-FILL_HALF} y={-FILL_HALF} width={FILL_HALF * 2} height={FILL_HALF * 2} fill="#1f2937" />
         {img && (
           <KonvaImage
             image={img}
-            x={-CHIP_R}
-            y={-CHIP_R}
-            width={CHIP_R * 2}
-            height={CHIP_R * 2}
+            x={-FILL_HALF}
+            y={-FILL_HALF}
+            width={FILL_HALF * 2}
+            height={FILL_HALF * 2}
           />
         )}
       </Group>
-      <Circle
-        radius={CHIP_R}
-        stroke="#ffffff"
-        strokeWidth={2}
-        shadowColor="#000000"
-        shadowBlur={6}
-        shadowOffsetY={3}
-        shadowOpacity={0.45}
-      />
+      <MarkerOutline shape={shape} />
     </>
   )
 }
 
-function KitFill({ kit }: { kit: KitConfig }) {
+function KitFill({ kit, shape }: { kit: KitConfig; shape: MarkerShape }) {
   return (
     <>
-      <Group clipFunc={(ctx) => ctx.arc(0, 0, CHIP_R, 0, Math.PI * 2, false)}>
+      <Group clipFunc={(ctx) => clipToMarkerShape(ctx, shape)}>
         <KitPatternContent kit={kit} />
       </Group>
-      <Circle
-        radius={CHIP_R}
-        stroke="#ffffff"
-        strokeWidth={2}
-        shadowColor="#000000"
-        shadowBlur={6}
-        shadowOffsetY={3}
-        shadowOpacity={0.45}
-      />
+      <MarkerOutline shape={shape} />
     </>
   )
 }
@@ -210,6 +278,7 @@ export function PlayerChipShape({ data }: { data: PlayerChipData }) {
       : teamKit
         ? teamKit[data.team]
         : { pattern: 'solid', color1: TEAM_COLORS[data.team], color2: TEAM_COLORS[data.team] })
+  const markerShape: MarkerShape = teamKit?.markerShape ?? 'circle'
 
   return (
     <Group>
@@ -221,7 +290,11 @@ export function PlayerChipShape({ data }: { data: PlayerChipData }) {
         // player's own photo (opted into explicitly) still wins over both.
         const crestUrl = customKit ? undefined : data.team === 'home' ? teamKit?.homeCrestUrl : teamKit?.awayCrestUrl
         const fillUrl = photoUrl ?? crestUrl
-        return fillUrl ? <CrestFill url={fillUrl} /> : <KitFill kit={kit} />
+        return fillUrl ? (
+          <CrestFill url={fillUrl} shape={markerShape} />
+        ) : (
+          <KitFill kit={kit} shape={markerShape} />
+        )
       })()}
       <Text
         text={data.displayText !== undefined ? data.displayText : String(data.number)}

@@ -4,11 +4,12 @@ import { useTranslation } from 'react-i18next'
 import { Button } from '../../../components/ui/Button'
 import { ColorSwatchPicker } from '../../../components/ui/ColorSwatchPicker'
 import type { TeamKitPatch } from '../../../lib/supabase/squad'
-import type { KitPattern } from '../../editor/types'
+import type { KitPattern, MarkerShape } from '../../editor/types'
 
 type Side = 'home' | 'away' | 'gk'
 
 const PATTERN_VALUES: KitPattern[] = ['solid', 'stripes', 'hoops', 'sash', 'split', 'collar']
+const MARKER_SHAPE_VALUES: MarkerShape[] = ['circle', 'shirt']
 
 /** Generates an original circular "9011 Soccer" badge (never a real club's
  * crest) as an inline data-URI SVG, recolored to whatever the user picks —
@@ -140,6 +141,7 @@ export function KitDesignerModal({
   const [gkColor1, setGkColor1] = useState(initial.gkKitColor1)
   const [gkColor2, setGkColor2] = useState(initial.gkKitColor2)
   const [chipScale, setChipScale] = useState(initial.chipScale)
+  const [markerShape, setMarkerShape] = useState(initial.markerShape)
   const [homeCrestUrl, setHomeCrestUrl] = useState(initial.homeCrestUrl ?? null)
   // Away never gets a crest through this modal (see `applyCrestColor`) — only
   // ever set via the separate manual upload in TeamSquadPanel — so it's
@@ -176,6 +178,7 @@ export function KitDesignerModal({
         gkKitColor1: gkColor1,
         gkKitColor2: gkColor2,
         chipScale,
+        markerShape,
         homeCrestUrl,
         awayCrestUrl,
       })
@@ -261,6 +264,26 @@ export function KitDesignerModal({
             onColor1={setGkColor1}
             onColor2={setGkColor2}
           />
+        </div>
+
+        <div className="mt-4 flex flex-col gap-1.5 text-sm">
+          <span className="font-medium text-white/70">{t('kitDesignerModal.markerShape')}</span>
+          <div className="flex gap-1.5">
+            {MARKER_SHAPE_VALUES.map((v) => (
+              <button
+                key={v}
+                type="button"
+                onClick={() => setMarkerShape(v)}
+                className={`flex-1 rounded-md border px-2 py-1.5 text-xs transition-colors ${
+                  markerShape === v
+                    ? 'border-violet-accent bg-violet-accent/20 text-white'
+                    : 'border-pitch-600 text-white/60 hover:text-white'
+                }`}
+              >
+                {t(`kitDesignerModal.markerShapes.${v}`)}
+              </button>
+            ))}
+          </div>
         </div>
 
         <label className="mt-4 flex flex-col gap-1.5 text-sm">
