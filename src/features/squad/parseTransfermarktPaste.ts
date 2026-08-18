@@ -36,11 +36,16 @@ const POSITION_PATTERN = Object.keys(POSITION_DE)
   .map((p) => p.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
   .join('|')
 
-// number → (tabs/newlines only, the empty crest-cell gap) → name → newline
-// → one of the known position labels. Global match scans the whole pasted
-// blob for this shape wherever it occurs, so it doesn't care how many rows
-// there are or what other columns/whitespace surround each one.
-const ROW_PATTERN = new RegExp(`(\\d{1,3})[\\t\\n]+([^\\n\\t]+)\\n(${POSITION_PATTERN})\\b`, 'g')
+// number → gap → name → gap → one of the known position labels. The gaps
+// match any whitespace (\s+, not just \n/\t) since a real OS copy-paste's
+// exact cell separators vary by browser: Windows clipboards often use \r\n
+// instead of \n, and some browsers tab-separate a multi-line cell's content
+// on one line instead of using a real newline. Anchoring loosely on "some
+// whitespace" rather than an exact character sequence is what makes this
+// resilient to that. Global match scans the whole pasted blob for this
+// shape wherever it occurs, so it doesn't care how many rows there are or
+// what other columns surround each one.
+const ROW_PATTERN = new RegExp(`(\\d{1,3})\\s+([^\\s\\d][^\\r\\n\\t]*?)\\s+(${POSITION_PATTERN})\\b`, 'g')
 
 function splitName(fullName: string): { firstName: string; lastName: string } {
   const trimmed = fullName.trim().replace(/\s+/g, ' ')
