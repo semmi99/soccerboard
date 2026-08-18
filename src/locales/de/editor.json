@@ -184,7 +184,9 @@
       "statsCardCategory": "Kategorie",
       "statsCardCategoryPlaceholder": "z. B. KRAFT",
       "statsCardBarPlaceholder": "Balken {{n}}, z. B. Sprint",
-      "statsCardLevel": "Stufe {{level}}"
+      "statsCardLevel": "Stufe {{level}}",
+      "statsCardSize": "Kartengröße ({{percent}}%)",
+      "statsCardResetPosition": "Position zurücksetzen"
     },
     "text": {
       "textLabel": "Text",

@@ -1142,6 +1142,33 @@ function ShapeFields({
               </div>
             </div>
           ))}
+          <Field
+            label={t('properties.shape.statsCardSize', {
+              percent: Math.round((data.statsCardScale ?? 1) * 100),
+            })}
+          >
+            <input
+              type="range"
+              min={0.6}
+              max={1.8}
+              step={0.05}
+              className="w-full"
+              value={data.statsCardScale ?? 1}
+              onFocus={onCheckpoint}
+              onChange={(e) => onChange({ statsCardScale: Number(e.target.value) })}
+            />
+          </Field>
+          {(data.statsCardOffsetX || data.statsCardOffsetY) && (
+            <Button
+              variant="secondary"
+              onClick={() => {
+                onCheckpoint()
+                onChange({ statsCardOffsetX: 0, statsCardOffsetY: 0 })
+              }}
+            >
+              {t('properties.shape.statsCardResetPosition')}
+            </Button>
+          )}
         </div>
       )}
     </div>

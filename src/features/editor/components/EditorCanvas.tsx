@@ -647,15 +647,21 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
     .filter((z) => z.o.data.showStatsCard)
     .map((z) => {
       const bars = z.o.data.statsCardBars ?? []
-      const width = 176
-      const height = 108 + bars.length * STATS_BAR_ROW_H
-      const localOffsetX = -(z.halfW + width / 2 + 24)
+      const cardScale = z.o.data.statsCardScale ?? 1
+      const boxW = 176
+      const boxH = 108 + bars.length * STATS_BAR_ROW_H
+      const localOffsetX = -(z.halfW + (boxW * cardScale) / 2 + 24)
+      const baseX = z.o.x + localOffsetX * z.cos
+      const baseY = z.o.y + localOffsetX * z.sin
       return {
         id: z.o.id,
-        x: z.o.x + localOffsetX * z.cos,
-        y: z.o.y + localOffsetX * z.sin,
-        width,
-        height,
+        baseX,
+        baseY,
+        x: baseX + (z.o.data.statsCardOffsetX ?? 0),
+        y: baseY + (z.o.data.statsCardOffsetY ?? 0),
+        width: boxW,
+        height: boxH,
+        scale: cardScale,
         category: z.o.data.statsCardCategory || '',
         color: z.o.data.statsCardColor || '#f2a73b',
         bigNumber: z.playerCount > 0 ? Math.round(z.areaM2 / z.playerCount) : Math.round(z.areaM2),
@@ -1203,6 +1209,19 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
     updateObjectLive(id, { data: { ...obj.data, motionBend: [x, y] } } as Partial<FrameObject>)
   }
 
+  // The card's rendered x/y is baseX/baseY (auto-calculated from the zone)
+  // plus a persisted drag offset — so dragging it just needs to work out
+  // how far the drop point ended up from that same base and save the
+  // delta, not the raw position (which would otherwise "jump" the next
+  // time the zone moves/resizes and its baseX/baseY recompute).
+  function handleStatsCardDragEnd(shapeId: string, dropX: number, dropY: number, baseX: number, baseY: number) {
+    const obj = frame.objects.find((o) => o.id === shapeId)
+    if (!obj || obj.objectType !== 'shape') return
+    updateObjectLive(shapeId, {
+      data: { ...obj.data, statsCardOffsetX: dropX - baseX, statsCardOffsetY: dropY - baseY },
+    } as Partial<FrameObject>)
+  }
+
   function handleMotionBendReset(id: string) {
     const obj = frame.objects.find((o) => o.id === id)
     if (!obj || (obj.objectType !== 'player_chip' && obj.objectType !== 'ball')) return
@@ -1521,7 +1540,16 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
             const subtitleY = numberY + 34
             const dividerY = subtitleY + 20
             return (
-              <Group key={`stats-card-${c.id}`} x={c.x} y={c.y} listening={false}>
+              <Group
+                key={`stats-card-${c.id}`}
+                x={c.x}
+                y={c.y}
+                scaleX={c.scale}
+                scaleY={c.scale}
+                draggable
+                onDragStart={beginHistoryCheckpoint}
+                onDragEnd={(e) => handleStatsCardDragEnd(c.id, e.target.x(), e.target.y(), c.baseX, c.baseY)}
+              >
                 <Rect
                   x={-c.width / 2}
                   y={-c.height / 2}

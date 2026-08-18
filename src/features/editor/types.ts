@@ -186,6 +186,15 @@ export interface ShapeData {
   statsCardCategory?: string
   statsCardColor?: string
   statsCardBars?: { label: string; level: number }[]
+  /** Drag offset (stage px, world space) from the card's default
+   * calculated position beside the shape — unset/0 keeps the original
+   * auto-placement. Lets a coach nudge the card clear of other objects
+   * without it losing its live link to the zone's own numbers. */
+  statsCardOffsetX?: number
+  statsCardOffsetY?: number
+  /** Uniform size multiplier for the whole card (box + all its text) —
+   * unset behaves as 1. */
+  statsCardScale?: number
 }
 
 export interface TextData {
