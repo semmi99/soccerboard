@@ -1059,6 +1059,17 @@ function ShapeFields({
         />
         {t('properties.shape.showAreaInfo')}
       </label>
+      {data.showAreaInfo && (data.dimLabelOffsetX || data.dimLabelOffsetY || data.areaLabelOffsetX || data.areaLabelOffsetY) && (
+        <Button
+          variant="secondary"
+          onClick={() => {
+            onCheckpoint()
+            onChange({ dimLabelOffsetX: 0, dimLabelOffsetY: 0, areaLabelOffsetX: 0, areaLabelOffsetY: 0 })
+          }}
+        >
+          {t('properties.shape.areaInfoResetPosition')}
+        </Button>
+      )}
 
       <label className="flex items-center gap-2 text-xs text-white/70">
         <input

@@ -622,10 +622,14 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
     .filter((z) => z.o.data.showAreaInfo)
     .map((z) => {
       const localLabelY = -z.halfH - 16
+      const baseX = z.o.x + localLabelY * -z.sin
+      const baseY = z.o.y + localLabelY * z.cos
       return {
         id: z.o.id,
-        x: z.o.x + localLabelY * -z.sin,
-        y: z.o.y + localLabelY * z.cos,
+        baseX,
+        baseY,
+        x: baseX + (z.o.data.dimLabelOffsetX ?? 0),
+        y: baseY + (z.o.data.dimLabelOffsetY ?? 0),
         text: `${z.widthM.toFixed(1)} × ${z.heightM.toFixed(1)} m`,
       }
     })
@@ -634,10 +638,14 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
     .filter((z) => z.o.data.showAreaInfo && z.playerCount > 0)
     .map((z) => {
       const localLabelY = z.halfH + 16
+      const baseX = z.o.x + localLabelY * -z.sin
+      const baseY = z.o.y + localLabelY * z.cos
       return {
         id: z.o.id,
-        x: z.o.x + localLabelY * -z.sin,
-        y: z.o.y + localLabelY * z.cos,
+        baseX,
+        baseY,
+        x: baseX + (z.o.data.areaLabelOffsetX ?? 0),
+        y: baseY + (z.o.data.areaLabelOffsetY ?? 0),
         text: `${Math.round(z.areaM2)} m² · ${z.playerCount} Sp. · ${Math.round(z.areaM2 / z.playerCount)} m²/Spieler`,
       }
     })
@@ -1222,6 +1230,27 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
     } as Partial<FrameObject>)
   }
 
+  // Same drag-offset trick as the stats card, generalized for the plain
+  // dimension band and m²/player badge — both can otherwise end up pushed
+  // off-canvas with no way back once the zone itself sits near a pitch
+  // edge (they have no size control of their own, so this is drag-only,
+  // no scale field).
+  function handleShapeLabelDragEnd(
+    shapeId: string,
+    field: 'dimLabelOffsetX' | 'areaLabelOffsetX',
+    dropX: number,
+    dropY: number,
+    baseX: number,
+    baseY: number,
+  ) {
+    const obj = frame.objects.find((o) => o.id === shapeId)
+    if (!obj || obj.objectType !== 'shape') return
+    const fieldY = field === 'dimLabelOffsetX' ? 'dimLabelOffsetY' : 'areaLabelOffsetY'
+    updateObjectLive(shapeId, {
+      data: { ...obj.data, [field]: dropX - baseX, [fieldY]: dropY - baseY },
+    } as Partial<FrameObject>)
+  }
+
   function handleMotionBendReset(id: string) {
     const obj = frame.objects.find((o) => o.id === id)
     if (!obj || (obj.objectType !== 'player_chip' && obj.objectType !== 'ball')) return
@@ -1478,7 +1507,16 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
           {shapeDimLabels.map((l) => {
             const labelWidth = Math.max(80, l.text.length * 6.6 + 18)
             return (
-              <Group key={`dim-info-${l.id}`} x={l.x} y={l.y} listening={false}>
+              <Group
+                key={`dim-info-${l.id}`}
+                x={l.x}
+                y={l.y}
+                draggable
+                onDragStart={beginHistoryCheckpoint}
+                onDragEnd={(e) =>
+                  handleShapeLabelDragEnd(l.id, 'dimLabelOffsetX', e.target.x(), e.target.y(), l.baseX, l.baseY)
+                }
+              >
                 <Rect
                   x={-labelWidth / 2}
                   y={-12}
@@ -1507,7 +1545,16 @@ export function EditorCanvas({ stageRef }: { stageRef: RefObject<Konva.Stage | n
           {shapeAreaLabels.map((l) => {
             const labelWidth = Math.max(70, l.text.length * 5.6 + 16)
             return (
-              <Group key={`area-info-${l.id}`} x={l.x} y={l.y} listening={false}>
+              <Group
+                key={`area-info-${l.id}`}
+                x={l.x}
+                y={l.y}
+                draggable
+                onDragStart={beginHistoryCheckpoint}
+                onDragEnd={(e) =>
+                  handleShapeLabelDragEnd(l.id, 'areaLabelOffsetX', e.target.x(), e.target.y(), l.baseX, l.baseY)
+                }
+              >
                 <Rect
                   x={-labelWidth / 2}
                   y={-11}

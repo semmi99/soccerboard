@@ -180,6 +180,7 @@
       "height": "Höhe ({{px}}px)",
       "opacity": "Deckkraft ({{percent}}%)",
       "showAreaInfo": "Größe & m²/Spieler anzeigen",
+      "areaInfoResetPosition": "Maß-/Flächenanzeige zurücksetzen",
       "showStatsCard": "Statistik-Karte anzeigen",
       "statsCardCategory": "Kategorie",
       "statsCardCategoryPlaceholder": "z. B. KRAFT",

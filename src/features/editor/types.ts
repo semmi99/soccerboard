@@ -176,6 +176,15 @@ export interface ShapeData {
    * space per player ≈ more duels/strength work, more space ≈ more
    * running/speed). */
   showAreaInfo?: boolean
+  /** Drag offset (stage px, world space) for the dimension band/m²-per-
+   * player badge — same idea as statsCardOffsetX/Y: unset/0 keeps the
+   * default auto-placement right above/below the shape, which otherwise
+   * has no way to be nudged back into view if the shape sits near the
+   * pitch edge and pushes the label off-canvas. */
+  dimLabelOffsetX?: number
+  dimLabelOffsetY?: number
+  areaLabelOffsetX?: number
+  areaLabelOffsetY?: number
   /** Opt-in richer stat card next to the shape — a coach-labeled category
    * tag plus up to 3 custom-labeled strength bars (1-4 pips each), for
    * characterizing a training zone's physical demand at a glance. Separate
