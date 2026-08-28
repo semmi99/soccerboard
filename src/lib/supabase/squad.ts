@@ -1,14 +1,18 @@
 import { supabase } from './client'
 import type { Json, Tables, TablesInsert, TablesUpdate } from '../../types/database.types'
-import type { KitPattern, MarkerShape } from '../../features/editor/types'
+import type { FrameObject, KitPattern, MarkerShape, PlayerChipData } from '../../features/editor/types'
+import { PITCH_STAGE_SIZE } from '../../features/editor/constants'
 import {
+  getApiFootballLineups,
   getApiFootballSquad,
   translateApiFootballPosition,
   type ApiFootballFixture,
+  type ApiFootballLineupPlayer,
   type ApiFootballPlayer,
   type ApiFootballTeam,
 } from './apiFootball'
 import { extractCrestColors } from './extractCrestColors'
+import { saveProject } from './projects'
 
 export type Team = Tables<'teams'>
 export type Player = Tables<'players'>
@@ -288,6 +292,7 @@ function splitApiFootballName(fullName: string): { firstName: string; lastName: 
 export interface ImportApiFootballSquadResult {
   team: Team
   playerCount: number
+  players: Player[]
 }
 
 /** Creates a brand-new team + its full squad from API-Football data —
@@ -335,9 +340,10 @@ async function importOneApiFootballTeam(
   }
 
   let done = 0
+  const createdPlayers: Player[] = []
   for (const p of players) {
     const { firstName, lastName } = splitApiFootballName(p.name)
-    await createPlayer({
+    const created = await createPlayer({
       teamId: team.id,
       firstName,
       lastName,
@@ -353,11 +359,12 @@ async function importOneApiFootballTeam(
       attributes: {},
       photoUrl: p.photoUrl,
     })
+    createdPlayers.push(created)
     done += 1
     onProgress?.(done, players.length)
   }
 
-  return { team, playerCount: players.length }
+  return { team, playerCount: players.length, players: createdPlayers }
 }
 
 export async function importApiFootballSquad(
@@ -369,20 +376,84 @@ export async function importApiFootballSquad(
   return importOneApiFootballTeam(orgId, apiTeam, players, onProgress)
 }
 
-export interface ImportApiFootballFixtureResult {
-  home: ImportApiFootballSquadResult
-  away: ImportApiFootballSquadResult
+function parseGrid(grid: string | null): { row: number; col: number } | null {
+  const m = grid?.match(/^(\d+):(\d+)$/)
+  return m ? { row: Number(m[1]), col: Number(m[2]) } : null
 }
 
-/** Imports both sides of a fixture in one go — fetches each squad, then
- * reuses importOneApiFootballTeam for both, so a scouted upcoming or recent
- * match lands as two ready-to-use teams instead of two separate manual
- * searches. onProgress reports combined progress across both squads. */
-export async function importApiFootballFixture(
+/** Matches an API-Football lineup entry to the just-imported, already-
+ * persisted Player row for the same person — the lineup and squad
+ * endpoints are separate API-Football calls with no shared local id, so
+ * jersey number (reliable — squads rarely reuse a number mid-season) is
+ * tried first, falling back to a last-name match for the rare case a
+ * lineup shows a number the squad list didn't have. */
+function matchPersistedPlayer(persisted: Player[], ref: { number: number | null; name: string }): Player | undefined {
+  if (ref.number != null) {
+    const byNumber = persisted.find((p) => p.jersey_number === ref.number)
+    if (byNumber) return byNumber
+  }
+  const { lastName } = splitApiFootballName(ref.name)
+  if (!lastName) return undefined
+  return persisted.find((p) => p.last_name.toLowerCase() === lastName.toLowerCase())
+}
+
+/** Converts a lineup's startXI into fractional formation coordinates using
+ * the same 0..1 "own goal → opponent goal" / "left → right" convention as
+ * PRESET_FORMATIONS (see src/features/formations/presets.ts), computed
+ * from each player's API-Football grid ("row:col") instead of a fixed
+ * preset — row 1 (the goalkeeper) sits deepest, higher rows push forward;
+ * within a row, players are spread evenly left-to-right in column order. */
+function lineupToFormationPositions(
+  startXI: ApiFootballLineupPlayer[],
+): Map<number, { x: number; y: number; isGoalkeeper: boolean }> {
+  const rows = new Map<number, ApiFootballLineupPlayer[]>()
+  for (const p of startXI) {
+    const row = parseGrid(p.grid)?.row ?? 1
+    const bucket = rows.get(row)
+    if (bucket) bucket.push(p)
+    else rows.set(row, [p])
+  }
+  const rowNumbers = [...rows.keys()].sort((a, b) => a - b)
+  const maxRow = Math.max(...rowNumbers, 1)
+
+  const result = new Map<number, { x: number; y: number; isGoalkeeper: boolean }>()
+  for (const row of rowNumbers) {
+    const playersInRow = [...rows.get(row)!].sort((a, b) => (parseGrid(a.grid)?.col ?? 1) - (parseGrid(b.grid)?.col ?? 1))
+    const y = maxRow > 1 ? 0.06 + ((row - 1) / (maxRow - 1)) * 0.4 : 0.06
+    playersInRow.forEach((p, i) => {
+      const x = playersInRow.length > 1 ? 0.12 + (i / (playersInRow.length - 1)) * 0.76 : 0.5
+      result.set(p.apiPlayerId, { x, y, isGoalkeeper: row === 1 })
+    })
+  }
+  return result
+}
+
+export interface FixtureBoardImportResult {
+  projectId: string
+  homeTeam: Team
+  awayTeam: Team
+}
+
+/** Imports both sides of a fixture AND creates a new project with the real
+ * published starting-XI lineup already placed on the pitch — substitutes
+ * aren't placed as chips, but since they're part of the same imported
+ * squad, the editor's own squad panel already shows every player not
+ * currently on the pitch as bench (see SquadPanel's `bench` filter), so
+ * they show up there automatically with no separate tracking needed.
+ *
+ * Known gap: a project only links ONE team (`teamId`), so only the HOME
+ * side's substitutes are reachable from the squad panel while this
+ * project is open — the away roster still exists as a normal team on the
+ * Kader page, just not simultaneously bench-visible alongside the home
+ * side. Throws if the lineup isn't published yet (common until shortly
+ * before kickoff) — the rosters are still imported as normal teams by
+ * then, nothing is lost, there's just nothing to place. */
+export async function importFixtureToBoard(
   orgId: string,
+  createdBy: string,
   fixture: ApiFootballFixture,
   onProgress?: (done: number, total: number) => void,
-): Promise<ImportApiFootballFixtureResult> {
+): Promise<FixtureBoardImportResult> {
   const [homePlayers, awayPlayers] = await Promise.all([
     getApiFootballSquad(fixture.home.id),
     getApiFootballSquad(fixture.away.id),
@@ -399,7 +470,83 @@ export async function importApiFootballFixture(
     onProgress?.(done + d, total)
   })
 
-  return { home, away }
+  const lineups = await getApiFootballLineups(fixture.id, fixture.home.id, fixture.away.id)
+  if (!lineups.home?.startXI.length || !lineups.away?.startXI.length) {
+    throw new Error(
+      `Kader importiert, aber für „${fixture.home.name} vs ${fixture.away.name}“ ist noch keine Aufstellung veröffentlicht.`,
+    )
+  }
+
+  const homePositions = lineupToFormationPositions(lineups.home.startXI)
+  const awayPositions = lineupToFormationPositions(lineups.away.startXI)
+  const stage = PITCH_STAGE_SIZE.horizontal
+
+  function placeSide(
+    startXI: ApiFootballLineupPlayer[],
+    positions: Map<number, { x: number; y: number; isGoalkeeper: boolean }>,
+    persisted: Player[],
+    team: 'home' | 'away',
+    zIndexStart: number,
+  ): FrameObject[] {
+    return startXI.flatMap((p, i) => {
+      const pos = positions.get(p.apiPlayerId)
+      if (!pos) return []
+      const player = matchPersistedPlayer(persisted, p)
+      // Away sits in the mirror image of home's own "own goal → opponent
+      // goal" axis, so the two sides face each other across the pitch
+      // instead of both advancing toward the same end.
+      const formationY = team === 'home' ? pos.y : 1 - pos.y
+      const data: PlayerChipData = {
+        team,
+        number: p.number ?? 0,
+        label: player ? `${player.first_name} ${player.last_name}` : p.name,
+        playerId: player?.id,
+        isGoalkeeper: pos.isGoalkeeper,
+      }
+      const chip: FrameObject = {
+        id: crypto.randomUUID(),
+        x: formationY * stage.width,
+        y: pos.x * stage.height,
+        rotation: 0,
+        scale: 1,
+        zIndex: zIndexStart + i,
+        objectType: 'player_chip',
+        data,
+      }
+      return [chip]
+    })
+  }
+
+  const chips = [
+    ...placeSide(lineups.home.startXI, homePositions, home.players, 'home', 0),
+    ...placeSide(lineups.away.startXI, awayPositions, away.players, 'away', lineups.home.startXI.length),
+  ]
+
+  const projectId = await saveProject({
+    projectId: null,
+    orgId,
+    createdBy,
+    title: `${fixture.home.name} vs ${fixture.away.name}`,
+    pitchDesign: 'classic_green',
+    pitchDesignCustomId: null,
+    orientation: 'horizontal',
+    teamId: home.team.id,
+    zoneGridStyle: 'none',
+    zoneGridCustomId: null,
+    showPitchMarkings: true,
+    showMovementTrails: false,
+    playerLabelFormat: 'lastName',
+    fieldCrop: 'full',
+    fieldMirrored: false,
+    pitchLengthM: 105,
+    pitchWidthM: 68,
+    customKit: null,
+    secondaryKit: null,
+    activeKitSlot: 'primary',
+    frames: [{ id: crypto.randomUUID(), durationMs: 1000, objects: chips }],
+  })
+
+  return { projectId, homeTeam: home.team, awayTeam: away.team }
 }
 
 export interface PastedSquadEntry {
@@ -432,8 +579,9 @@ export async function importPastedSquad(
 
   const team = await createTeam({ orgId, name: teamName, ageGroup: '', season: '' })
 
+  const createdPlayers: Player[] = []
   for (const entry of entries) {
-    await createPlayer({
+    const created = await createPlayer({
       teamId: team.id,
       firstName: entry.firstName,
       lastName: entry.lastName,
@@ -448,7 +596,8 @@ export async function importPastedSquad(
       notes: '',
       attributes: {},
     })
+    createdPlayers.push(created)
   }
 
-  return { team, playerCount: entries.length }
+  return { team, playerCount: entries.length, players: createdPlayers }
 }

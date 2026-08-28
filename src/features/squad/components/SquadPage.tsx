@@ -1,5 +1,6 @@
 import { Fragment, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useNavigate } from 'react-router-dom'
 import { useAuthStore } from '../../auth/store/authStore'
 import { AppHeader } from '../../../app/AppHeader'
 import { Button } from '../../../components/ui/Button'
@@ -10,8 +11,8 @@ import {
   createTeam,
   deletePlayer,
   deleteTeam,
-  importApiFootballFixture,
   importApiFootballSquad,
+  importFixtureToBoard,
   importPastedSquad,
   listPlayers,
   listTeams,
@@ -244,6 +245,7 @@ function TeamActionsMenu({
 
 export function SquadPage() {
   const { t } = useTranslation(['squad', 'common'])
+  const navigate = useNavigate()
   const organization = useAuthStore((s) => s.organization)
   const profile = useAuthStore((s) => s.profile)
 
@@ -409,13 +411,10 @@ export function SquadPage() {
     fixture: ApiFootballFixture,
     onProgress: (done: number, total: number) => void,
   ) {
-    if (!organization) return
-    const result = await importApiFootballFixture(organization.id, fixture, onProgress)
-    setTeams((prev) =>
-      [...prev, result.home.team, result.away.team].sort((a, b) => a.name.localeCompare(b.name)),
-    )
-    setActiveTeamId(result.home.team.id)
+    if (!organization || !profile) return
+    const result = await importFixtureToBoard(organization.id, profile.id, fixture, onProgress)
     setShowFixtureImport(false)
+    navigate(`/editor/${result.projectId}`)
   }
 
   async function handleTransfermarktImport(teamName: string, entries: ParsedTransfermarktPlayer[]) {

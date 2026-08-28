@@ -53,6 +53,28 @@ function apiFootballErrorMessage(data: { errors?: unknown }): string | null {
   return null
 }
 
+interface ApiFootballLineupPlayerRef {
+  player: { id: number; name: string; number: number | null; grid: string | null }
+}
+
+interface ApiFootballLineupsResponse {
+  response: {
+    team: { id: number }
+    formation: string | null
+    startXI: ApiFootballLineupPlayerRef[]
+    substitutes: ApiFootballLineupPlayerRef[]
+  }[]
+}
+
+function mapLineupPlayers(refs: ApiFootballLineupPlayerRef[]) {
+  return refs.map((r) => ({
+    apiPlayerId: r.player.id,
+    name: r.player.name,
+    number: r.player.number,
+    grid: r.player.grid,
+  }))
+}
+
 function mapFixture(f: ApiFootballFixturesResponse["response"][number]) {
   return {
     id: f.fixture.id,
@@ -98,7 +120,14 @@ Deno.serve(async (req: Request) => {
   const apiFootballKey = Deno.env.get("API_FOOTBALL_KEY")
   if (!apiFootballKey) return json({ error: "API_FOOTBALL_KEY is not configured" }, 500)
 
-  let body: { action?: unknown; query?: unknown; teamId?: unknown }
+  let body: {
+    action?: unknown
+    query?: unknown
+    teamId?: unknown
+    fixtureId?: unknown
+    homeTeamId?: unknown
+    awayTeamId?: unknown
+  }
   try {
     body = await req.json()
   } catch {
@@ -113,7 +142,7 @@ Deno.serve(async (req: Request) => {
       headers: { "x-apisports-key": apiFootballKey },
     })
     if (res.status === 429) return json({ error: "API-Football-Tageslimit erreicht. Bitte später erneut versuchen." }, 429)
-    if (!res.ok) return json({ error: `API-Football error (${res.status})` }, 502)
+    if (!res.ok) return json({ error: `API-Football error (${res.status}): ${(await res.text()).slice(0, 300)}` }, 502)
     const data = (await res.json()) as ApiFootballTeamsResponse
     const apiError = apiFootballErrorMessage(data)
     if (apiError) return json({ error: `API-Football: ${apiError}` }, 502)
@@ -135,7 +164,7 @@ Deno.serve(async (req: Request) => {
       headers: { "x-apisports-key": apiFootballKey },
     })
     if (res.status === 429) return json({ error: "API-Football-Tageslimit erreicht. Bitte später erneut versuchen." }, 429)
-    if (!res.ok) return json({ error: `API-Football error (${res.status})` }, 502)
+    if (!res.ok) return json({ error: `API-Football error (${res.status}): ${(await res.text()).slice(0, 300)}` }, 502)
     const data = (await res.json()) as ApiFootballSquadsResponse
     const apiError = apiFootballErrorMessage(data)
     if (apiError) return json({ error: `API-Football: ${apiError}` }, 502)
@@ -212,6 +241,37 @@ Deno.serve(async (req: Request) => {
     }
 
     return json({ fixtures })
+  }
+
+  if (body.action === "lineups") {
+    if (typeof body.fixtureId !== "number") {
+      return json({ error: "fixtureId erforderlich." }, 400)
+    }
+    const res = await fetch(`${API_BASE}/fixtures/lineups?fixture=${body.fixtureId}`, {
+      headers: { "x-apisports-key": apiFootballKey },
+    })
+    if (res.status === 429) {
+      return json({ error: "API-Football-Tageslimit erreicht. Bitte später erneut versuchen." }, 429)
+    }
+    if (!res.ok) return json({ error: `API-Football error (${res.status}): ${(await res.text()).slice(0, 300)}` }, 502)
+    const data = (await res.json()) as ApiFootballLineupsResponse
+    const apiError = apiFootballErrorMessage(data as { errors?: unknown })
+    if (apiError) return json({ error: `API-Football: ${apiError}` }, 502)
+
+    const homeId = typeof body.homeTeamId === "number" ? body.homeTeamId : null
+    const awayId = typeof body.awayTeamId === "number" ? body.awayTeamId : null
+    const homeEntry = data.response.find((r) => r.team.id === homeId)
+    const awayEntry = data.response.find((r) => r.team.id === awayId)
+    const mapTeam = (entry: ApiFootballLineupsResponse["response"][number] | undefined) =>
+      entry
+        ? {
+            formation: entry.formation,
+            startXI: mapLineupPlayers(entry.startXI),
+            substitutes: mapLineupPlayers(entry.substitutes),
+          }
+        : null
+
+    return json({ home: mapTeam(homeEntry), away: mapTeam(awayEntry) })
   }
 
   return json({ error: "Unknown action" }, 400)

@@ -67,3 +67,40 @@ export async function getApiFootballFixtures(teamId: number): Promise<ApiFootbal
   if (data?.error) throw new Error(data.error)
   return data?.fixtures ?? []
 }
+
+export interface ApiFootballLineupPlayer {
+  apiPlayerId: number
+  name: string
+  number: number | null
+  /** "row:col" (e.g. "4:2") — row 1 is the goalkeeper, higher rows are more
+   * advanced; unset for a bench player that isn't spatially positioned. */
+  grid: string | null
+}
+
+export interface ApiFootballTeamLineup {
+  formation: string | null
+  startXI: ApiFootballLineupPlayer[]
+  substitutes: ApiFootballLineupPlayer[]
+}
+
+export interface ApiFootballFixtureLineups {
+  /** null when this fixture's lineup hasn't been published yet (typical
+   * for anything more than ~1 hour before kickoff) rather than an error —
+   * the fixture itself is real, there's just nothing to place yet. */
+  home: ApiFootballTeamLineup | null
+  away: ApiFootballTeamLineup | null
+}
+
+export async function getApiFootballLineups(
+  fixtureId: number,
+  homeTeamId: number,
+  awayTeamId: number,
+): Promise<ApiFootballFixtureLineups> {
+  const { data, error } = await supabase.functions.invoke<ApiFootballFixtureLineups & { error?: string }>(
+    'import-api-football-squad',
+    { body: { action: 'lineups', fixtureId, homeTeamId, awayTeamId } },
+  )
+  if (error) throw error
+  if (data?.error) throw new Error(data.error)
+  return { home: data?.home ?? null, away: data?.away ?? null }
+}
