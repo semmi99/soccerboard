@@ -111,7 +111,7 @@
     "nationality": "Nationalität",
     "phone": "Telefon",
     "email": "Email",
-    "notes": "Notizen",
+    "notes": "Kurzinfo",
     "attributesTitle": "Bewertung (1-5)",
     "attributes": {
       "technique": "Technik",
@@ -119,6 +119,14 @@
       "physical": "Physis",
       "mental": "Mentalität",
       "pace": "Schnelligkeit"
+    },
+    "notesLog": {
+      "title": "Beobachtungen",
+      "placeholder": "Neue Beobachtung notieren…",
+      "add": "Hinzufügen",
+      "empty": "Noch keine Beobachtungen erfasst.",
+      "loading": "Lädt…",
+      "saveFirst": "Erst speichern, dann können hier Beobachtungen über mehrere Termine hinweg gesammelt werden."
     }
   },
   "bulkAddDialog": {

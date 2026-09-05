@@ -210,6 +210,57 @@ export async function deletePlayer(id: string): Promise<void> {
   if (error) throw error
 }
 
+/** A single timestamped scouting-log entry, as opposed to the single
+ * overwritable `players.notes` free-text field — several of these can
+ * accumulate over multiple sessions/matches for the same player. */
+export interface PlayerNote {
+  id: string
+  playerId: string
+  authorId: string | null
+  authorName: string | null
+  content: string
+  createdAt: string
+}
+
+export async function listPlayerNotes(playerId: string): Promise<PlayerNote[]> {
+  const { data, error } = await supabase
+    .from('player_notes')
+    .select('id, player_id, author_id, content, created_at, profiles(full_name)')
+    .eq('player_id', playerId)
+    .order('created_at', { ascending: false })
+  if (error) throw error
+  return data.map((n) => ({
+    id: n.id,
+    playerId: n.player_id,
+    authorId: n.author_id,
+    authorName: (n.profiles as { full_name: string | null } | null)?.full_name ?? null,
+    content: n.content,
+    createdAt: n.created_at,
+  }))
+}
+
+export async function addPlayerNote(playerId: string, authorId: string, content: string): Promise<PlayerNote> {
+  const { data, error } = await supabase
+    .from('player_notes')
+    .insert({ player_id: playerId, author_id: authorId, content })
+    .select('id, player_id, author_id, content, created_at, profiles(full_name)')
+    .single()
+  if (error) throw error
+  return {
+    id: data.id,
+    playerId: data.player_id,
+    authorId: data.author_id,
+    authorName: (data.profiles as { full_name: string | null } | null)?.full_name ?? null,
+    content: data.content,
+    createdAt: data.created_at,
+  }
+}
+
+export async function deletePlayerNote(id: string): Promise<void> {
+  const { error } = await supabase.from('player_notes').delete().eq('id', id)
+  if (error) throw error
+}
+
 export async function deleteTeam(id: string): Promise<void> {
   const { error } = await supabase.from('teams').delete().eq('id', id)
   if (error) throw error

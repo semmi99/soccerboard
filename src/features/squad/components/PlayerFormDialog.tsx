@@ -4,6 +4,8 @@ import { Button } from '../../../components/ui/Button'
 import { Input } from '../../../components/ui/Input'
 import { POSITIONS, STRONG_FOOT_OPTIONS } from '../constants'
 import { PLAYER_ATTRIBUTE_KEYS, type Player, type PlayerAttributes, type PlayerFormValues } from '../../../lib/supabase/squad'
+import { useAuthStore } from '../../auth/store/authStore'
+import { PlayerNotesLog } from './PlayerNotesLog'
 
 const selectClass =
   'rounded-lg border border-pitch-600 bg-pitch-800 px-3.5 py-2.5 text-sm text-white outline-none focus:border-violet-accent'
@@ -38,6 +40,7 @@ export function PlayerFormDialog({
   onSubmit: (values: PlayerFormValues, photoFile: File | null) => Promise<void>
 }) {
   const { t } = useTranslation(['squad', 'common'])
+  const profile = useAuthStore((s) => s.profile)
   const [values, setValues] = useState<PlayerFormValues>(toFormValues(teamId, player))
   const [photoFile, setPhotoFile] = useState<File | null>(null)
   const [isSaving, setIsSaving] = useState(false)
@@ -221,6 +224,15 @@ export function PlayerFormDialog({
             onChange={(e) => set('notes', e.target.value)}
           />
         </label>
+
+        <div className="mt-4 flex flex-col gap-1.5">
+          <span className="text-sm font-medium text-white/70">{t('playerForm.notesLog.title')}</span>
+          {player && profile ? (
+            <PlayerNotesLog playerId={player.id} authorId={profile.id} authorName={profile.full_name} />
+          ) : (
+            <p className="text-xs text-white/40">{t('playerForm.notesLog.saveFirst')}</p>
+          )}
+        </div>
 
         {error && <p className="mt-3 text-sm text-red-400">{error}</p>}
 

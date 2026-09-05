@@ -111,7 +111,7 @@
     "nationality": "Nationality",
     "phone": "Phone",
     "email": "Email",
-    "notes": "Notes",
+    "notes": "Quick note",
     "attributesTitle": "Rating (1-5)",
     "attributes": {
       "technique": "Technique",
@@ -119,6 +119,14 @@
       "physical": "Physical",
       "mental": "Mentality",
       "pace": "Pace"
+    },
+    "notesLog": {
+      "title": "Observations",
+      "placeholder": "Add a new observation…",
+      "add": "Add",
+      "empty": "No observations recorded yet.",
+      "loading": "Loading…",
+      "saveFirst": "Save first, then observations can be collected here across multiple sessions."
     }
   },
   "bulkAddDialog": {
