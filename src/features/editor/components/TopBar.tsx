@@ -41,7 +41,7 @@ export function TopBar({
         onChange={(e) => setProjectTitle(e.target.value)}
         placeholder={t('topBar.projectNamePlaceholder')}
         title={t('topBar.projectNameTitle')}
-        className="min-w-0 max-w-xs shrink truncate rounded-md border border-pitch-700 bg-pitch-800/60 px-2 py-1 text-sm font-medium text-white outline-none hover:border-pitch-600 focus:border-violet-accent focus:bg-pitch-800"
+        className="w-32 shrink-0 truncate rounded-md border border-pitch-700 bg-pitch-800/60 px-2 py-1 text-sm font-medium text-white outline-none hover:border-pitch-600 focus:border-violet-accent focus:bg-pitch-800 sm:w-48 lg:w-64"
       />
 
       <div className="flex shrink-0 items-center gap-1">
