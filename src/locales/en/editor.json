@@ -160,7 +160,10 @@
       "labelColor": "Label color",
       "highlight": "Highlight (blinks in this frame)",
       "offsideReference": "Mark as offside reference (last defender)",
-      "offsideTarget": "Mark as offside target (only marked players show the label)"
+      "offsideTarget": "Mark as offside target (only marked players show the label)",
+      "tag": "Tactical tag (e.g. pressing, cover)",
+      "tagPlaceholder": "Custom text…",
+      "tagBackground": "With colored background"
     },
     "arrow": {
       "angle": "Angle ({{deg}}°)",

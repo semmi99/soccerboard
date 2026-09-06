@@ -329,6 +329,54 @@ export function PlayerChipShape({ data }: { data: PlayerChipData }) {
           shadowOpacity={0.7}
         />
       )}
+      {data.tagText && <PlayerTag text={data.tagText} color={data.tagColor} textColor={data.tagTextColor} />}
+    </Group>
+  )
+}
+
+/** Short tactical-action callout ("PRESS", "COVER", "JOCKEY", ...) sitting
+ * above the chip — moves with it automatically since it's part of the same
+ * Group, unlike the auto-computed offside label which is positioned
+ * separately in EditorCanvas. With no `color`, renders as plain text (the
+ * lighter "COVER" look); with one, as a solid pill (the "PRESS" look). */
+function PlayerTag({
+  text,
+  color,
+  textColor,
+}: {
+  text: string
+  color: string | null | undefined
+  textColor: string | undefined
+}) {
+  const width = Math.max(48, text.length * 7 + 16)
+  return (
+    <Group y={-34} listening={false}>
+      {color && (
+        <Rect
+          x={-width / 2}
+          y={-10}
+          width={width}
+          height={20}
+          fill={color}
+          cornerRadius={4}
+          opacity={0.92}
+        />
+      )}
+      <Text
+        text={text}
+        x={-width / 2}
+        y={-10}
+        width={width}
+        height={20}
+        align="center"
+        verticalAlign="middle"
+        fontSize={11}
+        fontStyle="bold"
+        fill={textColor ?? '#ffffff'}
+        shadowColor="#000000"
+        shadowBlur={color ? 0 : 3}
+        shadowOpacity={0.7}
+      />
     </Group>
   )
 }

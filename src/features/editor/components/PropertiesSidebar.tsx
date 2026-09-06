@@ -668,9 +668,80 @@ function PlayerChipFields({
         />
         {t('properties.playerChip.offsideTarget')}
       </label>
+      <Field label={t('properties.playerChip.tag')}>
+        <div className="flex flex-col gap-1.5">
+          <div className="flex flex-wrap gap-1.5">
+            {TAG_PRESETS.map((preset) => (
+              <button
+                key={preset.text}
+                type="button"
+                className="rounded-md border border-pitch-600 bg-pitch-800 px-2 py-1 text-[11px] font-semibold text-white/80 hover:border-violet-accent hover:text-white"
+                onClick={() => {
+                  onCheckpoint()
+                  onChange({ tagText: preset.text, tagColor: preset.color })
+                }}
+              >
+                {preset.text}
+              </button>
+            ))}
+            {data.tagText && (
+              <button
+                type="button"
+                className="rounded-md border border-pitch-600 bg-pitch-800 px-2 py-1 text-[11px] text-white/50 hover:text-red-400"
+                onClick={() => {
+                  onCheckpoint()
+                  onChange({ tagText: '', tagColor: null, tagTextColor: undefined })
+                }}
+              >
+                ✕
+              </button>
+            )}
+          </div>
+          <input
+            type="text"
+            maxLength={12}
+            placeholder={t('properties.playerChip.tagPlaceholder')}
+            className={inputClass}
+            value={data.tagText ?? ''}
+            onFocus={onCheckpoint}
+            onChange={(e) => onChange({ tagText: e.target.value })}
+          />
+          {data.tagText && (
+            <label className="flex items-center gap-2 text-xs text-white/70">
+              <input
+                type="checkbox"
+                className="accent-violet-accent"
+                checked={Boolean(data.tagColor)}
+                onChange={(e) => {
+                  onCheckpoint()
+                  onChange({ tagColor: e.target.checked ? (data.tagColor ?? '#f97316') : null })
+                }}
+              />
+              {t('properties.playerChip.tagBackground')}
+            </label>
+          )}
+          {data.tagText && data.tagColor && (
+            <ColorSwatchPicker
+              size="sm"
+              value={data.tagColor}
+              onChange={(c) => {
+                onCheckpoint()
+                onChange({ tagColor: c })
+              }}
+            />
+          )}
+        </div>
+      </Field>
     </div>
   )
 }
+
+const TAG_PRESETS: { text: string; color: string | null }[] = [
+  { text: 'PRESS', color: '#f97316' },
+  { text: 'COVER', color: null },
+  { text: 'JOCKEY', color: '#f97316' },
+  { text: 'MARK', color: '#ef4444' },
+]
 
 const ROTATION_PRESETS = [0, 90, 180, 270, 360]
 

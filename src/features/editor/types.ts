@@ -58,6 +58,17 @@ export interface PlayerChipData {
    * over a team crest (which is team-wide, so a per-player override should
    * win) but not over `showPhoto`. Unset keeps the normal team-kit look. */
   color?: string | null
+  /** Short tactical-action callout shown above the chip (e.g. "PRESS",
+   * "COVER", "JOCKEY") — plain per-frame text like `label`, so it can appear
+   * on one frame and not the next as the phase of play changes. Unset/empty
+   * shows nothing. */
+  tagText?: string
+  /** Pill background behind `tagText` — null/undefined renders the text on
+   * its own with no background, for a lighter "COVER"-style callout instead
+   * of a solid badge. */
+  tagColor?: string | null
+  /** Text color for `tagText`. Unset falls back to white. */
+  tagTextColor?: string
 }
 
 export type KitPattern = 'solid' | 'stripes' | 'hoops' | 'sash' | 'split' | 'collar'

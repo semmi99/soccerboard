@@ -160,7 +160,10 @@
       "labelColor": "Farbe des Labels",
       "highlight": "Hervorheben (blinkt in diesem Frame)",
       "offsideReference": "Als Abseits-Referenz markieren (letzter Verteidiger)",
-      "offsideTarget": "Als Abseits-Ziel markieren (nur markierte Spieler zeigen das Label)"
+      "offsideTarget": "Als Abseits-Ziel markieren (nur markierte Spieler zeigen das Label)",
+      "tag": "Taktik-Tag (z.B. Pressing, Absichern)",
+      "tagPlaceholder": "Eigener Text…",
+      "tagBackground": "Mit farbigem Hintergrund"
     },
     "arrow": {
       "angle": "Winkel ({{deg}}°)",
