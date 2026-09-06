@@ -168,6 +168,13 @@
       "offsideReference": "Mark as offside reference (last defender)",
       "offsideTarget": "Mark as offside target (only marked players show the label)",
       "tag": "Tactical tag (e.g. pressing, cover)",
+      "tagPresets": {
+        "press": "PRESS",
+        "cover": "COVER",
+        "jockey": "JOCKEY",
+        "mark": "MARK"
+      },
+      "tagRemove": "Remove tag",
       "tagPlaceholder": "Custom text…",
       "tagBackground": "With colored background"
     },

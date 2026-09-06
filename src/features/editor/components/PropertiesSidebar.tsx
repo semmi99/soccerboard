@@ -671,32 +671,35 @@ function PlayerChipFields({
       <Field label={t('properties.playerChip.tag')}>
         <div className="flex flex-col gap-1.5">
           <div className="flex flex-wrap gap-1.5">
-            {TAG_PRESETS.map((preset) => (
-              <button
-                key={preset.text}
-                type="button"
-                className="rounded-md border border-pitch-600 bg-pitch-800 px-2 py-1 text-[11px] font-semibold text-white/80 hover:border-violet-accent hover:text-white"
-                onClick={() => {
-                  onCheckpoint()
-                  onChange({ tagText: preset.text, tagColor: preset.color })
-                }}
-              >
-                {preset.text}
-              </button>
-            ))}
-            {data.tagText && (
-              <button
-                type="button"
-                className="rounded-md border border-pitch-600 bg-pitch-800 px-2 py-1 text-[11px] text-white/50 hover:text-red-400"
-                onClick={() => {
-                  onCheckpoint()
-                  onChange({ tagText: '', tagColor: null, tagTextColor: undefined })
-                }}
-              >
-                ✕
-              </button>
-            )}
+            {TAG_PRESETS.map((preset) => {
+              const label = t(`properties.playerChip.tagPresets.${preset.key}`)
+              return (
+                <button
+                  key={preset.key}
+                  type="button"
+                  className="rounded-md border border-pitch-600 bg-pitch-800 px-2 py-1 text-[11px] font-semibold text-white/80 hover:border-violet-accent hover:text-white"
+                  onClick={() => {
+                    onCheckpoint()
+                    onChange({ tagText: label, tagColor: preset.color })
+                  }}
+                >
+                  {label}
+                </button>
+              )
+            })}
           </div>
+          {data.tagText && (
+            <button
+              type="button"
+              className="self-start rounded-md border border-red-500/30 bg-red-500/10 px-2 py-1 text-[11px] font-medium text-red-400 hover:bg-red-500/20"
+              onClick={() => {
+                onCheckpoint()
+                onChange({ tagText: '', tagColor: null, tagTextColor: undefined })
+              }}
+            >
+              {t('properties.playerChip.tagRemove')}
+            </button>
+          )}
           <input
             type="text"
             maxLength={12}
@@ -736,11 +739,11 @@ function PlayerChipFields({
   )
 }
 
-const TAG_PRESETS: { text: string; color: string | null }[] = [
-  { text: 'PRESS', color: '#f97316' },
-  { text: 'COVER', color: null },
-  { text: 'JOCKEY', color: '#f97316' },
-  { text: 'MARK', color: '#ef4444' },
+const TAG_PRESETS: { key: string; color: string | null }[] = [
+  { key: 'press', color: '#f97316' },
+  { key: 'cover', color: null },
+  { key: 'jockey', color: '#f97316' },
+  { key: 'mark', color: '#ef4444' },
 ]
 
 const ROTATION_PRESETS = [0, 90, 180, 270, 360]

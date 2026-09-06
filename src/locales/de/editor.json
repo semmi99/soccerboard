@@ -168,6 +168,13 @@
       "offsideReference": "Als Abseits-Referenz markieren (letzter Verteidiger)",
       "offsideTarget": "Als Abseits-Ziel markieren (nur markierte Spieler zeigen das Label)",
       "tag": "Taktik-Tag (z.B. Pressing, Absichern)",
+      "tagPresets": {
+        "press": "PRESSING",
+        "cover": "ABSICHERN",
+        "jockey": "VERZÖGERN",
+        "mark": "DECKEN"
+      },
+      "tagRemove": "Tag entfernen",
       "tagPlaceholder": "Eigener Text…",
       "tagBackground": "Mit farbigem Hintergrund"
     },
