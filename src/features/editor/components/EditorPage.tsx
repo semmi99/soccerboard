@@ -158,7 +158,7 @@ export function EditorPage() {
   }
 
   return (
-    <div className="flex h-full flex-col bg-pitch-950">
+    <div className="flex h-full flex-col overflow-hidden bg-pitch-950">
       <TopBar stageRef={stageRef} save={save} />
       <div className="flex min-h-0 flex-1">
         <Toolbar />
