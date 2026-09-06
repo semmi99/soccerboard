@@ -106,6 +106,18 @@ export function Toolbar() {
     })),
   ]
 
+  // One short caption per SECTIONS entry, purely for scannability in an
+  // otherwise undifferentiated grid of icon buttons — 'select' gets none
+  // since it's a single, self-explanatory pointer icon.
+  const SECTION_LABELS = [
+    null,
+    t('toolbar.sectionPlayers'),
+    t('toolbar.sectionDraw'),
+    t('toolbar.sectionShapes'),
+    t('toolbar.sectionText'),
+    t('toolbar.sectionEquipment'),
+  ]
+
   const setTool = useEditorStore((s) => s.setTool)
   const addImageObject = useEditorStore((s) => s.addImageObject)
   const addReferenceImageObject = useEditorStore((s) => s.addReferenceImageObject)
@@ -152,6 +164,11 @@ export function Toolbar() {
       {SECTIONS.map((section, i) => (
         <div key={i} className="flex w-full flex-col items-center gap-1.5">
           {i > 0 && <div className="my-1 h-px w-full bg-gold-accent/20" />}
+          {SECTION_LABELS[i] && (
+            <span className="w-full text-center text-[9px] font-semibold uppercase tracking-wide text-gold-accent/40">
+              {SECTION_LABELS[i]}
+            </span>
+          )}
           <div
             className={
               section.length > 1 ? 'grid w-full grid-cols-2 gap-1.5' : 'flex w-full justify-center'
@@ -189,6 +206,9 @@ export function Toolbar() {
         </div>
       ))}
       <div className="my-1 h-px w-full bg-gold-accent/20" />
+      <span className="w-full text-center text-[9px] font-semibold uppercase tracking-wide text-gold-accent/40">
+        {t('toolbar.sectionMedia')}
+      </span>
       <div className="grid w-full grid-cols-2 gap-1.5">
         <label
           title={t('toolbar.insertImage')}

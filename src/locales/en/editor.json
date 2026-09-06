@@ -1,5 +1,11 @@
 {
   "toolbar": {
+    "sectionPlayers": "Players",
+    "sectionDraw": "Draw",
+    "sectionShapes": "Shapes",
+    "sectionText": "Text",
+    "sectionEquipment": "Equipment",
+    "sectionMedia": "Media",
     "select": "Pointer",
     "playerHome": "Home player",
     "playerAway": "Away player",

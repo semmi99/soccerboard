@@ -8,7 +8,17 @@ import { Button } from '../../../components/ui/Button'
 import { OrgLogoUploader } from './OrgLogoUploader'
 import { AppHeader } from '../../../app/AppHeader'
 
-function PitchThumbnail() {
+/** Real snapshot of the saved board when available (see useProjectSave),
+ * falling back to a generic placeholder pitch icon for older projects that
+ * predate thumbnail generation or whose upload failed. */
+function PitchThumbnail({ thumbnailUrl }: { thumbnailUrl: string | null }) {
+  if (thumbnailUrl) {
+    return (
+      <div className="flex aspect-[4/5] w-full items-center justify-center overflow-hidden rounded-md bg-pitch-950">
+        <img src={thumbnailUrl} alt="" className="h-full w-full object-contain" />
+      </div>
+    )
+  }
   return (
     <div className="flex aspect-[4/5] w-full items-center justify-center rounded-md bg-gradient-to-br from-pitch-800 to-pitch-900">
       <svg viewBox="0 0 65 100" className="h-2/3 w-2/3 opacity-40">
@@ -165,7 +175,7 @@ export function DashboardPage() {
                 className="relative flex flex-col overflow-hidden rounded-xl border border-pitch-700 bg-pitch-900 transition-colors hover:border-violet-accent"
               >
                 <Link to={`/editor/${project.id}`} className="p-3">
-                  <PitchThumbnail />
+                  <PitchThumbnail thumbnailUrl={project.thumbnailUrl} />
                 </Link>
                 <div className="flex items-start justify-between gap-2 p-3 pt-0">
                   <div className="min-w-0">

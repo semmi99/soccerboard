@@ -1,5 +1,11 @@
 {
   "toolbar": {
+    "sectionPlayers": "Spieler",
+    "sectionDraw": "Zeichnen",
+    "sectionShapes": "Formen",
+    "sectionText": "Text",
+    "sectionEquipment": "Ausrüstung",
+    "sectionMedia": "Medien",
     "select": "Zeiger",
     "playerHome": "Spieler Heim",
     "playerAway": "Spieler Auswärts",

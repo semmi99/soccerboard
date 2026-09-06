@@ -229,13 +229,16 @@ function TeamActionsMenu({
             {t('transfermarktImport')}
           </button>
           {hasActiveTeam && (
-            <button
-              type="button"
-              onClick={() => pick(onDeleteTeam)}
-              className="block w-full rounded-md px-3 py-2 text-left text-sm text-white/70 hover:bg-red-500/10 hover:text-red-400"
-            >
-              {t('deleteTeam')}
-            </button>
+            <>
+              <div className="my-1 h-px bg-pitch-700" />
+              <button
+                type="button"
+                onClick={() => pick(onDeleteTeam)}
+                className="block w-full rounded-md px-3 py-2 text-left text-sm text-red-400/80 hover:bg-red-500/10 hover:text-red-400"
+              >
+                {t('deleteTeam')}
+              </button>
+            </>
           )}
         </div>
       )}

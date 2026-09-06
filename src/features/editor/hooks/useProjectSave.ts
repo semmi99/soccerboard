@@ -1,12 +1,15 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState, type RefObject } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
+import type Konva from 'konva'
 import { useEditorStore } from '../store/editorStore'
 import { useAuthStore } from '../../auth/store/authStore'
 import { limitsForTier } from '../../../lib/limits'
-import { countProjects, saveProject } from '../../../lib/supabase/projects'
+import { countProjects, saveProject, updateProjectThumbnail, uploadProjectThumbnail } from '../../../lib/supabase/projects'
 
-export function useProjectSave() {
+const THUMBNAIL_WIDTH = 320
+
+export function useProjectSave(stageRef?: RefObject<Konva.Stage | null>) {
   const { t } = useTranslation('editor')
   const navigate = useNavigate()
   const projectId = useEditorStore((s) => s.projectId)
@@ -91,6 +94,20 @@ export function useProjectSave() {
         navigate(`/editor/${savedId}`, { replace: true })
       }
       markSaved()
+
+      // Best-effort: the dashboard card is still useful with the old/no
+      // thumbnail if this fails, so it must never turn into a save error.
+      const stage = stageRef?.current
+      if (stage) {
+        try {
+          const pixelRatio = Math.min(1, THUMBNAIL_WIDTH / stage.width())
+          const dataUrl = stage.toDataURL({ mimeType: 'image/jpeg', quality: 0.7, pixelRatio })
+          const url = await uploadProjectThumbnail(organization.id, savedId, dataUrl)
+          await updateProjectThumbnail(savedId, url)
+        } catch {
+          // Ignored — see comment above.
+        }
+      }
     } catch (err) {
       setSaveError(err instanceof Error ? err.message : t('projectSave.saveFailed'))
     } finally {
@@ -100,6 +117,7 @@ export function useProjectSave() {
   }, [
     organization,
     profile,
+    stageRef,
     projectId,
     projectTitle,
     pitchDesign,

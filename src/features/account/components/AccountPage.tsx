@@ -170,6 +170,8 @@ export function AccountPage() {
             <Button variant="secondary" loading={billingLoading} onClick={() => void handleManageBilling()}>
               {t('subscription.manage')}
             </Button>
+          ) : organization?.subscription_tier === 'pro' ? (
+            <p className="text-xs text-white/40">{t('subscription.grantedNote')}</p>
           ) : (
             <Button loading={billingLoading} onClick={() => void handleUpgrade()}>
               {t('subscription.becomeCoach')}

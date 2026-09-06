@@ -16,6 +16,7 @@
     "paidUntil": "Paid until",
     "manage": "Manage subscription",
     "becomeCoach": "Become a coach",
+    "grantedNote": "Full access has been granted to this organization.",
     "checkoutFailed": "Checkout failed.",
     "openFailed": "Opening failed.",
     "status": {

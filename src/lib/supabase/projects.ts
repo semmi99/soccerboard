@@ -93,6 +93,33 @@ export async function deleteProject(id: string): Promise<void> {
   if (error) throw error
 }
 
+/** Renders the board as it looks right now into the dashboard card, instead
+ * of the generic placeholder pitch icon every project used to show
+ * regardless of its actual content. Uploaded to a stable per-project path
+ * (upsert) so re-saving overwrites the same file rather than accumulating
+ * orphaned images. Best-effort: called after a normal save succeeds, so a
+ * failure here shouldn't be treated as the save itself failing. */
+export async function uploadProjectThumbnail(orgId: string, projectId: string, dataUrl: string): Promise<string> {
+  const res = await fetch(dataUrl)
+  const blob = await res.blob()
+  const path = `${orgId}/thumbnails/${projectId}.jpg`
+
+  const { error: uploadError } = await supabase.storage
+    .from('board-images')
+    .upload(path, blob, { upsert: true, cacheControl: '3600', contentType: 'image/jpeg' })
+  if (uploadError) throw uploadError
+
+  const { data } = supabase.storage.from('board-images').getPublicUrl(path)
+  // Cache-bust so the dashboard picks up the new image immediately instead
+  // of an old cached response for the same URL.
+  return `${data.publicUrl}?t=${Date.now()}`
+}
+
+export async function updateProjectThumbnail(id: string, url: string): Promise<void> {
+  const { error } = await supabase.from('projects').update({ thumbnail_url: url }).eq('id', id)
+  if (error) throw error
+}
+
 export interface LoadedProject {
   id: string
   title: string

@@ -28,7 +28,7 @@ export function EditorPage() {
   const [isLocked, setIsLocked] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [isPropertiesOpen, setIsPropertiesOpen] = useState(false)
-  const save = useProjectSave()
+  const save = useProjectSave(stageRef)
 
   useKeyboardShortcuts({ onSave: save.handleSave })
 
