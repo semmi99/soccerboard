@@ -187,6 +187,8 @@
       "showArrowhead": "Pfeilspitze anzeigen",
       "arrowheadBothEnds": "Auch am Start (beide Enden)",
       "blocked": "Blockierte Option (X am Ende)",
+      "goodOption": "Gute Option (✓ am Ende)",
+      "opacity": "Deckkraft ({{percent}}%)",
       "dribble": "Dribbellinie (gewellt)",
       "spaceBehind": "Als Abwehrlinie markieren (Raum dahinter anzeigen)",
       "spaceBehindShowLabel": "Meter-Anzeige einblenden",

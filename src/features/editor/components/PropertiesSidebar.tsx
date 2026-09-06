@@ -864,6 +864,18 @@ function ArrowFields({
           onChange={(e) => onChange({ strokeWidth: Number(e.target.value) })}
         />
       </Field>
+      <Field label={t('properties.arrow.opacity', { percent: Math.round((data.opacity ?? 1) * 100) })}>
+        <input
+          type="range"
+          min={0.2}
+          max={1}
+          step={0.05}
+          className="w-full"
+          value={data.opacity ?? 1}
+          onFocus={onCheckpoint}
+          onChange={(e) => onChange({ opacity: Number(e.target.value) })}
+        />
+      </Field>
       {data.shape === 'curved' && (
         <Field label={t('properties.arrow.curveRadius', { px: getCurveOffset(data) })}>
           <input
@@ -935,10 +947,22 @@ function ArrowFields({
           checked={data.blocked ?? false}
           onChange={(e) => {
             onCheckpoint()
-            onChange({ blocked: e.target.checked })
+            onChange({ blocked: e.target.checked, goodOption: e.target.checked ? false : data.goodOption })
           }}
         />
         {t('properties.arrow.blocked')}
+      </label>
+      <label className="flex items-center gap-2 text-xs text-white/70">
+        <input
+          type="checkbox"
+          className="accent-violet-accent"
+          checked={data.goodOption ?? false}
+          onChange={(e) => {
+            onCheckpoint()
+            onChange({ goodOption: e.target.checked, blocked: e.target.checked ? false : data.blocked })
+          }}
+        />
+        {t('properties.arrow.goodOption')}
       </label>
       <label className="flex items-center gap-2 text-xs text-white/70">
         <input

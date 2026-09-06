@@ -31,7 +31,7 @@ export function ArrowShape({ data, scale = 1 }: { data: ArrowData; scale?: numbe
   const labelWidth = distanceLabel ? labelFontSize * distanceLabel.length * 0.62 + 12 : 0
 
   return (
-    <Group>
+    <Group opacity={data.opacity ?? 1}>
       <Arrow
         name="arrow-line"
         points={points}
@@ -61,6 +61,24 @@ export function ArrowShape({ data, scale = 1 }: { data: ArrowData; scale?: numbe
           <Group x={ex} y={ey}>
             <Line points={[-s, -s, s, s]} stroke={data.color} strokeWidth={w} lineCap="round" />
             <Line points={[-s, s, s, -s]} stroke={data.color} strokeWidth={w} lineCap="round" />
+          </Group>
+        )
+      })()}
+      {data.goodOption && (() => {
+        const n = points.length
+        const ex = points[n - 2]!
+        const ey = points[n - 1]!
+        const s = 9 / safeScale
+        const w = 3 / safeScale
+        return (
+          <Group x={ex} y={ey}>
+            <Line
+              points={[-s, 0, -s * 0.3, s * 0.7, s, -s * 0.6]}
+              stroke="#22c55e"
+              strokeWidth={w}
+              lineCap="round"
+              lineJoin="round"
+            />
           </Group>
         )
       })()}

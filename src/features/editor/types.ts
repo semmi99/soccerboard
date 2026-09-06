@@ -143,6 +143,16 @@ export interface ArrowData {
    * but cut off — rendering a small X at its end instead of relying on the
    * arrowhead alone. */
   blocked?: boolean
+  /** The counterpart to `blocked` — marks this as the good/available
+   * option, rendering a small green checkmark at its end. Independent of
+   * `blocked` (nothing stops both being set, though the UI only lets one
+   * be picked at a time). */
+  goodOption?: boolean
+  /** Fades the whole arrow (0..1) — for a passing option that was
+   * considered but not the one actually played, alongside a full-opacity
+   * arrow for what was. Unset/undefined renders fully opaque, matching
+   * every arrow saved before this existed. */
+  opacity?: number
   /** Treats this line as an opponent's defensive line: shades the pitch
    * area between it and the nearer goal line and labels that gap's real-
    * world depth in meters, recomputed live from the line's own position. */

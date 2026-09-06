@@ -187,6 +187,8 @@
       "showArrowhead": "Show arrowhead",
       "arrowheadBothEnds": "Also at the start (both ends)",
       "blocked": "Blocked option (X at the end)",
+      "goodOption": "Good option (✓ at the end)",
+      "opacity": "Opacity ({{percent}}%)",
       "dribble": "Dribble line (wavy)",
       "spaceBehind": "Mark as defensive line (show space behind)",
       "spaceBehindShowLabel": "Show meter label",
