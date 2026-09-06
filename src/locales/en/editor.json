@@ -149,6 +149,9 @@
       "loopFillColor": "Enclosed area color (when connectors form a closed loop)"
     },
     "playerChip": {
+      "sectionBasics": "Basics",
+      "sectionAppearance": "Appearance",
+      "sectionTactics": "Tactics",
       "linked": "Linked to squad player",
       "showPhoto": "Show photo instead of jersey number/kit",
       "showPhotoNoPhoto": "Show photo (no photo uploaded in squad)",

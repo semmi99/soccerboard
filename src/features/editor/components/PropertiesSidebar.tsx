@@ -48,6 +48,20 @@ function Field({ label, children }: { label: string; children: ReactNode }) {
   )
 }
 
+// Groups a long flat list of fields (e.g. all the player-chip properties)
+// into visually distinct clusters — a divider plus a small muted caption,
+// same idea as the toolbar's tool-group labels — so the panel reads as a
+// few short sections instead of one undifferentiated scroll.
+function SubSection({ title, first, children }: { title: string; first?: boolean; children: ReactNode }) {
+  return (
+    <div className="flex flex-col gap-2">
+      {!first && <div className="mt-1 h-px w-full bg-pitch-700" />}
+      <span className="text-[10px] font-semibold uppercase tracking-wide text-white/35">{title}</span>
+      {children}
+    </div>
+  )
+}
+
 // A section header that visibly reads as a clickable toggle — pill
 // background + chevron, rather than a plain uppercase label with a tiny
 // +/− that's easy to mistake for static text (this used to be a lone
@@ -503,238 +517,246 @@ function PlayerChipFields({
   const playerPhotos = useEditorStore((s) => s.playerPhotos)
   const photoUrl = data.playerId ? playerPhotos[data.playerId] : undefined
   return (
-    <div className="flex flex-col gap-2">
-      {data.playerId && (
-        <p className="rounded-md bg-violet-accent/10 px-2 py-1.5 text-xs text-violet-accent-bright">
-          {t('properties.playerChip.linked')}
-        </p>
-      )}
-      {data.playerId && (
-        <label className="flex items-center gap-2 text-xs text-white/70">
-          <input
-            type="checkbox"
-            className="accent-violet-accent"
-            checked={Boolean(data.showPhoto)}
-            disabled={!photoUrl}
+    <div className="flex flex-col gap-3">
+      <SubSection title={t('properties.playerChip.sectionBasics')} first>
+        {data.playerId && (
+          <p className="rounded-md bg-violet-accent/10 px-2 py-1.5 text-xs text-violet-accent-bright">
+            {t('properties.playerChip.linked')}
+          </p>
+        )}
+        {data.playerId && (
+          <label className="flex items-center gap-2 text-xs text-white/70">
+            <input
+              type="checkbox"
+              className="accent-violet-accent"
+              checked={Boolean(data.showPhoto)}
+              disabled={!photoUrl}
+              onChange={(e) => {
+                onCheckpoint()
+                onChange({ showPhoto: e.target.checked })
+              }}
+            />
+            {photoUrl ? t('properties.playerChip.showPhoto') : t('properties.playerChip.showPhotoNoPhoto')}
+          </label>
+        )}
+        <Field label={t('properties.playerChip.team')}>
+          <select
+            className={selectClass}
+            value={data.team}
             onChange={(e) => {
               onCheckpoint()
-              onChange({ showPhoto: e.target.checked })
+              onChange({ team: e.target.value as 'home' | 'away' })
             }}
-          />
-          {photoUrl ? t('properties.playerChip.showPhoto') : t('properties.playerChip.showPhotoNoPhoto')}
-        </label>
-      )}
-      <Field label={t('properties.playerChip.team')}>
-        <select
-          className={selectClass}
-          value={data.team}
-          onChange={(e) => {
-            onCheckpoint()
-            onChange({ team: e.target.value as 'home' | 'away' })
-          }}
-        >
-          <option value="home">{t('properties.playerChip.teamHome')}</option>
-          <option value="away">{t('properties.playerChip.teamAway')}</option>
-        </select>
-      </Field>
-      <Field label={t('properties.playerChip.chipColor')}>
-        <div className="flex flex-col gap-1.5">
-          <label className="flex items-center gap-2 text-xs text-white/70">
-            <input
-              type="checkbox"
-              className="accent-violet-accent"
-              checked={Boolean(data.color)}
-              onChange={(e) => {
-                onCheckpoint()
-                onChange({ color: e.target.checked ? (data.color ?? '#f97316') : null })
-              }}
-            />
-            {t('properties.playerChip.useCustomColor')}
-          </label>
-          {data.color && (
-            <ColorSwatchPicker
-              size="sm"
-              value={data.color}
-              onChange={(c) => {
-                onCheckpoint()
-                onChange({ color: c })
-              }}
-            />
-          )}
-        </div>
-      </Field>
-      <Field label={t('properties.playerChip.jerseyNumber')}>
-        <input
-          type="number"
-          className={inputClass}
-          value={data.number}
-          onFocus={onCheckpoint}
-          onChange={(e: ChangeEvent<HTMLInputElement>) =>
-            onChange({ number: Number(e.target.value) })
-          }
-        />
-      </Field>
-      <Field label={t('properties.playerChip.chipDisplay')}>
-        <div className="flex flex-col gap-1.5">
-          <label className="flex items-center gap-2 text-xs text-white/70">
-            <input
-              type="checkbox"
-              className="accent-violet-accent"
-              checked={data.displayText !== undefined}
-              onChange={(e) => {
-                onCheckpoint()
-                onChange({ displayText: e.target.checked ? '' : undefined })
-              }}
-            />
-            {t('properties.playerChip.useCustomText')}
-          </label>
-          {data.displayText !== undefined && (
-            <input
-              type="text"
-              maxLength={4}
-              placeholder={t('properties.playerChip.customTextPlaceholder')}
-              className={inputClass}
-              value={data.displayText}
-              onFocus={onCheckpoint}
-              onChange={(e) => onChange({ displayText: e.target.value })}
-            />
-          )}
-        </div>
-      </Field>
-      <Field label={t('properties.playerChip.numberColor')}>
-        <ColorSwatchPicker
-          size="sm"
-          value={data.numberColor ?? '#ffffff'}
-          onChange={(c) => {
-            onCheckpoint()
-            onChange({ numberColor: c })
-          }}
-        />
-      </Field>
-      <Field label={t('properties.playerChip.labelOptional')}>
-        <input
-          type="text"
-          className={inputClass}
-          value={data.label}
-          onFocus={onCheckpoint}
-          onChange={(e) => onChange({ label: e.target.value })}
-        />
-      </Field>
-      {data.label && (
-        <Field label={t('properties.playerChip.labelColor')}>
-          <ColorSwatchPicker
-            size="sm"
-            value={data.labelColor ?? '#ffffff'}
-            onChange={(c) => {
-              onCheckpoint()
-              onChange({ labelColor: c })
-            }}
+          >
+            <option value="home">{t('properties.playerChip.teamHome')}</option>
+            <option value="away">{t('properties.playerChip.teamAway')}</option>
+          </select>
+        </Field>
+        <Field label={t('properties.playerChip.jerseyNumber')}>
+          <input
+            type="number"
+            className={inputClass}
+            value={data.number}
+            onFocus={onCheckpoint}
+            onChange={(e: ChangeEvent<HTMLInputElement>) =>
+              onChange({ number: Number(e.target.value) })
+            }
           />
         </Field>
-      )}
-      <label className="flex items-center gap-2 text-xs text-white/70">
-        <input
-          type="checkbox"
-          className="accent-violet-accent"
-          checked={data.highlighted ?? false}
-          onChange={(e) => {
-            onCheckpoint()
-            onChange({ highlighted: e.target.checked })
-          }}
-        />
-        {t('properties.playerChip.highlight')}
-      </label>
-      <label className="flex items-center gap-2 text-xs text-white/70">
-        <input
-          type="checkbox"
-          className="accent-violet-accent"
-          checked={data.offsideReference ?? false}
-          onChange={(e) => {
-            onCheckpoint()
-            onChange({ offsideReference: e.target.checked })
-          }}
-        />
-        {t('properties.playerChip.offsideReference')}
-      </label>
-      <label className="flex items-center gap-2 text-xs text-white/70">
-        <input
-          type="checkbox"
-          className="accent-violet-accent"
-          checked={data.offsideTarget ?? false}
-          onChange={(e) => {
-            onCheckpoint()
-            onChange({ offsideTarget: e.target.checked })
-          }}
-        />
-        {t('properties.playerChip.offsideTarget')}
-      </label>
-      <Field label={t('properties.playerChip.tag')}>
-        <div className="flex flex-col gap-1.5">
-          <div className="flex flex-wrap gap-1.5">
-            {TAG_PRESETS.map((preset) => {
-              const label = t(`properties.playerChip.tagPresets.${preset.key}`)
-              return (
-                <button
-                  key={preset.key}
-                  type="button"
-                  className="rounded-md border border-pitch-600 bg-pitch-800 px-2 py-1 text-[11px] font-semibold text-white/80 hover:border-violet-accent hover:text-white"
-                  onClick={() => {
-                    onCheckpoint()
-                    onChange({ tagText: label, tagColor: preset.color })
-                  }}
-                >
-                  {label}
-                </button>
-              )
-            })}
-          </div>
-          {data.tagText && (
-            <button
-              type="button"
-              className="self-start rounded-md border border-red-500/30 bg-red-500/10 px-2 py-1 text-[11px] font-medium text-red-400 hover:bg-red-500/20"
-              onClick={() => {
-                onCheckpoint()
-                onChange({ tagText: '', tagColor: null, tagTextColor: undefined })
-              }}
-            >
-              {t('properties.playerChip.tagRemove')}
-            </button>
-          )}
-          <input
-            type="text"
-            maxLength={12}
-            placeholder={t('properties.playerChip.tagPlaceholder')}
-            className={inputClass}
-            value={data.tagText ?? ''}
-            onFocus={onCheckpoint}
-            onChange={(e) => onChange({ tagText: e.target.value })}
-          />
-          {data.tagText && (
+        <Field label={t('properties.playerChip.chipDisplay')}>
+          <div className="flex flex-col gap-1.5">
             <label className="flex items-center gap-2 text-xs text-white/70">
               <input
                 type="checkbox"
                 className="accent-violet-accent"
-                checked={Boolean(data.tagColor)}
+                checked={data.displayText !== undefined}
                 onChange={(e) => {
                   onCheckpoint()
-                  onChange({ tagColor: e.target.checked ? (data.tagColor ?? '#f97316') : null })
+                  onChange({ displayText: e.target.checked ? '' : undefined })
                 }}
               />
-              {t('properties.playerChip.tagBackground')}
+              {t('properties.playerChip.useCustomText')}
             </label>
-          )}
-          {data.tagText && data.tagColor && (
+            {data.displayText !== undefined && (
+              <input
+                type="text"
+                maxLength={4}
+                placeholder={t('properties.playerChip.customTextPlaceholder')}
+                className={inputClass}
+                value={data.displayText}
+                onFocus={onCheckpoint}
+                onChange={(e) => onChange({ displayText: e.target.value })}
+              />
+            )}
+          </div>
+        </Field>
+        <Field label={t('properties.playerChip.numberColor')}>
+          <ColorSwatchPicker
+            size="sm"
+            value={data.numberColor ?? '#ffffff'}
+            onChange={(c) => {
+              onCheckpoint()
+              onChange({ numberColor: c })
+            }}
+          />
+        </Field>
+      </SubSection>
+
+      <SubSection title={t('properties.playerChip.sectionAppearance')}>
+        <Field label={t('properties.playerChip.chipColor')}>
+          <div className="flex flex-col gap-1.5">
+            <label className="flex items-center gap-2 text-xs text-white/70">
+              <input
+                type="checkbox"
+                className="accent-violet-accent"
+                checked={Boolean(data.color)}
+                onChange={(e) => {
+                  onCheckpoint()
+                  onChange({ color: e.target.checked ? (data.color ?? '#f97316') : null })
+                }}
+              />
+              {t('properties.playerChip.useCustomColor')}
+            </label>
+            {data.color && (
+              <ColorSwatchPicker
+                size="sm"
+                value={data.color}
+                onChange={(c) => {
+                  onCheckpoint()
+                  onChange({ color: c })
+                }}
+              />
+            )}
+          </div>
+        </Field>
+        <Field label={t('properties.playerChip.labelOptional')}>
+          <input
+            type="text"
+            className={inputClass}
+            value={data.label}
+            onFocus={onCheckpoint}
+            onChange={(e) => onChange({ label: e.target.value })}
+          />
+        </Field>
+        {data.label && (
+          <Field label={t('properties.playerChip.labelColor')}>
             <ColorSwatchPicker
               size="sm"
-              value={data.tagColor}
+              value={data.labelColor ?? '#ffffff'}
               onChange={(c) => {
                 onCheckpoint()
-                onChange({ tagColor: c })
+                onChange({ labelColor: c })
               }}
             />
-          )}
-        </div>
-      </Field>
+          </Field>
+        )}
+      </SubSection>
+
+      <SubSection title={t('properties.playerChip.sectionTactics')}>
+        <label className="flex items-center gap-2 text-xs text-white/70">
+          <input
+            type="checkbox"
+            className="accent-violet-accent"
+            checked={data.highlighted ?? false}
+            onChange={(e) => {
+              onCheckpoint()
+              onChange({ highlighted: e.target.checked })
+            }}
+          />
+          {t('properties.playerChip.highlight')}
+        </label>
+        <label className="flex items-center gap-2 text-xs text-white/70">
+          <input
+            type="checkbox"
+            className="accent-violet-accent"
+            checked={data.offsideReference ?? false}
+            onChange={(e) => {
+              onCheckpoint()
+              onChange({ offsideReference: e.target.checked })
+            }}
+          />
+          {t('properties.playerChip.offsideReference')}
+        </label>
+        <label className="flex items-center gap-2 text-xs text-white/70">
+          <input
+            type="checkbox"
+            className="accent-violet-accent"
+            checked={data.offsideTarget ?? false}
+            onChange={(e) => {
+              onCheckpoint()
+              onChange({ offsideTarget: e.target.checked })
+            }}
+          />
+          {t('properties.playerChip.offsideTarget')}
+        </label>
+        <Field label={t('properties.playerChip.tag')}>
+          <div className="flex flex-col gap-1.5">
+            <div className="grid grid-cols-2 gap-1.5">
+              {TAG_PRESETS.map((preset) => {
+                const label = t(`properties.playerChip.tagPresets.${preset.key}`)
+                return (
+                  <button
+                    key={preset.key}
+                    type="button"
+                    className="rounded-md border border-pitch-600 bg-pitch-800 px-2 py-1 text-[11px] font-semibold text-white/80 hover:border-violet-accent hover:text-white"
+                    onClick={() => {
+                      onCheckpoint()
+                      onChange({ tagText: label, tagColor: preset.color })
+                    }}
+                  >
+                    {label}
+                  </button>
+                )
+              })}
+            </div>
+            {data.tagText && (
+              <button
+                type="button"
+                className="self-start rounded-md border border-red-500/30 bg-red-500/10 px-2 py-1 text-[11px] font-medium text-red-400 hover:bg-red-500/20"
+                onClick={() => {
+                  onCheckpoint()
+                  onChange({ tagText: '', tagColor: null, tagTextColor: undefined })
+                }}
+              >
+                {t('properties.playerChip.tagRemove')}
+              </button>
+            )}
+            <input
+              type="text"
+              maxLength={12}
+              placeholder={t('properties.playerChip.tagPlaceholder')}
+              className={inputClass}
+              value={data.tagText ?? ''}
+              onFocus={onCheckpoint}
+              onChange={(e) => onChange({ tagText: e.target.value })}
+            />
+            {data.tagText && (
+              <label className="flex items-center gap-2 text-xs text-white/70">
+                <input
+                  type="checkbox"
+                  className="accent-violet-accent"
+                  checked={Boolean(data.tagColor)}
+                  onChange={(e) => {
+                    onCheckpoint()
+                    onChange({ tagColor: e.target.checked ? (data.tagColor ?? '#f97316') : null })
+                  }}
+                />
+                {t('properties.playerChip.tagBackground')}
+              </label>
+            )}
+            {data.tagText && data.tagColor && (
+              <ColorSwatchPicker
+                size="sm"
+                value={data.tagColor}
+                onChange={(c) => {
+                  onCheckpoint()
+                  onChange({ tagColor: c })
+                }}
+              />
+            )}
+          </div>
+        </Field>
+      </SubSection>
     </div>
   )
 }

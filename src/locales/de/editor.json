@@ -149,6 +149,9 @@
       "loopFillColor": "Farbe der Fläche (bei geschlossener Verbindung)"
     },
     "playerChip": {
+      "sectionBasics": "Grunddaten",
+      "sectionAppearance": "Aussehen",
+      "sectionTactics": "Taktik",
       "linked": "Verknüpft mit Kaderspieler",
       "showPhoto": "Foto statt Rückennummer/Trikot anzeigen",
       "showPhotoNoPhoto": "Foto anzeigen (kein Foto im Kader hinterlegt)",
